@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from swing_price_store import get_current_price, update_pair
 from swing_indicators import evaluate_entry
 
-WORKSPACE    = "/root/.openclaw/workspace"
+WORKSPACE    = os.environ.get("WORKSPACE", "/root/.openclaw/workspace")
 ACTIVE_DIR   = os.path.join(WORKSPACE, "competition", "swing", "active")
 RESULTS_DIR  = os.path.join(WORKSPACE, "competition", "swing", "results")
 FLEET_DIR    = os.path.join(WORKSPACE, "fleet", "swing")

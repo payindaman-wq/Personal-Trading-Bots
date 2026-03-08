@@ -19,10 +19,10 @@ sys.path.insert(0, os.path.dirname(__file__))
 from price_store import append_prices, get_current_price
 from indicators import evaluate_entry
 
-WORKSPACE = "/root/.openclaw/workspace"
+WORKSPACE = os.environ.get("WORKSPACE", "/root/.openclaw/workspace")
 FLEET_DIR = os.path.join(WORKSPACE, "fleet")
 COMP_ACTIVE_DIR = os.path.join(WORKSPACE, "competition", "active")
-SKILLS_DIR = "/root/.openclaw/skills"
+SKILLS_DIR = os.environ.get("SKILLS_DIR", "/root/.openclaw/skills")
 TRADE_EXECUTE = os.path.join(SKILLS_DIR, "trade-execute", "scripts", "trade_execute.py")
 
 KRAKEN_PAIR_MAP = {

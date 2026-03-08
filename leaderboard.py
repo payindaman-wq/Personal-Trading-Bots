@@ -18,7 +18,7 @@ import json
 import argparse
 from datetime import datetime, timezone
 
-WORKSPACE   = "/root/.openclaw/workspace"
+WORKSPACE   = os.environ.get("WORKSPACE", "/root/.openclaw/workspace")
 RESULTS_DIR = os.path.join(WORKSPACE, "competition", "results")
 ACTIVE_DIR  = os.path.join(WORKSPACE, "competition", "active")
 LB_PATH     = os.path.join(WORKSPACE, "competition", "leaderboard.json")

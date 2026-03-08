@@ -8,7 +8,7 @@ import urllib.request
 import urllib.error
 from datetime import datetime, timezone
 
-WORKSPACE = "/root/.openclaw/workspace"
+WORKSPACE = os.environ.get("WORKSPACE", "/root/.openclaw/workspace")
 BOTS = ["floki", "bjorn", "lagertha"]
 FEE_RATE = 0.001
 

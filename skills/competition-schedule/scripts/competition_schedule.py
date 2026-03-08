@@ -18,8 +18,10 @@ import argparse
 import subprocess
 from datetime import datetime, timezone, timedelta
 
-COMPETITION_START = "/root/.openclaw/skills/competition-start/scripts/competition_start.py"
-COMPETITION_LOG   = "/root/.openclaw/workspace/competition.log"
+_WORKSPACE        = os.environ.get("WORKSPACE",  "/root/.openclaw/workspace")
+_SKILLS_DIR       = os.environ.get("SKILLS_DIR", "/root/.openclaw/skills")
+COMPETITION_START = os.path.join(_SKILLS_DIR, "competition-start", "scripts", "competition_start.py")
+COMPETITION_LOG   = os.path.join(_WORKSPACE, "competition.log")
 CRON_MARKER       = "# competition-schedule"
 
 PST_OFFSET = timedelta(hours=-8)  # PST = UTC-8 (no DST adjustment)

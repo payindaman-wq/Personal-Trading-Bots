@@ -236,7 +236,8 @@ def bt_evaluate_entry(conditions, history, pair, sim_now_iso):
         return None
     return all(results)
 
-FLEET_DIR = "/root/.openclaw/workspace/fleet"
+WORKSPACE = os.environ.get("WORKSPACE", "/root/.openclaw/workspace")
+FLEET_DIR = os.path.join(WORKSPACE, "fleet")
 STARTING_CAPITAL = 10_000.0
 FEE_RATE = 0.001
 CANDLE_INTERVAL = "5m"
@@ -638,7 +639,7 @@ def main():
         print(f"  Candles:      {r['candles_processed']:,}")
 
     print("\n" + "=" * 60)
-    out_path = "/root/.openclaw/workspace/competition/backtest_results.json"
+    out_path = os.path.join(WORKSPACE, "competition", "backtest_results.json")
     with open(out_path, "w") as f:
         json.dump(results, f, indent=2)
     print(f"Full results saved to {out_path}")

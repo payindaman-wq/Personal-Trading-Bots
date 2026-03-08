@@ -1,11 +1,29 @@
-# Runtime competition data
+# --- Secrets & personal config (NEVER commit these) -------------------------
+.env
+*.key
+*.secret
+secrets/
+config/local/
+kraken_credentials.json
+telegram_config.json
+
+# --- Runtime competition data ------------------------------------------------
 competition/active/
 competition/leaderboard.json
 competition/leaderboard.log
 competition/cron.log
 competition/backtest_results.json
 
-# Agent memory and identity (private)
+# --- Tax records (personal — keep in your private deployment repo) -----------
+tax/*.csv
+tax/*.json
+
+# --- Accounting ledger (personal — keep in your private deployment repo) -----
+competition/accounting/ledger.json
+competition/accounting/open_lots.json
+competition/accounting/reserves.json
+
+# --- Agent memory and identity (private) ------------------------------------
 .openclaw/
 memory/
 monitor.log
@@ -14,11 +32,21 @@ check_alerts.sh
 send_alerts.py
 process_alerts.py
 
-# Python cache
+# --- Python cache ------------------------------------------------------------
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
+.Python
 
-# Simulation data (ended 2026-03-28)
+# --- OS / editor noise -------------------------------------------------------
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# --- Simulation data (ended 2026-03-28) -------------------------------------
 sim_data/
 price_history.json

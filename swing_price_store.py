@@ -17,7 +17,7 @@ import argparse
 import urllib.request
 from datetime import datetime, timezone, timedelta
 
-WORKSPACE    = "/root/.openclaw/workspace"
+WORKSPACE    = os.environ.get("WORKSPACE", "/root/.openclaw/workspace")
 HISTORY_DIR  = os.path.join(WORKSPACE, "competition", "swing", "price_history")
 FLEET_DIR    = os.path.join(WORKSPACE, "fleet", "swing")
 CANDLE_INTERVAL = "1h"
