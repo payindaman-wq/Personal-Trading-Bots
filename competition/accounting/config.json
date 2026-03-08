@@ -1,0 +1,9 @@
+{
+  "tax_reserve_pct": 0.3,
+  "operating_reserve_pct": 0.1,
+  "reinvestment_pct": 0.6,
+  "default_tax_rate": 0.37,
+  "cost_basis_method": "FIFO",
+  "exchange": "Kraken",
+  "wash_sale_window_days": 30
+}

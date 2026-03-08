@@ -1,0 +1,10 @@
+{
+  "tax_reserve": 0.0,
+  "operating_reserve": 0.0,
+  "reinvestment_pool": 0.0,
+  "lifetime_gains": 0.0,
+  "lifetime_losses": 0.0,
+  "total_contributed_to_tax": 0.0,
+  "total_contributed_to_operating": 0.0,
+  "last_updated": null
+}
