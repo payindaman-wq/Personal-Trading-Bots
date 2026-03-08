@@ -1,0 +1,57 @@
+name: halfdan
+style: bollinger_squeeze_expansion
+inspiration: CryptoCred -- waits for volatility compression then trades the expansion breakout, high TP targets
+pairs:
+  - BTC/USD
+  - ETH/USD
+  - SOL/USD
+  - AVAX/USD
+position:
+  size_pct: 25
+  max_open: 2
+  fee_rate: 0.001
+entry:
+  long:
+    conditions:
+      - indicator: bollinger_position
+        period_hours: 20
+        operator: eq
+        value: above_upper
+      - indicator: trend
+        period_hours: 72
+        operator: in
+        value: ["up", "flat"]
+      - indicator: macd_signal
+        period_hours: 26
+        operator: eq
+        value: bullish
+      - indicator: momentum_accelerating
+        period_hours: 24
+        operator: eq
+        value: "true"
+  short:
+    conditions:
+      - indicator: bollinger_position
+        period_hours: 20
+        operator: eq
+        value: below_lower
+      - indicator: trend
+        period_hours: 72
+        operator: in
+        value: ["down", "flat"]
+      - indicator: macd_signal
+        period_hours: 26
+        operator: eq
+        value: bearish
+      - indicator: momentum_accelerating
+        period_hours: 24
+        operator: eq
+        value: "true"
+exit:
+  take_profit_pct: 10.0
+  stop_loss_pct: 3.5
+  timeout_hours: 144
+risk:
+  pause_if_down_pct: 8
+  pause_hours: 48
+  stop_if_down_pct: 18

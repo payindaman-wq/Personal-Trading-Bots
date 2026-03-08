@@ -1,0 +1,64 @@
+name: orm
+style: macro_pullback_buyer
+inspiration: InvestAnswers -- buys controlled pullbacks in established uptrends, patient, high conviction, never fights macro
+pairs:
+  - BTC/USD
+  - ETH/USD
+  - SOL/USD
+position:
+  size_pct: 25
+  max_open: 2
+  fee_rate: 0.001
+entry:
+  long:
+    conditions:
+      - indicator: trend
+        period_hours: 168
+        operator: eq
+        value: up
+      - indicator: trend
+        period_hours: 72
+        operator: eq
+        value: up
+      - indicator: trend
+        period_hours: 24
+        operator: in
+        value: ["down", "flat"]
+      - indicator: rsi
+        period_hours: 14
+        operator: lt
+        value: 42
+      - indicator: price_vs_ema
+        period_hours: 50
+        operator: in
+        value: ["below", "at"]
+  short:
+    conditions:
+      - indicator: trend
+        period_hours: 168
+        operator: eq
+        value: down
+      - indicator: trend
+        period_hours: 72
+        operator: eq
+        value: down
+      - indicator: trend
+        period_hours: 24
+        operator: in
+        value: ["up", "flat"]
+      - indicator: rsi
+        period_hours: 14
+        operator: gt
+        value: 58
+      - indicator: price_vs_ema
+        period_hours: 50
+        operator: in
+        value: ["above", "at"]
+exit:
+  take_profit_pct: 6.0
+  stop_loss_pct: 2.5
+  timeout_hours: 120
+risk:
+  pause_if_down_pct: 6
+  pause_hours: 48
+  stop_if_down_pct: 15

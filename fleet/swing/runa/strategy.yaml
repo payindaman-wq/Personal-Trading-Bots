@@ -1,0 +1,48 @@
+name: runa
+style: swing_contrarian_reversal
+inspiration: Tone Vays -- high conviction contrarian, only enters on extreme multi-day oversold or overbought conditions, quality pairs only
+pairs:
+  - BTC/USD
+  - ETH/USD
+  - SOL/USD
+position:
+  size_pct: 30
+  max_open: 1
+  fee_rate: 0.001
+entry:
+  long:
+    conditions:
+      - indicator: rsi
+        period_hours: 14
+        operator: lt
+        value: 28
+      - indicator: bollinger_position
+        period_hours: 20
+        operator: eq
+        value: below_lower
+      - indicator: price_change_pct
+        period_hours: 72
+        operator: lt
+        value: -8.0
+  short:
+    conditions:
+      - indicator: rsi
+        period_hours: 14
+        operator: gt
+        value: 72
+      - indicator: bollinger_position
+        period_hours: 20
+        operator: eq
+        value: above_upper
+      - indicator: price_change_pct
+        period_hours: 72
+        operator: gt
+        value: 8.0
+exit:
+  take_profit_pct: 7.0
+  stop_loss_pct: 2.5
+  timeout_hours: 120
+risk:
+  pause_if_down_pct: 7
+  pause_hours: 48
+  stop_if_down_pct: 16

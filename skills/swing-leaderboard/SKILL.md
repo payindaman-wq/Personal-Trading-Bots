@@ -10,23 +10,23 @@ Displays the cumulative swing trading leaderboard for the Viking Fleet.
 ## Usage
 
 ```bash
-# Show leaderboard (default)
 python3 /root/.openclaw/workspace/swing_leaderboard.py
-
-# Exclude active sprint from totals
 python3 /root/.openclaw/workspace/swing_leaderboard.py --no-live
-
-# Detail for one sprint
 python3 /root/.openclaw/workspace/swing_leaderboard.py --sprint swing-20260310-1300
 ```
 
-## The 8 Swing Bots
+## The 8 Swing Bots (Viking Swing Fleet)
 
-| Bot      | Style                        | Inspired By       |
-|----------|------------------------------|-------------------|
-| TBD x8   | See fleet/swing/ for roster  | Various           |
-
-(Bots added in Stop 4 — strategy design session)
+| Bot     | Style                        | Inspired By       |
+|---------|------------------------------|-------------------|
+| Egil    | Weekly trend follower        | Benjamin Cowen    |
+| Solveig | Multi-day mean reversion     | Crypto Jebb       |
+| Valdis  | Weekly structure breakout    | Rekt Capital      |
+| Thyra   | Altcoin momentum rotation    | Altcoin Daily     |
+| Orm     | Macro pullback buyer         | InvestAnswers     |
+| Gudrid  | Momentum continuation        | Coin Bureau       |
+| Halfdan | BB squeeze expansion         | CryptoCred        |
+| Runa    | Swing contrarian reversal    | Tone Vays         |
 
 ## Points System
 

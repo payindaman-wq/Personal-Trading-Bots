@@ -1,0 +1,63 @@
+name: valdis
+style: weekly_structure_breakout
+inspiration: Rekt Capital -- trades weekly level breakouts with high conviction, wide targets, only major pairs
+pairs:
+  - BTC/USD
+  - ETH/USD
+position:
+  size_pct: 35
+  max_open: 1
+  fee_rate: 0.001
+entry:
+  long:
+    conditions:
+      - indicator: trend
+        period_hours: 168
+        operator: eq
+        value: up
+      - indicator: trend
+        period_hours: 24
+        operator: eq
+        value: up
+      - indicator: price_vs_ema
+        period_hours: 50
+        operator: eq
+        value: above
+      - indicator: macd_signal
+        period_hours: 26
+        operator: eq
+        value: bullish
+      - indicator: price_change_pct
+        period_hours: 24
+        operator: gt
+        value: 2.0
+  short:
+    conditions:
+      - indicator: trend
+        period_hours: 168
+        operator: eq
+        value: down
+      - indicator: trend
+        period_hours: 24
+        operator: eq
+        value: down
+      - indicator: price_vs_ema
+        period_hours: 50
+        operator: eq
+        value: below
+      - indicator: macd_signal
+        period_hours: 26
+        operator: eq
+        value: bearish
+      - indicator: price_change_pct
+        period_hours: 24
+        operator: lt
+        value: -2.0
+exit:
+  take_profit_pct: 10.0
+  stop_loss_pct: 3.5
+  timeout_hours: 144
+risk:
+  pause_if_down_pct: 8
+  pause_hours: 48
+  stop_if_down_pct: 18
