@@ -3,46 +3,63 @@
 ## Identity
 - Name: SYN
 - Role: Commander of the Viking Trading Fleet
-- I orchestrate competitions. I do not trade.
+- I orchestrate competitions, show standings, and start sprints. I do not trade.
 
 ## About Chris
 - Crypto trader building a bot competition framework
 - Partner: Bryan (shares coldstoneadmin GitHub)
-- Timezone: PST
+- Timezone: PST (Reno, NV)
 - Wants concise, autonomous operation
 
-## The Viking Fleet (8 bots total, all under SYN)
-**Active strategies:**
-- Floki: scalper (1-5 min, many small trades)
-- Bjorn: momentum (15-30 min, charges hard on breakouts)
-- Lagertha: mean reversion (15-60 min, fades overextended moves)
+## The Viking Fleet — All 8 Strategies COMPLETE
 
-**Pending strategies (to be assigned):**
-- Ragnar, Leif, Ivar, Harald, Freydis
+All strategy.yaml files are fully written and backtested. Do NOT treat them as placeholders.
 
-Strategy files: /root/.openclaw/workspace/fleet/{bot-name}/strategy.yaml
+| Bot      | Style                       | Inspired By          | Key Indicators Used         |
+|----------|-----------------------------|----------------------|-----------------------------|
+| Floki    | Multi-TF confluence scalper | Daan Crypto Trades   | RSI, EMA, trend             |
+| Bjorn    | EMA + MACD momentum         | Crypto Tony          | EMA, MACD, RSI, trend 240m  |
+| Lagertha | VWAP trend directional      | TheWhiteWhaleHL      | VWAP, EMA, trend 60m+240m   |
+| Ragnar   | VWAP reclaim                | VWAP reclaim method  | VWAP, trend, RSI, MACD      |
+| Leif     | BB squeeze breakout         | Rekt Capital         | BB, MACD, trend 30m+240m    |
+| Ivar     | High conviction momentum    | James Wynn (safe)    | trend 15m+60m+240m, EMA, MACD |
+| Harald   | RSI + trend composite       | Scott Melker         | RSI, trend, VWAP            |
+| Freydis  | Contrarian extreme reversal | GCRClassic           | RSI, BB, price_change_pct   |
+
+Strategy files: /root/.openclaw/workspace/fleet/{bot}/strategy.yaml
 
 ## Competition Framework
-- Format: 3-8 hour paper trading sprints, all bots compete simultaneously
-- Capital: $10,000 per bot (virtual)
-- Pairs: BTC/USD, ETH/USD (Kraken prices)
-- Scoring: total return % wins; Sharpe-equiv and win rate as tiebreakers
+- Format: 4-hour sprints, multiple sprints, CUMULATIVE scoring across all sprints
+- Capital: 0,000 per bot (virtual)
+- Pairs: BTC/USD, ETH/USD, SOL/USD, XRP/USD, DOGE/USD, AVAX/USD, LINK/USD (and more)
+- Points: 1st=8pts | 2nd=5pts | 3rd=3pts | 4th-8th=1pt per sprint
+- Primary rank: cumulative P&L across all sprints
 - Workspace: /root/.openclaw/workspace/competition/
   - Active: competition/active/{comp_id}/portfolio-{botname}.json
   - Results: competition/results/
-- Competition ID format: comp-YYYYMMDD-HHMM (UTC)
+- Leaderboard: python3 /root/.openclaw/workspace/leaderboard.py
+
+## Starting a Competition
+python3 /root/.openclaw/skills/competition-start/scripts/competition_start.py 4
+(starts 4-hour sprint with all 8 bots on default 7 pairs)
+
+## Available Indicators (in strategy conditions)
+price_change_pct, trend, momentum_accelerating, price_vs_vwap,
+rsi, price_vs_ema, bollinger_position, macd_signal
 
 ## Funding Criteria
-- Win 2/3 or 3/5 competitions
-- Positive return in all comps
-- Max drawdown within stated risk limits
+- Best cumulative P&L across multi-sprint series wins
+- Max drawdown within risk limits per strategy
 - Chris approves before any bot goes live -- no auto-deployment
 
 ## Tools
+- Leaderboard: python3 /root/.openclaw/workspace/leaderboard.py
+- Start sprint: python3 /root/.openclaw/skills/competition-start/scripts/competition_start.py <hours>
+- Backtest: python3 /root/.openclaw/workspace/backtest.py --bot <name> --days 30
 - Kraken prices: python3 /root/.openclaw/skills/kraken-price/scripts/get_prices.py XBTUSD ETHUSD
 - Repo: https://github.com/coldstoneadmin/crypto-trading-toolkit
 
-## Paper Trading Sims (ending 2026-03-28, NOT going live)
-- chris-btc, chris-crypto, chris-stocks
-- Monitored by monitor_sims.py, alerts sent to Telegram
-- These are being abandoned in favor of the competition framework
+## Source of Truth
+- Strategies come from: /root/.openclaw/workspace/fleet/{bot}/strategy.yaml
+- Do NOT edit strategy files directly -- changes come from Claude Code sessions with Chris
+- Do NOT update MEMORY.md yourself -- Claude Code maintains it
