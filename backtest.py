@@ -608,12 +608,17 @@ def main():
         parser.print_help()
         sys.exit(1)
 
+    user_specified_pairs = "--pairs" in " ".join(sys.argv)
     results = []
     for bot in bots:
-        print(f"\nBacktesting {bot} over {args.days} days...")
-        result = run_backtest(bot, args.pairs, args.days, verbose=args.verbose)
+        pairs = args.pairs
+        if not user_specified_pairs:
+            strategy = load_strategy(bot)
+            if strategy and strategy.get("pairs"):
+                pairs = strategy["pairs"]
+        print(); print("Backtesting", bot, "over", args.days, "days...")
+        result = run_backtest(bot, pairs, args.days, verbose=args.verbose)
         results.append(result)
-
     print("\n" + "=" * 60)
     print(f"BACKTEST RESULTS  {args.days}d | $10,000 starting capital")
     print("=" * 60)

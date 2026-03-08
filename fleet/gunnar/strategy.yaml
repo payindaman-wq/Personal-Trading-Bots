@@ -1,0 +1,76 @@
+name: gunnar
+style: aggressive_momentum_scalper
+inspiration: Gainzy (Hyperliquid leaderboard) -- jumps into momentum already in motion, tight stops, fast exits, trades anything moving hard
+pairs:
+  - BTC/USD
+  - ETH/USD
+  - SOL/USD
+  - XRP/USD
+  - DOGE/USD
+  - AVAX/USD
+  - LINK/USD
+position:
+  size_pct: 30
+  max_open: 2
+  fee_rate: 0.001
+entry:
+  long:
+    conditions:
+      - indicator: price_change_pct
+        period_minutes: 15
+        operator: gt
+        value: 0.5
+      - indicator: trend
+        period_minutes: 15
+        operator: eq
+        value: up
+      - indicator: trend
+        period_minutes: 60
+        operator: in
+        value: ["up", "flat"]
+      - indicator: rsi
+        period_minutes: 70
+        operator: gt
+        value: 54
+      - indicator: rsi
+        period_minutes: 70
+        operator: lt
+        value: 70
+      - indicator: macd_signal
+        period_minutes: 130
+        operator: eq
+        value: bullish
+  short:
+    conditions:
+      - indicator: price_change_pct
+        period_minutes: 15
+        operator: lt
+        value: -0.5
+      - indicator: trend
+        period_minutes: 15
+        operator: eq
+        value: down
+      - indicator: trend
+        period_minutes: 60
+        operator: in
+        value: ["down", "flat"]
+      - indicator: rsi
+        period_minutes: 70
+        operator: lt
+        value: 46
+      - indicator: rsi
+        period_minutes: 70
+        operator: gt
+        value: 30
+      - indicator: macd_signal
+        period_minutes: 130
+        operator: eq
+        value: bearish
+exit:
+  take_profit_pct: 1.2
+  stop_loss_pct: 0.35
+  timeout_minutes: 35
+risk:
+  pause_if_down_pct: 5
+  pause_minutes: 30
+  stop_if_down_pct: 12

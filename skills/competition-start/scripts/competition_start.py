@@ -11,7 +11,8 @@ FEE_RATE         = 0.001
 
 ALL_BOTS = [
     "floki", "bjorn", "lagertha", "ragnar",
-    "leif",  "ivar",  "harald",   "freydis",
+    "leif", "gunnar", "harald", "freydis",
+    "sigurd", "astrid", "ulf",
 ]
 
 DEFAULT_PAIRS = [

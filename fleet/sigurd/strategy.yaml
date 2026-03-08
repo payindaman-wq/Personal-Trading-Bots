@@ -1,0 +1,68 @@
+name: sigurd
+style: altcoin_momentum_rotation
+inspiration: Michaël van de Poppe -- catches altcoin strength rotations, trades alts when they show independent momentum vs BTC
+pairs:
+  - SOL/USD
+  - XRP/USD
+  - DOGE/USD
+  - AVAX/USD
+  - LINK/USD
+  - UNI/USD
+  - AAVE/USD
+position:
+  size_pct: 20
+  max_open: 2
+  fee_rate: 0.001
+entry:
+  long:
+    conditions:
+      - indicator: price_change_pct
+        period_minutes: 30
+        operator: gt
+        value: 0.5
+      - indicator: trend
+        period_minutes: 30
+        operator: eq
+        value: up
+      - indicator: rsi
+        period_minutes: 70
+        operator: gt
+        value: 50
+      - indicator: rsi
+        period_minutes: 70
+        operator: lt
+        value: 68
+      - indicator: macd_signal
+        period_minutes: 130
+        operator: eq
+        value: bullish
+  short:
+    conditions:
+      - indicator: price_change_pct
+        period_minutes: 30
+        operator: lt
+        value: -0.5
+      - indicator: trend
+        period_minutes: 30
+        operator: eq
+        value: down
+      - indicator: rsi
+        period_minutes: 70
+        operator: lt
+        value: 50
+      - indicator: rsi
+        period_minutes: 70
+        operator: gt
+        value: 32
+      - indicator: macd_signal
+        period_minutes: 130
+        operator: eq
+        value: bearish
+exit:
+  take_profit_pct: 1.0
+  stop_loss_pct: 0.4
+  timeout_minutes: 45
+risk:
+  pause_if_down_pct: 4
+  pause_minutes: 45
+  stop_if_down_pct: 10

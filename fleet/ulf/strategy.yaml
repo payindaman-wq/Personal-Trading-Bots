@@ -1,0 +1,83 @@
+name: ulf
+style: breakout_retest_scalper
+inspiration: The Trading Rush -- waits for breakout then trades the retest of key level (VWAP or EMA), high precision entries
+pairs:
+  - BTC/USD
+  - ETH/USD
+  - SOL/USD
+  - LINK/USD
+  - NEAR/USD
+  - SUI/USD
+position:
+  size_pct: 25
+  max_open: 1
+  fee_rate: 0.001
+entry:
+  long:
+    conditions:
+      - indicator: price_vs_vwap
+        period_minutes: 0
+        operator: eq
+        value: above
+      - indicator: price_vs_ema
+        period_minutes: 50
+        operator: eq
+        value: above
+      - indicator: trend
+        period_minutes: 15
+        operator: eq
+        value: up
+      - indicator: trend
+        period_minutes: 60
+        operator: eq
+        value: up
+      - indicator: rsi
+        period_minutes: 70
+        operator: gt
+        value: 50
+      - indicator: rsi
+        period_minutes: 70
+        operator: lt
+        value: 62
+      - indicator: bollinger_position
+        period_minutes: 100
+        operator: eq
+        value: inside
+  short:
+    conditions:
+      - indicator: price_vs_vwap
+        period_minutes: 0
+        operator: eq
+        value: below
+      - indicator: price_vs_ema
+        period_minutes: 50
+        operator: eq
+        value: below
+      - indicator: trend
+        period_minutes: 15
+        operator: eq
+        value: down
+      - indicator: trend
+        period_minutes: 60
+        operator: eq
+        value: down
+      - indicator: rsi
+        period_minutes: 70
+        operator: lt
+        value: 50
+      - indicator: rsi
+        period_minutes: 70
+        operator: gt
+        value: 38
+      - indicator: bollinger_position
+        period_minutes: 100
+        operator: eq
+        value: inside
+exit:
+  take_profit_pct: 1.4
+  stop_loss_pct: 0.45
+  timeout_minutes: 60
+risk:
+  pause_if_down_pct: 4
+  pause_minutes: 45
+  stop_if_down_pct: 10

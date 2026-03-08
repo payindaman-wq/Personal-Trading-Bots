@@ -1,0 +1,58 @@
+name: astrid
+style: rsi_mean_reversion_scalper
+inspiration: Crypto Jebb -- fades overextended moves, buys deep pullbacks in uptrends, sells sharp spikes in downtrends
+pairs:
+  - BTC/USD
+  - ETH/USD
+  - SOL/USD
+  - XRP/USD
+  - AVAX/USD
+position:
+  size_pct: 20
+  max_open: 2
+  fee_rate: 0.001
+entry:
+  long:
+    conditions:
+      - indicator: rsi
+        period_minutes: 35
+        operator: lt
+        value: 35
+      - indicator: rsi
+        period_minutes: 70
+        operator: gt
+        value: 45
+      - indicator: trend
+        period_minutes: 60
+        operator: in
+        value: ["up", "flat"]
+      - indicator: price_vs_vwap
+        period_minutes: 0
+        operator: in
+        value: ["below", "at"]
+  short:
+    conditions:
+      - indicator: rsi
+        period_minutes: 35
+        operator: gt
+        value: 65
+      - indicator: rsi
+        period_minutes: 70
+        operator: lt
+        value: 55
+      - indicator: trend
+        period_minutes: 60
+        operator: in
+        value: ["down", "flat"]
+      - indicator: price_vs_vwap
+        period_minutes: 0
+        operator: in
+        value: ["above", "at"]
+exit:
+  take_profit_pct: 0.9
+  stop_loss_pct: 0.4
+  timeout_minutes: 40
+risk:
+  pause_if_down_pct: 4
+  pause_minutes: 30
+  stop_if_down_pct: 10
