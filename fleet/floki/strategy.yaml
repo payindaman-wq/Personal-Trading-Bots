@@ -1,0 +1,48 @@
+name: floki
+style: multi_tf_confluence_scalper
+inspiration: Daan Crypto Trades -- RSI pullback to extreme at EMA with short-term trend confirmation, scalp the snapback
+pairs:
+  - BTC/USD
+  - ETH/USD
+  - SOL/USD
+position:
+  size_pct: 15
+  max_open: 1
+  fee_rate: 0.001
+entry:
+  long:
+    conditions:
+      - indicator: rsi
+        period_minutes: 25
+        operator: lt
+        value: 38
+      - indicator: price_vs_ema
+        period_minutes: 50
+        operator: in
+        value: [below, at]
+      - indicator: trend
+        period_minutes: 30
+        operator: eq
+        value: up
+  short:
+    conditions:
+      - indicator: rsi
+        period_minutes: 25
+        operator: gt
+        value: 62
+      - indicator: price_vs_ema
+        period_minutes: 50
+        operator: in
+        value: [above, at]
+      - indicator: trend
+        period_minutes: 30
+        operator: eq
+        value: down
+exit:
+  take_profit_pct: 0.8
+  stop_loss_pct: 0.3
+  timeout_minutes: 20
+risk:
+  pause_if_down_pct: 3
+  pause_minutes: 60
+  stop_if_down_pct: 6

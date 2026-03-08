@@ -1,0 +1,24 @@
+# Runtime competition data
+competition/active/
+competition/leaderboard.json
+competition/leaderboard.log
+competition/cron.log
+competition/backtest_results.json
+
+# Agent memory and identity (private)
+.openclaw/
+memory/
+monitor.log
+monitor_sims.py
+check_alerts.sh
+send_alerts.py
+process_alerts.py
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Simulation data (ended 2026-03-28)
+sim_data/
+price_history.json

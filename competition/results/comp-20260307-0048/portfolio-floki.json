@@ -1,0 +1,72 @@
+{
+  "bot": "floki",
+  "competition_id": "comp-20260307-0048",
+  "duration_hours": 4.0,
+  "started_at": "2026-03-07T00:48:19.642649+00:00",
+  "pairs": [
+    "BTC/USD",
+    "ETH/USD"
+  ],
+  "starting_capital": 10000.0,
+  "fee_rate": 0.001,
+  "cash": 7983.59693761,
+  "positions": [
+    {
+      "pair": "BTC/USD",
+      "direction": "long",
+      "entry_price": 68300.0,
+      "quantity": 0.02919331,
+      "cost_basis": 1993.9,
+      "entry_fee": 2.0,
+      "stop_loss": null,
+      "take_profit": null,
+      "opened_at": "2026-03-07T00:48:19.843212+00:00"
+    }
+  ],
+  "closed_trades": [
+    {
+      "pair": "BTC/USD",
+      "direction": "long",
+      "entry_price": 68250.0,
+      "exit_price": 68591.25,
+      "quantity": 0.02927473,
+      "cost_basis": 1998.0,
+      "gross_pnl": 9.99,
+      "close_fee": 2.0,
+      "net_pnl": 7.99,
+      "pnl_pct": 0.4,
+      "reason": "target",
+      "opened_at": "2026-03-07T00:48:19.703180+00:00",
+      "closed_at": "2026-03-07T00:48:19.775247+00:00"
+    },
+    {
+      "pair": "ETH/USD",
+      "direction": "short",
+      "entry_price": 1981.0,
+      "exit_price": 2020.82,
+      "quantity": 0.60514891,
+      "cost_basis": 1198.8,
+      "gross_pnl": -24.1,
+      "close_fee": 1.2,
+      "net_pnl": -25.3,
+      "pnl_pct": -2.1101,
+      "reason": "stop",
+      "opened_at": "2026-03-07T00:48:19.735324+00:00",
+      "closed_at": "2026-03-07T00:48:19.807110+00:00"
+    }
+  ],
+  "stats": {
+    "total_trades": 2,
+    "wins": 1,
+    "losses": 1,
+    "win_rate": 50.0,
+    "total_pnl_usd": -17.31,
+    "total_pnl_pct": -0.1731,
+    "total_fees": 8.4,
+    "max_drawdown_pct": 0.2728,
+    "largest_win_pct": 0.4,
+    "largest_loss_pct": -2.1101,
+    "current_equity": 9977.5,
+    "peak_equity": 10004.79
+  }
+}

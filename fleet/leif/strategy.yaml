@@ -1,0 +1,57 @@
+name: leif
+style: bb_squeeze_breakout
+inspiration: Rekt Capital -- waits for Bollinger Band squeeze (low volatility consolidation) then trades the expansion in the trend direction
+pairs:
+  - BTC/USD
+  - ETH/USD
+  - SOL/USD
+  - LINK/USD
+position:
+  size_pct: 20
+  max_open: 1
+  fee_rate: 0.001
+entry:
+  long:
+    conditions:
+      - indicator: bollinger_position
+        period_minutes: 100
+        operator: eq
+        value: above_upper
+      - indicator: macd_signal
+        period_minutes: 130
+        operator: eq
+        value: bullish
+      - indicator: trend
+        period_minutes: 30
+        operator: eq
+        value: up
+      - indicator: trend
+        period_minutes: 240
+        operator: in
+        value: [up, flat]
+  short:
+    conditions:
+      - indicator: bollinger_position
+        period_minutes: 100
+        operator: eq
+        value: below_lower
+      - indicator: macd_signal
+        period_minutes: 130
+        operator: eq
+        value: bearish
+      - indicator: trend
+        period_minutes: 30
+        operator: eq
+        value: down
+      - indicator: trend
+        period_minutes: 240
+        operator: in
+        value: [down, flat]
+exit:
+  take_profit_pct: 2.0
+  stop_loss_pct: 0.6
+  timeout_minutes: 90
+risk:
+  pause_if_down_pct: 4
+  pause_minutes: 60
+  stop_if_down_pct: 8
