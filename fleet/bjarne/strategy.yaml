@@ -1,0 +1,75 @@
+name: bjarne
+style: trend_pullback_buyer
+inspiration: Credible Crypto -- buys controlled pullbacks within confirmed uptrends, enters when short-term weakness meets macro strength
+pairs:
+  - BTC/USD
+  - ETH/USD
+  - SOL/USD
+  - XRP/USD
+  - AVAX/USD
+  - LINK/USD
+position:
+  size_pct: 25
+  max_open: 2
+  fee_rate: 0.001
+entry:
+  long:
+    conditions:
+      - indicator: trend
+        period_minutes: 240
+        operator: eq
+        value: up
+      - indicator: trend
+        period_minutes: 60
+        operator: eq
+        value: up
+      - indicator: trend
+        period_minutes: 15
+        operator: in
+        value: ["down", "flat"]
+      - indicator: rsi
+        period_minutes: 35
+        operator: lt
+        value: 45
+      - indicator: price_vs_vwap
+        period_minutes: 0
+        operator: in
+        value: ["below", "at"]
+      - indicator: macd_signal
+        period_minutes: 130
+        operator: in
+        value: ["bullish", "neutral"]
+  short:
+    conditions:
+      - indicator: trend
+        period_minutes: 240
+        operator: eq
+        value: down
+      - indicator: trend
+        period_minutes: 60
+        operator: eq
+        value: down
+      - indicator: trend
+        period_minutes: 15
+        operator: in
+        value: ["up", "flat"]
+      - indicator: rsi
+        period_minutes: 35
+        operator: gt
+        value: 55
+      - indicator: price_vs_vwap
+        period_minutes: 0
+        operator: in
+        value: ["above", "at"]
+      - indicator: macd_signal
+        period_minutes: 130
+        operator: in
+        value: ["bearish", "neutral"]
+exit:
+  take_profit_pct: 1.8
+  stop_loss_pct: 0.5
+  timeout_minutes: 90
+risk:
+  pause_if_down_pct: 4
+  pause_minutes: 60
+  stop_if_down_pct: 10
