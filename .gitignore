@@ -9,10 +9,19 @@ telegram_config.json
 
 # --- Runtime competition data ------------------------------------------------
 competition/active/
+competition/abandoned/
+competition/results/
 competition/leaderboard.json
 competition/leaderboard.log
 competition/cron.log
 competition/backtest_results.json
+competition/swing/active/
+competition/swing/price_history/
+competition/swing/swing_leaderboard.json
+competition/swing/tick.log
+competition/swing/leaderboard.log
+*.log
+.timezone
 
 # --- Tax records (personal — keep in your private deployment repo) -----------
 tax/*.csv

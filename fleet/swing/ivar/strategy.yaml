@@ -1,0 +1,81 @@
+name: ivar
+style: narrative_momentum_swing
+inspiration: chris-crypto (full discretion) -- seeks strongest narrative plays across the altcoin landscape, macro-aware, large asymmetric targets, holds days to weeks
+
+pairs:
+  - BTC/USD
+  - ETH/USD
+  - SOL/USD
+  - XRP/USD
+  - AVAX/USD
+  - LINK/USD
+  - AAVE/USD
+
+position:
+  size_pct: 30
+  max_open: 3
+  fee_rate: 0.001
+
+entry:
+  long:
+    conditions:
+      - indicator: trend
+        period_hours: 168
+        operator: in
+        value: ["up", "flat"]
+      - indicator: trend
+        period_hours: 72
+        operator: eq
+        value: up
+      - indicator: momentum_accelerating
+        period_hours: 24
+        operator: eq
+        value: true
+      - indicator: macd_signal
+        period_hours: 26
+        operator: eq
+        value: bullish
+      - indicator: rsi
+        period_hours: 14
+        operator: gt
+        value: 45
+      - indicator: rsi
+        period_hours: 14
+        operator: lt
+        value: 70
+  short:
+    conditions:
+      - indicator: trend
+        period_hours: 168
+        operator: in
+        value: ["down", "flat"]
+      - indicator: trend
+        period_hours: 72
+        operator: eq
+        value: down
+      - indicator: momentum_accelerating
+        period_hours: 24
+        operator: eq
+        value: true
+      - indicator: macd_signal
+        period_hours: 26
+        operator: eq
+        value: bearish
+      - indicator: rsi
+        period_hours: 14
+        operator: lt
+        value: 55
+      - indicator: rsi
+        period_hours: 14
+        operator: gt
+        value: 30
+
+exit:
+  take_profit_pct: 22.0
+  stop_loss_pct: 7.0
+  timeout_hours: 120
+
+risk:
+  pause_if_down_pct: 8
+  pause_hours: 48
+  stop_if_down_pct: 18

@@ -8,8 +8,8 @@ import urllib.request
 import urllib.error
 from datetime import datetime, timezone
 
-WORKSPACE = os.environ.get("WORKSPACE", "/root/.openclaw/workspace")
-BOTS = ["floki", "bjorn", "lagertha"]
+WORKSPACE = "/root/.openclaw/workspace"
+BOTS = []  # auto-discovered from meta.json
 FEE_RATE = 0.001
 
 KRAKEN_PAIR_MAP = {
@@ -110,8 +110,15 @@ def main():
 
     current_prices = fetch_current_prices(meta["pairs"])
 
+    # Auto-discover bots from meta.json, falling back to portfolio files
+    bot_list = meta.get("bots") or [
+        f[len("portfolio-"):-len(".json")]
+        for f in os.listdir(comp_dir)
+        if f.startswith("portfolio-") and f.endswith(".json")
+    ]
+
     results = []
-    for bot in BOTS:
+    for bot in bot_list:
         path = os.path.join(comp_dir, f"portfolio-{bot}.json")
         if not os.path.exists(path):
             print(f"Warning: portfolio for {bot} not found, skipping", file=sys.stderr)

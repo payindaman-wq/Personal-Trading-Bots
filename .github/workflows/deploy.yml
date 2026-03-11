@@ -17,9 +17,12 @@ jobs:
           script: |
             set -e
 
-            # Pull latest code
+            # Sync to latest master — hard reset avoids local-change conflicts.
+            # Runtime data (competition/results, price_history, etc.) is gitignored
+            # so it is never touched by this reset.
             cd /root/.openclaw/workspace
-            git pull origin master
+            git fetch origin master
+            git reset --hard origin/master
 
             # Deploy dashboard HTML if present
             if [ -f /root/.openclaw/workspace/dashboard/index.html ]; then
