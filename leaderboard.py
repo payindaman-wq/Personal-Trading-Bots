@@ -26,21 +26,40 @@ LB_PATH     = os.path.join(WORKSPACE, "competition", "leaderboard.json")
 # Sprint placement points: 1st=8, 2nd=5, 3rd=3, 4th-8th=1
 POINTS_MAP = {1: 8, 2: 5, 3: 3}
 
+# Only count sprints where at least this many bots participated (filters early test sprints)
+MIN_SPRINT_BOTS = 10
+
+# Normalize all USD display values to this capital base
+DISPLAY_CAPITAL = 1000.0
+
 
 # ---------------------------------------------------------------------------
 # Data loading
 # ---------------------------------------------------------------------------
 
 def load_archived_sprints():
-    """Return list of final_score dicts from results/, sorted by comp_id."""
+    """Return list of final_score dicts from results/, sorted by comp_id.
+    Skips sprints where fewer than MIN_SPRINT_BOTS participated (early test sprints)."""
     sprints = []
     if not os.path.isdir(RESULTS_DIR):
         return sprints
     for entry in sorted(os.listdir(RESULTS_DIR)):
-        path = os.path.join(RESULTS_DIR, entry, "final_score.json")
-        if os.path.isfile(path):
-            with open(path) as f:
-                sprints.append(json.load(f))
+        score_path = os.path.join(RESULTS_DIR, entry, "final_score.json")
+        meta_path  = os.path.join(RESULTS_DIR, entry, "meta.json")
+        if not os.path.isfile(score_path):
+            continue
+        with open(score_path) as f:
+            data = json.load(f)
+        if len(data.get("rankings", [])) < MIN_SPRINT_BOTS:
+            continue
+        # Attach starting_capital for USD normalization
+        if os.path.isfile(meta_path):
+            with open(meta_path) as f:
+                meta = json.load(f)
+            data["starting_capital"] = meta.get("starting_capital", 10000.0)
+        else:
+            data["starting_capital"] = 10000.0
+        sprints.append(data)
     return sprints
 
 
@@ -65,6 +84,9 @@ def load_active_sprint():
     if meta.get("status") != "active":
         return None
 
+    starting_capital = meta.get("starting_capital", 10000.0)
+    usd_scale = DISPLAY_CAPITAL / starting_capital
+
     rankings = []
     for bot in meta.get("bots", []):
         pfile = os.path.join(comp_dir, f"portfolio-{bot}.json")
@@ -74,18 +96,18 @@ def load_active_sprint():
             p = json.load(f)
         s = p["stats"]
         rankings.append({
-            "bot": bot,
-            "final_equity": round(s["current_equity"], 2),
-            "total_pnl_usd": round(s["total_pnl_usd"], 2),
-            "total_pnl_pct": round(s["total_pnl_pct"], 4),
-            "total_trades": s["total_trades"],
-            "wins": s["wins"],
-            "losses": s["losses"],
-            "win_rate": s["win_rate"],
+            "bot":              bot,
+            "final_equity":     round(s["current_equity"] * usd_scale, 2),
+            "total_pnl_usd":    round(s["total_pnl_usd"]  * usd_scale, 2),
+            "total_pnl_pct":    round(s["total_pnl_pct"],  4),
+            "total_trades":     s["total_trades"],
+            "wins":             s["wins"],
+            "losses":           s["losses"],
+            "win_rate":         s["win_rate"],
             "max_drawdown_pct": s["max_drawdown_pct"],
-            "total_fees": round(s["total_fees"], 2),
-            "open_positions": len(p.get("positions", [])),
-            "rank": None,
+            "total_fees":       round(s["total_fees"] * usd_scale, 2),
+            "open_positions":   len(p.get("positions", [])),
+            "rank":             None,
         })
 
     rankings.sort(key=lambda x: x["final_equity"], reverse=True)
@@ -93,13 +115,14 @@ def load_active_sprint():
         r["rank"] = i
 
     return {
-        "comp_id": meta["comp_id"],
-        "scored_at": None,
-        "duration_hours": meta["duration_hours"],
-        "pairs": meta["pairs"],
-        "winner": rankings[0]["bot"] if rankings else None,
-        "rankings": rankings,
-        "in_progress": True,
+        "comp_id":          meta["comp_id"],
+        "scored_at":        None,
+        "duration_hours":   meta["duration_hours"],
+        "pairs":            meta["pairs"],
+        "winner":           rankings[0]["bot"] if rankings else None,
+        "rankings":         rankings,
+        "in_progress":      True,
+        "starting_capital": starting_capital,
     }
 
 
@@ -133,8 +156,9 @@ def aggregate(sprints):
         return bots[name]
 
     for sprint in sprints:
-        in_prog = sprint.get("in_progress", False)
-        comp_id = sprint["comp_id"]
+        in_prog   = sprint.get("in_progress", False)
+        comp_id   = sprint["comp_id"]
+        usd_scale = DISPLAY_CAPITAL / sprint.get("starting_capital", DISPLAY_CAPITAL)
         for r in sprint.get("rankings", []):
             name = r["bot"]
             b = ensure(name)
@@ -145,14 +169,14 @@ def aggregate(sprints):
                 b["sprint_wins"] += 1
             if rank <= 3:
                 b["podiums"] += 1
-            pnl_usd = r.get("total_pnl_usd", 0.0)
+            pnl_usd = round(r.get("total_pnl_usd", 0.0) * usd_scale, 2)
             pnl_pct = r.get("total_pnl_pct", 0.0)
             b["cumulative_pnl_usd"] = round(b["cumulative_pnl_usd"] + pnl_usd, 2)
             b["cumulative_pnl_pct"] = round(b["cumulative_pnl_pct"] + pnl_pct, 4)
             b["total_trades"]   += r.get("total_trades", 0)
             b["total_wins"]     += r.get("wins", 0)
             b["total_losses"]   += r.get("losses", 0)
-            b["total_fees_usd"]  = round(b["total_fees_usd"] + r.get("total_fees", 0.0), 2)
+            b["total_fees_usd"]  = round(b["total_fees_usd"] + r.get("total_fees", 0.0) * usd_scale, 2)
             dd = r.get("max_drawdown_pct", 0.0)
             if dd > b["worst_drawdown_pct"]:
                 b["worst_drawdown_pct"] = dd
@@ -163,8 +187,8 @@ def aggregate(sprints):
             b["sprint_log"].append({
                 "comp_id":     comp_id,
                 "rank":        rank,
-                "pnl_usd":    round(pnl_usd, 2),
-                "pnl_pct":    round(pnl_pct, 4),
+                "pnl_usd":     pnl_usd,
+                "pnl_pct":     round(pnl_pct, 4),
                 "trades":      r.get("total_trades", 0),
                 "win_rate":    r.get("win_rate", 0.0),
                 "in_progress": in_prog,

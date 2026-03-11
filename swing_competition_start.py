@@ -7,7 +7,7 @@ import yaml
 from datetime import datetime, timezone
 
 WORKSPACE        = os.environ.get("WORKSPACE", "/root/.openclaw/workspace")
-STARTING_CAPITAL = 10000.00
+STARTING_CAPITAL = 1000.00
 FEE_RATE         = 0.001
 DEFAULT_DURATION = 168  # 7 days in hours
 

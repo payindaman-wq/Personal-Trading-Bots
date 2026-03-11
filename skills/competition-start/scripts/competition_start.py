@@ -5,8 +5,8 @@ import json
 import os
 from datetime import datetime, timezone
 
-WORKSPACE        = os.environ.get("WORKSPACE", "/root/.openclaw/workspace")
-STARTING_CAPITAL = 10000.00
+WORKSPACE        = "/root/.openclaw/workspace"
+STARTING_CAPITAL = 1000.00
 FEE_RATE         = 0.001
 
 ALL_BOTS = [

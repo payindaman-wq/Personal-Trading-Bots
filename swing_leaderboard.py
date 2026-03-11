@@ -21,6 +21,8 @@ LB_PATH      = os.path.join(WORKSPACE, "competition", "swing", "swing_leaderboar
 
 POINTS_MAP = {1: 8, 2: 5, 3: 3}
 
+DISPLAY_CAPITAL = 1000.0
+
 
 # ---------------------------------------------------------------------------
 # Data loading
@@ -31,10 +33,19 @@ def load_archived_sprints():
     if not os.path.isdir(RESULTS_DIR):
         return sprints
     for entry in sorted(os.listdir(RESULTS_DIR)):
-        path = os.path.join(RESULTS_DIR, entry, "final_score.json")
-        if os.path.isfile(path):
-            with open(path) as f:
-                sprints.append(json.load(f))
+        score_path = os.path.join(RESULTS_DIR, entry, "final_score.json")
+        meta_path  = os.path.join(RESULTS_DIR, entry, "meta.json")
+        if not os.path.isfile(score_path):
+            continue
+        with open(score_path) as f:
+            data = json.load(f)
+        if os.path.isfile(meta_path):
+            with open(meta_path) as f:
+                meta = json.load(f)
+            data["starting_capital"] = meta.get("starting_capital", 10000.0)
+        else:
+            data["starting_capital"] = 10000.0
+        sprints.append(data)
     return sprints
 
 
@@ -53,6 +64,9 @@ def load_active_sprint():
     if meta.get("status") != "active":
         return None
 
+    starting_capital = meta.get("starting_capital", 10000.0)
+    usd_scale = DISPLAY_CAPITAL / starting_capital
+
     rankings = []
     for bot in meta.get("bots", []):
         pfile = os.path.join(comp_dir, f"portfolio-{bot}.json")
@@ -63,15 +77,15 @@ def load_active_sprint():
         s = p["stats"]
         rankings.append({
             "bot":              bot,
-            "final_equity":     round(p["equity"], 2),
-            "total_pnl_usd":    round(s["total_pnl_usd"], 2),
+            "final_equity":     round(p["equity"] * usd_scale, 2),
+            "total_pnl_usd":    round(s["total_pnl_usd"] * usd_scale, 2),
             "total_pnl_pct":    round(s["total_pnl_pct"], 4),
             "total_trades":     s["total_trades"],
             "wins":             s["wins"],
             "losses":           s["losses"],
             "win_rate":         s["win_rate"],
             "max_drawdown_pct": s["max_drawdown_pct"],
-            "total_fees":       round(s["total_fees"], 4),
+            "total_fees":       round(s["total_fees"] * usd_scale, 4),
             "open_positions":   len(p.get("positions", [])),
             "rank":             None,
         })
@@ -120,8 +134,9 @@ def aggregate(sprints):
         return bots[name]
 
     for sprint in sprints:
-        in_prog = sprint.get("in_progress", False)
-        comp_id = sprint["comp_id"]
+        in_prog   = sprint.get("in_progress", False)
+        comp_id   = sprint["comp_id"]
+        usd_scale = DISPLAY_CAPITAL / sprint.get("starting_capital", DISPLAY_CAPITAL)
         for r in sprint.get("rankings", []):
             name = r["bot"]
             b    = ensure(name)
@@ -130,14 +145,14 @@ def aggregate(sprints):
             b["points"] += POINTS_MAP.get(rank, 1)
             if rank == 1: b["sprint_wins"] += 1
             if rank <= 3: b["podiums"]     += 1
-            pnl_usd = r.get("total_pnl_usd", 0.0)
+            pnl_usd = round(r.get("total_pnl_usd", 0.0) * usd_scale, 2)
             pnl_pct = r.get("total_pnl_pct", 0.0)
             b["cumulative_pnl_usd"] = round(b["cumulative_pnl_usd"] + pnl_usd, 2)
             b["cumulative_pnl_pct"] = round(b["cumulative_pnl_pct"] + pnl_pct, 4)
             b["total_trades"]       += r.get("total_trades", 0)
             b["total_wins"]         += r.get("wins", 0)
             b["total_losses"]       += r.get("losses", 0)
-            b["total_fees_usd"]      = round(b["total_fees_usd"] + r.get("total_fees", 0.0), 4)
+            b["total_fees_usd"]      = round(b["total_fees_usd"] + r.get("total_fees", 0.0) * usd_scale, 4)
             dd = r.get("max_drawdown_pct", 0.0)
             if dd > b["worst_drawdown_pct"]:
                 b["worst_drawdown_pct"] = dd
