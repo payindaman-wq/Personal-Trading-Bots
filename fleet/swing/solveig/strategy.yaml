@@ -1,10 +1,11 @@
 name: solveig
 style: multi_day_mean_reversion
-inspiration: Crypto Jebb (swing timeframe) -- fades extreme multi-day moves, buys deep RSI dips when longer trend remains intact
+inspiration: Crypto Jebb (swing timeframe) -- fades extreme multi-day moves, buys deep RSI dips near BB lower band when macro trend intact
 pairs:
   - BTC/USD
   - ETH/USD
   - SOL/USD
+  - AVAX/USD
 position:
   size_pct: 25
   max_open: 2
@@ -23,7 +24,11 @@ entry:
       - indicator: trend
         period_hours: 168
         operator: in
-        value: ["up", "flat"]
+        value: [up, flat]
+      - indicator: price_vs_ema
+        period_hours: 50
+        operator: in
+        value: [below, at]
   short:
     conditions:
       - indicator: rsi
@@ -37,9 +42,13 @@ entry:
       - indicator: trend
         period_hours: 168
         operator: in
-        value: ["down", "flat"]
+        value: [down, flat]
+      - indicator: price_vs_ema
+        period_hours: 50
+        operator: in
+        value: [above, at]
 exit:
-  take_profit_pct: 5.0
+  take_profit_pct: 6.0
   stop_loss_pct: 2.0
   timeout_hours: 72
 risk:

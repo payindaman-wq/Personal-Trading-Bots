@@ -1,6 +1,6 @@
 name: bjarne
 style: trend_pullback_buyer
-inspiration: Credible Crypto -- buys controlled pullbacks within confirmed uptrends, enters when short-term weakness meets macro strength
+inspiration: Credible Crypto -- buys controlled pullbacks within confirmed impulse waves, high conviction when macro structure is intact
 pairs:
   - BTC/USD
   - ETH/USD
@@ -9,7 +9,7 @@ pairs:
   - AVAX/USD
   - LINK/USD
 position:
-  size_pct: 25
+  size_pct: 28
   max_open: 2
   fee_rate: 0.001
 entry:
@@ -26,19 +26,22 @@ entry:
       - indicator: trend
         period_minutes: 15
         operator: in
-        value: ["down", "flat"]
+        value: [down, flat]
       - indicator: rsi
         period_minutes: 35
         operator: lt
-        value: 45
+        value: 42
       - indicator: price_vs_vwap
-        period_minutes: 0
         operator: in
-        value: ["below", "at"]
+        value: [below, at]
+      - indicator: price_vs_ema
+        period_minutes: 50
+        operator: in
+        value: [below, at]
       - indicator: macd_signal
         period_minutes: 130
-        operator: in
-        value: ["bullish", "neutral"]
+        operator: eq
+        value: bullish
   short:
     conditions:
       - indicator: trend
@@ -52,19 +55,22 @@ entry:
       - indicator: trend
         period_minutes: 15
         operator: in
-        value: ["up", "flat"]
+        value: [up, flat]
       - indicator: rsi
         period_minutes: 35
         operator: gt
-        value: 55
+        value: 58
       - indicator: price_vs_vwap
-        period_minutes: 0
         operator: in
-        value: ["above", "at"]
+        value: [above, at]
+      - indicator: price_vs_ema
+        period_minutes: 50
+        operator: in
+        value: [above, at]
       - indicator: macd_signal
         period_minutes: 130
-        operator: in
-        value: ["bearish", "neutral"]
+        operator: eq
+        value: bearish
 exit:
   take_profit_pct: 1.8
   stop_loss_pct: 0.5

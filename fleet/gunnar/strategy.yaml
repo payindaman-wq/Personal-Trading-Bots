@@ -1,6 +1,6 @@
 name: gunnar
 style: aggressive_momentum_scalper
-inspiration: Gainzy (Hyperliquid leaderboard) -- jumps into momentum already in motion, tight stops, fast exits, trades anything moving hard
+inspiration: Gainzy -- jumps into momentum already in motion, tight stops, fast exits, high frequency across many pairs
 pairs:
   - BTC/USD
   - ETH/USD
@@ -9,9 +9,12 @@ pairs:
   - DOGE/USD
   - AVAX/USD
   - LINK/USD
+  - SUI/USD
+  - PEPE/USD
+  - WIF/USD
 position:
   size_pct: 30
-  max_open: 2
+  max_open: 3
   fee_rate: 0.001
 entry:
   long:
@@ -19,7 +22,7 @@ entry:
       - indicator: price_change_pct
         period_minutes: 15
         operator: gt
-        value: 0.5
+        value: 0.6
       - indicator: trend
         period_minutes: 15
         operator: eq
@@ -27,7 +30,7 @@ entry:
       - indicator: trend
         period_minutes: 60
         operator: in
-        value: ["up", "flat"]
+        value: [up, flat]
       - indicator: rsi
         period_minutes: 70
         operator: gt
@@ -35,7 +38,7 @@ entry:
       - indicator: rsi
         period_minutes: 70
         operator: lt
-        value: 70
+        value: 78
       - indicator: macd_signal
         period_minutes: 130
         operator: eq
@@ -45,7 +48,7 @@ entry:
       - indicator: price_change_pct
         period_minutes: 15
         operator: lt
-        value: -0.5
+        value: -0.6
       - indicator: trend
         period_minutes: 15
         operator: eq
@@ -53,7 +56,7 @@ entry:
       - indicator: trend
         period_minutes: 60
         operator: in
-        value: ["down", "flat"]
+        value: [down, flat]
       - indicator: rsi
         period_minutes: 70
         operator: lt
@@ -61,7 +64,7 @@ entry:
       - indicator: rsi
         period_minutes: 70
         operator: gt
-        value: 30
+        value: 22
       - indicator: macd_signal
         period_minutes: 130
         operator: eq
@@ -69,7 +72,7 @@ entry:
 exit:
   take_profit_pct: 1.2
   stop_loss_pct: 0.35
-  timeout_minutes: 35
+  timeout_minutes: 25
 risk:
   pause_if_down_pct: 5
   pause_minutes: 30

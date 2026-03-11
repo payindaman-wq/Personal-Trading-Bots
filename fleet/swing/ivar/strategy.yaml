@@ -1,6 +1,6 @@
 name: ivar
 style: narrative_momentum_swing
-inspiration: chris-crypto (full discretion) -- seeks strongest narrative plays across the altcoin landscape, macro-aware, large asymmetric targets, holds days to weeks
+inspiration: chris-crypto (full discretion) -- broadest mandate, seeks strongest momentum across the altcoin landscape, macro-aware, large asymmetric targets
 
 pairs:
   - BTC/USD
@@ -10,9 +10,11 @@ pairs:
   - AVAX/USD
   - LINK/USD
   - AAVE/USD
+  - NEAR/USD
+  - SUI/USD
 
 position:
-  size_pct: 30
+  size_pct: 28
   max_open: 3
   fee_rate: 0.001
 
@@ -22,15 +24,15 @@ entry:
       - indicator: trend
         period_hours: 168
         operator: in
-        value: ["up", "flat"]
+        value: [up, flat]
       - indicator: trend
         period_hours: 72
         operator: eq
         value: up
-      - indicator: momentum_accelerating
-        period_hours: 24
+      - indicator: price_vs_ema
+        period_hours: 50
         operator: eq
-        value: true
+        value: above
       - indicator: macd_signal
         period_hours: 26
         operator: eq
@@ -48,15 +50,15 @@ entry:
       - indicator: trend
         period_hours: 168
         operator: in
-        value: ["down", "flat"]
+        value: [down, flat]
       - indicator: trend
         period_hours: 72
         operator: eq
         value: down
-      - indicator: momentum_accelerating
-        period_hours: 24
+      - indicator: price_vs_ema
+        period_hours: 50
         operator: eq
-        value: true
+        value: below
       - indicator: macd_signal
         period_hours: 26
         operator: eq
@@ -71,9 +73,9 @@ entry:
         value: 30
 
 exit:
-  take_profit_pct: 22.0
-  stop_loss_pct: 7.0
-  timeout_hours: 120
+  take_profit_pct: 15.0
+  stop_loss_pct: 5.0
+  timeout_hours: 168
 
 risk:
   pause_if_down_pct: 8

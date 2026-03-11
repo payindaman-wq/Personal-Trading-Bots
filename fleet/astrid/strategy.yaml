@@ -1,6 +1,6 @@
 name: astrid
 style: rsi_mean_reversion_scalper
-inspiration: Crypto Jebb -- fades overextended moves, buys deep pullbacks in uptrends, sells sharp spikes in downtrends
+inspiration: Crypto Jebb -- fades overextended moves using dual-timeframe RSI, buys deep pullbacks in uptrends near VWAP support
 pairs:
   - BTC/USD
   - ETH/USD
@@ -17,7 +17,7 @@ entry:
       - indicator: rsi
         period_minutes: 35
         operator: lt
-        value: 35
+        value: 33
       - indicator: rsi
         period_minutes: 70
         operator: gt
@@ -25,17 +25,20 @@ entry:
       - indicator: trend
         period_minutes: 60
         operator: in
-        value: ["up", "flat"]
+        value: [up, flat]
       - indicator: price_vs_vwap
-        period_minutes: 0
         operator: in
-        value: ["below", "at"]
+        value: [below, at]
+      - indicator: macd_signal
+        period_minutes: 130
+        operator: in
+        value: [bullish, neutral]
   short:
     conditions:
       - indicator: rsi
         period_minutes: 35
         operator: gt
-        value: 65
+        value: 67
       - indicator: rsi
         period_minutes: 70
         operator: lt
@@ -43,15 +46,18 @@ entry:
       - indicator: trend
         period_minutes: 60
         operator: in
-        value: ["down", "flat"]
+        value: [down, flat]
       - indicator: price_vs_vwap
-        period_minutes: 0
         operator: in
-        value: ["above", "at"]
+        value: [above, at]
+      - indicator: macd_signal
+        period_minutes: 130
+        operator: in
+        value: [bearish, neutral]
 exit:
-  take_profit_pct: 0.9
-  stop_loss_pct: 0.4
-  timeout_minutes: 40
+  take_profit_pct: 1.2
+  stop_loss_pct: 0.45
+  timeout_minutes: 55
 risk:
   pause_if_down_pct: 4
   pause_minutes: 30

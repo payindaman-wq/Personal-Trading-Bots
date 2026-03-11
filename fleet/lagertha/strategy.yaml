@@ -1,13 +1,13 @@
 name: lagertha
 style: vwap_trend_directional
-inspiration: TheWhiteWhaleHL -- VWAP-anchored directional bias, patient entries only with macro trend confirmation, holds for meaningful moves
+inspiration: TheWhiteWhaleHL -- VWAP-anchored directional conviction trades, large positions when VWAP holds with macro trend confirmation
 pairs:
   - BTC/USD
   - ETH/USD
   - SOL/USD
   - AVAX/USD
 position:
-  size_pct: 20
+  size_pct: 22
   max_open: 1
   fee_rate: 0.001
 entry:
@@ -21,17 +21,17 @@ entry:
         operator: eq
         value: above
       - indicator: trend
-        period_minutes: 60
-        operator: eq
-        value: up
-      - indicator: trend
         period_minutes: 240
         operator: eq
         value: up
       - indicator: rsi
         period_minutes: 70
         operator: gt
-        value: 50
+        value: 45
+      - indicator: momentum_accelerating
+        period_minutes: 60
+        operator: eq
+        value: true
   short:
     conditions:
       - indicator: price_vs_vwap
@@ -42,21 +42,21 @@ entry:
         operator: eq
         value: below
       - indicator: trend
-        period_minutes: 60
-        operator: eq
-        value: down
-      - indicator: trend
         period_minutes: 240
         operator: eq
         value: down
       - indicator: rsi
         period_minutes: 70
         operator: lt
-        value: 50
+        value: 55
+      - indicator: momentum_accelerating
+        period_minutes: 60
+        operator: eq
+        value: true
 exit:
   take_profit_pct: 2.0
   stop_loss_pct: 0.6
-  timeout_minutes: 120
+  timeout_minutes: 150
 risk:
   pause_if_down_pct: 4
   pause_minutes: 60

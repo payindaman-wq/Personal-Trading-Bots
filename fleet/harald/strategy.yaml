@@ -1,13 +1,13 @@
 name: harald
 style: rsi_trend_composite
-inspiration: Scott Melker (Wolf of All Streets) -- RSI and trend confluence, strict risk-first, never fights confirmed direction
+inspiration: Scott Melker -- RSI and trend confluence with strict risk-first approach, never fights confirmed direction, waits for high-probability setups
 pairs:
   - BTC/USD
   - ETH/USD
   - SOL/USD
   - XRP/USD
 position:
-  size_pct: 18
+  size_pct: 15
   max_open: 1
   fee_rate: 0.001
 entry:
@@ -16,43 +16,51 @@ entry:
       - indicator: rsi
         period_minutes: 70
         operator: gt
-        value: 52
+        value: 53
       - indicator: rsi
         period_minutes: 70
         operator: lt
-        value: 65
+        value: 63
       - indicator: trend
         period_minutes: 30
         operator: eq
         value: up
       - indicator: trend
-        period_minutes: 60
+        period_minutes: 240
         operator: in
         value: [up, flat]
       - indicator: price_vs_vwap
         operator: in
         value: [above, at]
+      - indicator: macd_signal
+        period_minutes: 130
+        operator: eq
+        value: bullish
   short:
     conditions:
       - indicator: rsi
         period_minutes: 70
         operator: lt
-        value: 48
+        value: 47
       - indicator: rsi
         period_minutes: 70
         operator: gt
-        value: 35
+        value: 37
       - indicator: trend
         period_minutes: 30
         operator: eq
         value: down
       - indicator: trend
-        period_minutes: 60
+        period_minutes: 240
         operator: in
         value: [down, flat]
       - indicator: price_vs_vwap
         operator: in
         value: [below, at]
+      - indicator: macd_signal
+        period_minutes: 130
+        operator: eq
+        value: bearish
 exit:
   take_profit_pct: 1.2
   stop_loss_pct: 0.4

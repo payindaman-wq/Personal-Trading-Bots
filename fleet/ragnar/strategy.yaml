@@ -1,10 +1,12 @@
 name: ragnar
 style: vwap_reclaim
-inspiration: VWAP reclaim -- VWAP + RSI sweet spot + MACD direction all must agree, quality over quantity
+inspiration: VWAP reclaim -- price dips below VWAP then reclaims it, enter on the reclaim with VWAP as support, quality setups only
 pairs:
   - BTC/USD
   - ETH/USD
   - SOL/USD
+  - AVAX/USD
+  - LINK/USD
 position:
   size_pct: 20
   max_open: 1
@@ -22,19 +24,19 @@ entry:
       - indicator: rsi
         period_minutes: 35
         operator: gt
-        value: 52
+        value: 50
       - indicator: rsi
         period_minutes: 35
         operator: lt
-        value: 65
+        value: 67
       - indicator: macd_signal
         period_minutes: 130
         operator: eq
         value: bullish
       - indicator: trend
         period_minutes: 240
-        operator: eq
-        value: up
+        operator: in
+        value: [up, flat]
   short:
     conditions:
       - indicator: price_vs_vwap
@@ -47,23 +49,23 @@ entry:
       - indicator: rsi
         period_minutes: 35
         operator: lt
-        value: 48
+        value: 50
       - indicator: rsi
         period_minutes: 35
         operator: gt
-        value: 35
+        value: 33
       - indicator: macd_signal
         period_minutes: 130
         operator: eq
         value: bearish
       - indicator: trend
         period_minutes: 240
-        operator: eq
-        value: down
+        operator: in
+        value: [down, flat]
 exit:
   take_profit_pct: 1.0
   stop_loss_pct: 0.4
-  timeout_minutes: 45
+  timeout_minutes: 60
 risk:
   pause_if_down_pct: 4
   pause_minutes: 60
