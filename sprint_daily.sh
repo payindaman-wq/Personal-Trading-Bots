@@ -1,7 +1,7 @@
 #!/bin/bash
 # sprint_daily.sh - Start a 24h competition sprint daily. Self-removes after END_DATE.
 
-END_DATE="2026-03-28"
+END_DATE="2026-03-31"
 TODAY=$(date -u +%Y-%m-%d)
 
 if [[ "$TODAY" > "$END_DATE" ]]; then
