@@ -1,0 +1,33 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 5.78.188.151
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+
+            # Pull latest code
+            cd /root/.openclaw/workspace
+            git pull origin master
+
+            # Deploy dashboard HTML if present
+            if [ -f /root/.openclaw/workspace/dashboard/index.html ]; then
+              cp /root/.openclaw/workspace/dashboard/index.html /var/www/dashboard/index.html
+              echo "Dashboard HTML deployed"
+            fi
+
+            # Refresh dashboard data
+            python3 /root/.openclaw/workspace/dashboard_data.py
+
+            echo "Deploy complete"

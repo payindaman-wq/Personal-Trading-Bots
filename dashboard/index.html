@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Viking Fleet — Competition Dashboard</title>
+<style>
+  :root {
+    --bg:        #07090f;
+    --surface:   #0d1117;
+    --surface2:  #131920;
+    --border:    #1e2d3d;
+    --border2:   #243040;
+    --gold:      #c9a84c;
+    --gold-dim:  #7a6230;
+    --text:      #dde6f0;
+    --muted:     #546a7b;
+    --green:     #3fb950;
+    --red:       #f85149;
+    --blue:      #58a6ff;
+    --purple:    #bc8cff;
+    --yellow:    #e3b341;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: linear-gradient(180deg, #0d1320 0%, #07090f 100%);
+    border-bottom: 1px solid var(--gold-dim);
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .header-left { display: flex; align-items: center; gap: 16px; }
+  .logo {
+    font-size: 22px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+  .logo span { color: var(--muted); font-size: 11px; letter-spacing: 1px; display: block; margin-top: 2px; }
+  .header-meta { font-size: 11px; color: var(--muted); text-align: right; line-height: 1.7; }
+  .header-meta .updated { color: var(--text); }
+  .refresh-btn {
+    background: none;
+    border: 1px solid var(--border2);
+    color: var(--muted);
+    font-family: inherit;
+    font-size: 11px;
+    padding: 4px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+    margin-top: 4px;
+  }
+  .refresh-btn:hover { border-color: var(--gold-dim); color: var(--gold); }
+
+  /* ── Layout ── */
+  .main { max-width: 1400px; margin: 0 auto; padding: 20px 16px; display: flex; flex-direction: column; gap: 24px; }
+
+  /* ── League Card ── */
+  .league-card {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .league-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .league-title {
+    font-size: 14px;
+    font-weight: bold;
+    letter-spacing: 1.5px;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+  .league-meta { font-size: 11px; color: var(--muted); }
+  .badge {
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    padding: 3px 8px;
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+  .badge-live   { background: rgba(63,185,80,.15); color: var(--green); border: 1px solid rgba(63,185,80,.3); }
+  .badge-idle   { background: rgba(84,106,123,.1); color: var(--muted); border: 1px solid var(--border2); }
+  .badge-funded { background: rgba(201,168,76,.15); color: var(--gold);  border: 1px solid var(--gold-dim); }
+
+  /* ── Sprint Status Bar ── */
+  .sprint-bar {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 18px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .sprint-bar .sprint-id { color: var(--blue); font-weight: bold; }
+  .sprint-bar .countdown { color: var(--yellow); font-weight: bold; }
+  .sprint-bar .pairs { color: var(--muted); }
+
+  /* ── Section ── */
+  .section { padding: 14px 18px; border-bottom: 1px solid var(--border); }
+  .section:last-child { border-bottom: none; }
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  /* ── Tables ── */
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: left;
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  td {
+    padding: 7px 8px;
+    border-bottom: 1px solid rgba(30,45,61,.5);
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,.02); }
+
+  .rank-1 td:first-child { color: var(--gold); font-weight: bold; }
+  .rank-2 td:first-child { color: #94a3b8; font-weight: bold; }
+  .rank-3 td:first-child { color: #9a7c55; font-weight: bold; }
+
+  .bot-name { color: var(--text); font-weight: bold; letter-spacing: .5px; }
+  .pnl-pos  { color: var(--green); }
+  .pnl-neg  { color: var(--red); }
+  .pnl-zero { color: var(--muted); }
+  .pts      { color: var(--gold); font-weight: bold; }
+  .win-rate { color: var(--blue); }
+  .open-pos { color: var(--purple); }
+
+  /* ── Positions sub-list ── */
+  .pos-list { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .pos-long  { color: var(--green); }
+  .pos-short { color: var(--red); }
+
+  /* ── No-active notice ── */
+  .idle-notice {
+    padding: 18px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: .5px;
+  }
+
+  /* ── Funded bots ── */
+  .funded-empty {
+    padding: 28px 18px;
+    text-align: center;
+  }
+  .funded-empty .big  { font-size: 13px; color: var(--muted); letter-spacing: 1px; margin-bottom: 8px; }
+  .funded-empty .sub  { font-size: 11px; color: #2d3d4d; }
+  .funded-gate {
+    display: inline-block;
+    margin-top: 14px;
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--gold-dim);
+    border: 1px dashed var(--gold-dim);
+    padding: 6px 14px;
+    border-radius: 3px;
+  }
+
+  /* ── Loading / Error ── */
+  .loading { text-align: center; padding: 60px 20px; color: var(--muted); letter-spacing: 1px; }
+  .error   { text-align: center; padding: 40px 20px; color: var(--red); font-size: 11px; }
+
+  /* ── Responsive ── */
+  @media (max-width: 700px) {
+    .hide-mobile { display: none; }
+    .logo { font-size: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo">
+      Viking Fleet
+      <span>Competition Dashboard</span>
+    </div>
+  </div>
+  <div class="header-meta">
+    <div>Updated: <span class="updated" id="updated">--</span></div>
+    <div>Auto-refresh in <span id="countdown">30</span>s</div>
+    <button class="refresh-btn" onclick="load()">Refresh now</button>
+  </div>
+</div>
+
+<div class="main" id="main">
+  <div class="loading">Loading fleet data...</div>
+</div>
+
+<script>
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function fmt_pnl_usd(v) {
+  if (v === 0) return '<span class="pnl-zero">$0.00</span>';
+  const cls = v > 0 ? 'pnl-pos' : 'pnl-neg';
+  const sign = v > 0 ? '+' : '';
+  return `<span class="${cls}">${sign}$${Math.abs(v).toLocaleString('en', {minimumFractionDigits:2, maximumFractionDigits:2})}</span>`;
+}
+
+function fmt_pnl_pct(v) {
+  if (v === 0) return '<span class="pnl-zero">0.00%</span>';
+  const cls = v > 0 ? 'pnl-pos' : 'pnl-neg';
+  const sign = v > 0 ? '+' : '';
+  return `<span class="${cls}">${sign}${Math.abs(v).toFixed(2)}%</span>`;
+}
+
+function fmt_equity(v) {
+  return '$' + v.toLocaleString('en', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+function fmt_countdown(secs) {
+  if (secs <= 0) return 'Ending...';
+  const h = Math.floor(secs / 3600);
+  const m = Math.floor((secs % 3600) / 60);
+  if (h > 24) {
+    const d = Math.floor(h / 24);
+    const rh = h % 24;
+    return `${d}d ${rh}h ${m}m`;
+  }
+  return `${h}h ${m}m`;
+}
+
+function rank_label(r) {
+  if (r === 1) return '#1';
+  if (r === 2) return '#2';
+  if (r === 3) return '#3';
+  return `#${r}`;
+}
+
+function rank_class(r) {
+  if (r === 1) return 'rank-1';
+  if (r === 2) return 'rank-2';
+  if (r === 3) return 'rank-3';
+  return '';
+}
+
+// ── Render ───────────────────────────────────────────────────────────────────
+
+function render_live_sprint(ls) {
+  if (!ls || !ls.bots || ls.bots.length === 0) return '';
+
+  const rows = ls.bots.map(b => {
+    const pos_html = b.positions && b.positions.length > 0
+      ? b.positions.map(p =>
+          `<span class="${p.direction === 'long' ? 'pos-long' : 'pos-short'}">${p.pair} ${p.direction.toUpperCase()}</span>`
+        ).join(' &middot; ')
+      : '&mdash;';
+
+    return `
+    <tr class="${rank_class(b.rank)}">
+      <td>${rank_label(b.rank)}</td>
+      <td class="bot-name">${b.bot}</td>
+      <td>${fmt_equity(b.equity)}</td>
+      <td>${fmt_pnl_usd(b.pnl_usd)}</td>
+      <td class="hide-mobile">${fmt_pnl_pct(b.pnl_pct)}</td>
+      <td>${b.trades}</td>
+      <td class="hide-mobile">${b.win_rate > 0 ? `<span class="win-rate">${b.win_rate.toFixed(0)}%</span>` : '<span class="pnl-zero">—</span>'}</td>
+      <td class="open-pos">${b.open_positions > 0 ? `[${b.open_positions}]` : '—'}</td>
+      <td class="hide-mobile pos-list">${pos_html}</td>
+    </tr>`;
+  }).join('');
+
+  return `
+  <div class="section">
+    <div class="section-label">Live Sprint Standings</div>
+    <table>
+      <thead><tr>
+        <th>Rank</th><th>Bot</th><th>Equity</th><th>P&amp;L</th>
+        <th class="hide-mobile">P&amp;L %</th><th>Trades</th>
+        <th class="hide-mobile">Win%</th><th>Open</th>
+        <th class="hide-mobile">Positions</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`;
+}
+
+function render_cumulative(rankings, label) {
+  if (!rankings || rankings.length === 0) return '';
+
+  const rows = rankings.map((b, i) => {
+    const rank = i + 1;
+    const avg_pct = b.avg_pnl_pct_per_sprint || 0;
+    return `
+    <tr class="${rank_class(rank)}">
+      <td>${rank_label(rank)}</td>
+      <td class="bot-name">${b.bot}</td>
+      <td class="pts">${b.points}</td>
+      <td class="hide-mobile">${b.sprints_entered}</td>
+      <td class="hide-mobile">${b.sprint_wins}</td>
+      <td class="hide-mobile">${b.podiums}</td>
+      <td>${fmt_pnl_usd(b.cumulative_pnl_usd)}</td>
+      <td class="hide-mobile">${fmt_pnl_pct(avg_pct)}</td>
+      <td class="hide-mobile">${b.overall_win_rate > 0 ? `<span class="win-rate">${b.overall_win_rate.toFixed(0)}%</span>` : '<span class="pnl-zero">—</span>'}</td>
+      <td class="hide-mobile">${b.total_trades}</td>
+    </tr>`;
+  }).join('');
+
+  return `
+  <div class="section">
+    <div class="section-label">${label}</div>
+    <table>
+      <thead><tr>
+        <th>Rank</th><th>Bot</th><th>Pts</th>
+        <th class="hide-mobile">Sprints</th>
+        <th class="hide-mobile">Wins</th>
+        <th class="hide-mobile">Podiums</th>
+        <th>Cum P&amp;L</th>
+        <th class="hide-mobile">Avg/Sprint</th>
+        <th class="hide-mobile">Win%</th>
+        <th class="hide-mobile">Trades</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`;
+}
+
+function render_league(id, league) {
+  const is_live = !!league.live_sprint;
+  const ls = league.live_sprint;
+
+  const sprint_bar = ls ? `
+  <div class="sprint-bar">
+    <span>Sprint: <span class="sprint-id">${ls.sprint_id}</span></span>
+    <span>Ends in: <span class="countdown">${fmt_countdown(ls.seconds_remaining)}</span></span>
+    <span class="hide-mobile pairs">Pairs: ${ls.pairs.join(' &middot; ')}</span>
+    <span>Duration: ${ls.duration_hours}h</span>
+  </div>` : '';
+
+  const live_section = is_live
+    ? render_live_sprint(ls)
+    : `<div class="idle-notice">No active sprint — awaiting next competition start</div>`;
+
+  const cum_label = `Cumulative Standings &mdash; ${league.total_sprints} sprint${league.total_sprints !== 1 ? 's' : ''} recorded`;
+  const cum_section = league.cumulative_rankings && league.cumulative_rankings.length > 0
+    ? render_cumulative(league.cumulative_rankings, cum_label)
+    : '';
+
+  return `
+  <div class="league-card">
+    <div class="league-header">
+      <div>
+        <div class="league-title">${league.label}</div>
+        <div class="league-meta">${league.sprint_duration_hours}h sprints &mdash; points: 1st=8 &middot; 2nd=5 &middot; 3rd=3 &middot; 4th+=1</div>
+      </div>
+      <span class="badge ${is_live ? 'badge-live' : 'badge-idle'}">${is_live ? 'Live' : 'Idle'}</span>
+    </div>
+    ${sprint_bar}
+    ${live_section}
+    ${cum_section}
+  </div>`;
+}
+
+function render_funded(bots) {
+  if (!bots || bots.length === 0) {
+    return `
+    <div class="league-card">
+      <div class="league-header">
+        <div>
+          <div class="league-title">Funded Bots &mdash; Live Capital</div>
+          <div class="league-meta">Bots that win their competition earn real capital allocation</div>
+        </div>
+        <span class="badge badge-idle">Pending</span>
+      </div>
+      <div class="funded-empty">
+        <div class="big">No funded bots yet</div>
+        <div class="sub">Competition is in progress &mdash; winner earns live trading allocation</div>
+        <div class="funded-gate">Day &amp; Swing winners &rarr; Kraken Live Trading &rarr; Macro Governor oversight</div>
+      </div>
+    </div>`;
+  }
+
+  // Future: render funded bot table with live P&L, drawdown, exchange, etc.
+  const rows = bots.map(b => {
+    const rank = 1; // funded bots don't compete — just show performance
+    return `
+    <tr>
+      <td class="bot-name">${b.bot}</td>
+      <td>${b.league}</td>
+      <td>${b.exchange || '—'}</td>
+      <td>$${b.capital_usd.toLocaleString()}</td>
+      <td>${fmt_equity(b.current_equity)}</td>
+      <td>${fmt_pnl_usd(b.pnl_usd)}</td>
+      <td>${fmt_pnl_pct(b.pnl_pct)}</td>
+      <td>${b.win_rate}%</td>
+      <td class="pnl-neg">${b.drawdown_pct.toFixed(2)}%</td>
+      <td><span class="badge ${b.status === 'active' ? 'badge-live' : 'badge-idle'}">${b.status}</span></td>
+    </tr>`;
+  }).join('');
+
+  return `
+  <div class="league-card">
+    <div class="league-header">
+      <div>
+        <div class="league-title">Funded Bots &mdash; Live Capital</div>
+        <div class="league-meta">Real money on Kraken — supervised by Macro Governor</div>
+      </div>
+      <span class="badge badge-funded">Live Capital</span>
+    </div>
+    <div class="section">
+      <table>
+        <thead><tr>
+          <th>Bot</th><th>League</th><th>Exchange</th><th>Capital</th>
+          <th>Equity</th><th>P&amp;L</th><th>P&amp;L %</th>
+          <th>Win%</th><th>Max DD</th><th>Status</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+// ── Data loading ──────────────────────────────────────────────────────────────
+
+let refresh_timer = null;
+let countdown_val = 30;
+
+function start_countdown() {
+  clearInterval(refresh_timer);
+  countdown_val = 30;
+  document.getElementById('countdown').textContent = countdown_val;
+  refresh_timer = setInterval(() => {
+    countdown_val--;
+    const el = document.getElementById('countdown');
+    if (el) el.textContent = countdown_val;
+    if (countdown_val <= 0) load();
+  }, 1000);
+}
+
+async function load() {
+  try {
+    const res = await fetch('/api/dashboard.json?t=' + Date.now());
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    render(data);
+    start_countdown();
+  } catch (e) {
+    document.getElementById('main').innerHTML =
+      `<div class="error">Failed to load dashboard data: ${e.message}<br>Retrying in 30s</div>`;
+    start_countdown();
+  }
+}
+
+function render(data) {
+  const updated_el = document.getElementById('updated');
+  if (updated_el && data.generated_at) {
+    const d = new Date(data.generated_at);
+    updated_el.textContent = d.toUTCString().replace('GMT', 'UTC');
+  }
+
+  let html = '';
+
+  const league_order = ['day', 'swing'];
+  for (const id of league_order) {
+    const league = data.leagues && data.leagues[id];
+    if (league) html += render_league(id, league);
+  }
+
+  html += render_funded(data.funded_bots);
+
+  document.getElementById('main').innerHTML = html;
+}
+
+// ── Boot ─────────────────────────────────────────────────────────────────────
+load();
+</script>
+</body>
+</html>
