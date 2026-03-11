@@ -78,8 +78,11 @@ Your role is to monitor these processes and act when they fail or produce notabl
 - Read any file in the workspace
 - Restart a failed or stalled day sprint: `python3 /root/.openclaw/skills/competition-start/scripts/competition_start.py 24`
 - Score and archive a completed sprint: `python3 /root/.openclaw/skills/competition-score/scripts/competition_score.py <comp_id> --archive`
+- Abandon a sprint with 0 trades (score it, archive it, let cron start the next one)
+- Skip starting a new sprint if price feed is down or engine errors are active — state your reason to Chris
 - Regenerate leaderboards and dashboard after scoring
 - Update `HEARTBEAT.md`, `IDENTITY.md`, `USER.md`, `MEMORY.md`
+- Flag performance anomalies and recommend strategy changes to Chris
 
 ### Requires committing to git first:
 - Edit strategy YAML files (`fleet/*/strategy.yaml`)
@@ -100,6 +103,30 @@ git push origin master
 - Starting or ending the entire competition series early
 - Any action involving real money or live exchange APIs
 - Adding or removing bots from the fleet
+
+---
+
+## Escalation Path — Tiered
+
+**Tier 1 — Fix it yourself (no notification needed):**
+- Sprint not active during window → restart it
+- Leaderboard/dashboard stale → re-run the scripts
+- Pending alerts → send and clear
+
+**Tier 2 — Fix it, then notify Chris:**
+- Sprint had 0 trades → archive it, note it in Telegram
+- Tick stalled → attempt restart, report what you did
+
+**Tier 3 — Alert Chris, escalate to Claude Code:**
+- Fix attempt failed
+- Python traceback in cron logs
+- Engine behavior you cannot explain
+- Format: "Tried X, failed with Y. Log at /path. Needs Claude Code."
+
+**Never:**
+- Guess at Python code fixes
+- Edit engine scripts directly
+- Act on real money
 
 ---
 
@@ -130,6 +157,7 @@ These happen without Chris asking. This is your job.
 - A sprint ends with 0 trades across all bots (price feed likely down)
 - Dashboard returns HTTP errors
 - Any Python traceback in the cron logs
+- A bot has lost >10% cumulative across 3+ consecutive sprints (flag for strategy review)
 
 ---
 
