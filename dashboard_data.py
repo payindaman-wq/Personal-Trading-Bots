@@ -41,18 +41,27 @@ def get_live_sprint(league, active_sprint_id):
         p = load_json(os.path.join(active_dir, fname))
         if not p:
             continue
+        # Swing portfolios have an 'equity' field; day trading portfolios use
+        # 'cash' + open position cost_basis to derive equity.
+        if "equity" in p:
+            equity = p["equity"]
+        else:
+            equity = p.get("cash", 0) + sum(
+                pos.get("cost_basis", 0) for pos in p.get("positions", [])
+            )
+        s = p["stats"]
         bots.append({
-            "bot":           p["bot"],
-            "equity":        round(p["equity"], 2),
-            "pnl_usd":       round(p["stats"]["total_pnl_usd"], 2),
-            "pnl_pct":       round(p["stats"]["total_pnl_pct"], 4),
-            "trades":        p["stats"]["total_trades"],
-            "wins":          p["stats"]["wins"],
-            "losses":        p["stats"]["losses"],
-            "win_rate":      p["stats"]["win_rate"],
-            "max_drawdown":  round(p["stats"]["max_drawdown_pct"], 4),
+            "bot":            p["bot"],
+            "equity":         round(equity, 2),
+            "pnl_usd":        round(s["total_pnl_usd"], 2),
+            "pnl_pct":        round(s["total_pnl_pct"], 4),
+            "trades":         s["total_trades"],
+            "wins":           s["wins"],
+            "losses":         s["losses"],
+            "win_rate":       s["win_rate"],
+            "max_drawdown":   round(s["max_drawdown_pct"], 4),
             "open_positions": len(p.get("positions", [])),
-            "positions":     p.get("positions", []),
+            "positions":      p.get("positions", []),
         })
 
     bots.sort(key=lambda x: x["equity"], reverse=True)
