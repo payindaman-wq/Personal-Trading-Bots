@@ -29,7 +29,7 @@ POINTS_MAP = {1: 8, 2: 5, 3: 3}
 # Only count sprints where at least this many bots participated (filters early test sprints)
 MIN_SPRINT_BOTS = 10
 
-# Normalize all USD display values to this capital base
+# Normalize USD display to this capital base (handles legacy $10k sprints)
 DISPLAY_CAPITAL = 1000.0
 
 
