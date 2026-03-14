@@ -1185,201 +1185,154 @@ function toggle_archive(idx) {
 
 // ── Polymarket Tab ────────────────────────────────────────────────────────────
 
-function render_polymarket(pm) {
+function pm_market_link(title) {
+  if (!title) return '&mdash;';
+  const url = 'https://polymarket.com/search?q=' + encodeURIComponent(title);
+  return `<a href="${url}" target="_blank" rel="noopener" style="color:var(--blue);text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${esc(title)}</a>`;
+}
+
+function render_polymarket(pm, cycle_state) {
   if (!pm || pm.status === 'pending_setup') {
     return `
     <div class="pm-pending">
       <div class="pm-pending-title">POLYMARKET BOT — NOT YET CONFIGURED</div>
       <div class="pm-pending-desc">
         The Polymarket prediction market trading bot is pending setup.<br>
-        Once configured, this tab will show tracked traders, bot performance,
-        and recent trade history.<br><br>
         To activate: create the bot competition state file and run the data pipeline.
       </div>
       <div class="pm-pending-path">/root/.openclaw/workspace/competition/polymarket/state.json</div>
     </div>`;
   }
 
-  // ── Header ──
-  const mode_cls = pm.mode === 'live' ? 'live' : 'paper';
-  const mode_lbl = (pm.mode || 'paper').toUpperCase();
-  const status_lbl = pm.status === 'active' ? '<span style="color:var(--green)">● ACTIVE</span>' : '<span style="color:var(--muted)">◌ PAUSED</span>';
-  const ts_lbl = pm.generated_at ? fmt_ts_short(pm.generated_at) : '';
+  const pm_auto   = window._pm_auto_data;
+  const cs        = cycle_state || { cycle: 1, sprint_in_cycle: 0, sprints_per_cycle: 4 };
+  const cycle_num = cs.cycle || 1;
+  const sprint_num = cs.sprint_in_cycle + 1;
+  const is_active = pm.status === 'active';
+  const mode_lbl  = (pm.mode || 'paper').toUpperCase();
+  const mode_cls  = pm.mode === 'live' ? 'live' : 'paper';
 
+  // Sprint countdown from sprint_ends_at
+  const ends_at = pm.sprint_ends_at || (pm_auto && pm_auto.sprint_ends_at);
+  const secs_remaining = ends_at
+    ? Math.max(0, Math.floor((new Date(ends_at).getTime() - Date.now()) / 1000))
+    : null;
+
+  // ── League card ──
   let html = `
-  <div class="pm-header">
-    <span class="pm-mode-badge ${mode_cls}">${mode_lbl}</span>
-    <span class="pm-header-status">${status_lbl}</span>
-    <span class="pm-header-ts">${esc(ts_lbl)}</span>
-  </div>`;
+  <div class="league-card">
+    <div class="league-header">
+      <div>
+        <div class="league-title">Polymarket League</div>
+        <div class="league-meta">7d sprints &mdash; copy-traders &amp; autonomous bots</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="pm-mode-badge ${mode_cls}">${mode_lbl}</span>
+        <span class="badge ${is_active ? 'badge-live' : 'badge-idle'}">${is_active ? 'Live' : 'Idle'}</span>
+      </div>
+    </div>
+    <div class="sprint-bar">
+      <span style="color:var(--text);font-weight:bold">Cycle #${cycle_num} &mdash; Sprint #${sprint_num}</span>
+      <span class="sprint-id hide-mobile">${esc(pm.sprint_id || '')}</span>
+      ${secs_remaining !== null ? `<span>Ends in: <span class="countdown">${fmt_countdown(secs_remaining)}</span></span>` : ''}
+      <span>Duration: 7d</span>
+    </div>`;
 
-  // ── Stats grid ──
-  const s = pm.stats || {};
-  const pnl_usd = typeof s.total_pnl_usd === 'number' ? fmt_pnl_usd(s.total_pnl_usd) : '<span class="pnl-zero">$0.00</span>';
-  const win_rate = typeof s.overall_win_rate === 'number' ? `${s.overall_win_rate.toFixed(1)}%` : '—';
-  const active_pos = typeof s.active_positions === 'number' ? s.active_positions : 0;
-  const total_trades = typeof s.total_trades === 'number' ? s.total_trades : 0;
+  // ── Helper: standings section ──
+  function pm_standings(bots_list, title, pnl_key, wr_key, tr_key, type_badge_fn) {
+    if (!bots_list || bots_list.length === 0) {
+      return `<div class="section"><div class="section-label">${title}</div><div class="idle-notice">No data</div></div>`;
+    }
+    const sorted = [...bots_list].sort((a, b) => (b[pnl_key] || 0) - (a[pnl_key] || 0));
+    const rows = sorted.map((b, i) => {
+      const rank = i + 1;
+      const pnl  = b[pnl_key] || 0;
+      const wr   = b[wr_key]  || 0;
+      const tr   = b[tr_key]  || 0;
+      const ap   = b.active_positions || 0;
+      return `
+      <tr class="${rank_class(rank)}">
+        <td>${rank_label(rank)}</td>
+        <td class="bot-name">${esc(b.bot || '—')}</td>
+        <td>${type_badge_fn(b)}</td>
+        <td>${fmt_pnl_usd(pnl)}</td>
+        <td>${wr > 0 ? `<span class="win-rate">${wr.toFixed(0)}%</span>` : '<span class="pnl-zero">—</span>'}</td>
+        <td>${tr}</td>
+        <td class="open-pos">${ap > 0 ? `[${ap}]` : '—'}</td>
+      </tr>`;
+    }).join('');
+    return `
+    <div class="section">
+      <div class="section-label">${title}</div>
+      <table>
+        <thead><tr>
+          <th>Rank</th><th>Bot</th><th>Type</th><th>P&amp;L</th>
+          <th>Win%</th><th>Trades</th><th>Open</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+  }
 
-  html += `
-  <div class="pm-stat-grid">
-    <div class="pm-stat-card">
-      <div class="pm-stat-label">Total P&amp;L</div>
-      <div class="pm-stat-value">${pnl_usd}</div>
-    </div>
-    <div class="pm-stat-card">
-      <div class="pm-stat-label">Win Rate</div>
-      <div class="pm-stat-value">${win_rate}</div>
-    </div>
-    <div class="pm-stat-card">
-      <div class="pm-stat-label">Active Positions</div>
-      <div class="pm-stat-value">${active_pos}</div>
-    </div>
-    <div class="pm-stat-card">
-      <div class="pm-stat-label">Total Trades</div>
-      <div class="pm-stat-value">${total_trades}</div>
-    </div>
-  </div>`;
+  // Copy-trader standings
+  html += pm_standings(
+    pm.bots, 'Live Sprint &mdash; Copy-Traders',
+    'sprint_pnl_usd', 'sprint_win_rate', 'sprint_trades',
+    b => `<span style="color:var(--muted);font-size:11px">${esc(b.assigned_trader || '—')}</span>`
+  );
+
+  // Autonomous bot standings
+  const auto_bots = pm_auto && pm_auto.bots ? pm_auto.bots : [];
+  html += pm_standings(
+    auto_bots, 'Live Sprint &mdash; Autonomous Bots',
+    'pnl_usd', 'win_rate', 'trades',
+    b => `<span class="badge" style="background:rgba(88,166,255,0.12);color:#58a6ff;border:1px solid rgba(88,166,255,0.3);font-size:9px">${esc((b.category || 'auto').toUpperCase())}</span>`
+  );
+
+  html += `</div>`; // close league-card
 
   // ── Open Positions ──
-  const open_pos = pm.open_positions || [];
-  let open_pos_html = '';
-  if (open_pos.length === 0) {
-    open_pos_html = '<div class="pm-empty">No open positions</div>';
+  const copy_pos = pm.open_positions || [];
+  const auto_pos = pm_auto && pm_auto.open_positions ? pm_auto.open_positions : [];
+  const all_pos  = [...copy_pos, ...auto_pos];
+
+  let pos_html;
+  if (all_pos.length === 0) {
+    pos_html = '<div class="idle-notice">No open positions</div>';
   } else {
-    const pos_rows = open_pos.map(p => {
+    const pos_rows = all_pos.map(p => {
       const entry_c   = (p.entry_price * 100).toFixed(1);
       const curr_c    = (p.current_price * 100).toFixed(1);
-      const upnl      = typeof p.unrealized_pnl === 'number' ? fmt_pnl_usd(p.unrealized_pnl) : '\u2014';
-      const cost      = typeof p.cost_usd === 'number' ? '$' + p.cost_usd.toFixed(0) : '\u2014';
-      const val       = typeof p.current_value === 'number' ? '$' + p.current_value.toFixed(2) : '\u2014';
+      const upnl      = typeof p.unrealized_pnl === 'number' ? fmt_pnl_usd(p.unrealized_pnl) : '&mdash;';
+      const cost      = typeof p.cost_usd === 'number' ? '$' + p.cost_usd.toFixed(0) : '&mdash;';
       const price_cls = p.current_price > p.entry_price ? 'pnl-pos'
                       : p.current_price < p.entry_price ? 'pnl-neg' : '';
       return `
       <tr>
-        <td class="bot-name">${esc(p.bot || '\u2014')}</td>
-        <td style="color:var(--muted);font-size:11px">${esc(p.trader || '\u2014')}</td>
-        <td style="max-width:240px;word-break:break-word">${esc(p.market || '\u2014')}</td>
-        <td><span class="pm-outcome-open">${esc(p.outcome || '\u2014')}</span></td>
-        <td><span style="color:var(--muted)">${entry_c}\u00a2</span> \u2192 <span class="${price_cls}">${curr_c}\u00a2</span></td>
+        <td class="bot-name">${esc(p.bot || '&mdash;')}</td>
+        <td style="max-width:300px;white-space:normal;line-height:1.4">${pm_market_link(p.market)}</td>
+        <td><span class="pm-outcome-open">${esc(p.outcome || '&mdash;')}</span></td>
+        <td><span style="color:var(--muted)">${entry_c}&cent;</span> &rarr; <span class="${price_cls}">${curr_c}&cent;</span></td>
         <td style="color:var(--muted)">${cost}</td>
-        <td>${val}</td>
         <td>${upnl}</td>
       </tr>`;
     }).join('');
-    open_pos_html = `
+    pos_html = `
     <table>
       <thead><tr>
-        <th>Bot</th><th>Directive</th><th>Market</th><th>Pick</th>
-        <th>Entry \u2192 Now</th><th>Cost</th><th>Value</th><th>Unreal P&amp;L</th>
+        <th>Bot</th><th>Market</th><th>Pick</th>
+        <th>Entry &rarr; Now</th><th>Cost</th><th>Unreal P&amp;L</th>
       </tr></thead>
       <tbody>${pos_rows}</tbody>
     </table>`;
   }
 
   html += `
-  <div class="pm-section">
-    <div class="pm-section-title">Open Positions (${open_pos.length})</div>
-    <div class="pm-section-body" style="padding:0">${open_pos_html}</div>
-  </div>`;
-
-  // ── Tracked Traders ──
-  const traders = pm.tracked_traders || [];
-  let traders_html = '';
-  if (traders.length === 0) {
-    traders_html = '<div class="pm-empty">No tracked traders configured yet</div>';
-  } else {
-    traders_html = traders.map((t, i) => {
-      const roi = typeof t.roi_pct === 'number' ? t.roi_pct : 0;
-      const bar_w = Math.min(Math.max(roi, 0), 100).toFixed(1);
-      return `
-      <div class="pm-trader-row">
-        <span class="pm-trader-rank">#${i + 1}</span>
-        <span class="pm-trader-name">${esc(t.name || '—')}</span>
-        <span class="pm-trader-bot">${esc(t.bot || '—')}</span>
-        <div class="pm-roi-bar-track">
-          <div class="pm-roi-bar-fill" style="width:${bar_w}%"></div>
-        </div>
-        <span class="pm-trader-roi">${roi >= 0 ? '+' : ''}${roi.toFixed(1)}%</span>
-      </div>`;
-    }).join('');
-  }
-
-  html += `
-  <div class="pm-section">
-    <div class="pm-section-title">Tracked Traders — sorted by ROI efficiency</div>
-    <div class="pm-section-body">${traders_html}</div>
-  </div>`;
-
-  // ── Bot Fleet ──
-  const bots = pm.bots || [];
-  let bots_html = '';
-  if (bots.length === 0) {
-    bots_html = '<div class="pm-empty">No Polymarket bots configured yet</div>';
-  } else {
-    const bot_rows = bots.map(b => {
-      const pnl = typeof b.pnl_usd === 'number' ? fmt_pnl_usd(b.pnl_usd) : '<span class="pnl-zero">$0.00</span>';
-      const wr  = typeof b.win_rate === 'number' ? `${b.win_rate.toFixed(0)}%` : '—';
-      const tr  = typeof b.trades === 'number' ? b.trades : 0;
-      const ap  = typeof b.active_positions === 'number' ? b.active_positions : 0;
-      const st_cls = b.status === 'active' ? 'pnl-pos' : 'pnl-zero';
-      const st_lbl = esc(b.status || 'inactive');
-      return `
-      <tr class="pm-bot-row">
-        <td class="bot-name">${esc(b.bot || '—')}</td>
-        <td style="color:var(--muted)">${esc(b.assigned_trader || '—')}</td>
-        <td>${pnl}</td>
-        <td>${wr}</td>
-        <td>${tr}</td>
-        <td>${ap}</td>
-        <td><span class="${st_cls}">${st_lbl}</span></td>
-      </tr>`;
-    }).join('');
-    bots_html = `
-    <table>
-      <thead><tr>
-        <th>Bot</th><th>Assigned Trader</th><th>P&amp;L</th>
-        <th>Win%</th><th>Trades</th><th>Active</th><th>Status</th>
-      </tr></thead>
-      <tbody>${bot_rows}</tbody>
-    </table>`;
-  }
-
-  html += `
-  <div class="pm-section">
-    <div class="pm-section-title">Polymarket Bots</div>
-    <div class="pm-section-body" style="padding:0">${bots_html}</div>
-  </div>`;
-
-  // ── Recent Trades ──
-  const trades = pm.recent_trades || [];
-  let trades_html = '';
-  if (trades.length === 0) {
-    trades_html = '<div class="pm-empty">No trades recorded yet</div>';
-  } else {
-    trades_html = trades.map(t => {
-      const market = (t.market_title || '').slice(0, 60);
-      const dir_cls = t.direction === 'NO' ? 'pm-dir-no' : 'pm-dir-yes';
-      const dir_lbl = esc(t.direction || 'YES');
-      let outcome_html;
-      if (t.outcome === 'win')       outcome_html = '<span class="pm-outcome-win">WIN</span>';
-      else if (t.outcome === 'loss') outcome_html = '<span class="pm-outcome-loss">LOSS</span>';
-      else                           outcome_html = '<span class="pm-outcome-open">OPEN</span>';
-      const pnl = typeof t.pnl_usd === 'number' ? fmt_pnl_usd(t.pnl_usd) : '';
-      return `
-      <div class="pm-trade-row">
-        <span class="pm-trade-bot">${esc(t.bot || '—')}</span>
-        <span class="pm-trade-market">${esc(market)}</span>
-        <span class="${dir_cls}">${dir_lbl}</span>
-        ${outcome_html}
-        <span style="margin-left:auto">${pnl}</span>
-      </div>`;
-    }).join('');
-  }
-
-  html += `
-  <div class="pm-section">
-    <div class="pm-section-title">Recent Trades</div>
-    <div class="pm-section-body">${trades_html}</div>
+  <div class="league-card" style="margin-top:20px">
+    <div class="league-header">
+      <div class="league-title">Open Positions (${all_pos.length})</div>
+    </div>
+    <div class="section" style="padding:0">${pos_html}</div>
   </div>`;
 
   return html;
@@ -1605,8 +1558,9 @@ function render(data) {
   if (arc_el) arc_el.innerHTML = `<div style="display:flex;flex-direction:column;gap:0;">${render_archive(data.sprint_archive, cycle_configs)}</div>`;
 
   // Polymarket tab
+  const poly_cs = data.poly_cycle_state || { cycle: 1, sprint_in_cycle: 0, sprints_per_cycle: 4 };
   const pm_el = document.getElementById('main-polymarket');
-  if (pm_el) pm_el.innerHTML = render_polymarket(window._pm_data || null);
+  if (pm_el) pm_el.innerHTML = render_polymarket(window._pm_data || null, poly_cs);
 }
 
 // ── Boot ─────────────────────────────────────────────────────────────────────
