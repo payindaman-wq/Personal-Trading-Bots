@@ -574,9 +574,9 @@
 <!-- Tab Bar -->
 <div class="tab-bar">
   <button class="tab-btn active" onclick="switch_tab('overview', this)">Overview</button>
+  <button class="tab-btn" onclick="switch_tab('leaderboard', this)">Leaderboard</button>
   <button class="tab-btn" onclick="switch_tab('day', this)">Day</button>
   <button class="tab-btn" onclick="switch_tab('swing', this)">Swing</button>
-  <button class="tab-btn" onclick="switch_tab('fleet', this)">Fleet</button>
   <button class="tab-btn" onclick="switch_tab('polymarket', this)">Polymarket</button>
   <button class="tab-btn" onclick="switch_tab('archive', this)">Archive</button>
 </div>
@@ -602,10 +602,10 @@
   </div>
 </div>
 
-<!-- Tab: Fleet -->
-<div class="tab-panel" id="tab-fleet">
-  <div class="main" id="main-fleet">
-    <div class="loading">Loading fleet data...</div>
+<!-- Tab: Leaderboard -->
+<div class="tab-panel" id="tab-leaderboard">
+  <div class="main" id="main-leaderboard">
+    <div class="loading">Loading leaderboard data...</div>
   </div>
 </div>
 
@@ -905,9 +905,10 @@ function render_funded(bots) {
 
 // ── Activity Feed ──────────────────────────────────────────────────────────────
 
-function render_activity_feed(feed) {
-  const positions = (feed || []).filter(e => e.type === 'position_open');
-  const logs      = (feed || []).filter(e => e.type === 'log');
+function render_activity_feed(feed, league) {
+  const all_feed  = (feed || []).filter(e => !league || e.league === league);
+  const positions = all_feed.filter(e => e.type === 'position_open');
+  const logs      = all_feed.filter(e => e.type === 'log');
 
   let pos_html;
   if (positions.length === 0) {
@@ -1545,29 +1546,31 @@ function render(data) {
 
   // Overview tab
   const ov = document.getElementById('main-overview');
-  if (ov) ov.innerHTML = render_overview(data) + render_activity_feed(data.activity_feed);
+  if (ov) ov.innerHTML = render_overview(data);
+
+  // Leaderboard tab
+  const lb_el = document.getElementById('main-leaderboard');
+  if (lb_el) lb_el.innerHTML = render_fleet(data.fleet_roster, window._pm_data || null, window._pm_auto_data || null);
 
   // Day tab
   const day_tab_el = document.getElementById('main-day');
   if (day_tab_el) {
     const day_league = data.leagues && data.leagues.day;
-    day_tab_el.innerHTML = day_league
+    day_tab_el.innerHTML = (day_league
       ? render_league('day', day_league)
-      : '<div class="idle-notice">No day trading data available</div>';
+      : '<div class="idle-notice">No day trading data available</div>')
+      + render_activity_feed(data.activity_feed, 'day');
   }
 
   // Swing tab
   const swing_tab_el = document.getElementById('main-swing');
   if (swing_tab_el) {
     const swing_league = data.leagues && data.leagues.swing;
-    swing_tab_el.innerHTML = swing_league
+    swing_tab_el.innerHTML = (swing_league
       ? render_league('swing', swing_league)
-      : '<div class="idle-notice">No swing trading data available</div>';
+      : '<div class="idle-notice">No swing trading data available</div>')
+      + render_activity_feed(data.activity_feed, 'swing');
   }
-
-  // Fleet tab
-  const fleet_el = document.getElementById('main-fleet');
-  if (fleet_el) fleet_el.innerHTML = render_fleet(data.fleet_roster, window._pm_data || null, window._pm_auto_data || null);
 
   // Archive tab
   const arc_el = document.getElementById('main-archive');
