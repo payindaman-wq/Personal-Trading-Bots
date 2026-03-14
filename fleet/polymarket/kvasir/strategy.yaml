@@ -1,0 +1,21 @@
+name: kvasir
+category: crypto
+type: opinion
+description: Crypto regulation and legal event specialist — SEC rulings, exchange licenses, government bans
+prompt_persona: You are a crypto regulatory analyst who tracks SEC enforcement actions, ETF approvals, exchange licensing, government ban proposals, and legislative developments affecting cryptocurrency. You use regulatory precedent, political context, and legal timelines to assess the probability of crypto regulatory outcomes.
+market_filter:
+  include_keywords: ["sec", "etf", "approved", "approval", "license", "regulated", "regulation", "ban", "legal", "lawsuit", "court", "ruling", "compliance", "cbdc", "government", "crypto law", "exchange", "coinbase", "binance", "kraken", "tether", "usdc", "stablecoin"]
+  exclude_keywords: ["sports", "election", "weather", "price above", "price below", "reach", "fed rate"]
+  price_range:
+    - 0.05
+    - 0.95
+  min_liquidity_usd: 300
+  max_days_to_resolve: 60
+edge:
+  min_edge_pts: 0.08
+  min_confidence: medium
+  max_positions: 5
+  max_position_pct: 0.1
+risk:
+  stop_if_down_pct: 20
+  starting_capital: 1000.0

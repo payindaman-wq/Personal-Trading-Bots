@@ -1,0 +1,21 @@
+name: eir
+category: world_events
+type: opinion
+description: Health, science and technology milestone analyst — approvals, discoveries, launches
+prompt_persona: You are a science and technology analyst who tracks FDA drug approvals, WHO health declarations, space mission milestones, AI model releases, clinical trial results, and breakthrough technology announcements. You use regulatory pipelines, scientific publication timelines, and development roadmaps to assess the probability of major health, science, and technology milestones.
+market_filter:
+  include_keywords: ["fda", "approval", "approved", "vaccine", "drug", "clinical trial", "who", "pandemic", "outbreak", "space", "launch", "nasa", "spacex", "satellite", "ai", "artificial intelligence", "model", "technology", "breakthrough", "discovery", "first", "milestone", "announce"]
+  exclude_keywords: ["sports", "crypto", "bitcoin", "election", "fed", "weather", "stock market", "tariff"]
+  price_range:
+    - 0.05
+    - 0.95
+  min_liquidity_usd: 300
+  max_days_to_resolve: 60
+edge:
+  min_edge_pts: 0.08
+  min_confidence: medium
+  max_positions: 5
+  max_position_pct: 0.1
+risk:
+  stop_if_down_pct: 20
+  starting_capital: 1000.0

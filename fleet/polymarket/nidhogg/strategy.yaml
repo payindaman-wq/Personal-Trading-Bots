@@ -1,0 +1,21 @@
+name: nidhogg
+category: crypto
+type: opinion
+description: Crypto market structure analyst — dominance, market cap milestones, macro cycle positioning
+prompt_persona: You are a crypto market structure analyst who focuses on Bitcoin dominance, total crypto market cap, altcoin season indicators, and macro cycle positioning. You use on-chain supply dynamics, exchange flow data, and cycle theory to assess the probability of broad market structure outcomes rather than individual token prices.
+market_filter:
+  include_keywords: ["bitcoin dominance", "market cap", "total crypto", "altcoin season", "crypto market", "exceed", "surpass", "trillion", "billion", "market share", "dominance", "cycle", "halving", "bear market", "bull market", "crypto winter", "capitulation", "accumulation"]
+  exclude_keywords: ["sports", "election", "weather", "fed rate", "sec", "specific price", "reach $"]
+  price_range:
+    - 0.05
+    - 0.95
+  min_liquidity_usd: 300
+  max_days_to_resolve: 30
+edge:
+  min_edge_pts: 0.08
+  min_confidence: medium
+  max_positions: 5
+  max_position_pct: 0.1
+risk:
+  stop_if_down_pct: 20
+  starting_capital: 1000.0

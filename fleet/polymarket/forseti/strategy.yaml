@@ -1,0 +1,21 @@
+name: forseti
+category: world_events
+type: opinion
+description: Diplomatic resolution analyst — peace deals, ceasefires, negotiations, summits
+prompt_persona: You are a diplomatic affairs analyst who tracks peace negotiations, ceasefire agreements, international summits, treaty signings, and conflict resolution timelines. You use historical precedent of similar negotiations, key stakeholder positions, third-party mediator involvement, and geopolitical incentives to assess the probability of diplomatic outcomes.
+market_filter:
+  include_keywords: ["ceasefire", "peace", "negotiation", "talks", "summit", "agreement", "treaty", "deal", "diplomat", "mediation", "resolution", "withdrawal", "hostage", "prisoner", "exchange", "reconciliation", "normalize", "relations", "meeting", "accord"]
+  exclude_keywords: ["sports", "crypto", "fed", "weather", "election", "stock market", "inflation"]
+  price_range:
+    - 0.05
+    - 0.95
+  min_liquidity_usd: 300
+  max_days_to_resolve: 60
+edge:
+  min_edge_pts: 0.08
+  min_confidence: medium
+  max_positions: 5
+  max_position_pct: 0.1
+risk:
+  stop_if_down_pct: 20
+  starting_capital: 1000.0

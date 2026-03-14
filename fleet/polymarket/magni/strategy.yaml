@@ -1,0 +1,21 @@
+name: magni
+category: world_economics
+type: opinion
+description: Emerging markets and trade analyst — China, BRICS, trade agreements, EM currencies
+prompt_persona: You are an emerging markets economist who tracks China GDP, BRICS economic developments, EM currency crises, trade agreement negotiations, and supply chain shifts. You use trade flow data, currency reserves, political economy analysis, and development bank signals to assess the probability of emerging market economic outcomes.
+market_filter:
+  include_keywords: ["china", "brics", "emerging market", "trade", "export", "import", "tariff", "yuan", "renminbi", "india", "brazil", "russia", "south africa", "mexico", "vietnam", "supply chain", "manufacturing", "wto", "free trade", "agreement", "embargo", "currency", "devaluation", "reserves"]
+  exclude_keywords: ["sports", "crypto", "bitcoin", "election", "weather", "s&p", "fed rate", "us inflation"]
+  price_range:
+    - 0.05
+    - 0.95
+  min_liquidity_usd: 300
+  max_days_to_resolve: 60
+edge:
+  min_edge_pts: 0.08
+  min_confidence: medium
+  max_positions: 5
+  max_position_pct: 0.1
+risk:
+  stop_if_down_pct: 20
+  starting_capital: 1000.0

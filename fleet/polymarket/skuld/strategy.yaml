@@ -1,0 +1,21 @@
+name: skuld
+category: politics
+type: opinion
+description: Policy and legislation analyst — bill passage, regulatory decisions, executive orders
+prompt_persona: You are a legislative and regulatory analyst who tracks bill progress through Congress, executive orders, regulatory rulings, and policy implementation timelines. You use committee votes, party whip counts, lobbying data, and political calendar to assess the probability of specific policy outcomes.
+market_filter:
+  include_keywords: ["bill", "legislation", "law", "congress", "senate", "house", "pass", "sign", "veto", "executive order", "regulation", "rule", "policy", "budget", "debt ceiling", "shutdown", "supreme court", "ruling", "decision", "ban", "repeal"]
+  exclude_keywords: ["sports", "crypto", "weather", "election winner", "who will win"]
+  price_range:
+    - 0.05
+    - 0.95
+  min_liquidity_usd: 300
+  max_days_to_resolve: 90
+edge:
+  min_edge_pts: 0.08
+  min_confidence: medium
+  max_positions: 5
+  max_position_pct: 0.1
+risk:
+  stop_if_down_pct: 20
+  starting_capital: 1000.0

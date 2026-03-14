@@ -11,30 +11,40 @@ RESULTS_DIR      = "/root/.openclaw/workspace/competition/polymarket/auto_result
 SPRINT_HOURS     = 168  # 7 days
 
 BOT_ROSTER = [
-    # Sports
-    {"name": "ullr",     "category": "sports",       "type": "opinion"},
-    {"name": "sigyn",    "category": "sports",       "type": "opinion"},
-    {"name": "hlin",     "category": "sports",       "type": "opinion"},
-    # Politics
-    {"name": "freya",    "category": "politics",     "type": "opinion"},
-    {"name": "var",      "category": "politics",     "type": "opinion"},
-    {"name": "saga",     "category": "politics",     "type": "opinion"},
-    # Crypto
-    {"name": "mimir",    "category": "crypto",       "type": "opinion"},
-    {"name": "gerd",     "category": "crypto",       "type": "opinion"},
-    {"name": "skadi",    "category": "crypto",       "type": "opinion"},
-    # Macro
+    # Sports (5)
+    {"name": "ullr",     "category": "sports",          "type": "opinion"},
+    {"name": "sigyn",    "category": "sports",          "type": "opinion"},
+    {"name": "hlin",     "category": "sports",          "type": "opinion"},
+    {"name": "tora",     "category": "sports",          "type": "opinion"},
+    {"name": "skoll",    "category": "sports",          "type": "opinion"},
+    # Politics (5)
+    {"name": "freya",    "category": "politics",        "type": "opinion"},
+    {"name": "var",      "category": "politics",        "type": "opinion"},
+    {"name": "saga",     "category": "politics",        "type": "opinion"},
+    {"name": "skuld",    "category": "politics",        "type": "opinion"},
+    {"name": "vor",      "category": "politics",        "type": "opinion"},
+    # Crypto (5)
+    {"name": "mimir",    "category": "crypto",          "type": "opinion"},
+    {"name": "gerd",     "category": "crypto",          "type": "opinion"},
+    {"name": "skadi",    "category": "crypto",          "type": "opinion"},
+    {"name": "kvasir",   "category": "crypto",          "type": "opinion"},
+    {"name": "nidhogg",  "category": "crypto",          "type": "opinion"},
+    # World Economics (5)
     {"name": "rind",     "category": "world_economics", "type": "opinion"},
     {"name": "aegir",    "category": "world_economics", "type": "opinion"},
     {"name": "jord",     "category": "world_economics", "type": "opinion"},
-    # World Events
-    {"name": "verdandi", "category": "world_events", "type": "opinion"},
-    {"name": "urd",      "category": "world_events", "type": "opinion"},
-    {"name": "ran",      "category": "world_events", "type": "opinion"},
-    # Arb
-    {"name": "loki",     "category": "arb",          "type": "arb"},
-    {"name": "huginn",   "category": "arb",          "type": "arb"},
-    {"name": "muninn",   "category": "arb",          "type": "arb"},
+    {"name": "hermod",   "category": "world_economics", "type": "opinion"},
+    {"name": "magni",    "category": "world_economics", "type": "opinion"},
+    # World Events (5)
+    {"name": "verdandi", "category": "world_events",    "type": "opinion"},
+    {"name": "urd",      "category": "world_events",    "type": "opinion"},
+    {"name": "ran",      "category": "world_events",    "type": "opinion"},
+    {"name": "forseti",  "category": "world_events",    "type": "opinion"},
+    {"name": "eir",      "category": "world_events",    "type": "opinion"},
+    # Arb (3)
+    {"name": "loki",     "category": "arb",             "type": "arb"},
+    {"name": "huginn",   "category": "arb",             "type": "arb"},
+    {"name": "muninn",   "category": "arb",             "type": "arb"},
 ]
 
 def make_bot(meta):
