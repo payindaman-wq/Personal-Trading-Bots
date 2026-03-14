@@ -19,6 +19,9 @@ SWING_TICK_LOG = os.path.join(WORKSPACE, "competition", "swing", "tick.log")
 
 DAY_RESULTS_DIR   = os.path.join(WORKSPACE, "competition", "results")
 SWING_RESULTS_DIR = os.path.join(WORKSPACE, "competition", "swing", "results")
+CYCLE_STATE_PATH       = os.path.join(WORKSPACE, "competition", "cycle_state.json")
+SWING_CYCLE_STATE_PATH = os.path.join(WORKSPACE, "competition", "swing", "swing_cycle_state.json")
+POLY_CYCLE_STATE_PATH  = os.path.join(WORKSPACE, "competition", "polymarket", "polymarket_cycle_state.json")
 
 BOT_NAMES = [
     "floki", "bjorn", "lagertha", "ragnar", "leif", "gunnar",
@@ -335,6 +338,30 @@ def get_sprint_archive():
     return archive
 
 
+
+def get_cycle_state():
+    try:
+        with open(CYCLE_STATE_PATH) as f:
+            return json.load(f)
+    except Exception:
+        return {"cycle": 1, "sprint_in_cycle": 0, "sprints_per_cycle": 7, "status": "active"}
+
+
+def get_swing_cycle_state():
+    try:
+        with open(SWING_CYCLE_STATE_PATH) as f:
+            return json.load(f)
+    except Exception:
+        return {"cycle": 1, "sprint_in_cycle": 0, "sprints_per_cycle": 4, "status": "active"}
+
+
+def get_poly_cycle_state():
+    try:
+        with open(POLY_CYCLE_STATE_PATH) as f:
+            return json.load(f)
+    except Exception:
+        return {"cycle": 1, "sprint_in_cycle": 0, "sprints_per_cycle": 4, "status": "active"}
+
 def build():
     day_lb   = load_json(DAY_LB_PATH)
     swing_lb = load_json(SWING_LB_PATH)
@@ -372,6 +399,10 @@ def build():
             "cumulative_rankings":   swing_lb.get("rankings", []),
             "live_sprint":           get_live_sprint("swing", swing_active_id),
         }
+
+    dashboard["cycle_state"]       = get_cycle_state()
+    dashboard["swing_cycle_state"] = get_swing_cycle_state()
+    dashboard["poly_cycle_state"]  = get_poly_cycle_state()
 
     os.makedirs(os.path.dirname(OUT_FILE), exist_ok=True)
     with open(OUT_FILE, "w") as f:

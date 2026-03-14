@@ -1,0 +1,122 @@
+{
+  "bot": "ragnar",
+  "competition_id": "comp-20260312-1420",
+  "duration_hours": 24.0,
+  "started_at": "2026-03-12T14:20:47.354742+00:00",
+  "pairs": [
+    "BTC/USD",
+    "ETH/USD",
+    "SOL/USD",
+    "XRP/USD",
+    "DOGE/USD",
+    "AVAX/USD",
+    "LINK/USD"
+  ],
+  "starting_capital": 1000.0,
+  "fee_rate": 0.001,
+  "cash": 797.173893,
+  "positions": [
+    {
+      "pair": "BTC/USD",
+      "direction": "long",
+      "entry_price": 71700.6,
+      "quantity": 0.00277674,
+      "cost_basis": 199.09,
+      "entry_fee": 0.2,
+      "stop_loss": 71413.8,
+      "take_profit": 72417.61,
+      "opened_at": "2026-03-13T08:35:02.005646+00:00"
+    }
+  ],
+  "closed_trades": [
+    {
+      "pair": "SOL/USD",
+      "direction": "long",
+      "entry_price": 90.16,
+      "exit_price": 90.2,
+      "quantity": 2.21606034,
+      "cost_basis": 199.8,
+      "gross_pnl": 0.09,
+      "close_fee": 0.2,
+      "net_pnl": -0.11,
+      "pnl_pct": -0.0556,
+      "reason": "timeout",
+      "opened_at": "2026-03-13T01:10:01.540353+00:00",
+      "closed_at": "2026-03-13T02:15:01.889503+00:00"
+    },
+    {
+      "pair": "SOL/USD",
+      "direction": "long",
+      "entry_price": 89.71,
+      "exit_price": 89.32,
+      "quantity": 2.22648345,
+      "cost_basis": 199.74,
+      "gross_pnl": -0.87,
+      "close_fee": 0.2,
+      "net_pnl": -1.07,
+      "pnl_pct": -0.5347,
+      "reason": "stop",
+      "opened_at": "2026-03-13T04:00:01.481779+00:00",
+      "closed_at": "2026-03-13T04:25:01.562151+00:00"
+    },
+    {
+      "pair": "BTC/USD",
+      "direction": "short",
+      "entry_price": 71263.1,
+      "exit_price": 71564.1,
+      "quantity": 0.00279927,
+      "cost_basis": 199.48,
+      "gross_pnl": -0.84,
+      "close_fee": 0.2,
+      "net_pnl": -1.04,
+      "pnl_pct": -0.5224,
+      "reason": "stop",
+      "opened_at": "2026-03-13T05:15:02.317595+00:00",
+      "closed_at": "2026-03-13T05:35:01.805779+00:00"
+    },
+    {
+      "pair": "SOL/USD",
+      "direction": "short",
+      "entry_price": 88.99,
+      "exit_price": 88.54,
+      "quantity": 2.23885643,
+      "cost_basis": 199.24,
+      "gross_pnl": 1.01,
+      "close_fee": 0.2,
+      "net_pnl": 0.81,
+      "pnl_pct": 0.4057,
+      "reason": "timeout",
+      "opened_at": "2026-03-13T05:40:02.226696+00:00",
+      "closed_at": "2026-03-13T06:45:02.165055+00:00"
+    },
+    {
+      "pair": "SOL/USD",
+      "direction": "short",
+      "entry_price": 88.39,
+      "exit_price": 88.8,
+      "quantity": 2.2554396,
+      "cost_basis": 199.36,
+      "gross_pnl": -0.92,
+      "close_fee": 0.2,
+      "net_pnl": -1.12,
+      "pnl_pct": -0.5638,
+      "reason": "stop",
+      "opened_at": "2026-03-13T07:40:02.107950+00:00",
+      "closed_at": "2026-03-13T08:30:01.934694+00:00"
+    }
+  ],
+  "stats": {
+    "total_trades": 5,
+    "wins": 1,
+    "losses": 4,
+    "win_rate": 20.0,
+    "total_pnl_usd": -2.53,
+    "total_pnl_pct": -0.253,
+    "total_fees": 2.2,
+    "max_drawdown_pct": 0.374,
+    "largest_win_pct": 0.4057,
+    "largest_loss_pct": -0.5638,
+    "current_equity": 996.26,
+    "peak_equity": 1000.0
+  }
+}

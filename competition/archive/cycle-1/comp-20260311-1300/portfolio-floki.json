@@ -1,0 +1,80 @@
+{
+  "bot": "floki",
+  "competition_id": "comp-20260311-1300",
+  "duration_hours": 24.0,
+  "started_at": "2026-03-11T13:00:01.140249+00:00",
+  "pairs": [
+    "BTC/USD",
+    "ETH/USD",
+    "SOL/USD",
+    "XRP/USD",
+    "DOGE/USD",
+    "AVAX/USD",
+    "LINK/USD"
+  ],
+  "starting_capital": 1000.0,
+  "fee_rate": 0.001,
+  "cash": 1000.6536593,
+  "positions": [],
+  "closed_trades": [
+    {
+      "pair": "BTC/USD",
+      "direction": "long",
+      "entry_price": 70582.1,
+      "exit_price": 70842.6,
+      "quantity": 0.00212306,
+      "cost_basis": 149.85,
+      "gross_pnl": 0.553,
+      "close_fee": 0.15,
+      "net_pnl": 0.403,
+      "pnl_pct": 0.2691,
+      "reason": "timeout",
+      "opened_at": "2026-03-11T17:00:02.171115+00:00",
+      "closed_at": "2026-03-11T17:45:01.355208+00:00"
+    },
+    {
+      "pair": "BTC/USD",
+      "direction": "short",
+      "entry_price": 70868.8,
+      "exit_price": 70666.4,
+      "quantity": 0.00211501,
+      "cost_basis": 149.888,
+      "gross_pnl": 0.428,
+      "close_fee": 0.15,
+      "net_pnl": 0.278,
+      "pnl_pct": 0.1856,
+      "reason": "timeout",
+      "opened_at": "2026-03-11T18:05:02.183472+00:00",
+      "closed_at": "2026-03-11T18:50:01.472509+00:00"
+    },
+    {
+      "pair": "SOL/USD",
+      "direction": "short",
+      "entry_price": 86.43,
+      "exit_price": 86.1,
+      "quantity": 1.73443428,
+      "cost_basis": 149.907,
+      "gross_pnl": 0.572,
+      "close_fee": 0.15,
+      "net_pnl": 0.422,
+      "pnl_pct": 0.2818,
+      "reason": "timeout",
+      "opened_at": "2026-03-12T01:30:01.715405+00:00",
+      "closed_at": "2026-03-12T02:10:02.035400+00:00"
+    }
+  ],
+  "stats": {
+    "total_trades": 3,
+    "wins": 3,
+    "losses": 0,
+    "win_rate": 100.0,
+    "total_pnl_usd": 1.103,
+    "total_pnl_pct": 0.1103,
+    "total_fees": 0.9,
+    "max_drawdown_pct": 0.015,
+    "largest_win_pct": 0.2818,
+    "largest_loss_pct": 0.0,
+    "current_equity": 1000.654,
+    "peak_equity": 1000.654
+  }
+}

@@ -51,6 +51,9 @@ def main():
     parser.add_argument("--bots",  nargs="+", help="Override bot list")
     parser.add_argument("--pairs", nargs="+", help="Override pair list",
                         default=DEFAULT_PAIRS)
+    parser.add_argument("--cycle",           type=int, default=None, help="Cycle number")
+    parser.add_argument("--sprint-in-cycle", type=int, default=None, dest="sprint_in_cycle",
+                        help="Sprint number within the cycle")
     args = parser.parse_args()
 
     bots = args.bots if args.bots else discover_bots()
@@ -109,6 +112,10 @@ def main():
         "fee_rate":       FEE_RATE,
         "status":         "active",
     }
+    if args.cycle is not None:
+        meta["cycle"] = args.cycle
+    if args.sprint_in_cycle is not None:
+        meta["sprint_in_cycle"] = args.sprint_in_cycle
     with open(os.path.join(comp_dir, "meta.json"), "w") as f:
         json.dump(meta, f, indent=2)
 
@@ -119,6 +126,8 @@ def main():
         "started_at":     now.isoformat(),
         "pairs":          pairs,
         "bots":           bots,
+        "cycle":          args.cycle,
+        "sprint_in_cycle": args.sprint_in_cycle,
     }
     print(json.dumps(result, indent=2))
 

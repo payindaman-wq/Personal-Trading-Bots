@@ -10,6 +10,7 @@ Timeouts are in HOURS (timeout_hours). TP/SL percentages are wider than
 day trading (typically 3-15% TP, 1-3% SL).
 """
 import os
+import urllib.request
 import sys
 import json
 import yaml
@@ -22,6 +23,9 @@ from swing_indicators import evaluate_entry
 WORKSPACE    = os.environ.get("WORKSPACE", "/root/.openclaw/workspace")
 ACTIVE_DIR   = os.path.join(WORKSPACE, "competition", "swing", "active")
 RESULTS_DIR  = os.path.join(WORKSPACE, "competition", "swing", "results")
+CYCLE_STATE  = os.path.join(WORKSPACE, "competition", "swing", "swing_cycle_state.json")
+BOT_TOKEN    = "8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
+CHAT_ID      = "8154505910"
 FLEET_DIR    = os.path.join(WORKSPACE, "fleet", "swing")
 
 ALL_PAIRS = [
@@ -225,6 +229,54 @@ def find_active_comp():
     return comp_dir, meta
 
 
+def tg_send(msg):
+    """Send a Telegram message to the configured chat."""
+    try:
+        import urllib.request as ur
+        data = json.dumps({"chat_id": CHAT_ID, "text": msg, "parse_mode": "Markdown"}).encode()
+        req  = ur.Request(f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
+                          data=data, headers={"Content-Type": "application/json"})
+        ur.urlopen(req, timeout=5)
+    except Exception as e:
+        print(f"  Telegram notify failed: {e}")
+
+
+def update_swing_cycle_state(comp_id):
+    """Increment sprint_in_cycle after archiving. Pause and alert if cycle complete."""
+    try:
+        with open(CYCLE_STATE) as f:
+            state = json.load(f)
+    except Exception:
+        state = {"cycle": 1, "sprint_in_cycle": 0, "sprints_per_cycle": 4,
+                 "cycle_started_at": None, "status": "active", "sprints": []}
+
+    # Record this sprint if not already listed
+    if comp_id not in state.get("sprints", []):
+        state.setdefault("sprints", []).append(comp_id)
+
+    state["sprint_in_cycle"] = len(state["sprints"])
+    cycle    = state["cycle"]
+    n        = state["sprint_in_cycle"]
+    per      = state["sprints_per_cycle"]
+
+    if n >= per:
+        state["status"] = "awaiting_review"
+        with open(CYCLE_STATE, "w") as f:
+            json.dump(state, f, indent=2)
+        tg_send(
+            f"*Swing Cycle {cycle} complete* — all {per} sprints finished.
+"
+            f"Review standings and adjust non-profitable bot strategies, then run:
+"
+            f"`python3 /root/.openclaw/workspace/swing_cycle_advance.py`"
+        )
+        print(f"  Swing Cycle {cycle} complete. Telegram alert sent.")
+    else:
+        with open(CYCLE_STATE, "w") as f:
+            json.dump(state, f, indent=2)
+        print(f"  Swing cycle state: Cycle {cycle}, Sprint {n}/{per}")
+
+
 def archive_competition(comp_dir, meta, bots, prices):
     """Score and archive a finished competition."""
     comp_id = meta["comp_id"]
@@ -287,6 +339,7 @@ def archive_competition(comp_dir, meta, bots, prices):
     shutil.move(comp_dir, os.path.join(RESULTS_DIR, comp_id + "_portfolios"))
 
     print(f"  Archived: {comp_id}  winner: {final['winner']}")
+    update_swing_cycle_state(comp_id)
     return final
 
 

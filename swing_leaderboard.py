@@ -18,10 +18,20 @@ WORKSPACE    = os.environ.get("WORKSPACE", "/root/.openclaw/workspace")
 RESULTS_DIR  = os.path.join(WORKSPACE, "competition", "swing", "results")
 ACTIVE_DIR   = os.path.join(WORKSPACE, "competition", "swing", "active")
 LB_PATH      = os.path.join(WORKSPACE, "competition", "swing", "swing_leaderboard.json")
+CYCLE_STATE  = os.path.join(WORKSPACE, "competition", "swing", "swing_cycle_state.json")
 
 POINTS_MAP = {1: 8, 2: 5, 3: 3}
 
 DISPLAY_CAPITAL = 1000.0
+
+
+def load_cycle_state():
+    """Return swing cycle state dict, or defaults if file missing."""
+    try:
+        with open(CYCLE_STATE) as f:
+            return json.load(f)
+    except Exception:
+        return {"cycle": 1, "sprint_in_cycle": 0, "sprints_per_cycle": 4, "status": "active"}
 
 
 # ---------------------------------------------------------------------------
@@ -200,9 +210,19 @@ def print_leaderboard(bots_dict, active_sprint=None):
     now     = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     divider = "=" * 78
 
+    cycle = load_cycle_state()
+    cyc_num     = cycle.get("cycle", 1)
+    sprint_n    = cycle.get("sprint_in_cycle", 0)
+    sprints_per = cycle.get("sprints_per_cycle", 4)
+    cyc_status  = cycle.get("status", "active")
+
     print()
     print(divider)
     print(f"  VIKING FLEET — SWING LEAGUE LEADERBOARD  --  {now}")
+    if cyc_status == "awaiting_review":
+        print(f"  Cycle {cyc_num} | COMPLETE ({sprint_n}/{sprints_per} sprints) -- awaiting strategy review")
+    else:
+        print(f"  Cycle {cyc_num} | Sprint {sprint_n} of {sprints_per}")
     if active_sprint:
         print(f"  Active sprint : {active_sprint['comp_id']}  (live data included)")
     print(divider)
@@ -290,13 +310,18 @@ def main():
     if args.json:
         ranked = sorted(bots.values(),
                         key=lambda x: x["cumulative_pnl_usd"], reverse=True)
+        cycle_st = load_cycle_state()
         out = {
-            "generated_at":  datetime.now(timezone.utc).isoformat(),
-            "league":        "swing",
-            "total_sprints": len(all_sprints),
-            "archived":      len(archived),
-            "active_sprint": active["comp_id"] if active else None,
-            "rankings":      ranked,
+            "generated_at":      datetime.now(timezone.utc).isoformat(),
+            "league":            "swing",
+            "total_sprints":     len(all_sprints),
+            "archived":          len(archived),
+            "active_sprint":     active["comp_id"] if active else None,
+            "cycle":             cycle_st.get("cycle", 1),
+            "sprint_in_cycle":   cycle_st.get("sprint_in_cycle", 0),
+            "sprints_per_cycle": cycle_st.get("sprints_per_cycle", 4),
+            "cycle_status":      cycle_st.get("status", "active"),
+            "rankings":          ranked,
         }
         with open(LB_PATH, "w") as f:
             json.dump(out, f, indent=2)

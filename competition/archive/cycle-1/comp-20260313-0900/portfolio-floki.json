@@ -1,0 +1,92 @@
+{
+  "bot": "floki",
+  "competition_id": "comp-20260313-0900",
+  "duration_hours": 24.0,
+  "started_at": "2026-03-13T09:00:01.136590+00:00",
+  "pairs": [
+    "BTC/USD",
+    "ETH/USD",
+    "SOL/USD",
+    "XRP/USD",
+    "DOGE/USD",
+    "AVAX/USD",
+    "LINK/USD"
+  ],
+  "starting_capital": 1000.0,
+  "fee_rate": 0.001,
+  "cash": 798.83054513,
+  "positions": [
+    {
+      "pair": "BTC/USD",
+      "direction": "short",
+      "entry_price": 70663.5,
+      "quantity": 0.00282335,
+      "cost_basis": 199.51,
+      "entry_fee": 0.2,
+      "stop_loss": 71158.14,
+      "take_profit": 69108.9,
+      "opened_at": "2026-03-14T07:05:02.253187+00:00"
+    }
+  ],
+  "closed_trades": [
+    {
+      "pair": "SOL/USD",
+      "direction": "long",
+      "entry_price": 89.59,
+      "exit_price": 89.21,
+      "quantity": 1.67261971,
+      "cost_basis": 149.85,
+      "gross_pnl": -0.64,
+      "close_fee": 0.15,
+      "net_pnl": -0.79,
+      "pnl_pct": -0.5242,
+      "reason": "stop",
+      "opened_at": "2026-03-13T17:05:01.721549+00:00",
+      "closed_at": "2026-03-13T17:40:01.453309+00:00"
+    },
+    {
+      "pair": "BTC/USD",
+      "direction": "short",
+      "entry_price": 70757.7,
+      "exit_price": 70887.1,
+      "quantity": 0.00211581,
+      "cost_basis": 149.71,
+      "gross_pnl": -0.27,
+      "close_fee": 0.15,
+      "net_pnl": -0.42,
+      "pnl_pct": -0.2829,
+      "reason": "timeout",
+      "opened_at": "2026-03-14T01:10:01.806094+00:00",
+      "closed_at": "2026-03-14T01:50:01.953127+00:00"
+    },
+    {
+      "pair": "BTC/USD",
+      "direction": "short",
+      "entry_price": 71108.5,
+      "exit_price": 70942.1,
+      "quantity": 0.00210416,
+      "cost_basis": 149.62,
+      "gross_pnl": 0.35,
+      "close_fee": 0.15,
+      "net_pnl": 0.2,
+      "pnl_pct": 0.134,
+      "reason": "timeout",
+      "opened_at": "2026-03-14T05:25:01.950348+00:00",
+      "closed_at": "2026-03-14T06:05:02.159957+00:00"
+    }
+  ],
+  "stats": {
+    "total_trades": 3,
+    "wins": 1,
+    "losses": 2,
+    "win_rate": 33.3,
+    "total_pnl_usd": -1.01,
+    "total_pnl_pct": -0.101,
+    "total_fees": 1.1,
+    "max_drawdown_pct": 0.166,
+    "largest_win_pct": 0.134,
+    "largest_loss_pct": -0.5242,
+    "current_equity": 998.34,
+    "peak_equity": 1000.0
+  }
+}

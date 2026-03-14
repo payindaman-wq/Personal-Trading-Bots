@@ -22,6 +22,7 @@ WORKSPACE   = os.environ.get("WORKSPACE", "/root/.openclaw/workspace")
 RESULTS_DIR = os.path.join(WORKSPACE, "competition", "results")
 ACTIVE_DIR  = os.path.join(WORKSPACE, "competition", "active")
 LB_PATH     = os.path.join(WORKSPACE, "competition", "leaderboard.json")
+CYCLE_STATE = os.path.join(WORKSPACE, "competition", "cycle_state.json")
 
 # Sprint placement points: 1st=8, 2nd=5, 3rd=3, 4th-8th=1
 POINTS_MAP = {1: 8, 2: 5, 3: 3}
@@ -31,6 +32,15 @@ MIN_SPRINT_BOTS = 10
 
 # Normalize USD display to this capital base (handles legacy $10k sprints)
 DISPLAY_CAPITAL = 1000.0
+
+
+def load_cycle_state():
+    """Return cycle state dict, or defaults if file missing."""
+    try:
+        with open(CYCLE_STATE) as f:
+            return json.load(f)
+    except Exception:
+        return {"cycle": 1, "sprint_in_cycle": 0, "sprints_per_cycle": 7, "status": "active"}
 
 
 # ---------------------------------------------------------------------------
@@ -225,14 +235,21 @@ def print_leaderboard(bots_dict, active_sprint=None):
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     divider = "=" * 78
 
+    cycle = load_cycle_state()
+    cyc_num     = cycle.get("cycle", 1)
+    sprint_n    = cycle.get("sprint_in_cycle", 0)
+    sprints_per = cycle.get("sprints_per_cycle", 7)
+    cyc_status  = cycle.get("status", "active")
+
     print()
     print(divider)
     print(f"  VIKING FLEET LEADERBOARD  --  {now}")
-    total_sprints = sum(1 for b in ranked if b["sprints_entered"] > 0)
+    if cyc_status == "awaiting_review":
+        print(f"  Cycle {cyc_num} | COMPLETE ({sprint_n}/{sprints_per} sprints) -- awaiting strategy review")
+    else:
+        print(f"  Cycle {cyc_num} | Sprint {sprint_n} of {sprints_per}")
     if active_sprint:
         print(f"  Active sprint : {active_sprint['comp_id']}  (live data included)")
-    n_archived = len([s for s in (bots_dict.get(ranked[0]["bot"], {}).get("sprint_log", []))
-                      if not s.get("in_progress")]) if ranked else 0
     print(divider)
     print(f"  {'#':<4} {'BOT':<12} {'PTS':>4} {'SPRINTS':>8} {'1ST':>4} {'TOP3':>5} "
           f"{'CUM PNL':>11} {'AVG/SPRINT':>11} {'WIN%':>6} {'TRADES':>7}")
@@ -321,12 +338,17 @@ def main():
     if args.json:
         ranked = sorted(bots.values(),
                         key=lambda x: x["cumulative_pnl_usd"], reverse=True)
+        cycle_st = load_cycle_state()
         out = {
-            "generated_at":   datetime.now(timezone.utc).isoformat(),
-            "total_sprints":  len(all_sprints),
-            "archived":       len(archived),
-            "active_sprint":  active["comp_id"] if active else None,
-            "rankings":       ranked,
+            "generated_at":      datetime.now(timezone.utc).isoformat(),
+            "total_sprints":     len(all_sprints),
+            "archived":          len(archived),
+            "active_sprint":     active["comp_id"] if active else None,
+            "cycle":             cycle_st.get("cycle", 1),
+            "sprint_in_cycle":   cycle_st.get("sprint_in_cycle", 0),
+            "sprints_per_cycle": cycle_st.get("sprints_per_cycle", 7),
+            "cycle_status":      cycle_st.get("status", "active"),
+            "rankings":          ranked,
         }
         with open(LB_PATH, "w") as f:
             json.dump(out, f, indent=2)

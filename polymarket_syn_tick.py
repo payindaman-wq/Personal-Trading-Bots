@@ -20,6 +20,9 @@ RESULTS_DIR      = f"{WORKSPACE}/competition/polymarket/auto_results"
 FLEET_DIR        = f"{WORKSPACE}/fleet/polymarket"
 DASH_OUTPUT      = "/var/www/dashboard/api/polymarket_auto.json"
 LOG_FILE         = f"{WORKSPACE}/competition/polymarket/syn_tick.log"
+CYCLE_STATE_FILE = f"{WORKSPACE}/competition/polymarket/polymarket_cycle_state.json"
+BOT_TOKEN        = "8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
+CHAT_ID          = "8154505910"
 GEMINI_SECRET    = "/root/.openclaw/secrets/gemini.json"
 ODDS_SECRET      = "/root/.openclaw/secrets/odds_api.json"
 KALSHI_SECRET    = "/root/.openclaw/secrets/kalshi.json"
@@ -665,6 +668,56 @@ def update_equity(bot):
     bot["pnl_pct"] = round((bot["pnl_usd"] / bot["starting_capital"]) * 100, 2)
 
 
+# ── Cycle management ──────────────────────────────────────────────────────
+
+def tg_send(msg):
+    """Send a Telegram message via the SYN bot."""
+    try:
+        data = json.dumps({"chat_id": CHAT_ID, "text": msg, "parse_mode": "Markdown"}).encode()
+        req  = urllib.request.Request(
+            f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
+            data=data, headers={"Content-Type": "application/json"})
+        urllib.request.urlopen(req, timeout=5)
+    except Exception as e:
+        log.warning(f"Telegram notify failed: {e}")
+
+
+def load_cycle_state():
+    try:
+        with open(CYCLE_STATE_FILE) as f:
+            return json.load(f)
+    except Exception:
+        return {"cycle": 1, "sprint_in_cycle": 0, "sprints_per_cycle": 4,
+                "cycle_started_at": None, "status": "active", "sprints": []}
+
+
+def save_cycle_state(state):
+    with open(CYCLE_STATE_FILE, "w") as f:
+        json.dump(state, f, indent=2)
+
+
+def update_cycle_after_sprint(sprint_id):
+    """Record completed sprint. Returns True if cycle is now complete."""
+    cs = load_cycle_state()
+    if sprint_id not in cs.get("sprints", []):
+        cs.setdefault("sprints", []).append(sprint_id)
+    cs["sprint_in_cycle"] = len(cs["sprints"])
+    cycle   = cs["cycle"]
+    n       = cs["sprint_in_cycle"]
+    per     = cs["sprints_per_cycle"]
+    if n >= per:
+        cs["status"] = "awaiting_review"
+        save_cycle_state(cs)
+        msg = "*Polymarket Cycle " + str(cycle) + " complete* - all " + str(per) + " sprints done. Review standings and adjust strategies, then run: python3 /root/.openclaw/workspace/polymarket_cycle_advance.py"
+        tg_send(msg)
+        log.info(f"Polymarket Cycle {cycle} complete — awaiting review. Telegram alert sent.")
+        return True
+    else:
+        save_cycle_state(cs)
+        log.info(f"Polymarket cycle state: Cycle {cycle}, Sprint {n}/{per}")
+        return False
+
+
 # ── Sprint management ──────────────────────────────────────────────────────
 
 def sprint_is_expired(state):
@@ -718,6 +771,17 @@ def score_and_archive_sprint(state):
             "starting_capital": 1000.0,
         }, f, indent=2)
     log.info(f"Sprint archived to {result_dir}")
+    # Stamp cycle info onto archived meta
+    cs = load_cycle_state()
+    try:
+        meta_path = os.path.join(result_dir, "meta.json")
+        with open(meta_path) as f:
+            _m = json.load(f)
+        _m["cycle"] = cs.get("cycle", 1)
+        with open(meta_path, "w") as f:
+            json.dump(_m, f, indent=2)
+    except Exception:
+        pass
 
 
 def start_new_sprint(state):
@@ -829,10 +893,30 @@ def run_tick(state, strategies, secrets, tick_count):
     log.info(f"─── Tick #{tick_count} | Sprint: {state.get('sprint_id','?')} "
              f"| Bots: {len(state['bots'])} ───")
 
-    # Sprint check
+    # Cycle gate — pause only when awaiting strategy review
+    cs = load_cycle_state()
+    if cs.get("status") == "awaiting_review":
+        log.info(f"Polymarket Cycle {cs['cycle']} awaiting review — tick skipped.")
+        return
+
+    # Sprint check — archive and immediately restart (Polymarket runs 24/7)
     if sprint_is_expired(state):
+        completed_sprint_id = state.get("sprint_id", "unknown")
         score_and_archive_sprint(state)
-        start_new_sprint(state)
+        cycle_done = update_cycle_after_sprint(completed_sprint_id)
+        if cycle_done:
+            log.info("Cycle complete — awaiting strategy review.")
+            state["status"] = "awaiting_review"
+        else:
+            cs = load_cycle_state()
+            next_sprint_num = cs["sprint_in_cycle"] + 1
+            start_new_sprint(state)
+            state["cycle"] = cs["cycle"]
+            state["sprint_in_cycle"] = next_sprint_num
+            cs["sprint_in_cycle"] = next_sprint_num
+            cs["sprints"].append(state["sprint_id"])
+            save_cycle_state(cs)
+            log.info(f"New sprint auto-started: {state['sprint_id']}")
 
     # ── 1. Fetch all market data once ────────────────────────────────────
     pm_markets    = fetch_polymarket_markets(strategies)
