@@ -1,0 +1,14 @@
+[Unit]
+Description=Polymarket copy-trading paper daemon
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/.openclaw/workspace
+ExecStart=/usr/bin/python3 /root/.openclaw/workspace/polymarket_tick.py
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
