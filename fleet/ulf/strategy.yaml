@@ -1,6 +1,6 @@
 name: ulf
-style: breakout_retest_scalper
-inspiration: The Trading Rush -- waits for breakout above VWAP/EMA then trades the retest, price must be back inside BBs confirming the pullback
+style: breakout_retest
+inspiration: The Trading Rush -- waits for breakout then buys the retest pullback, enters as price pulls back toward EMA support
 pairs:
   - BTC/USD
   - ETH/USD
@@ -16,24 +16,24 @@ entry:
   long:
     conditions:
       - indicator: price_vs_vwap
-        operator: eq
-        value: above
+        operator: in
+        value: [above, at]
       - indicator: price_vs_ema
         period_minutes: 50
-        operator: eq
-        value: above
+        operator: in
+        value: [below, at]
       - indicator: trend
         period_minutes: 15
+        operator: in
+        value: [down, flat]
+      - indicator: trend
+        period_minutes: 240
         operator: eq
         value: up
       - indicator: rsi
-        period_minutes: 70
-        operator: gt
-        value: 48
-      - indicator: rsi
-        period_minutes: 70
+        period_minutes: 35
         operator: lt
-        value: 64
+        value: 45
       - indicator: bollinger_position
         period_minutes: 100
         operator: eq
@@ -41,33 +41,33 @@ entry:
   short:
     conditions:
       - indicator: price_vs_vwap
-        operator: eq
-        value: below
+        operator: in
+        value: [below, at]
       - indicator: price_vs_ema
         period_minutes: 50
-        operator: eq
-        value: below
+        operator: in
+        value: [above, at]
       - indicator: trend
         period_minutes: 15
+        operator: in
+        value: [up, flat]
+      - indicator: trend
+        period_minutes: 240
         operator: eq
         value: down
       - indicator: rsi
-        period_minutes: 70
-        operator: lt
-        value: 52
-      - indicator: rsi
-        period_minutes: 70
+        period_minutes: 35
         operator: gt
-        value: 36
+        value: 55
       - indicator: bollinger_position
         period_minutes: 100
         operator: eq
         value: inside
 exit:
-  take_profit_pct: 1.6
-  stop_loss_pct: 0.5
-  timeout_minutes: 60
+  take_profit_pct: 2.0
+  stop_loss_pct: 0.6
+  timeout_minutes: 90
 risk:
   pause_if_down_pct: 4
-  pause_minutes: 45
+  pause_minutes: 60
   stop_if_down_pct: 10

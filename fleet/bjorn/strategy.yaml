@@ -1,13 +1,13 @@
 name: bjorn
 style: ema_macd_momentum
-inspiration: Crypto Tony -- EMA trend direction confirmed by MACD, only trades pullbacks in the direction of momentum, strict risk management
+inspiration: Crypto Tony -- EMA trend direction confirmed by MACD, buys pullbacks to EMA in the direction of momentum
 pairs:
   - BTC/USD
   - ETH/USD
   - SOL/USD
   - XRP/USD
 position:
-  size_pct: 20
+  size_pct: 22
   max_open: 1
   fee_rate: 0.001
 entry:
@@ -15,56 +15,50 @@ entry:
     conditions:
       - indicator: price_vs_ema
         period_minutes: 50
-        operator: eq
-        value: above
+        operator: in
+        value: [below, at]
       - indicator: macd_signal
         period_minutes: 130
         operator: eq
         value: bullish
       - indicator: rsi
-        period_minutes: 70
-        operator: gt
-        value: 50
-      - indicator: rsi
-        period_minutes: 70
+        period_minutes: 35
         operator: lt
-        value: 68
+        value: 40
       - indicator: trend
         period_minutes: 240
         operator: eq
         value: up
-      - indicator: price_vs_vwap
+      - indicator: trend
+        period_minutes: 30
         operator: in
-        value: [above, at]
+        value: [down, flat]
   short:
     conditions:
       - indicator: price_vs_ema
         period_minutes: 50
-        operator: eq
-        value: below
+        operator: in
+        value: [above, at]
       - indicator: macd_signal
         period_minutes: 130
         operator: eq
         value: bearish
       - indicator: rsi
-        period_minutes: 70
-        operator: lt
-        value: 48
-      - indicator: rsi
-        period_minutes: 70
+        period_minutes: 35
         operator: gt
-        value: 35
+        value: 60
       - indicator: trend
         period_minutes: 240
         operator: eq
         value: down
-      - indicator: price_vs_vwap
+      - indicator: trend
+        period_minutes: 30
         operator: in
-        value: [below, at]
+        value: [up, flat]
 exit:
-  take_profit_pct: 1.8
+  take_profit_pct: 2.2
   stop_loss_pct: 0.6
-  timeout_minutes: 90
+  timeout_minutes: 120
 risk:
   pause_if_down_pct: 4
   pause_minutes: 60

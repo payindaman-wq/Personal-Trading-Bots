@@ -1,57 +1,28 @@
 name: harald
 style: rsi_trend_composite
-inspiration: Scott Melker -- RSI and trend confluence with strict risk-first approach, never fights confirmed direction, waits for high-probability setups
+inspiration: Scott Melker -- RSI pullback within confirmed trend, buys when short-term RSI oversold but macro direction intact
 pairs:
   - BTC/USD
   - ETH/USD
   - SOL/USD
   - XRP/USD
 position:
-  size_pct: 15
+  size_pct: 22
   max_open: 1
   fee_rate: 0.001
 entry:
   long:
     conditions:
       - indicator: rsi
-        period_minutes: 70
-        operator: gt
-        value: 53
-      - indicator: rsi
-        period_minutes: 70
+        period_minutes: 35
         operator: lt
-        value: 63
-      - indicator: trend
-        period_minutes: 30
-        operator: eq
-        value: up
+        value: 38
       - indicator: trend
         period_minutes: 240
         operator: in
         value: [up, flat]
-      - indicator: price_vs_vwap
-        operator: in
-        value: [above, at]
-      - indicator: macd_signal
-        period_minutes: 130
-        operator: eq
-        value: bullish
-  short:
-    conditions:
-      - indicator: rsi
-        period_minutes: 70
-        operator: lt
-        value: 47
-      - indicator: rsi
-        period_minutes: 70
-        operator: gt
-        value: 37
       - indicator: trend
         period_minutes: 30
-        operator: eq
-        value: down
-      - indicator: trend
-        period_minutes: 240
         operator: in
         value: [down, flat]
       - indicator: price_vs_vwap
@@ -60,12 +31,33 @@ entry:
       - indicator: macd_signal
         period_minutes: 130
         operator: eq
+        value: bullish
+  short:
+    conditions:
+      - indicator: rsi
+        period_minutes: 35
+        operator: gt
+        value: 62
+      - indicator: trend
+        period_minutes: 240
+        operator: in
+        value: [down, flat]
+      - indicator: trend
+        period_minutes: 30
+        operator: in
+        value: [up, flat]
+      - indicator: price_vs_vwap
+        operator: in
+        value: [above, at]
+      - indicator: macd_signal
+        period_minutes: 130
+        operator: eq
         value: bearish
 exit:
-  take_profit_pct: 1.2
-  stop_loss_pct: 0.4
-  timeout_minutes: 60
+  take_profit_pct: 2.2
+  stop_loss_pct: 0.7
+  timeout_minutes: 120
 risk:
-  pause_if_down_pct: 3
+  pause_if_down_pct: 4
   pause_minutes: 60
-  stop_if_down_pct: 7
+  stop_if_down_pct: 8

@@ -1,6 +1,6 @@
 name: ragnar
 style: vwap_reclaim
-inspiration: VWAP reclaim -- price dips below VWAP then reclaims it, enter on the reclaim with VWAP as support, quality setups only
+inspiration: VWAP reclaim -- price dips below VWAP then reclaims it, enter on the reclaim with VWAP as support
 pairs:
   - BTC/USD
   - ETH/USD
@@ -8,27 +8,27 @@ pairs:
   - AVAX/USD
   - LINK/USD
 position:
-  size_pct: 20
+  size_pct: 22
   max_open: 1
   fee_rate: 0.001
 entry:
   long:
     conditions:
       - indicator: price_vs_vwap
-        operator: eq
-        value: above
+        operator: in
+        value: [above, at]
       - indicator: trend
         period_minutes: 15
-        operator: eq
-        value: up
+        operator: in
+        value: [up, flat]
       - indicator: rsi
         period_minutes: 35
         operator: gt
-        value: 50
+        value: 40
       - indicator: rsi
         period_minutes: 35
         operator: lt
-        value: 67
+        value: 58
       - indicator: macd_signal
         period_minutes: 130
         operator: eq
@@ -40,20 +40,20 @@ entry:
   short:
     conditions:
       - indicator: price_vs_vwap
-        operator: eq
-        value: below
+        operator: in
+        value: [below, at]
       - indicator: trend
         period_minutes: 15
-        operator: eq
-        value: down
+        operator: in
+        value: [down, flat]
       - indicator: rsi
         period_minutes: 35
         operator: lt
-        value: 50
+        value: 60
       - indicator: rsi
         period_minutes: 35
         operator: gt
-        value: 33
+        value: 42
       - indicator: macd_signal
         period_minutes: 130
         operator: eq
@@ -63,9 +63,9 @@ entry:
         operator: in
         value: [down, flat]
 exit:
-  take_profit_pct: 1.0
-  stop_loss_pct: 0.4
-  timeout_minutes: 60
+  take_profit_pct: 2.0
+  stop_loss_pct: 0.6
+  timeout_minutes: 120
 risk:
   pause_if_down_pct: 4
   pause_minutes: 60

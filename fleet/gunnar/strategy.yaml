@@ -1,79 +1,51 @@
 name: gunnar
-style: aggressive_momentum_scalper
-inspiration: Gainzy -- jumps into momentum already in motion, tight stops, fast exits, high frequency across many pairs
+style: aggressive_dip_buyer
+inspiration: Gainzy -- catches sharp dips with conviction sizing, enters extreme oversold conditions when macro trend still intact
 pairs:
   - BTC/USD
   - ETH/USD
   - SOL/USD
   - XRP/USD
-  - DOGE/USD
   - AVAX/USD
   - LINK/USD
-  - SUI/USD
-  - PEPE/USD
-  - WIF/USD
 position:
-  size_pct: 30
-  max_open: 3
+  size_pct: 25
+  max_open: 1
   fee_rate: 0.001
 entry:
   long:
     conditions:
       - indicator: price_change_pct
-        period_minutes: 15
-        operator: gt
-        value: 0.6
+        period_minutes: 30
+        operator: lt
+        value: -1.0
+      - indicator: rsi
+        period_minutes: 25
+        operator: lt
+        value: 28
       - indicator: trend
-        period_minutes: 15
-        operator: eq
-        value: up
-      - indicator: trend
-        period_minutes: 60
+        period_minutes: 240
         operator: in
         value: [up, flat]
-      - indicator: rsi
-        period_minutes: 70
-        operator: gt
-        value: 54
-      - indicator: rsi
-        period_minutes: 70
-        operator: lt
-        value: 78
-      - indicator: macd_signal
-        period_minutes: 130
-        operator: eq
-        value: bullish
   short:
     conditions:
       - indicator: price_change_pct
-        period_minutes: 15
-        operator: lt
-        value: -0.6
+        period_minutes: 30
+        operator: gt
+        value: 1.0
+      - indicator: rsi
+        period_minutes: 25
+        operator: gt
+        value: 72
       - indicator: trend
-        period_minutes: 15
-        operator: eq
-        value: down
-      - indicator: trend
-        period_minutes: 60
+        period_minutes: 240
         operator: in
         value: [down, flat]
-      - indicator: rsi
-        period_minutes: 70
-        operator: lt
-        value: 46
-      - indicator: rsi
-        period_minutes: 70
-        operator: gt
-        value: 22
-      - indicator: macd_signal
-        period_minutes: 130
-        operator: eq
-        value: bearish
 exit:
-  take_profit_pct: 1.2
-  stop_loss_pct: 0.35
-  timeout_minutes: 25
+  take_profit_pct: 3.0
+  stop_loss_pct: 1.0
+  timeout_minutes: 120
 risk:
   pause_if_down_pct: 5
-  pause_minutes: 30
+  pause_minutes: 60
   stop_if_down_pct: 12

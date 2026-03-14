@@ -1,79 +1,68 @@
 name: sigurd
 style: altcoin_momentum_rotation
-inspiration: Michael van de Poppe -- catches altcoin strength rotations, trades alts showing independent momentum with EMA support
+inspiration: Michael van de Poppe -- catches alt pullbacks in trending markets, buys dips on alts showing macro strength
 pairs:
   - SOL/USD
   - XRP/USD
-  - DOGE/USD
   - AVAX/USD
   - LINK/USD
-  - UNI/USD
-  - AAVE/USD
+  - SUI/USD
   - NEAR/USD
   - APT/USD
-  - SUI/USD
 position:
-  size_pct: 20
+  size_pct: 22
   max_open: 2
   fee_rate: 0.001
 entry:
   long:
     conditions:
-      - indicator: price_change_pct
-        period_minutes: 30
-        operator: gt
-        value: 0.5
+      - indicator: rsi
+        period_minutes: 35
+        operator: lt
+        value: 35
       - indicator: trend
-        period_minutes: 30
+        period_minutes: 240
         operator: eq
         value: up
-      - indicator: rsi
-        period_minutes: 70
-        operator: gt
-        value: 50
-      - indicator: rsi
-        period_minutes: 70
-        operator: lt
-        value: 68
+      - indicator: trend
+        period_minutes: 30
+        operator: in
+        value: [down, flat]
       - indicator: macd_signal
         period_minutes: 130
         operator: eq
         value: bullish
       - indicator: price_vs_ema
         period_minutes: 50
-        operator: eq
-        value: above
+        operator: in
+        value: [below, at]
   short:
     conditions:
-      - indicator: price_change_pct
-        period_minutes: 30
-        operator: lt
-        value: -0.5
+      - indicator: rsi
+        period_minutes: 35
+        operator: gt
+        value: 65
       - indicator: trend
-        period_minutes: 30
+        period_minutes: 240
         operator: eq
         value: down
-      - indicator: rsi
-        period_minutes: 70
-        operator: lt
-        value: 50
-      - indicator: rsi
-        period_minutes: 70
-        operator: gt
-        value: 32
+      - indicator: trend
+        period_minutes: 30
+        operator: in
+        value: [up, flat]
       - indicator: macd_signal
         period_minutes: 130
         operator: eq
         value: bearish
       - indicator: price_vs_ema
         period_minutes: 50
-        operator: eq
-        value: below
+        operator: in
+        value: [above, at]
 exit:
-  take_profit_pct: 1.5
-  stop_loss_pct: 0.5
-  timeout_minutes: 60
+  take_profit_pct: 2.5
+  stop_loss_pct: 0.7
+  timeout_minutes: 90
 risk:
   pause_if_down_pct: 4
-  pause_minutes: 45
+  pause_minutes: 60
   stop_if_down_pct: 10

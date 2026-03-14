@@ -1,13 +1,13 @@
 name: leif
 style: bb_squeeze_breakout
-inspiration: Rekt Capital -- waits for Bollinger Band squeeze then trades the expansion, requires momentum confirmation in trend direction
+inspiration: Rekt Capital -- enters during Bollinger Band compression with trend alignment, positioned for the expansion
 pairs:
   - BTC/USD
   - ETH/USD
   - SOL/USD
   - LINK/USD
 position:
-  size_pct: 20
+  size_pct: 22
   max_open: 1
   fee_rate: 0.001
 entry:
@@ -16,49 +16,49 @@ entry:
       - indicator: bollinger_position
         period_minutes: 100
         operator: eq
-        value: above_upper
+        value: inside
       - indicator: macd_signal
         period_minutes: 130
         operator: eq
         value: bullish
-      - indicator: momentum_accelerating
-        period_minutes: 30
-        operator: eq
-        value: true
       - indicator: rsi
-        period_minutes: 70
-        operator: gt
-        value: 55
-      - indicator: trend
-        period_minutes: 240
-        operator: eq
-        value: up
-  short:
-    conditions:
-      - indicator: bollinger_position
-        period_minutes: 100
-        operator: eq
-        value: below_lower
-      - indicator: macd_signal
-        period_minutes: 130
-        operator: eq
-        value: bearish
-      - indicator: momentum_accelerating
-        period_minutes: 30
-        operator: eq
-        value: true
-      - indicator: rsi
-        period_minutes: 70
+        period_minutes: 35
         operator: lt
         value: 45
       - indicator: trend
         period_minutes: 240
         operator: eq
+        value: up
+      - indicator: price_vs_ema
+        period_minutes: 50
+        operator: in
+        value: [below, at]
+  short:
+    conditions:
+      - indicator: bollinger_position
+        period_minutes: 100
+        operator: eq
+        value: inside
+      - indicator: macd_signal
+        period_minutes: 130
+        operator: eq
+        value: bearish
+      - indicator: rsi
+        period_minutes: 35
+        operator: gt
+        value: 55
+      - indicator: trend
+        period_minutes: 240
+        operator: eq
         value: down
+      - indicator: price_vs_ema
+        period_minutes: 50
+        operator: in
+        value: [above, at]
 exit:
-  take_profit_pct: 2.0
-  stop_loss_pct: 0.6
-  timeout_minutes: 120
+  take_profit_pct: 2.8
+  stop_loss_pct: 0.8
+  timeout_minutes: 150
 risk:
   pause_if_down_pct: 4
   pause_minutes: 60
