@@ -1,0 +1,24 @@
+name: muninn
+category: arb
+type: arb
+description: Consensus arb — only trades when Metaculus AND Manifold both agree against Polymarket
+arb_sources:
+  - kalshi
+  - manifold
+arb_min_gap: 0.06
+require_consensus: true
+market_filter:
+  include_keywords: []
+  exclude_keywords: []
+  price_range:
+    - 0.05
+    - 0.95
+  min_liquidity_usd: 500
+  max_days_to_resolve: 30
+edge:
+  min_edge_pts: 0.06
+  max_positions: 6
+  max_position_pct: 0.12
+risk:
+  stop_if_down_pct: 20
+  starting_capital: 1000.0

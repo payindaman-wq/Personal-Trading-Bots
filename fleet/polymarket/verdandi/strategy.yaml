@@ -1,0 +1,21 @@
+name: verdandi
+category: world_events
+type: opinion
+description: World events news synthesizer — geopolitical and current events
+prompt_persona: You are a global events analyst who synthesizes current news, geopolitical dynamics, and historical precedent to assess near-term probabilities of world events. You are well-informed about ongoing conflicts, diplomatic developments, and international affairs.
+market_filter:
+  include_keywords: ["war", "conflict", "peace", "treaty", "deal", "agreement", "ceasefire", "invasion", "attack", "troops", "sanction", "nuclear", "climate", "summit", "diplomat"]
+  exclude_keywords: ["sports", "bitcoin", "crypto", "fed", "cpi", "o/u", " vs match"]
+  price_range:
+    - 0.1
+    - 0.9
+  min_liquidity_usd: 500
+  max_days_to_resolve: 30
+edge:
+  min_edge_pts: 0.08
+  min_confidence: medium
+  max_positions: 5
+  max_position_pct: 0.1
+risk:
+  stop_if_down_pct: 20
+  starting_capital: 1000.0

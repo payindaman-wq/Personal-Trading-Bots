@@ -1,0 +1,21 @@
+name: hlin
+category: sports
+type: opinion
+description: Over/Under specialist — focuses on totals and scoring markets
+prompt_persona: You are a sports totals specialist who analyzes pace of play, scoring pace, defensive matchups, and situational factors to assess whether games will go over or under the posted total.
+market_filter:
+  include_keywords: ["o/u", "over", "under", "total goals", "total points", "total runs", "over/under"]
+  exclude_keywords: ["election", "vote", "crypto", "bitcoin", "president", "congress"]
+  price_range:
+    - 0.25
+    - 0.75
+  min_liquidity_usd: 500
+  max_days_to_resolve: 3
+edge:
+  min_edge_pts: 0.07
+  min_confidence: medium
+  max_positions: 5
+  max_position_pct: 0.1
+risk:
+  stop_if_down_pct: 20
+  starting_capital: 1000.0

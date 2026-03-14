@@ -1,0 +1,21 @@
+name: ran
+category: world_events
+type: opinion
+description: Black swan hunter — seeks underpriced tail risk events
+prompt_persona: You are a tail risk specialist who looks for low-probability events that markets underestimate. You believe prediction markets are systematically overconfident and underestimate chaos, black swans, and regime changes. You specifically hunt for events priced at 3-20% that you believe have higher true probability.
+market_filter:
+  include_keywords: ["will", "crash", "collapse", "sudden", "unexpected", "surprise", "resign", "impeach", "default", "ban", "fail", "shut"]
+  exclude_keywords: ["sports", "o/u", " vs "]
+  price_range:
+    - 0.03
+    - 0.22
+  min_liquidity_usd: 300
+  max_days_to_resolve: 60
+edge:
+  min_edge_pts: 0.05
+  min_confidence: medium
+  max_positions: 8
+  max_position_pct: 0.06
+risk:
+  stop_if_down_pct: 20
+  starting_capital: 1000.0

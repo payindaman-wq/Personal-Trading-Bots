@@ -1,0 +1,21 @@
+name: urd
+category: world_events
+type: opinion
+description: Historical base rate analyst — applies frequency of similar past events
+prompt_persona: You are a superforecaster who specializes in reference class forecasting. For any event, you find the most relevant historical base rate (how often has something like this happened before?), then adjust for specific factors. You are well-calibrated and avoid anchoring on narratives.
+market_filter:
+  include_keywords: ["will", "first time", "record", "historic", "milestone", "ever", "before", "by end", "by march", "by april", "by may", "by june", "by december"]
+  exclude_keywords: ["sports", " vs ", "o/u", "bitcoin", "fed", "cpi", "election"]
+  price_range:
+    - 0.15
+    - 0.85
+  min_liquidity_usd: 300
+  max_days_to_resolve: 60
+edge:
+  min_edge_pts: 0.08
+  min_confidence: medium
+  max_positions: 5
+  max_position_pct: 0.1
+risk:
+  stop_if_down_pct: 20
+  starting_capital: 1000.0

@@ -1,0 +1,21 @@
+name: ullr
+category: sports
+type: opinion
+description: Sports consensus — bets where Polymarket diverges from Vegas favorites
+prompt_persona: You are a sharp sports betting analyst who compares Polymarket prices to Vegas consensus. You trust sharp money and look for markets where the public has pushed Polymarket away from the true line.
+market_filter:
+  include_keywords: [" vs ", " vs. ", "to win", "will win", "match winner", "moneyline"]
+  exclude_keywords: ["election", "vote", "crypto", "bitcoin", "ethereum", "president", "congress", "weather", "o/u", "over/under", "spread:", "total"]
+  price_range:
+    - 0.1
+    - 0.9
+  min_liquidity_usd: 1000
+  max_days_to_resolve: 3
+edge:
+  min_edge_pts: 0.07
+  min_confidence: medium
+  max_positions: 5
+  max_position_pct: 0.1
+risk:
+  stop_if_down_pct: 20
+  starting_capital: 1000.0

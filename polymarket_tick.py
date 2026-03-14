@@ -210,9 +210,73 @@ def save_state(state):
 
 
 def write_dashboard(state):
+    raw_bots = state.get("bots", [])
+    status   = state.get("status", "active")
+
+    normalized_bots = []
+    for b in raw_bots:
+        wins  = b.get("wins", 0)
+        total = b.get("total_trades", 0)
+        normalized_bots.append({
+            "bot":              b.get("name", ""),
+            "assigned_trader":  b.get("trader", ""),
+            "pnl_usd":          round(b.get("pnl_usd", 0.0), 2),
+            "win_rate":         round(wins / total * 100, 1) if total > 0 else 0.0,
+            "trades":           total,
+            "active_positions": len(b.get("positions", {})),
+            "status":           status,
+        })
+
+    open_positions = []
+    for b in raw_bots:
+        for cid, pos in b.get("positions", {}).items():
+            open_positions.append({
+                "bot":            b.get("name", ""),
+                "trader":         b.get("trader", ""),
+                "market":         pos.get("title", ""),
+                "outcome":        pos.get("outcome", ""),
+                "side":           pos.get("side", "BUY"),
+                "entry_price":    pos.get("entry_price", 0),
+                "current_price":  pos.get("current_price", 0),
+                "cost_usd":       pos.get("cost_usd", 0),
+                "current_value":  pos.get("current_value", 0),
+                "unrealized_pnl": pos.get("unrealized_pnl", 0),
+                "opened_at":      pos.get("opened_at", ""),
+            })
+
+    tracked = []
+    for t in state.get("tracked_traders", []):
+        tracked.append({
+            "name":    t.get("trader", ""),
+            "bot":     t.get("bot", ""),
+            "roi_pct": t.get("roi_pct", 0),
+        })
+
+    recent_trades = []
+    for entry in state.get("recent_trades", []):
+        recent_trades.append({
+            "bot":          entry.get("bot", ""),
+            "market_title": entry.get("market", entry.get("title", "")),
+            "direction":    entry.get("outcome", "YES"),
+            "outcome":      "open" if entry.get("action") == "OPEN" else "closed",
+            "pnl_usd":      entry.get("pnl_usd"),
+        })
+
+    dashboard = {
+        "generated_at":    datetime.now(timezone.utc).isoformat(),
+        "mode":            state.get("mode", "paper"),
+        "status":          status,
+        "started_at":      state.get("started_at", ""),
+        "stats":           state.get("stats", {}),
+        "bots":            normalized_bots,
+        "tracked_traders": tracked,
+        "open_positions":  open_positions,
+        "recent_trades":   recent_trades,
+    }
+
     os.makedirs(os.path.dirname(DASH_OUTPUT), exist_ok=True)
     with open(DASH_OUTPUT, "w") as f:
-        json.dump(state, f, indent=2)
+        json.dump(dashboard, f, indent=2)
 
 
 def recompute_stats(state):

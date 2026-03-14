@@ -519,8 +519,8 @@
 <div class="tab-bar">
   <button class="tab-btn active" onclick="switch_tab('overview', this)">Overview</button>
   <button class="tab-btn" onclick="switch_tab('fleet', this)">Fleet</button>
-  <button class="tab-btn" onclick="switch_tab('archive', this)">Archive</button>
   <button class="tab-btn" onclick="switch_tab('polymarket', this)">Polymarket</button>
+  <button class="tab-btn" onclick="switch_tab('archive', this)">Archive</button>
 </div>
 
 <!-- Tab: Overview -->
@@ -537,17 +537,17 @@
   </div>
 </div>
 
-<!-- Tab: Archive -->
-<div class="tab-panel" id="tab-archive">
-  <div class="main" id="main-archive">
-    <div class="loading">Loading archive data...</div>
-  </div>
-</div>
-
 <!-- Tab: Polymarket -->
 <div class="tab-panel" id="tab-polymarket">
   <div class="main" id="main-polymarket">
     <div class="loading">Loading Polymarket data...</div>
+  </div>
+</div>
+
+<!-- Tab: Archive -->
+<div class="tab-panel" id="tab-archive">
+  <div class="main" id="main-archive">
+    <div class="loading">Loading archive data...</div>
   </div>
 </div>
 
@@ -876,7 +876,7 @@ function render_activity_feed(feed) {
 
 // ── Fleet Tab ──────────────────────────────────────────────────────────────────
 
-function render_fleet(roster) {
+function render_fleet(roster, pm) {
   if (!roster || roster.length === 0) {
     return '<div class="loading">No fleet data available</div>';
   }
@@ -930,7 +930,57 @@ function render_fleet(roster) {
     </div>`;
   }
 
-  return fleet_table(day_bots, 'Day Trading League') + fleet_table(swing_bots, 'Swing Trading League');
+  function pm_table(bots, title) {
+    if (!bots || bots.length === 0) return `
+    <div class="fleet-card">
+      <div class="fleet-section-title">${title}</div>
+      <div class="pm-empty" style="padding:14px 18px">No Polymarket bots configured</div>
+    </div>`;
+    const rows = bots.map(b => {
+      const pnl_cls = b.pnl_usd > 0 ? 'pnl-pos' : b.pnl_usd < 0 ? 'pnl-neg' : 'pnl-zero';
+      const sign    = b.pnl_usd > 0 ? '+' : '';
+      const wr      = typeof b.win_rate === 'number' && b.trades > 0
+                      ? `<span class="win-rate">${b.win_rate.toFixed(0)}%</span>` : '<span class="pnl-zero">—</span>';
+      return `
+      <tr>
+        <td class="bot-name">${esc(b.bot)}</td>
+        <td><span class="badge" style="background:rgba(188,140,255,0.15);color:#bc8cff;letter-spacing:.5px">POLY</span></td>
+        <td class="fleet-style hide-mobile">${esc(b.assigned_trader || '—')}</td>
+        <td class="fleet-inspired hide-mobile">copy-trading</td>
+        <td>${b.active_positions || 0}</td>
+        <td>${b.trades || 0}</td>
+        <td class="pts">—</td>
+        <td class="${pnl_cls}">${sign}$${Math.abs(b.pnl_usd || 0).toFixed(2)}</td>
+        <td class="hide-mobile pnl-zero">—</td>
+        <td class="hide-mobile">${wr}</td>
+        <td class="hide-mobile">${b.trades || 0}</td>
+      </tr>`;
+    }).join('');
+    return `
+    <div class="fleet-card">
+      <div class="fleet-section-title">${title}</div>
+      <div class="section" style="padding:0;">
+        <table>
+          <thead><tr>
+            <th>Bot</th><th>League</th>
+            <th class="hide-mobile">Directive</th>
+            <th class="hide-mobile">Strategy</th>
+            <th>Open</th><th>Trades</th><th>Pts</th>
+            <th>P&amp;L</th>
+            <th class="hide-mobile">Avg/Sprint</th>
+            <th class="hide-mobile">Win%</th>
+            <th class="hide-mobile">Trades</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
+  }
+
+  const pm_bots = pm && pm.bots ? pm.bots : [];
+  return fleet_table(day_bots, 'Day Trading League')
+       + fleet_table(swing_bots, 'Swing Trading League')
+       + pm_table(pm_bots, 'Polymarket League');
 }
 
 // ── Archive Tab ────────────────────────────────────────────────────────────────
@@ -1062,6 +1112,48 @@ function render_polymarket(pm) {
       <div class="pm-stat-label">Total Trades</div>
       <div class="pm-stat-value">${total_trades}</div>
     </div>
+  </div>`;
+
+  // ── Open Positions ──
+  const open_pos = pm.open_positions || [];
+  let open_pos_html = '';
+  if (open_pos.length === 0) {
+    open_pos_html = '<div class="pm-empty">No open positions</div>';
+  } else {
+    const pos_rows = open_pos.map(p => {
+      const entry_c   = (p.entry_price * 100).toFixed(1);
+      const curr_c    = (p.current_price * 100).toFixed(1);
+      const upnl      = typeof p.unrealized_pnl === 'number' ? fmt_pnl_usd(p.unrealized_pnl) : '\u2014';
+      const cost      = typeof p.cost_usd === 'number' ? '$' + p.cost_usd.toFixed(0) : '\u2014';
+      const val       = typeof p.current_value === 'number' ? '$' + p.current_value.toFixed(2) : '\u2014';
+      const price_cls = p.current_price > p.entry_price ? 'pnl-pos'
+                      : p.current_price < p.entry_price ? 'pnl-neg' : '';
+      return `
+      <tr>
+        <td class="bot-name">${esc(p.bot || '\u2014')}</td>
+        <td style="color:var(--muted);font-size:11px">${esc(p.trader || '\u2014')}</td>
+        <td style="max-width:240px;word-break:break-word">${esc(p.market || '\u2014')}</td>
+        <td><span class="pm-outcome-open">${esc(p.outcome || '\u2014')}</span></td>
+        <td><span style="color:var(--muted)">${entry_c}\u00a2</span> \u2192 <span class="${price_cls}">${curr_c}\u00a2</span></td>
+        <td style="color:var(--muted)">${cost}</td>
+        <td>${val}</td>
+        <td>${upnl}</td>
+      </tr>`;
+    }).join('');
+    open_pos_html = `
+    <table>
+      <thead><tr>
+        <th>Bot</th><th>Directive</th><th>Market</th><th>Pick</th>
+        <th>Entry \u2192 Now</th><th>Cost</th><th>Value</th><th>Unreal P&amp;L</th>
+      </tr></thead>
+      <tbody>${pos_rows}</tbody>
+    </table>`;
+  }
+
+  html += `
+  <div class="pm-section">
+    <div class="pm-section-title">Open Positions (${open_pos.length})</div>
+    <div class="pm-section-body" style="padding:0">${open_pos_html}</div>
   </div>`;
 
   // ── Tracked Traders ──
@@ -1234,7 +1326,7 @@ function render(data) {
 
   // Fleet tab
   const fleet_el = document.getElementById('main-fleet');
-  if (fleet_el) fleet_el.innerHTML = render_fleet(data.fleet_roster);
+  if (fleet_el) fleet_el.innerHTML = render_fleet(data.fleet_roster, window._pm_data || null);
 
   // Archive tab
   const arc_el = document.getElementById('main-archive');

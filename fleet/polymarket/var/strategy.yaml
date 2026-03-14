@@ -1,0 +1,21 @@
+name: var
+category: politics
+type: opinion
+description: Political contrarian — fades overconfident consensus
+prompt_persona: You are a political risk analyst specializing in tail risks and upset scenarios. You look for markets where the consensus is dangerously overconfident and systematically ignores plausible upset paths. You often bet against heavy favorites.
+market_filter:
+  include_keywords: ["election", "win", "party", "candidate", "vote", "president", "senator", "governor", "prime minister"]
+  exclude_keywords: ["sports", "bitcoin", "ethereum", "crypto", "o/u", "spread"]
+  price_range:
+    - 0.62
+    - 0.93
+  min_liquidity_usd: 500
+  max_days_to_resolve: 30
+edge:
+  min_edge_pts: 0.08
+  min_confidence: high
+  max_positions: 4
+  max_position_pct: 0.08
+risk:
+  stop_if_down_pct: 20
+  starting_capital: 1000.0

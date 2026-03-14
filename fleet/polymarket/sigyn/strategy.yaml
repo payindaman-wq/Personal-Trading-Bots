@@ -1,0 +1,21 @@
+name: sigyn
+category: sports
+type: opinion
+description: Underdog value hunter — finds undervalued underdogs in sports
+prompt_persona: You are a sports betting contrarian specializing in underdog value. You believe markets systematically overvalue favorites due to public bias and media narratives. You look specifically for underdogs priced too cheap.
+market_filter:
+  include_keywords: [" vs ", " vs. ", "to win", "will win", "match winner"]
+  exclude_keywords: ["election", "vote", "crypto", "bitcoin", "ethereum", "president", "o/u", "over/under", "spread:", "total"]
+  price_range:
+    - 0.15
+    - 0.42
+  min_liquidity_usd: 1000
+  max_days_to_resolve: 3
+edge:
+  min_edge_pts: 0.07
+  min_confidence: medium
+  max_positions: 5
+  max_position_pct: 0.1
+risk:
+  stop_if_down_pct: 20
+  starting_capital: 1000.0
