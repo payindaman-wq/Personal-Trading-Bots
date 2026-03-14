@@ -300,6 +300,17 @@
   .act-league-day   { color: var(--blue);   font-size: 9px; letter-spacing: 1px; text-transform: uppercase; }
   .act-league-swing { color: var(--purple); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; }
 
+  /* ── Fleet Table — uniform column widths across all sections ── */
+  .fleet-table { table-layout: fixed; }
+  .fleet-table th:nth-child(1), .fleet-table td:nth-child(1) { width: 110px; }
+  .fleet-table th:nth-child(2), .fleet-table td:nth-child(2) { width: 68px;  text-align: center; }
+  .fleet-table th:nth-child(3), .fleet-table td:nth-child(3) { overflow: hidden; text-overflow: ellipsis; }
+  .fleet-table th:nth-child(4), .fleet-table td:nth-child(4) { width: 68px;  text-align: right; }
+  .fleet-table th:nth-child(5), .fleet-table td:nth-child(5) { width: 90px;  text-align: right; }
+  .fleet-table th:nth-child(6), .fleet-table td:nth-child(6) { width: 90px;  text-align: right; }
+  .fleet-table th:nth-child(7), .fleet-table td:nth-child(7) { width: 60px;  text-align: right; }
+  .fleet-table th:nth-child(8), .fleet-table td:nth-child(8) { width: 60px;  text-align: right; }
+
   /* ── Fleet Tab ── */
   .fleet-section-title {
     font-size: 13px;
@@ -965,7 +976,7 @@ function render_fleet(roster, pm, pm_auto) {
     <div class="fleet-card">
       <div class="fleet-section-title">${title}</div>
       <div class="section" style="padding:0;">
-        <table>
+        <table class="fleet-table">
           <thead><tr>
             <th>Bot</th><th>Type</th>
             <th class="hide-mobile">Strategy</th>
