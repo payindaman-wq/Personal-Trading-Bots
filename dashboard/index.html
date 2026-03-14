@@ -876,7 +876,7 @@ function render_activity_feed(feed) {
 
 // ── Fleet Tab ──────────────────────────────────────────────────────────────────
 
-function render_fleet(roster, pm) {
+function render_fleet(roster, pm, pm_auto) {
   if (!roster || roster.length === 0) {
     return '<div class="loading">No fleet data available</div>';
   }
@@ -977,10 +977,59 @@ function render_fleet(roster, pm) {
     </div>`;
   }
 
+  function auto_category_table(category_key, title) {
+    const bots = pm_auto && pm_auto.bots
+      ? pm_auto.bots.filter(b => b.category === category_key)
+      : [];
+    if (bots.length === 0) return `
+    <div class="fleet-card">
+      <div class="fleet-section-title">${title}</div>
+      <div class="pm-empty" style="padding:14px 18px">No data</div>
+    </div>`;
+    const rows = bots.map(b => {
+      const pnl_cls = b.pnl_usd > 0 ? 'pnl-pos' : b.pnl_usd < 0 ? 'pnl-neg' : 'pnl-zero';
+      const sign    = b.pnl_usd > 0 ? '+' : '';
+      const wr      = typeof b.win_rate === 'number' && b.trades > 0
+                      ? `<span class="win-rate">${b.win_rate.toFixed(0)}%</span>` : '<span class="pnl-zero">—</span>';
+      return `
+      <tr>
+        <td class="bot-name">${esc(b.bot)}</td>
+        <td><span class="badge" style="background:rgba(188,140,255,0.15);color:#bc8cff;letter-spacing:.5px">AUTO</span></td>
+        <td class="fleet-style hide-mobile">${esc(b.assigned_trader || '—')}</td>
+        <td>${b.active_positions || 0}</td>
+        <td>${b.trades || 0}</td>
+        <td class="${pnl_cls}">${sign}$${Math.abs(b.pnl_usd || 0).toFixed(2)}</td>
+        <td class="hide-mobile">${wr}</td>
+      </tr>`;
+    }).join('');
+    return `
+    <div class="fleet-card">
+      <div class="fleet-section-title">${title}</div>
+      <div class="section" style="padding:0;">
+        <table>
+          <thead><tr>
+            <th>Bot</th><th>Type</th>
+            <th class="hide-mobile">Method</th>
+            <th>Open</th><th>Trades</th>
+            <th>P&amp;L</th>
+            <th class="hide-mobile">Win%</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
+  }
+
   const pm_bots = pm && pm.bots ? pm.bots : [];
   return fleet_table(day_bots, 'Day Trading League')
        + fleet_table(swing_bots, 'Swing Trading League')
-       + pm_table(pm_bots, 'Polymarket League');
+       + pm_table(pm_bots, 'Polymarket — Copy-Traders')
+       + auto_category_table('sports',       'Polymarket — Sports')
+       + auto_category_table('politics',     'Polymarket — Politics')
+       + auto_category_table('crypto',       'Polymarket — Crypto')
+       + auto_category_table('macro',        'Polymarket — Macro')
+       + auto_category_table('world_events', 'Polymarket — World Events')
+       + auto_category_table('arb',          'Polymarket — Arb');
 }
 
 // ── Archive Tab ────────────────────────────────────────────────────────────────
@@ -1292,6 +1341,14 @@ async function load_data() {
         window._pm_data = null;
       }
     } catch (_) { window._pm_data = null; }
+    try {
+      const pm_auto_res = await fetch('/api/polymarket_auto.json?t=' + Date.now());
+      if (pm_auto_res.ok) {
+        window._pm_auto_data = await pm_auto_res.json();
+      } else {
+        window._pm_auto_data = null;
+      }
+    } catch (_) { window._pm_auto_data = null; }
     render(data);
     start_countdown();
   } catch (e) {
@@ -1326,7 +1383,7 @@ function render(data) {
 
   // Fleet tab
   const fleet_el = document.getElementById('main-fleet');
-  if (fleet_el) fleet_el.innerHTML = render_fleet(data.fleet_roster, window._pm_data || null);
+  if (fleet_el) fleet_el.innerHTML = render_fleet(data.fleet_roster, window._pm_data || null, window._pm_auto_data || null);
 
   // Archive tab
   const arc_el = document.getElementById('main-archive');
