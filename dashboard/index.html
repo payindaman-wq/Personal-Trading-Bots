@@ -881,130 +881,86 @@ function render_fleet(roster, pm, pm_auto) {
     return '<div class="loading">No fleet data available</div>';
   }
 
-  const day_bots   = roster.filter(b => b.league === 'day').sort((a, b) => b.points - a.points);
-  const swing_bots = roster.filter(b => b.league === 'swing').sort((a, b) => b.points - a.points);
-
-  function bot_rows(bots) {
-    return bots.map(b => {
-      const pnl_cls = b.cumulative_pnl_usd > 0 ? 'pnl-pos' : b.cumulative_pnl_usd < 0 ? 'pnl-neg' : 'pnl-zero';
-      const avg_cls = b.avg_pnl_pct_per_sprint > 0 ? 'pnl-pos' : b.avg_pnl_pct_per_sprint < 0 ? 'pnl-neg' : 'pnl-zero';
-      const sign    = b.cumulative_pnl_usd > 0 ? '+' : '';
-      const avg_sign = b.avg_pnl_pct_per_sprint > 0 ? '+' : '';
-      return `
-      <tr>
-        <td class="bot-name">${esc(b.bot)}</td>
-        <td><span class="badge badge-${b.league}">${b.league.toUpperCase()}</span></td>
-        <td class="fleet-style hide-mobile">${esc(b.style)}</td>
-        <td class="fleet-inspired hide-mobile">${esc(b.inspired_by)}</td>
-        <td>${b.sprints_entered}</td>
-        <td>${b.sprint_wins}</td>
-        <td class="pts">${b.points}</td>
-        <td class="${pnl_cls}">${sign}$${Math.abs(b.cumulative_pnl_usd).toFixed(2)}</td>
-        <td class="hide-mobile ${avg_cls}">${avg_sign}${Math.abs(b.avg_pnl_pct_per_sprint).toFixed(2)}%</td>
-        <td class="hide-mobile">${b.overall_win_rate > 0 ? `<span class="win-rate">${b.overall_win_rate.toFixed(0)}%</span>` : '<span class="pnl-zero">—</span>'}</td>
-        <td class="hide-mobile">${b.total_trades}</td>
-      </tr>`;
-    }).join('');
+  // ── Normalize all bot types to a common schema ──────────────────────────────
+  function norm_trading(b) {
+    return {
+      bot:      b.bot,
+      type:     b.league.toUpperCase(),
+      league:   b.league,
+      strategy: b.style || '—',
+      sprints:  b.sprints_entered || 0,
+      pnl:      b.cumulative_pnl_usd || 0,
+      avg:      b.avg_pnl_pct_per_sprint,   // number → show as %
+      win_rate: b.overall_win_rate || 0,
+      trades:   b.total_trades || 0,
+    };
   }
 
-  function fleet_table(bots, title) {
-    if (bots.length === 0) return '';
+  function norm_copy(b) {
+    const pnl = typeof b.sprint_pnl_usd === 'number' ? b.sprint_pnl_usd : b.pnl_usd || 0;
+    const wr  = typeof b.sprint_win_rate === 'number' ? b.sprint_win_rate : b.win_rate || 0;
+    const tr  = typeof b.sprint_trades === 'number'   ? b.sprint_trades   : b.trades  || 0;
+    return {
+      bot:      b.bot,
+      type:     'COPY',
+      league:   'copy',
+      strategy: b.assigned_trader || '—',
+      sprints:  1,
+      pnl:      pnl,
+      avg:      null,
+      win_rate: wr,
+      trades:   tr,
+    };
+  }
+
+  function norm_auto(b) {
+    return {
+      bot:      b.bot,
+      type:     'AUTO',
+      league:   'auto',
+      strategy: b.assigned_trader || '—',
+      sprints:  1,
+      pnl:      b.pnl_usd || 0,
+      avg:      null,
+      win_rate: b.win_rate || 0,
+      trades:   b.trades || 0,
+    };
+  }
+
+  // ── Single row renderer for all bot types ───────────────────────────────────
+  function bot_row(b) {
+    const pnl_cls  = b.pnl > 0 ? 'pnl-pos' : b.pnl < 0 ? 'pnl-neg' : 'pnl-zero';
+    const sign     = b.pnl > 0 ? '+' : '';
+    const avg_html = b.avg != null
+      ? `<span class="${b.avg >= 0 ? 'pnl-pos' : 'pnl-neg'}">${b.avg >= 0 ? '+' : ''}${b.avg.toFixed(2)}%</span>`
+      : '<span class="pnl-zero">—</span>';
+    const wr_html  = b.trades > 0
+      ? `<span class="win-rate">${b.win_rate.toFixed(0)}%</span>`
+      : '<span class="pnl-zero">—</span>';
+    const badge = b.league === 'day'   ? `<span class="badge badge-day">DAY</span>`
+                : b.league === 'swing' ? `<span class="badge badge-swing">SWING</span>`
+                : b.league === 'copy'  ? `<span class="badge" style="background:rgba(188,140,255,0.15);color:#bc8cff">COPY</span>`
+                :                       `<span class="badge" style="background:rgba(88,166,255,0.15);color:#58a6ff">AUTO</span>`;
     return `
-    <div class="fleet-card">
-      <div class="fleet-section-title">${title}</div>
-      <div class="section" style="padding:0;">
-        <table>
-          <thead><tr>
-            <th>Bot</th><th>League</th>
-            <th class="hide-mobile">Style</th>
-            <th class="hide-mobile">Inspired By</th>
-            <th>Sprints</th><th>1st</th><th>Pts</th>
-            <th>Cum P&amp;L</th>
-            <th class="hide-mobile">Avg/Sprint</th>
-            <th class="hide-mobile">Win%</th>
-            <th class="hide-mobile">Trades</th>
-          </tr></thead>
-          <tbody>${bot_rows(bots)}</tbody>
-        </table>
-      </div>
-    </div>`;
+    <tr>
+      <td class="bot-name">${esc(b.bot)}</td>
+      <td>${badge}</td>
+      <td class="fleet-style hide-mobile">${esc(b.strategy)}</td>
+      <td>${b.sprints}</td>
+      <td class="${pnl_cls}">${sign}$${Math.abs(b.pnl).toFixed(2)}</td>
+      <td class="hide-mobile">${avg_html}</td>
+      <td class="hide-mobile">${wr_html}</td>
+      <td class="hide-mobile">${b.trades}</td>
+    </tr>`;
   }
 
-  function pm_table(bots, title) {
+  // ── Single table renderer for all sections ───────────────────────────────────
+  function section_table(bots, title) {
     if (!bots || bots.length === 0) return `
-    <div class="fleet-card">
-      <div class="fleet-section-title">${title}</div>
-      <div class="pm-empty" style="padding:14px 18px">No Polymarket bots configured</div>
-    </div>`;
-    const rows = bots.map(b => {
-      const sprint_pnl = typeof b.sprint_pnl_usd === 'number' ? b.sprint_pnl_usd : b.pnl_usd || 0;
-      const sprint_wr  = typeof b.sprint_win_rate === 'number' ? b.sprint_win_rate : b.win_rate || 0;
-      const sprint_tr  = typeof b.sprint_trades === 'number' ? b.sprint_trades : b.trades || 0;
-      const pnl_cls = sprint_pnl > 0 ? 'pnl-pos' : sprint_pnl < 0 ? 'pnl-neg' : 'pnl-zero';
-      const sign    = sprint_pnl > 0 ? '+' : '';
-      const wr      = sprint_tr > 0
-                      ? `<span class="win-rate">${sprint_wr.toFixed(0)}%</span>` : '<span class="pnl-zero">—</span>';
-      return `
-      <tr>
-        <td class="bot-name">${esc(b.bot)}</td>
-        <td><span class="badge" style="background:rgba(188,140,255,0.15);color:#bc8cff;letter-spacing:.5px">COPY</span></td>
-        <td class="fleet-style hide-mobile">${esc(b.assigned_trader || '—')}</td>
-        <td class="fleet-inspired hide-mobile">copy-trading</td>
-        <td>${b.active_positions || 0}</td>
-        <td>${sprint_tr}</td>
-        <td class="pts">—</td>
-        <td class="${pnl_cls}">${sign}$${Math.abs(sprint_pnl).toFixed(2)}</td>
-        <td class="hide-mobile pnl-zero">—</td>
-        <td class="hide-mobile">${wr}</td>
-        <td class="hide-mobile">${sprint_tr}</td>
-      </tr>`;
-    }).join('');
-    return `
-    <div class="fleet-card">
-      <div class="fleet-section-title">${title}</div>
-      <div class="section" style="padding:0;">
-        <table>
-          <thead><tr>
-            <th>Bot</th><th>League</th>
-            <th class="hide-mobile">Directive</th>
-            <th class="hide-mobile">Strategy</th>
-            <th>Open</th><th>Trades</th><th>Pts</th>
-            <th>P&amp;L</th>
-            <th class="hide-mobile">Avg/Sprint</th>
-            <th class="hide-mobile">Win%</th>
-            <th class="hide-mobile">Trades</th>
-          </tr></thead>
-          <tbody>${rows}</tbody>
-        </table>
-      </div>
-    </div>`;
-  }
-
-  function auto_category_table(category_key, title) {
-    const bots = pm_auto && pm_auto.bots
-      ? pm_auto.bots.filter(b => b.category === category_key)
-      : [];
-    if (bots.length === 0) return `
     <div class="fleet-card">
       <div class="fleet-section-title">${title}</div>
       <div class="pm-empty" style="padding:14px 18px">No data</div>
     </div>`;
-    const rows = bots.map(b => {
-      const pnl_cls = b.pnl_usd > 0 ? 'pnl-pos' : b.pnl_usd < 0 ? 'pnl-neg' : 'pnl-zero';
-      const sign    = b.pnl_usd > 0 ? '+' : '';
-      const wr      = typeof b.win_rate === 'number' && b.trades > 0
-                      ? `<span class="win-rate">${b.win_rate.toFixed(0)}%</span>` : '<span class="pnl-zero">—</span>';
-      return `
-      <tr>
-        <td class="bot-name">${esc(b.bot)}</td>
-        <td><span class="badge" style="background:rgba(188,140,255,0.15);color:#bc8cff;letter-spacing:.5px">AUTO</span></td>
-        <td class="fleet-style hide-mobile">${esc(b.assigned_trader || '—')}</td>
-        <td>${b.active_positions || 0}</td>
-        <td>${b.trades || 0}</td>
-        <td class="${pnl_cls}">${sign}$${Math.abs(b.pnl_usd || 0).toFixed(2)}</td>
-        <td class="hide-mobile">${wr}</td>
-      </tr>`;
-    }).join('');
     return `
     <div class="fleet-card">
       <div class="fleet-section-title">${title}</div>
@@ -1012,27 +968,39 @@ function render_fleet(roster, pm, pm_auto) {
         <table>
           <thead><tr>
             <th>Bot</th><th>Type</th>
-            <th class="hide-mobile">Method</th>
-            <th>Open</th><th>Trades</th>
+            <th class="hide-mobile">Strategy</th>
+            <th>Sprints</th>
             <th>P&amp;L</th>
+            <th class="hide-mobile">Avg/Sprint</th>
             <th class="hide-mobile">Win%</th>
+            <th class="hide-mobile">Trades</th>
           </tr></thead>
-          <tbody>${rows}</tbody>
+          <tbody>${bots.map(bot_row).join('')}</tbody>
         </table>
       </div>
     </div>`;
   }
 
-  const pm_bots = pm && pm.bots ? pm.bots : [];
-  return fleet_table(day_bots, 'Day Trading League')
-       + fleet_table(swing_bots, 'Swing Trading League')
-       + pm_table(pm_bots, 'Polymarket — Copy-Traders')
-       + auto_category_table('sports',       'Polymarket — Sports')
-       + auto_category_table('politics',     'Polymarket — Politics')
-       + auto_category_table('crypto',       'Polymarket — Crypto')
-       + auto_category_table('macro',        'Polymarket — Macro')
-       + auto_category_table('world_events', 'Polymarket — World Events')
-       + auto_category_table('arb',          'Polymarket — Arb');
+  // ── Assemble sections ────────────────────────────────────────────────────────
+  const day_bots   = roster.filter(b => b.league === 'day').sort((a,b) => b.points - a.points).map(norm_trading);
+  const swing_bots = roster.filter(b => b.league === 'swing').sort((a,b) => b.points - a.points).map(norm_trading);
+  const copy_bots  = pm && pm.bots ? pm.bots.map(norm_copy) : [];
+
+  function auto_section(cat) {
+    return pm_auto && pm_auto.bots
+      ? pm_auto.bots.filter(b => b.category === cat).map(norm_auto)
+      : [];
+  }
+
+  return section_table(day_bots,                    'Day Trading League')
+       + section_table(swing_bots,                  'Swing Trading League')
+       + section_table(copy_bots,                   'Polymarket — Copy-Traders')
+       + section_table(auto_section('sports'),      'Polymarket — Sports')
+       + section_table(auto_section('politics'),    'Polymarket — Politics')
+       + section_table(auto_section('crypto'),      'Polymarket — Crypto')
+       + section_table(auto_section('macro'),       'Polymarket — Macro')
+       + section_table(auto_section('world_events'),'Polymarket — World Events')
+       + section_table(auto_section('arb'),         'Polymarket — Arb');
 }
 
 // ── Archive Tab ────────────────────────────────────────────────────────────────
