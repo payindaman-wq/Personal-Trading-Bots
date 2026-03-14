@@ -300,6 +300,50 @@
   .act-league-day   { color: var(--blue);   font-size: 9px; letter-spacing: 1px; text-transform: uppercase; }
   .act-league-swing { color: var(--purple); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; }
 
+  /* ── Overview Org Chart ── */
+  .ov-section-title {
+    font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 12px; padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .ov-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .ov-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px 18px;
+  }
+  .ov-card.active  { border-color: rgba(63,185,80,.35); }
+  .ov-card.pending { border-color: var(--border); opacity: .55; }
+  .ov-card-title {
+    font-size: 13px; font-weight: bold; letter-spacing: .5px;
+    color: var(--text); margin-bottom: 4px;
+  }
+  .ov-card-meta {
+    font-size: 11px; color: var(--muted); margin-bottom: 10px; line-height: 1.6;
+  }
+  .ov-card-stats { display: flex; gap: 20px; font-size: 11px; }
+  .ov-stat { display: flex; flex-direction: column; gap: 1px; }
+  .ov-stat-val { font-weight: bold; color: var(--text); font-size: 13px; }
+  .ov-stat-lbl { color: var(--muted); font-size: 10px; letter-spacing: .5px; text-transform: uppercase; }
+  .ov-card-leader {
+    margin-top: 10px; font-size: 11px; color: var(--muted);
+    border-top: 1px solid var(--border); padding-top: 8px;
+  }
+  .ov-leader-name { color: var(--gold); font-weight: bold; }
+  .ov-pending-badge {
+    display: inline-block; font-size: 9px; letter-spacing: 1px; text-transform: uppercase;
+    padding: 2px 7px; border-radius: 3px;
+    background: rgba(84,106,123,.15); color: var(--muted);
+    border: 1px solid var(--border2); margin-bottom: 6px;
+  }
+  .ov-phase { font-size: 10px; color: var(--muted); letter-spacing: .5px; margin-bottom: 3px; }
+
   /* ── Fleet Table — uniform column widths across all sections ── */
   .fleet-table { table-layout: fixed; }
   .fleet-table th:nth-child(1), .fleet-table td:nth-child(1) { width: 110px; }
@@ -530,6 +574,8 @@
 <!-- Tab Bar -->
 <div class="tab-bar">
   <button class="tab-btn active" onclick="switch_tab('overview', this)">Overview</button>
+  <button class="tab-btn" onclick="switch_tab('day', this)">Day</button>
+  <button class="tab-btn" onclick="switch_tab('swing', this)">Swing</button>
   <button class="tab-btn" onclick="switch_tab('fleet', this)">Fleet</button>
   <button class="tab-btn" onclick="switch_tab('polymarket', this)">Polymarket</button>
   <button class="tab-btn" onclick="switch_tab('archive', this)">Archive</button>
@@ -538,7 +584,21 @@
 <!-- Tab: Overview -->
 <div class="tab-panel active" id="tab-overview">
   <div class="main" id="main-overview">
-    <div class="loading">Loading fleet data...</div>
+    <div class="loading">Loading...</div>
+  </div>
+</div>
+
+<!-- Tab: Day -->
+<div class="tab-panel" id="tab-day">
+  <div class="main" id="main-day">
+    <div class="loading">Loading day trading data...</div>
+  </div>
+</div>
+
+<!-- Tab: Swing -->
+<div class="tab-panel" id="tab-swing">
+  <div class="main" id="main-swing">
+    <div class="loading">Loading swing trading data...</div>
   </div>
 </div>
 
@@ -1302,6 +1362,127 @@ function render_polymarket(pm) {
 }
 
 
+// ── Overview Tab ──────────────────────────────────────────────────────────────
+
+function render_overview(data) {
+  const leagues = data.leagues || {};
+  const day     = leagues.day;
+  const swing   = leagues.swing;
+  const pm      = window._pm_data;
+  const pm_auto = window._pm_auto_data;
+
+  function active_card(title, meta, badge_cls, badge_lbl, stats, leader_bot, leader_pnl) {
+    const leader_html = leader_bot
+      ? `<div class="ov-card-leader">Leader: <span class="ov-leader-name">${esc(leader_bot)}</span>${leader_pnl !== null ? ' &mdash; ' + fmt_pnl_usd(leader_pnl) : ''}</div>`
+      : '';
+    const stats_html = stats.map(s =>
+      `<div class="ov-stat"><span class="ov-stat-val">${s.val}</span><span class="ov-stat-lbl">${s.lbl}</span></div>`
+    ).join('');
+    return `
+    <div class="ov-card active">
+      <span class="badge ${badge_cls}" style="display:inline-block;margin-bottom:8px">${badge_lbl}</span>
+      <div class="ov-card-title">${title}</div>
+      <div class="ov-card-meta">${meta}</div>
+      <div class="ov-card-stats">${stats_html}</div>
+      ${leader_html}
+    </div>`;
+  }
+
+  function pending_card(phase, title, meta) {
+    return `
+    <div class="ov-card pending">
+      <div class="ov-phase">Phase ${phase}</div>
+      <span class="ov-pending-badge">Pending</span>
+      <div class="ov-card-title">${title}</div>
+      <div class="ov-card-meta">${meta}</div>
+    </div>`;
+  }
+
+  // Day League card
+  let day_card;
+  if (day) {
+    const is_live = !!day.live_sprint;
+    const bots    = (day.cumulative_rankings || []).length;
+    const leader  = day.cumulative_rankings && day.cumulative_rankings[0];
+    const stats   = [
+      { val: bots,                  lbl: 'Bots'    },
+      { val: day.total_sprints || 0, lbl: 'Sprints' },
+    ];
+    if (is_live) stats.push({ val: fmt_countdown(day.live_sprint.seconds_remaining), lbl: 'Remaining' });
+    day_card = active_card(
+      'Day Trading League', '4-hour sprints &mdash; 12 bots, 16 pairs',
+      'badge-day', is_live ? 'LIVE' : 'IDLE',
+      stats,
+      leader ? leader.bot : null,
+      leader ? leader.cumulative_pnl_usd : null
+    );
+  } else {
+    day_card = `<div class="ov-card pending"><span class="ov-pending-badge">Not Started</span><div class="ov-card-title">Day Trading League</div><div class="ov-card-meta">4-hour sprints &mdash; 12 bots, 16 pairs</div></div>`;
+  }
+
+  // Swing League card
+  let swing_card;
+  if (swing) {
+    const is_live = !!swing.live_sprint;
+    const bots    = (swing.cumulative_rankings || []).length;
+    const leader  = swing.cumulative_rankings && swing.cumulative_rankings[0];
+    const stats   = [
+      { val: bots,                    lbl: 'Bots'    },
+      { val: swing.total_sprints || 0, lbl: 'Sprints' },
+    ];
+    if (is_live) stats.push({ val: fmt_countdown(swing.live_sprint.seconds_remaining), lbl: 'Remaining' });
+    swing_card = active_card(
+      'Swing Trading League', '7-day sprints &mdash; 8 bots, multi-pair',
+      'badge-swing', is_live ? 'LIVE' : 'IDLE',
+      stats,
+      leader ? leader.bot : null,
+      leader ? leader.cumulative_pnl_usd : null
+    );
+  } else {
+    swing_card = `<div class="ov-card pending"><span class="ov-pending-badge">Not Started</span><div class="ov-card-title">Swing Trading League</div><div class="ov-card-meta">7-day sprints &mdash; 8 bots, multi-pair</div></div>`;
+  }
+
+  // Polymarket card
+  const copy_bots = pm && pm.bots ? pm.bots.length : 0;
+  const auto_bots = pm_auto && pm_auto.bots ? pm_auto.bots.length : 0;
+  const pm_active = (pm && pm.status === 'active') || (pm_auto && pm_auto.status === 'active');
+  const copy_pnl  = pm && pm.stats ? pm.stats.total_pnl_usd || 0 : 0;
+  const auto_pnl  = pm_auto && pm_auto.bots
+    ? pm_auto.bots.reduce((s, b) => s + (b.pnl_usd || 0), 0)
+    : 0;
+  const pm_card = active_card(
+    'Polymarket', 'Prediction market &mdash; copy-traders &amp; autonomous bots',
+    pm_active ? 'badge-live' : 'badge-idle', pm_active ? 'LIVE' : 'IDLE',
+    [
+      { val: copy_bots, lbl: 'Copy' },
+      { val: auto_bots, lbl: 'Auto' },
+      { val: fmt_pnl_usd(copy_pnl + auto_pnl), lbl: 'P&L' },
+    ],
+    null, null
+  );
+
+  return `
+  <div>
+    <div class="ov-section-title">Active Operations</div>
+    <div class="ov-grid">
+      ${day_card}
+      ${swing_card}
+      ${pm_card}
+    </div>
+  </div>
+  ${render_funded(data.funded_bots)}
+  <div>
+    <div class="ov-section-title">Expansion Pipeline</div>
+    <div class="ov-grid">
+      ${pending_card(3, 'Statistical Arb Trader',    'Cross-pair mean reversion &mdash; Swing league')}
+      ${pending_card(4, 'Cross-pair Spread Trader',  'Spread trading across correlated pairs')}
+      ${pending_card(5, 'Crypto Futures Day Trader', 'Leveraged perps &mdash; requires proven spot edge')}
+      ${pending_card(6, 'Crypto Futures Swing',      'Swing leverage &mdash; requires proven spot edge')}
+      ${pending_card(7, 'Macro Governor',            'Always-on risk officer &mdash; controls all bots')}
+    </div>
+  </div>`;
+}
+
 // ── Data loading ──────────────────────────────────────────────────────────────
 
 let refresh_timer = null;
@@ -1363,16 +1544,26 @@ function render(data) {
   if (data.system_health) render_health(data.system_health);
 
   // Overview tab
-  let overview_html = '';
-  const league_order = ['day', 'swing'];
-  for (const id of league_order) {
-    const league = data.leagues && data.leagues[id];
-    if (league) overview_html += render_league(id, league);
-  }
-  overview_html += render_funded(data.funded_bots);
-  overview_html += render_activity_feed(data.activity_feed);
   const ov = document.getElementById('main-overview');
-  if (ov) ov.innerHTML = overview_html;
+  if (ov) ov.innerHTML = render_overview(data) + render_activity_feed(data.activity_feed);
+
+  // Day tab
+  const day_tab_el = document.getElementById('main-day');
+  if (day_tab_el) {
+    const day_league = data.leagues && data.leagues.day;
+    day_tab_el.innerHTML = day_league
+      ? render_league('day', day_league)
+      : '<div class="idle-notice">No day trading data available</div>';
+  }
+
+  // Swing tab
+  const swing_tab_el = document.getElementById('main-swing');
+  if (swing_tab_el) {
+    const swing_league = data.leagues && data.leagues.swing;
+    swing_tab_el.innerHTML = swing_league
+      ? render_league('swing', swing_league)
+      : '<div class="idle-notice">No swing trading data available</div>';
+  }
 
   // Fleet tab
   const fleet_el = document.getElementById('main-fleet');
