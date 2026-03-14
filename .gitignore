@@ -7,10 +7,12 @@ config/local/
 kraken_credentials.json
 telegram_config.json
 
-# --- Runtime competition data ------------------------------------------------
+# --- Runtime competition data (VPS-only, never commit) -----------------------
 competition/active/
 competition/abandoned/
 competition/results/
+competition/archive/
+competition/cycle_state.json
 competition/leaderboard.json
 competition/leaderboard.log
 competition/cron.log
@@ -18,8 +20,12 @@ competition/backtest_results.json
 competition/swing/active/
 competition/swing/price_history/
 competition/swing/swing_leaderboard.json
+competition/swing/swing_cycle_state.json
 competition/swing/tick.log
 competition/swing/leaderboard.log
+competition/polymarket/state.json
+competition/polymarket/auto_state.json
+competition/polymarket/polymarket_cycle_state.json
 *.log
 .timezone
 
@@ -31,6 +37,7 @@ tax/*.json
 competition/accounting/ledger.json
 competition/accounting/open_lots.json
 competition/accounting/reserves.json
+competition/accounting/
 
 # --- Agent memory and identity (private) ------------------------------------
 .openclaw/
