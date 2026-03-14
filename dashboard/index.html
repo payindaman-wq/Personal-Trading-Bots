@@ -818,14 +818,16 @@ function render_cumulative(rankings, label) {
   </div>`;
 }
 
-function render_league(id, league) {
-  const is_live = !!league.live_sprint;
-  const ls      = league.live_sprint;
+function render_league(id, league, cycle_state) {
+  const is_live   = !!league.live_sprint;
+  const ls        = league.live_sprint;
+  const cs        = cycle_state || { cycle: 1, sprint_in_cycle: 0, sprints_per_cycle: 7 };
+  const cycle_num = cs.cycle || 1;
+  const sprint_num = cs.sprint_in_cycle + 1; // completed in cycle + 1 = current sprint
 
-  const sprint_num = league.total_sprints || 1;
   const sprint_bar = ls ? `
   <div class="sprint-bar">
-    <span style="color:var(--text);font-weight:bold">Sprint #${sprint_num}</span>
+    <span style="color:var(--text);font-weight:bold">Cycle #${cycle_num} &mdash; Sprint #${sprint_num}</span>
     <span class="sprint-id hide-mobile">${esc(ls.sprint_id)}</span>
     <span>Ends in: <span class="countdown">${fmt_countdown(ls.seconds_remaining)}</span></span>
     <span class="hide-mobile pairs">Pairs: ${ls.pairs.map(esc).join(' &middot; ')}</span>
@@ -836,7 +838,7 @@ function render_league(id, league) {
     ? render_live_sprint(ls)
     : `<div class="idle-notice">No active sprint — awaiting next competition start</div>`;
 
-  const cum_label = `Cycle #1 &mdash; Cumulative Standings &mdash; ${league.total_sprints} sprint${league.total_sprints !== 1 ? 's' : ''} recorded`;
+  const cum_label = `Cycle #${cycle_num} &mdash; Cumulative Standings &mdash; ${league.total_sprints} sprint${league.total_sprints !== 1 ? 's' : ''} recorded`;
   const cum_section = league.cumulative_rankings && league.cumulative_rankings.length > 0
     ? render_cumulative(league.cumulative_rankings, cum_label)
     : '';
@@ -846,7 +848,7 @@ function render_league(id, league) {
     <div class="league-header">
       <div>
         <div class="league-title">${esc(league.label)}</div>
-        <div class="league-meta">${league.sprint_duration_hours}h sprints &mdash; points: 1st=8 &middot; 2nd=5 &middot; 3rd=3 &middot; 4th+=1</div>
+        <div class="league-meta">${fmt_duration(league.sprint_duration_hours)} sprints &mdash; points: 1st=8 &middot; 2nd=5 &middot; 3rd=3 &middot; 4th+=1</div>
       </div>
       <span class="badge ${is_live ? 'badge-live' : 'badge-idle'}">${is_live ? 'Live' : 'Idle'}</span>
     </div>
@@ -1096,11 +1098,12 @@ function render_fleet(roster, pm, pm_auto) {
 
 // ── Archive Tab ────────────────────────────────────────────────────────────────
 
-function render_archive(archive) {
+function render_archive(archive, cycle_configs) {
   if (!archive || archive.length === 0) {
     return `<div class="archive-empty">No completed sprints yet &mdash; results will appear here after sprints finish</div>`;
   }
 
+  const cfgs = cycle_configs || {};
   const league_labels = { day: 'Day Trading League', swing: 'Swing Trading League' };
   const sprint_counters = {};
 
@@ -1108,9 +1111,11 @@ function render_archive(archive) {
   archive.forEach((sprint, idx) => {
     const lg        = sprint.league || 'unknown';
     sprint_counters[lg] = (sprint_counters[lg] || 0) + 1;
-    const sprint_num = sprint_counters[lg];
-    const cycle_num  = 1; // Cycle tracking added in future; Cycle 1 for all current sprints
-    const lg_label   = league_labels[lg] || lg.toUpperCase();
+    const total     = sprint_counters[lg];
+    const per       = (cfgs[lg] && cfgs[lg].sprints_per_cycle) || 7;
+    const cycle_num      = Math.ceil(total / per);
+    const sprint_num     = ((total - 1) % per) + 1;
+    const lg_label  = league_labels[lg] || lg.toUpperCase();
 
     const top3 = (sprint.rankings || []).slice(0, 3);
     const top3_html = top3.map((r, i) => {
@@ -1429,14 +1434,14 @@ function render_overview(data) {
     ];
     if (is_live) stats.push({ val: fmt_countdown(day.live_sprint.seconds_remaining), lbl: 'Remaining' });
     day_card = active_card(
-      'Day Trading League', '4-hour sprints &mdash; 12 bots, 16 pairs',
+      'Day Trading League', `${fmt_duration(day.sprint_duration_hours)} sprints &mdash; 12 bots, 16 pairs`,
       'badge-day', is_live ? 'LIVE' : 'IDLE',
       stats,
       leader ? leader.bot : null,
       leader ? leader.cumulative_pnl_usd : null
     );
   } else {
-    day_card = `<div class="ov-card pending"><span class="ov-pending-badge">Not Started</span><div class="ov-card-title">Day Trading League</div><div class="ov-card-meta">4-hour sprints &mdash; 12 bots, 16 pairs</div></div>`;
+    day_card = `<div class="ov-card pending"><span class="ov-pending-badge">Not Started</span><div class="ov-card-title">Day Trading League</div><div class="ov-card-meta">1d sprints &mdash; 12 bots, 16 pairs</div></div>`;
   }
 
   // Swing League card
@@ -1451,14 +1456,14 @@ function render_overview(data) {
     ];
     if (is_live) stats.push({ val: fmt_countdown(swing.live_sprint.seconds_remaining), lbl: 'Remaining' });
     swing_card = active_card(
-      'Swing Trading League', '7-day sprints &mdash; 8 bots, multi-pair',
+      'Swing Trading League', `${fmt_duration(swing.sprint_duration_hours)} sprints &mdash; 8 bots, multi-pair`,
       'badge-swing', is_live ? 'LIVE' : 'IDLE',
       stats,
       leader ? leader.bot : null,
       leader ? leader.cumulative_pnl_usd : null
     );
   } else {
-    swing_card = `<div class="ov-card pending"><span class="ov-pending-badge">Not Started</span><div class="ov-card-title">Swing Trading League</div><div class="ov-card-meta">7-day sprints &mdash; 8 bots, multi-pair</div></div>`;
+    swing_card = `<div class="ov-card pending"><span class="ov-pending-badge">Not Started</span><div class="ov-card-title">Swing Trading League</div><div class="ov-card-meta">7d sprints &mdash; 8 bots, multi-pair</div></div>`;
   }
 
   // Polymarket card
@@ -1570,12 +1575,16 @@ function render(data) {
   const lb_el = document.getElementById('main-leaderboard');
   if (lb_el) lb_el.innerHTML = render_fleet(data.fleet_roster, window._pm_data || null, window._pm_auto_data || null);
 
+  // Cycle states
+  const day_cs   = data.cycle_state       || { cycle: 1, sprint_in_cycle: 0, sprints_per_cycle: 7 };
+  const swing_cs = data.swing_cycle_state || { cycle: 1, sprint_in_cycle: 0, sprints_per_cycle: 4 };
+
   // Day tab
   const day_tab_el = document.getElementById('main-day');
   if (day_tab_el) {
     const day_league = data.leagues && data.leagues.day;
     day_tab_el.innerHTML = (day_league
-      ? render_league('day', day_league)
+      ? render_league('day', day_league, day_cs)
       : '<div class="idle-notice">No day trading data available</div>')
       + render_activity_feed(data.activity_feed, 'day');
   }
@@ -1585,14 +1594,15 @@ function render(data) {
   if (swing_tab_el) {
     const swing_league = data.leagues && data.leagues.swing;
     swing_tab_el.innerHTML = (swing_league
-      ? render_league('swing', swing_league)
+      ? render_league('swing', swing_league, swing_cs)
       : '<div class="idle-notice">No swing trading data available</div>')
       + render_activity_feed(data.activity_feed, 'swing');
   }
 
   // Archive tab
+  const cycle_configs = { day: day_cs, swing: swing_cs };
   const arc_el = document.getElementById('main-archive');
-  if (arc_el) arc_el.innerHTML = `<div style="display:flex;flex-direction:column;gap:0;">${render_archive(data.sprint_archive)}</div>`;
+  if (arc_el) arc_el.innerHTML = `<div style="display:flex;flex-direction:column;gap:0;">${render_archive(data.sprint_archive, cycle_configs)}</div>`;
 
   // Polymarket tab
   const pm_el = document.getElementById('main-polymarket');
