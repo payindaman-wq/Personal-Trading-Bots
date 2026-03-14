@@ -816,9 +816,11 @@ function render_league(id, league) {
   const is_live = !!league.live_sprint;
   const ls      = league.live_sprint;
 
+  const sprint_num = league.total_sprints || 1;
   const sprint_bar = ls ? `
   <div class="sprint-bar">
-    <span>Sprint: <span class="sprint-id">${esc(ls.sprint_id)}</span></span>
+    <span style="color:var(--text);font-weight:bold">Sprint #${sprint_num}</span>
+    <span class="sprint-id hide-mobile">${esc(ls.sprint_id)}</span>
     <span>Ends in: <span class="countdown">${fmt_countdown(ls.seconds_remaining)}</span></span>
     <span class="hide-mobile pairs">Pairs: ${ls.pairs.map(esc).join(' &middot; ')}</span>
     <span>Duration: ${ls.duration_hours}h</span>
