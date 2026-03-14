@@ -10,7 +10,7 @@
   "rankings": [
     {
       "bot": "floki",
-      "final_equity": 10000.0,
+      "final_equity": 1000.0,
       "total_pnl_usd": 0.0,
       "total_pnl_pct": 0.0,
       "total_trades": 0,
@@ -24,7 +24,7 @@
     },
     {
       "bot": "bjorn",
-      "final_equity": 10000.0,
+      "final_equity": 1000.0,
       "total_pnl_usd": 0.0,
       "total_pnl_pct": 0.0,
       "total_trades": 0,
@@ -38,7 +38,7 @@
     },
     {
       "bot": "lagertha",
-      "final_equity": 10000.0,
+      "final_equity": 1000.0,
       "total_pnl_usd": 0.0,
       "total_pnl_pct": 0.0,
       "total_trades": 0,

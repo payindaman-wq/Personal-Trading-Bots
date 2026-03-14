@@ -368,6 +368,128 @@
     .tab-btn { padding: 10px 10px; font-size: 10px; letter-spacing: 1px; }
     .act-raw { max-width: 260px; }
   }
+
+  /* ── Polymarket Tab ── */
+  .pm-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 14px 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 16px;
+  }
+  .pm-mode-badge {
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 3px;
+    background: var(--surface2);
+    color: var(--muted);
+  }
+  .pm-mode-badge.paper { background: rgba(227,179,65,0.15); color: #e3b341; }
+  .pm-mode-badge.live  { background: rgba(63,185,80,0.15);  color: var(--green); }
+  .pm-header-status { font-size: 11px; color: var(--muted); }
+  .pm-header-ts     { font-size: 10px; color: var(--muted); margin-left: auto; }
+  .pm-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 700px) { .pm-stat-grid { grid-template-columns: repeat(2, 1fr); } }
+  .pm-stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .pm-stat-label { font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+  .pm-stat-value { font-size: 20px; font-weight: bold; color: var(--text); }
+  .pm-section {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .pm-section-title {
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 1.5px;
+    color: var(--gold);
+    text-transform: uppercase;
+    padding: 16px 18px 8px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .pm-section-body { padding: 14px 18px; background: var(--bg); }
+  .pm-trader-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+  }
+  .pm-trader-row:last-child { border-bottom: none; }
+  .pm-trader-rank { color: var(--muted); min-width: 24px; }
+  .pm-trader-name { min-width: 140px; color: var(--text); font-weight: bold; }
+  .pm-trader-bot  { color: var(--muted); font-size: 10px; min-width: 80px; }
+  .pm-roi-bar-track {
+    flex: 1;
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .pm-roi-bar-fill {
+    height: 100%;
+    background: #e87a20;
+    border-radius: 3px;
+    min-width: 2px;
+  }
+  .pm-trader-roi { min-width: 54px; text-align: right; color: #e87a20; font-weight: bold; }
+  .pm-bot-row td { font-size: 11px; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  .pm-bot-row:last-child td { border-bottom: none; }
+  .pm-trade-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+  }
+  .pm-trade-row:last-child { border-bottom: none; }
+  .pm-trade-bot     { color: var(--text); font-weight: bold; min-width: 70px; }
+  .pm-trade-market  { color: var(--muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pm-dir-yes  { color: var(--green); font-weight: bold; font-size: 10px; min-width: 28px; }
+  .pm-dir-no   { color: var(--red);   font-weight: bold; font-size: 10px; min-width: 28px; }
+  .pm-outcome-win  { color: var(--green); font-size: 10px; min-width: 40px; }
+  .pm-outcome-loss { color: var(--red);   font-size: 10px; min-width: 40px; }
+  .pm-outcome-open { color: var(--muted); font-size: 10px; min-width: 40px; }
+  .pm-empty {
+    text-align: center;
+    color: var(--muted);
+    font-size: 11px;
+    padding: 24px;
+    letter-spacing: .5px;
+  }
+  .pm-pending {
+    text-align: center;
+    padding: 60px 30px;
+    color: var(--muted);
+  }
+  .pm-pending-title { font-size: 16px; color: var(--gold); letter-spacing: 2px; margin-bottom: 14px; }
+  .pm-pending-desc  { font-size: 11px; line-height: 1.8; color: var(--muted); max-width: 520px; margin: 0 auto; }
+  .pm-pending-path  { color: var(--blue); font-size: 10px; margin-top: 10px; }
+
 </style>
 </head>
 <body>
@@ -398,6 +520,7 @@
   <button class="tab-btn active" onclick="switch_tab('overview', this)">Overview</button>
   <button class="tab-btn" onclick="switch_tab('fleet', this)">Fleet</button>
   <button class="tab-btn" onclick="switch_tab('archive', this)">Archive</button>
+  <button class="tab-btn" onclick="switch_tab('polymarket', this)">Polymarket</button>
 </div>
 
 <!-- Tab: Overview -->
@@ -418,6 +541,13 @@
 <div class="tab-panel" id="tab-archive">
   <div class="main" id="main-archive">
     <div class="loading">Loading archive data...</div>
+  </div>
+</div>
+
+<!-- Tab: Polymarket -->
+<div class="tab-panel" id="tab-polymarket">
+  <div class="main" id="main-polymarket">
+    <div class="loading">Loading Polymarket data...</div>
   </div>
 </div>
 
@@ -588,7 +718,7 @@ function render_cumulative(rankings, label) {
       <thead><tr>
         <th>Rank</th><th>Bot</th><th>Pts</th>
         <th class="hide-mobile">Sprints</th>
-        <th class="hide-mobile">Wins</th>
+        <th class="hide-mobile">1st</th>
         <th class="hide-mobile">Podiums</th>
         <th>Cum P&amp;L</th>
         <th class="hide-mobile">Avg/Sprint</th>
@@ -788,7 +918,7 @@ function render_fleet(roster) {
             <th>Bot</th><th>League</th>
             <th class="hide-mobile">Style</th>
             <th class="hide-mobile">Inspired By</th>
-            <th>Sprints</th><th>Wins</th><th>Pts</th>
+            <th>Sprints</th><th>1st</th><th>Pts</th>
             <th>Cum P&amp;L</th>
             <th class="hide-mobile">Avg/Sprint</th>
             <th class="hide-mobile">Win%</th>
@@ -876,6 +1006,168 @@ function toggle_archive(idx) {
   if (card) card.classList.toggle('expanded');
 }
 
+
+// ── Polymarket Tab ────────────────────────────────────────────────────────────
+
+function render_polymarket(pm) {
+  if (!pm || pm.status === 'pending_setup') {
+    return `
+    <div class="pm-pending">
+      <div class="pm-pending-title">POLYMARKET BOT — NOT YET CONFIGURED</div>
+      <div class="pm-pending-desc">
+        The Polymarket prediction market trading bot is pending setup.<br>
+        Once configured, this tab will show tracked traders, bot performance,
+        and recent trade history.<br><br>
+        To activate: create the bot competition state file and run the data pipeline.
+      </div>
+      <div class="pm-pending-path">/root/.openclaw/workspace/competition/polymarket/state.json</div>
+    </div>`;
+  }
+
+  // ── Header ──
+  const mode_cls = pm.mode === 'live' ? 'live' : 'paper';
+  const mode_lbl = (pm.mode || 'paper').toUpperCase();
+  const status_lbl = pm.status === 'active' ? '<span style="color:var(--green)">● ACTIVE</span>' : '<span style="color:var(--muted)">◌ PAUSED</span>';
+  const ts_lbl = pm.generated_at ? fmt_ts_short(pm.generated_at) : '';
+
+  let html = `
+  <div class="pm-header">
+    <span class="pm-mode-badge ${mode_cls}">${mode_lbl}</span>
+    <span class="pm-header-status">${status_lbl}</span>
+    <span class="pm-header-ts">${esc(ts_lbl)}</span>
+  </div>`;
+
+  // ── Stats grid ──
+  const s = pm.stats || {};
+  const pnl_usd = typeof s.total_pnl_usd === 'number' ? fmt_pnl_usd(s.total_pnl_usd) : '<span class="pnl-zero">$0.00</span>';
+  const win_rate = typeof s.overall_win_rate === 'number' ? `${s.overall_win_rate.toFixed(1)}%` : '—';
+  const active_pos = typeof s.active_positions === 'number' ? s.active_positions : 0;
+  const total_trades = typeof s.total_trades === 'number' ? s.total_trades : 0;
+
+  html += `
+  <div class="pm-stat-grid">
+    <div class="pm-stat-card">
+      <div class="pm-stat-label">Total P&amp;L</div>
+      <div class="pm-stat-value">${pnl_usd}</div>
+    </div>
+    <div class="pm-stat-card">
+      <div class="pm-stat-label">Win Rate</div>
+      <div class="pm-stat-value">${win_rate}</div>
+    </div>
+    <div class="pm-stat-card">
+      <div class="pm-stat-label">Active Positions</div>
+      <div class="pm-stat-value">${active_pos}</div>
+    </div>
+    <div class="pm-stat-card">
+      <div class="pm-stat-label">Total Trades</div>
+      <div class="pm-stat-value">${total_trades}</div>
+    </div>
+  </div>`;
+
+  // ── Tracked Traders ──
+  const traders = pm.tracked_traders || [];
+  let traders_html = '';
+  if (traders.length === 0) {
+    traders_html = '<div class="pm-empty">No tracked traders configured yet</div>';
+  } else {
+    traders_html = traders.map((t, i) => {
+      const roi = typeof t.roi_pct === 'number' ? t.roi_pct : 0;
+      const bar_w = Math.min(Math.max(roi, 0), 100).toFixed(1);
+      return `
+      <div class="pm-trader-row">
+        <span class="pm-trader-rank">#${i + 1}</span>
+        <span class="pm-trader-name">${esc(t.name || '—')}</span>
+        <span class="pm-trader-bot">${esc(t.bot || '—')}</span>
+        <div class="pm-roi-bar-track">
+          <div class="pm-roi-bar-fill" style="width:${bar_w}%"></div>
+        </div>
+        <span class="pm-trader-roi">${roi >= 0 ? '+' : ''}${roi.toFixed(1)}%</span>
+      </div>`;
+    }).join('');
+  }
+
+  html += `
+  <div class="pm-section">
+    <div class="pm-section-title">Tracked Traders — sorted by ROI efficiency</div>
+    <div class="pm-section-body">${traders_html}</div>
+  </div>`;
+
+  // ── Bot Fleet ──
+  const bots = pm.bots || [];
+  let bots_html = '';
+  if (bots.length === 0) {
+    bots_html = '<div class="pm-empty">No Polymarket bots configured yet</div>';
+  } else {
+    const bot_rows = bots.map(b => {
+      const pnl = typeof b.pnl_usd === 'number' ? fmt_pnl_usd(b.pnl_usd) : '<span class="pnl-zero">$0.00</span>';
+      const wr  = typeof b.win_rate === 'number' ? `${b.win_rate.toFixed(0)}%` : '—';
+      const tr  = typeof b.trades === 'number' ? b.trades : 0;
+      const ap  = typeof b.active_positions === 'number' ? b.active_positions : 0;
+      const st_cls = b.status === 'active' ? 'pnl-pos' : 'pnl-zero';
+      const st_lbl = esc(b.status || 'inactive');
+      return `
+      <tr class="pm-bot-row">
+        <td class="bot-name">${esc(b.bot || '—')}</td>
+        <td style="color:var(--muted)">${esc(b.assigned_trader || '—')}</td>
+        <td>${pnl}</td>
+        <td>${wr}</td>
+        <td>${tr}</td>
+        <td>${ap}</td>
+        <td><span class="${st_cls}">${st_lbl}</span></td>
+      </tr>`;
+    }).join('');
+    bots_html = `
+    <table>
+      <thead><tr>
+        <th>Bot</th><th>Assigned Trader</th><th>P&amp;L</th>
+        <th>Win%</th><th>Trades</th><th>Active</th><th>Status</th>
+      </tr></thead>
+      <tbody>${bot_rows}</tbody>
+    </table>`;
+  }
+
+  html += `
+  <div class="pm-section">
+    <div class="pm-section-title">Polymarket Bots</div>
+    <div class="pm-section-body" style="padding:0">${bots_html}</div>
+  </div>`;
+
+  // ── Recent Trades ──
+  const trades = pm.recent_trades || [];
+  let trades_html = '';
+  if (trades.length === 0) {
+    trades_html = '<div class="pm-empty">No trades recorded yet</div>';
+  } else {
+    trades_html = trades.map(t => {
+      const market = (t.market_title || '').slice(0, 60);
+      const dir_cls = t.direction === 'NO' ? 'pm-dir-no' : 'pm-dir-yes';
+      const dir_lbl = esc(t.direction || 'YES');
+      let outcome_html;
+      if (t.outcome === 'win')       outcome_html = '<span class="pm-outcome-win">WIN</span>';
+      else if (t.outcome === 'loss') outcome_html = '<span class="pm-outcome-loss">LOSS</span>';
+      else                           outcome_html = '<span class="pm-outcome-open">OPEN</span>';
+      const pnl = typeof t.pnl_usd === 'number' ? fmt_pnl_usd(t.pnl_usd) : '';
+      return `
+      <div class="pm-trade-row">
+        <span class="pm-trade-bot">${esc(t.bot || '—')}</span>
+        <span class="pm-trade-market">${esc(market)}</span>
+        <span class="${dir_cls}">${dir_lbl}</span>
+        ${outcome_html}
+        <span style="margin-left:auto">${pnl}</span>
+      </div>`;
+    }).join('');
+  }
+
+  html += `
+  <div class="pm-section">
+    <div class="pm-section-title">Recent Trades</div>
+    <div class="pm-section-body">${trades_html}</div>
+  </div>`;
+
+  return html;
+}
+
+
 // ── Data loading ──────────────────────────────────────────────────────────────
 
 let refresh_timer = null;
@@ -899,6 +1191,15 @@ async function load_data() {
     const res = await fetch('/api/dashboard.json?t=' + Date.now());
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
+    // Fetch polymarket data separately (non-blocking)
+    try {
+      const pm_res = await fetch('/api/polymarket.json?t=' + Date.now());
+      if (pm_res.ok) {
+        window._pm_data = await pm_res.json();
+      } else {
+        window._pm_data = null;
+      }
+    } catch (_) { window._pm_data = null; }
     render(data);
     start_countdown();
   } catch (e) {
@@ -938,6 +1239,10 @@ function render(data) {
   // Archive tab
   const arc_el = document.getElementById('main-archive');
   if (arc_el) arc_el.innerHTML = `<div style="display:flex;flex-direction:column;gap:0;">${render_archive(data.sprint_archive)}</div>`;
+
+  // Polymarket tab
+  const pm_el = document.getElementById('main-polymarket');
+  if (pm_el) pm_el.innerHTML = render_polymarket(window._pm_data || null);
 }
 
 // ── Boot ─────────────────────────────────────────────────────────────────────

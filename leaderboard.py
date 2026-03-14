@@ -56,9 +56,9 @@ def load_archived_sprints():
         if os.path.isfile(meta_path):
             with open(meta_path) as f:
                 meta = json.load(f)
-            data["starting_capital"] = meta.get("starting_capital", 10000.0)
+            data["starting_capital"] = meta.get("starting_capital", 1000.0)
         else:
-            data["starting_capital"] = 10000.0
+            data["starting_capital"] = 1000.0
         sprints.append(data)
     return sprints
 
@@ -84,7 +84,7 @@ def load_active_sprint():
     if meta.get("status") != "active":
         return None
 
-    starting_capital = meta.get("starting_capital", 10000.0)
+    starting_capital = meta.get("starting_capital", 1000.0)
     usd_scale = DISPLAY_CAPITAL / starting_capital
 
     rankings = []

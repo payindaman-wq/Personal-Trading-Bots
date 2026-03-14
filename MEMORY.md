@@ -29,15 +29,16 @@ All strategy.yaml files are fully written and backtested. Do NOT treat them as p
 Strategy files: /root/.openclaw/workspace/fleet/{bot}/strategy.yaml
 
 ## Competition Framework
-- Format: 4-hour sprints, multiple sprints, CUMULATIVE scoring across all sprints
-- Capital: 0,000 per bot (virtual)
-- Pairs: BTC/USD, ETH/USD, SOL/USD, XRP/USD, DOGE/USD, AVAX/USD, LINK/USD (and more)
+- Format: 20-day series, 24-hour sprints, CUMULATIVE scoring
+- Capital: $10,000 per bot (virtual)
+- Pairs: BTC/USD, ETH/USD, SOL/USD, XRP/USD, DOGE/USD, AVAX/USD, LINK/USD
 - Points: 1st=8pts | 2nd=5pts | 3rd=3pts | 4th-8th=1pt per sprint
 - Primary rank: cumulative P&L across all sprints
 - Workspace: /root/.openclaw/workspace/competition/
   - Active: competition/active/{comp_id}/portfolio-{botname}.json
   - Results: competition/results/
 - Leaderboard: python3 /root/.openclaw/workspace/leaderboard.py
+- Daily leaderboard snapshot: 5:00 AM PST (1:00 PM UTC) via cron → Telegram
 
 ## Starting a Competition
 python3 /root/.openclaw/skills/competition-start/scripts/competition_start.py 4
@@ -58,6 +59,46 @@ rsi, price_vs_ema, bollinger_position, macd_signal
 - Backtest: python3 /root/.openclaw/workspace/backtest.py --bot <name> --days 30
 - Kraken prices: python3 /root/.openclaw/skills/kraken-price/scripts/get_prices.py XBTUSD ETHUSD
 - Repo: https://github.com/coldstoneadmin/crypto-trading-toolkit
+
+## Operational Responsibilities (as of 2026-03-11)
+
+### Decision Authority by Tier
+
+**Tier 1 (Fix silently, no notification):**
+- Sprint missing → restart competition_start.py 24 immediately
+- Stale leaderboard → re-run leaderboard.py
+
+**Tier 2 (Fix, then notify Chris):**
+- 0-trade sprint → archive results, note in Telegram
+- Stalled tick (price updates frozen) → restart tick script, report status
+
+**Tier 3 (Alert Chris, escalate to Claude Code):**
+- Python traceback in logs
+- Engine behavior I can't explain
+- Fix attempt failed
+- Format: "Tried X, failed with Y. Log at /path. Needs Claude Code."
+
+### Proactive Anomaly Flagging (no action, just flag)
+Alert Chris without being asked if:
+- Any bot loses >15% in single sprint
+- Bot takes 0 trades across 3+ consecutive sprints
+- ALL bots: 0 trades in a sprint (price feed issue)
+- Bot bleeds >10% cumulative over 3 consecutive sprints
+
+### Kill Switches (can pause/skip sprints)
+- Can skip new sprint if: price feed is down OR active engine errors detected
+- Must state reason to Chris
+- Cannot: edit Python scripts, remove bot mid-sprint, make strategy changes
+
+### Mid-Sprint Data Access
+- **Safe:** Read portfolio JSON files directly with `cat` or `json.load()`
+- **Unsafe:** Running `competition_score.py` or any archive/scoring scripts (triggers sprint end)
+- **Never:** Manually call scoring scripts during active sprint
+- Pull data only from portfolio files, not through scoring pipeline
+
+### Strategy Feedback (recommend, don't execute)
+- If bot down >10% over 3 consecutive sprints → flag to Chris with suggestion
+- Chris or Claude Code executes the change, not me
 
 ## Source of Truth
 - Strategies come from: /root/.openclaw/workspace/fleet/{bot}/strategy.yaml

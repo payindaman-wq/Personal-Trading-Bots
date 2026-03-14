@@ -35,7 +35,7 @@ FLEET_ROSTER = [
     {"bot": "ragnar",   "league": "day",   "style": "VWAP reclaim",                 "inspired_by": "VWAP reclaim"},
     {"bot": "leif",     "league": "day",   "style": "BB squeeze breakout",          "inspired_by": "Rekt Capital"},
     {"bot": "gunnar",   "league": "day",   "style": "Aggressive momentum scalper",  "inspired_by": "Gainzy"},
-    {"bot": "harold",   "league": "day",   "style": "RSI + trend composite",        "inspired_by": "Scott Melker"},
+    {"bot": "harald",   "league": "day",   "style": "RSI + trend composite",        "inspired_by": "Scott Melker"},
     {"bot": "freydis",  "league": "day",   "style": "Contrarian extreme reversal",  "inspired_by": "GCRClassic"},
     {"bot": "sigurd",   "league": "day",   "style": "Altcoin momentum rotation",    "inspired_by": "van de Poppe"},
     {"bot": "astrid",   "league": "day",   "style": "RSI mean reversion",           "inspired_by": "Crypto Jebb"},
