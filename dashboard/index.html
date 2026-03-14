@@ -524,6 +524,7 @@
   <span class="health-label">System Health</span>
   <span class="health-item" id="health-day"><span class="health-name">Day Tick</span> <span class="health-na health-age">--</span></span>
   <span class="health-item" id="health-swing"><span class="health-name">Swing Tick</span> <span class="health-na health-age">--</span></span>
+  <span class="health-item" id="health-poly"><span class="health-name">Poly Tick</span> <span class="health-na health-age">--</span></span>
 </div>
 
 <!-- Tab Bar -->
@@ -656,8 +657,18 @@ function render_health(health) {
 
   const day_el   = document.getElementById('health-day');
   const swing_el = document.getElementById('health-swing');
+  const poly_el  = document.getElementById('health-poly');
   if (day_el)   day_el.innerHTML   = age_html(health.day_tick_age_min,   health.day_tick_stalled,   10, 'Day Tick');
   if (swing_el) swing_el.innerHTML = age_html(health.swing_tick_age_min, health.swing_tick_stalled, 60, 'Swing Tick');
+  if (poly_el) {
+    const pm_auto = window._pm_auto_data;
+    let poly_age = null, poly_stalled = false;
+    if (pm_auto && pm_auto.generated_at) {
+      poly_age = (Date.now() - new Date(pm_auto.generated_at).getTime()) / 60000;
+      poly_stalled = poly_age > 30;
+    }
+    poly_el.innerHTML = age_html(poly_age, poly_stalled, 20, 'Poly Tick');
+  }
 }
 
 // ── Overview: League Rendering ────────────────────────────────────────────────
