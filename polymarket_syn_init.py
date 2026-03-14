@@ -24,9 +24,9 @@ BOT_ROSTER = [
     {"name": "gerd",     "category": "crypto",       "type": "opinion"},
     {"name": "skadi",    "category": "crypto",       "type": "opinion"},
     # Macro
-    {"name": "rind",     "category": "macro",        "type": "opinion"},
-    {"name": "aegir",    "category": "macro",        "type": "opinion"},
-    {"name": "jord",     "category": "macro",        "type": "opinion"},
+    {"name": "rind",     "category": "world_economics", "type": "opinion"},
+    {"name": "aegir",    "category": "world_economics", "type": "opinion"},
+    {"name": "jord",     "category": "world_economics", "type": "opinion"},
     # World Events
     {"name": "verdandi", "category": "world_events", "type": "opinion"},
     {"name": "urd",      "category": "world_events", "type": "opinion"},
