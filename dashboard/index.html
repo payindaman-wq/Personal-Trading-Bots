@@ -653,6 +653,12 @@ function fmt_equity(v) {
   return '$' + v.toLocaleString('en', {minimumFractionDigits:2, maximumFractionDigits:2});
 }
 
+function fmt_duration(hours) {
+  if (hours >= 24 && hours % 24 === 0) return `${hours / 24}d`;
+  if (hours >= 24) return `${Math.floor(hours / 24)}d ${hours % 24}h`;
+  return `${hours}h`;
+}
+
 function fmt_countdown(secs) {
   if (secs <= 0) return 'Ending...';
   const h = Math.floor(secs / 3600);
@@ -823,14 +829,14 @@ function render_league(id, league) {
     <span class="sprint-id hide-mobile">${esc(ls.sprint_id)}</span>
     <span>Ends in: <span class="countdown">${fmt_countdown(ls.seconds_remaining)}</span></span>
     <span class="hide-mobile pairs">Pairs: ${ls.pairs.map(esc).join(' &middot; ')}</span>
-    <span>Duration: ${ls.duration_hours}h</span>
+    <span>Duration: ${fmt_duration(ls.duration_hours)}</span>
   </div>` : '';
 
   const live_section = is_live
     ? render_live_sprint(ls)
     : `<div class="idle-notice">No active sprint — awaiting next competition start</div>`;
 
-  const cum_label = `Cumulative Standings &mdash; ${league.total_sprints} sprint${league.total_sprints !== 1 ? 's' : ''} recorded`;
+  const cum_label = `Cycle #1 &mdash; Cumulative Standings &mdash; ${league.total_sprints} sprint${league.total_sprints !== 1 ? 's' : ''} recorded`;
   const cum_section = league.cumulative_rankings && league.cumulative_rankings.length > 0
     ? render_cumulative(league.cumulative_rankings, cum_label)
     : '';
@@ -1095,8 +1101,17 @@ function render_archive(archive) {
     return `<div class="archive-empty">No completed sprints yet &mdash; results will appear here after sprints finish</div>`;
   }
 
+  const league_labels = { day: 'Day Trading League', swing: 'Swing Trading League' };
+  const sprint_counters = {};
+
   let html = '';
   archive.forEach((sprint, idx) => {
+    const lg        = sprint.league || 'unknown';
+    sprint_counters[lg] = (sprint_counters[lg] || 0) + 1;
+    const sprint_num = sprint_counters[lg];
+    const cycle_num  = 1; // Cycle tracking added in future; Cycle 1 for all current sprints
+    const lg_label   = league_labels[lg] || lg.toUpperCase();
+
     const top3 = (sprint.rankings || []).slice(0, 3);
     const top3_html = top3.map((r, i) => {
       const medal = ['#1', '#2', '#3'][i];
@@ -1107,9 +1122,7 @@ function render_archive(archive) {
     }).join(' &middot; ');
 
     const scored_str = sprint.scored_at ? fmt_ts_short(sprint.scored_at) : '';
-    const dur_str    = sprint.duration_hours >= 24
-      ? `${sprint.duration_hours / 24}d`
-      : `${sprint.duration_hours}h`;
+    const dur_str    = fmt_duration(sprint.duration_hours || 0);
 
     // Full rankings table for expanded view
     const rank_rows = (sprint.rankings || []).map(r => {
@@ -1132,8 +1145,11 @@ function render_archive(archive) {
     html += `
     <div class="archive-card" id="arc-${idx}">
       <div class="archive-row" onclick="toggle_archive(${idx})">
-        <span class="archive-comp-id">${esc(sprint.comp_id)}</span>
-        <span class="badge badge-${sprint.league}">${sprint.league.toUpperCase()}</span>
+        <span class="badge badge-${lg}" style="min-width:48px;text-align:center">${lg.toUpperCase()}</span>
+        <span style="display:flex;flex-direction:column;gap:2px;min-width:180px">
+          <span style="color:var(--gold);font-weight:bold;font-size:12px">${esc(lg_label)}</span>
+          <span style="color:var(--muted);font-size:10px;letter-spacing:.5px">Cycle #${cycle_num} &mdash; Sprint #${sprint_num}</span>
+        </span>
         <span><span class="archive-winner-label">Winner: </span><span class="archive-winner">${esc(sprint.winner)}</span></span>
         <span class="archive-duration hide-mobile">${dur_str}</span>
         <span class="archive-date hide-mobile">${esc(scored_str)}</span>
