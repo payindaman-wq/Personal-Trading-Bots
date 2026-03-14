@@ -937,23 +937,26 @@ function render_fleet(roster, pm, pm_auto) {
       <div class="pm-empty" style="padding:14px 18px">No Polymarket bots configured</div>
     </div>`;
     const rows = bots.map(b => {
-      const pnl_cls = b.pnl_usd > 0 ? 'pnl-pos' : b.pnl_usd < 0 ? 'pnl-neg' : 'pnl-zero';
-      const sign    = b.pnl_usd > 0 ? '+' : '';
-      const wr      = typeof b.win_rate === 'number' && b.trades > 0
-                      ? `<span class="win-rate">${b.win_rate.toFixed(0)}%</span>` : '<span class="pnl-zero">—</span>';
+      const sprint_pnl = typeof b.sprint_pnl_usd === 'number' ? b.sprint_pnl_usd : b.pnl_usd || 0;
+      const sprint_wr  = typeof b.sprint_win_rate === 'number' ? b.sprint_win_rate : b.win_rate || 0;
+      const sprint_tr  = typeof b.sprint_trades === 'number' ? b.sprint_trades : b.trades || 0;
+      const pnl_cls = sprint_pnl > 0 ? 'pnl-pos' : sprint_pnl < 0 ? 'pnl-neg' : 'pnl-zero';
+      const sign    = sprint_pnl > 0 ? '+' : '';
+      const wr      = sprint_tr > 0
+                      ? `<span class="win-rate">${sprint_wr.toFixed(0)}%</span>` : '<span class="pnl-zero">—</span>';
       return `
       <tr>
         <td class="bot-name">${esc(b.bot)}</td>
-        <td><span class="badge" style="background:rgba(188,140,255,0.15);color:#bc8cff;letter-spacing:.5px">POLY</span></td>
+        <td><span class="badge" style="background:rgba(188,140,255,0.15);color:#bc8cff;letter-spacing:.5px">COPY</span></td>
         <td class="fleet-style hide-mobile">${esc(b.assigned_trader || '—')}</td>
         <td class="fleet-inspired hide-mobile">copy-trading</td>
         <td>${b.active_positions || 0}</td>
-        <td>${b.trades || 0}</td>
+        <td>${sprint_tr}</td>
         <td class="pts">—</td>
-        <td class="${pnl_cls}">${sign}$${Math.abs(b.pnl_usd || 0).toFixed(2)}</td>
+        <td class="${pnl_cls}">${sign}$${Math.abs(sprint_pnl).toFixed(2)}</td>
         <td class="hide-mobile pnl-zero">—</td>
         <td class="hide-mobile">${wr}</td>
-        <td class="hide-mobile">${b.trades || 0}</td>
+        <td class="hide-mobile">${sprint_tr}</td>
       </tr>`;
     }).join('');
     return `

@@ -10,14 +10,16 @@ Run as: python3 polymarket_tick.py
 Or as a systemd service (see polymarket.service).
 """
 import json, os, time, urllib.request, urllib.error, logging
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from copy import deepcopy
 
-STATE_FILE   = "/root/.openclaw/workspace/competition/polymarket/state.json"
-DASH_OUTPUT  = "/var/www/dashboard/api/polymarket.json"
-LOG_FILE     = "/root/.openclaw/workspace/competition/polymarket/tick.log"
-POLL_SEC     = 30
-MAX_RECENT   = 50  # recent_trades entries to keep
+STATE_FILE       = "/root/.openclaw/workspace/competition/polymarket/state.json"
+DASH_OUTPUT      = "/var/www/dashboard/api/polymarket.json"
+LOG_FILE         = "/root/.openclaw/workspace/competition/polymarket/tick.log"
+SPRINT_RESULTS   = "/root/.openclaw/workspace/competition/polymarket/sprint_results"
+POLL_SEC         = 30
+MAX_RECENT       = 50  # recent_trades entries to keep
+SPRINT_HOURS     = 168  # 7-day sprints, matches swing league
 
 logging.basicConfig(
     level=logging.INFO,
@@ -148,8 +150,10 @@ def close_position(bot, cid, reason="resolved", final_price=None):
     bot["cash"] = round(bot["cash"] + proceeds, 4)
     if pnl >= 0:
         bot["wins"] += 1
+        bot["sprint_wins"] = bot.get("sprint_wins", 0) + 1
     else:
         bot["losses"] += 1
+    bot["sprint_trades"] = bot.get("sprint_trades", 0) + 1
 
     closed = {**pos, "closed_at": datetime.now(timezone.utc).isoformat(),
               "exit_price": final_price, "proceeds_usd": proceeds,
@@ -196,6 +200,8 @@ def update_bot_equity(bot):
     bot["equity"] = round(bot["cash"] + total_position_value, 4)
     bot["pnl_usd"] = round(bot["equity"] - bot["starting_capital"], 4)
     bot["pnl_pct"] = round((bot["pnl_usd"] / bot["starting_capital"]) * 100, 2)
+    sprint_base = bot.get("sprint_start_equity", bot["starting_capital"])
+    bot["sprint_pnl_usd"] = round(bot["equity"] - sprint_base, 4)
 
 
 def load_state():
@@ -217,6 +223,8 @@ def write_dashboard(state):
     for b in raw_bots:
         wins  = b.get("wins", 0)
         total = b.get("total_trades", 0)
+        st = b.get("sprint_trades", 0)
+        sw = b.get("sprint_wins", 0)
         normalized_bots.append({
             "bot":              b.get("name", ""),
             "assigned_trader":  b.get("trader", ""),
@@ -225,6 +233,9 @@ def write_dashboard(state):
             "trades":           total,
             "active_positions": len(b.get("positions", {})),
             "status":           status,
+            "sprint_pnl_usd":   round(b.get("sprint_pnl_usd", 0.0), 2),
+            "sprint_win_rate":  round(sw / st * 100, 1) if st > 0 else 0.0,
+            "sprint_trades":    st,
         })
 
     open_positions = []
@@ -263,15 +274,18 @@ def write_dashboard(state):
         })
 
     dashboard = {
-        "generated_at":    datetime.now(timezone.utc).isoformat(),
-        "mode":            state.get("mode", "paper"),
-        "status":          status,
-        "started_at":      state.get("started_at", ""),
-        "stats":           state.get("stats", {}),
-        "bots":            normalized_bots,
-        "tracked_traders": tracked,
-        "open_positions":  open_positions,
-        "recent_trades":   recent_trades,
+        "generated_at":      datetime.now(timezone.utc).isoformat(),
+        "mode":              state.get("mode", "paper"),
+        "status":            status,
+        "started_at":        state.get("started_at", ""),
+        "sprint_id":         state.get("sprint_id"),
+        "sprint_started_at": state.get("sprint_started_at"),
+        "sprint_ends_at":    state.get("sprint_ends_at"),
+        "stats":             state.get("stats", {}),
+        "bots":              normalized_bots,
+        "tracked_traders":   tracked,
+        "open_positions":    open_positions,
+        "recent_trades":     recent_trades,
     }
 
     os.makedirs(os.path.dirname(DASH_OUTPUT), exist_ok=True)
@@ -298,8 +312,53 @@ def recompute_stats(state):
     }
 
 
+def advance_sprint(state):
+    now = datetime.now(timezone.utc)
+    sprint_id = state.get("sprint_id", f"copy-{now.strftime('%Y%m%d-%H%M')}")
+    os.makedirs(SPRINT_RESULTS, exist_ok=True)
+    results = {
+        "sprint_id": sprint_id,
+        "started_at": state.get("sprint_started_at"),
+        "ended_at": now.isoformat(),
+        "bots": [
+            {
+                "bot":             b["name"],
+                "trader":          b["trader"],
+                "sprint_pnl_usd":  round(b.get("sprint_pnl_usd", 0), 2),
+                "sprint_wins":     b.get("sprint_wins", 0),
+                "sprint_trades":   b.get("sprint_trades", 0),
+                "sprint_win_rate": round(b.get("sprint_wins", 0) / b["sprint_trades"] * 100, 1)
+                                   if b.get("sprint_trades", 0) > 0 else 0.0,
+            }
+            for b in state["bots"]
+        ],
+    }
+    with open(os.path.join(SPRINT_RESULTS, f"{sprint_id}.json"), "w") as f:
+        json.dump(results, f, indent=2)
+
+    new_id   = f"copy-{now.strftime('%Y%m%d-%H%M')}"
+    ends_at  = now + timedelta(hours=SPRINT_HOURS)
+    state["sprint_id"]         = new_id
+    state["sprint_started_at"] = now.isoformat()
+    state["sprint_ends_at"]    = ends_at.isoformat()
+    for bot in state["bots"]:
+        bot["sprint_pnl_usd"]      = 0.0
+        bot["sprint_wins"]         = 0
+        bot["sprint_trades"]       = 0
+        bot["sprint_start_equity"] = bot["equity"]
+    log.info(f"Sprint advanced: {sprint_id} → {new_id} (ends {ends_at.isoformat()})")
+
+
 def tick():
     state = load_state()
+
+    # Advance sprint if window has elapsed
+    sprint_ends = state.get("sprint_ends_at")
+    if sprint_ends:
+        ends_dt = datetime.fromisoformat(sprint_ends)
+        if datetime.now(timezone.utc) >= ends_dt:
+            advance_sprint(state)
+
     new_events = []
 
     for bot in state["bots"]:

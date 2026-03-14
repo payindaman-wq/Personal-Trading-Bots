@@ -19,10 +19,14 @@ BOT_ROSTER = [
     {"name": "freya",    "category": "politics",     "type": "opinion"},
     {"name": "var",      "category": "politics",     "type": "opinion"},
     {"name": "saga",     "category": "politics",     "type": "opinion"},
-    # Crypto / Macro
+    # Crypto
     {"name": "mimir",    "category": "crypto",       "type": "opinion"},
-    {"name": "rind",     "category": "macro",        "type": "opinion"},
     {"name": "gerd",     "category": "crypto",       "type": "opinion"},
+    {"name": "skadi",    "category": "crypto",       "type": "opinion"},
+    # Macro
+    {"name": "rind",     "category": "macro",        "type": "opinion"},
+    {"name": "aegir",    "category": "macro",        "type": "opinion"},
+    {"name": "jord",     "category": "macro",        "type": "opinion"},
     # World Events
     {"name": "verdandi", "category": "world_events", "type": "opinion"},
     {"name": "urd",      "category": "world_events", "type": "opinion"},

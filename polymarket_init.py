@@ -4,7 +4,7 @@ polymarket_init.py — Initialize the Polymarket copy-trading paper competition.
 Run once to create state.json. Then start polymarket_tick.py daemon.
 """
 import json, os
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 STATE_DIR  = "/root/.openclaw/workspace/competition/polymarket"
 STATE_FILE = f"{STATE_DIR}/state.json"
@@ -40,10 +40,14 @@ def make_bot(b):
         "total_trades": 0,
         "wins": 0,
         "losses": 0,
-        "positions": {},        # conditionId -> position dict
-        "closed_trades": [],    # settled/resolved trades
-        "last_seen_tx": None,   # last processed tx hash for this trader
-        "last_seen_ts": 0,      # last processed timestamp
+        "positions": {},           # conditionId -> position dict
+        "closed_trades": [],       # settled/resolved trades
+        "last_seen_tx": None,      # last processed tx hash for this trader
+        "last_seen_ts": 0,         # last processed timestamp
+        "sprint_pnl_usd": 0.0,
+        "sprint_wins": 0,
+        "sprint_trades": 0,
+        "sprint_start_equity": STARTING_CAPITAL,
     }
 
 def main():
@@ -54,12 +58,17 @@ def main():
 
     os.makedirs(STATE_DIR, exist_ok=True)
 
+    now      = datetime.now(timezone.utc)
+    ends_at  = now + timedelta(hours=168)
     state = {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
-        "mode": "paper",
-        "status": "active",
-        "started_at": datetime.now(timezone.utc).isoformat(),
-        "starting_capital": STARTING_CAPITAL,
+        "generated_at":      now.isoformat(),
+        "mode":              "paper",
+        "status":            "active",
+        "started_at":        now.isoformat(),
+        "sprint_id":         f"copy-{now.strftime('%Y%m%d-%H%M')}",
+        "sprint_started_at": now.isoformat(),
+        "sprint_ends_at":    ends_at.isoformat(),
+        "starting_capital":  STARTING_CAPITAL,
         "trade_size_pct": TRADE_SIZE_PCT,
         "poll_interval_sec": 30,
         "bots": [make_bot(b) for b in BOTS],
