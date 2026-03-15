@@ -1040,6 +1040,7 @@ function render_fleet(roster, pm, pm_auto) {
       : '<span class="pnl-zero">—</span>';
     const badge = b.league === 'day'   ? `<span class="badge badge-day">DAY</span>`
                 : b.league === 'swing' ? `<span class="badge badge-swing">SWING</span>`
+                : b.league === 'arb'   ? `<span class="badge" style="background:rgba(255,184,0,0.15);color:#ffb800">ARB</span>`
                 : b.league === 'copy'  ? `<span class="badge" style="background:rgba(188,140,255,0.15);color:#bc8cff">COPY</span>`
                 :                       `<span class="badge" style="background:rgba(88,166,255,0.15);color:#58a6ff">AUTO</span>`;
     return `
@@ -1085,6 +1086,7 @@ function render_fleet(roster, pm, pm_auto) {
   // ── Assemble sections ────────────────────────────────────────────────────────
   const day_bots   = roster.filter(b => b.league === 'day').sort((a,b) => b.points - a.points).map(norm_trading);
   const swing_bots = roster.filter(b => b.league === 'swing').sort((a,b) => b.points - a.points).map(norm_trading);
+  const arb_bots   = roster.filter(b => b.league === 'arb').sort((a,b) => b.points - a.points).map(norm_trading);
   const copy_bots  = pm && pm.bots ? pm.bots.map(norm_copy) : [];
 
   function auto_section(cat) {
@@ -1095,6 +1097,7 @@ function render_fleet(roster, pm, pm_auto) {
 
   return section_table(day_bots,                    'Day Trading League')
        + section_table(swing_bots,                  'Swing Trading League')
+       + section_table(arb_bots,                    'Statistical Arb League')
        + section_table(copy_bots,                   'Polymarket — Copy-Traders')
        + section_table(auto_section('sports'),      'Polymarket — Sports')
        + section_table(auto_section('politics'),    'Polymarket — Politics')
