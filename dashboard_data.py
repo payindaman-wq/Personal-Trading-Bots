@@ -13,15 +13,18 @@ OUT_FILE  = "/var/www/dashboard/api/dashboard.json"
 
 DAY_LB_PATH   = os.path.join(WORKSPACE, "competition", "leaderboard.json")
 SWING_LB_PATH = os.path.join(WORKSPACE, "competition", "swing", "swing_leaderboard.json")
+ARB_LB_PATH   = os.path.join(WORKSPACE, "competition", "arb", "arb_leaderboard.json")
 
 DAY_CRON_LOG   = os.path.join(WORKSPACE, "competition", "cron.log")
 SWING_TICK_LOG = os.path.join(WORKSPACE, "competition", "swing", "tick.log")
 
 DAY_RESULTS_DIR   = os.path.join(WORKSPACE, "competition", "results")
 SWING_RESULTS_DIR = os.path.join(WORKSPACE, "competition", "swing", "results")
+ARB_RESULTS_DIR   = os.path.join(WORKSPACE, "competition", "arb", "results")
 CYCLE_STATE_PATH       = os.path.join(WORKSPACE, "competition", "cycle_state.json")
 SWING_CYCLE_STATE_PATH = os.path.join(WORKSPACE, "competition", "swing", "swing_cycle_state.json")
 POLY_CYCLE_STATE_PATH  = os.path.join(WORKSPACE, "competition", "polymarket", "polymarket_cycle_state.json")
+ARB_CYCLE_STATE_PATH   = os.path.join(WORKSPACE, "competition", "arb", "arb_cycle_state.json")
 
 BOT_NAMES = [
     "floki", "bjorn", "lagertha", "ragnar", "leif", "gunnar",
@@ -103,6 +106,8 @@ def get_live_sprint(league, active_sprint_id):
 
     if league == "day":
         active_dir = os.path.join(WORKSPACE, "competition", "active", active_sprint_id)
+    elif league == "arb":
+        active_dir = os.path.join(WORKSPACE, "competition", "arb", "active", active_sprint_id)
     else:
         active_dir = os.path.join(WORKSPACE, "competition", "swing", "active", active_sprint_id)
 
@@ -163,30 +168,33 @@ def get_live_sprint(league, active_sprint_id):
     }
 
 
-def get_fleet_roster(day_lb, swing_lb):
+def get_fleet_roster(day_lb, swing_lb, arb_lb=None):
     """Build fleet roster merging static metadata with live cumulative stats."""
-    # Index cumulative rankings by bot name
     day_stats   = {}
     swing_stats = {}
+    arb_stats   = {}
 
     if day_lb:
         for entry in day_lb.get("rankings", []):
             day_stats[entry["bot"].lower()] = entry
-
     if swing_lb:
         for entry in swing_lb.get("rankings", []):
             swing_stats[entry["bot"].lower()] = entry
+    if arb_lb:
+        for entry in arb_lb.get("rankings", []):
+            arb_stats[entry["bot"].lower()] = entry
 
     roster = []
     for member in FLEET_ROSTER:
-        bot  = member["bot"]
-        key  = bot.lower()
-        src  = day_stats if member["league"] == "day" else swing_stats
+        bot   = member["bot"]
+        key   = bot.lower()
+        lg    = member["league"]
+        src   = day_stats if lg == "day" else (arb_stats if lg == "arb" else swing_stats)
         stats = src.get(key, {})
 
         roster.append({
             "bot":                    bot,
-            "league":                 member["league"],
+            "league":                 lg,
             "style":                  member["style"],
             "inspired_by":            member["inspired_by"],
             "sprints_entered":        stats.get("sprints_entered", 0),
@@ -198,6 +206,26 @@ def get_fleet_roster(day_lb, swing_lb):
             "overall_win_rate":       round(stats.get("overall_win_rate", 0.0), 2),
             "total_trades":           stats.get("total_trades", 0),
         })
+
+    # Arb bots (not in FLEET_ROSTER — dynamic from arb_lb)
+    if arb_lb:
+        existing = {r["bot"].lower() for r in roster}
+        for entry in arb_lb.get("rankings", []):
+            if entry["bot"].lower() not in existing:
+                roster.append({
+                    "bot":                    entry["bot"],
+                    "league":                 "arb",
+                    "style":                  entry.get("style", "stat arb"),
+                    "inspired_by":            "mean reversion",
+                    "sprints_entered":        entry.get("sprints_entered", 0),
+                    "sprint_wins":            entry.get("sprint_wins", 0),
+                    "podiums":                entry.get("podiums", 0),
+                    "points":                 entry.get("points", 0),
+                    "cumulative_pnl_usd":     round(entry.get("cumulative_pnl_usd", 0.0), 2),
+                    "avg_pnl_pct_per_sprint": round(entry.get("avg_pnl_pct_per_sprint", 0.0), 4),
+                    "overall_win_rate":       round(entry.get("overall_win_rate", 0.0), 2),
+                    "total_trades":           entry.get("total_trades", 0),
+                })
 
     return roster
 
@@ -276,6 +304,7 @@ def get_sprint_archive():
     sources = [
         ("day",   DAY_RESULTS_DIR),
         ("swing", SWING_RESULTS_DIR),
+        ("arb",   ARB_RESULTS_DIR),
     ]
 
     for league, results_dir in sources:
@@ -362,20 +391,31 @@ def get_poly_cycle_state():
     except Exception:
         return {"cycle": 1, "sprint_in_cycle": 0, "sprints_per_cycle": 4, "status": "active"}
 
+
+def get_arb_cycle_state():
+    try:
+        with open(ARB_CYCLE_STATE_PATH) as f:
+            return json.load(f)
+    except Exception:
+        return {"cycle": 1, "sprint_in_cycle": 0, "sprints_per_cycle": 4, "status": "active"}
+
+
 def build():
     day_lb   = load_json(DAY_LB_PATH)
     swing_lb = load_json(SWING_LB_PATH)
+    arb_lb   = load_json(ARB_LB_PATH)
     funded   = load_json("/var/www/dashboard/api/funded.json") or []
 
     day_active_id   = day_lb.get("active_sprint")   if day_lb   else None
     swing_active_id = swing_lb.get("active_sprint") if swing_lb else None
+    arb_active_id   = arb_lb.get("active_sprint")   if arb_lb   else None
 
     dashboard = {
         "generated_at":  datetime.now(timezone.utc).isoformat(),
         "leagues":       {},
         "funded_bots":   funded,
         "system_health": get_system_health(day_lb, swing_lb),
-        "fleet_roster":  get_fleet_roster(day_lb, swing_lb),
+        "fleet_roster":  get_fleet_roster(day_lb, swing_lb, arb_lb),
         "activity_feed": get_activity_feed(day_active_id, swing_active_id),
         "sprint_archive": get_sprint_archive(),
     }
@@ -400,9 +440,20 @@ def build():
             "live_sprint":           get_live_sprint("swing", swing_active_id),
         }
 
+    if arb_lb:
+        dashboard["leagues"]["arb"] = {
+            "label":                 "Statistical Arb League",
+            "sprint_duration_hours": 168,
+            "active_sprint":         arb_active_id,
+            "total_sprints":         arb_lb.get("total_sprints", 0),
+            "cumulative_rankings":   arb_lb.get("rankings", []),
+            "live_sprint":           get_live_sprint("arb", arb_active_id),
+        }
+
     dashboard["cycle_state"]       = get_cycle_state()
     dashboard["swing_cycle_state"] = get_swing_cycle_state()
     dashboard["poly_cycle_state"]  = get_poly_cycle_state()
+    dashboard["arb_cycle_state"]   = get_arb_cycle_state()
 
     os.makedirs(os.path.dirname(OUT_FILE), exist_ok=True)
     with open(OUT_FILE, "w") as f:

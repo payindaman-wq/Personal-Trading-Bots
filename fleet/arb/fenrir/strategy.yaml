@@ -1,0 +1,13 @@
+name: fenrir
+description: "ETH/BTC mean reversion — most liquid crypto ratio, stable long-run correlation"
+pair_a: ETH/USD
+pair_b: BTC/USD
+lookback_hours: 480        # 20-day rolling window for mean/std
+z_entry: 2.0               # open position when |z-score| >= this
+z_exit: 0.5                # close when |z-score| falls back below this
+z_stop: 4.0                # stop loss if z-score blows out further
+timeout_hours: 120         # 5-day max hold — exit regardless
+max_positions: 1
+max_position_pct: 0.35     # 35% of equity per trade (both legs combined)
+stop_if_down_pct: 20
+starting_capital: 1000.0
