@@ -377,6 +377,16 @@ def main():
     if datetime.now(timezone.utc) >= expires_at:
         print(f"  Competition expired — archiving...")
         archive_competition(comp_dir, meta, bots, prices)
+        # Run cointegration check after every sprint ends
+        try:
+            import subprocess
+            print("  Running cointegration check...")
+            subprocess.run(
+                ["python3", "/root/.openclaw/workspace/spread_cointegration_check.py"],
+                timeout=120
+            )
+        except Exception as e:
+            print(f"  Cointegration check failed: {e}")
         return
 
     hours_left = (expires_at - datetime.now(timezone.utc)).total_seconds() / 3600
