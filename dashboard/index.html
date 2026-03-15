@@ -179,6 +179,8 @@
   .badge-funded  { background: rgba(201,168,76,.15); color: var(--gold);  border: 1px solid var(--gold-dim); }
   .badge-day     { background: rgba(88,166,255,.12); color: var(--blue);  border: 1px solid rgba(88,166,255,.3); }
   .badge-swing   { background: rgba(188,140,255,.12); color: var(--purple); border: 1px solid rgba(188,140,255,.3); }
+  .badge-spread  { background: rgba(57,211,195,.12); color: #39d3c3; border: 1px solid rgba(57,211,195,.3); }
+  .badge-arb     { background: rgba(255,184,0,.12); color: #ffb800; border: 1px solid rgba(255,184,0,.3); }
 
   /* ── Sprint Status Bar ── */
   .sprint-bar {
@@ -578,6 +580,7 @@
   <button class="tab-btn" onclick="switch_tab('day', this)">Day</button>
   <button class="tab-btn" onclick="switch_tab('swing', this)">Swing</button>
   <button class="tab-btn" onclick="switch_tab('arb', this)">Arb</button>
+  <button class="tab-btn" onclick="switch_tab('spread', this)">Spread</button>
   <button class="tab-btn" onclick="switch_tab('polymarket', this)">Polymarket</button>
   <button class="tab-btn" onclick="switch_tab('archive', this)">Archive</button>
 </div>
@@ -607,6 +610,13 @@
 <div class="tab-panel" id="tab-arb">
   <div class="main" id="main-arb">
     <div class="loading">Loading arb data...</div>
+  </div>
+</div>
+
+<!-- Tab: Spread -->
+<div class="tab-panel" id="tab-spread">
+  <div class="main" id="main-spread">
+    <div class="loading">Loading spread trading data...</div>
   </div>
 </div>
 
@@ -1041,6 +1051,7 @@ function render_fleet(roster, pm, pm_auto) {
     const badge = b.league === 'day'   ? `<span class="badge badge-day">DAY</span>`
                 : b.league === 'swing' ? `<span class="badge badge-swing">SWING</span>`
                 : b.league === 'arb'   ? `<span class="badge" style="background:rgba(255,184,0,0.15);color:#ffb800">ARB</span>`
+                : b.league === 'spread' ? `<span class="badge badge-spread">SPREAD</span>`
                 : b.league === 'copy'  ? `<span class="badge" style="background:rgba(188,140,255,0.15);color:#bc8cff">COPY</span>`
                 :                       `<span class="badge" style="background:rgba(88,166,255,0.15);color:#58a6ff">AUTO</span>`;
     return `
@@ -1430,6 +1441,29 @@ function render_overview(data) {
     swing_card = `<div class="ov-card pending"><span class="ov-pending-badge">Not Started</span><div class="ov-card-title">Swing Trading League</div><div class="ov-card-meta">7d sprints &mdash; 8 bots, multi-pair</div></div>`;
   }
 
+  // Spread League card
+  const spread_league = leagues.spread;
+  let spread_card;
+  if (spread_league) {
+    const is_live = !!spread_league.live_sprint;
+    const bots    = (spread_league.cumulative_rankings || []).length;
+    const leader  = spread_league.cumulative_rankings && spread_league.cumulative_rankings[0];
+    const stats   = [
+      { val: bots,                             lbl: 'Bots'    },
+      { val: spread_league.total_sprints || 0, lbl: 'Sprints' },
+    ];
+    if (is_live) stats.push({ val: fmt_countdown(spread_league.live_sprint.seconds_remaining), lbl: 'Remaining' });
+    spread_card = active_card(
+      'Spread Trading League', `${fmt_duration(spread_league.sprint_duration_hours)} sprints — 14 bots, ratio pairs`,
+      'badge-spread', is_live ? 'LIVE' : 'IDLE',
+      stats,
+      leader ? leader.bot : null,
+      leader ? leader.cumulative_pnl_usd : null
+    );
+  } else {
+    spread_card = `<div class="ov-card pending"><span class="ov-pending-badge">Not Started</span><div class="ov-card-title">Spread Trading League</div><div class="ov-card-meta">7d sprints — 14 bots, ratio pairs</div></div>`;
+  }
+
   // Arb League card
   const arb_league = leagues.arb;
   let arb_card;
@@ -1444,7 +1478,7 @@ function render_overview(data) {
     if (is_live) stats.push({ val: fmt_countdown(arb_league.live_sprint.seconds_remaining), lbl: 'Remaining' });
     arb_card = active_card(
       'Statistical Arb League', `${fmt_duration(arb_league.sprint_duration_hours)} sprints &mdash; 5 bots, spread pairs`,
-      'badge-swing', is_live ? 'LIVE' : 'IDLE',
+      'badge-arb', is_live ? 'LIVE' : 'IDLE',
       stats,
       leader ? leader.bot : null,
       leader ? leader.cumulative_pnl_usd : null
@@ -1479,6 +1513,7 @@ function render_overview(data) {
       ${day_card}
       ${swing_card}
       ${arb_card}
+      ${spread_card}
       ${pm_card}
     </div>
   </div>
@@ -1486,7 +1521,6 @@ function render_overview(data) {
   <div>
     <div class="ov-section-title">Expansion Pipeline</div>
     <div class="ov-grid">
-      ${pending_card(4, 'Cross-pair Spread Trader',  'Spread trading across correlated pairs')}
       ${pending_card(5, 'Crypto Futures Day Trader', 'Leveraged perps &mdash; requires proven spot edge')}
       ${pending_card(6, 'Crypto Futures Swing',      'Swing leverage &mdash; requires proven spot edge')}
       ${pending_card(7, 'Macro Governor',            'Always-on risk officer &mdash; controls all bots')}
@@ -1566,6 +1600,7 @@ function render(data) {
   const day_cs   = data.cycle_state       || { cycle: 1, sprint_in_cycle: 0, sprints_per_cycle: 7 };
   const swing_cs = data.swing_cycle_state || { cycle: 1, sprint_in_cycle: 0, sprints_per_cycle: 4 };
   const arb_cs   = data.arb_cycle_state   || { cycle: 1, sprint_in_cycle: 0, sprints_per_cycle: 4 };
+  const spread_cs = data.spread_cycle_state || { cycle: 1, sprint_in_cycle: 0, sprints_per_cycle: 4 };
 
   // Day tab
   const day_tab_el = document.getElementById('main-day');
@@ -1594,6 +1629,15 @@ function render(data) {
     arb_tab_el.innerHTML = (arb_league
       ? render_league('arb', arb_league, arb_cs)
       : '<div class="idle-notice">No arb data yet &mdash; run arb_competition_start.py to begin</div>');
+  }
+
+  // Spread tab
+  const spread_tab_el = document.getElementById('main-spread');
+  if (spread_tab_el) {
+    const spread_league = data.leagues && data.leagues.spread;
+    spread_tab_el.innerHTML = (spread_league
+      ? render_league('spread', spread_league, spread_cs)
+      : '<div class="idle-notice">No spread data yet &mdash; run spread_competition_start.py to begin</div>');
   }
 
   // Archive tab
