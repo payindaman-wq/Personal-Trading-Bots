@@ -1,0 +1,52 @@
+name: thordis
+style: avax_sol_dual_confirmation
+inspiration: Refined herdis -- only enter when AVAX/SOL ratio is extreme AND AVAX absolute price trend agrees, filtering entries where AVAX is genuinely losing ground to SOL rather than temporarily lagging
+pairs:
+  - AVAX/USD
+spread:
+  base: AVAX/USD
+  quote: SOL/USD
+  analysis_pair: AVAX_SOL_RATIO
+position:
+  size_pct: 30
+  max_open: 1
+  fee_rate: 0.001
+entry:
+  long:
+    conditions:
+      - indicator: rsi
+        period_hours: 14
+        operator: lt
+        value: 35
+      - indicator: bollinger_position
+        period_hours: 20
+        operator: eq
+        value: below_lower
+      - indicator: price_vs_ema
+        period_hours: 48
+        pair: AVAX/USD
+        operator: eq
+        value: above
+  short:
+    conditions:
+      - indicator: rsi
+        period_hours: 14
+        operator: gt
+        value: 65
+      - indicator: bollinger_position
+        period_hours: 20
+        operator: eq
+        value: above_upper
+      - indicator: price_vs_ema
+        period_hours: 48
+        pair: AVAX/USD
+        operator: eq
+        value: below
+exit:
+  take_profit_pct: 6.0
+  stop_loss_pct: 2.5
+  timeout_hours: 96
+risk:
+  pause_if_down_pct: 8
+  pause_hours: 48
+  stop_if_down_pct: 18
