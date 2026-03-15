@@ -581,7 +581,7 @@
   <button class="tab-btn" onclick="switch_tab('swing', this)">Swing</button>
   <button class="tab-btn" onclick="switch_tab('arb', this)">Pairs</button>
   <button class="tab-btn" onclick="switch_tab('spread', this)">Spread</button>
-  <button class="tab-btn" onclick="switch_tab('polymarket', this)">Polymarket</button>
+  <button class="tab-btn" onclick="switch_tab('polymarket', this)">Poly</button>
   <button class="tab-btn" onclick="switch_tab('archive', this)">Archive</button>
 </div>
 
@@ -627,10 +627,10 @@
   </div>
 </div>
 
-<!-- Tab: Polymarket -->
+<!-- Tab: Poly -->
 <div class="tab-panel" id="tab-polymarket">
   <div class="main" id="main-polymarket">
-    <div class="loading">Loading Polymarket data...</div>
+    <div class="loading">Loading Poly trading data...</div>
   </div>
 </div>
 
@@ -1245,7 +1245,7 @@ function render_polymarket(pm, cycle_state) {
   <div class="league-card">
     <div class="league-header">
       <div>
-        <div class="league-title">Polymarket League</div>
+        <div class="league-title">Poly Trading League</div>
         <div class="league-meta">7d sprints &mdash; copy-traders &amp; autonomous bots</div>
       </div>
       <div style="display:flex;gap:8px;align-items:center">
@@ -1552,7 +1552,7 @@ function render_overview(data) {
     ? pm_auto.bots.reduce((s, b) => s + (b.pnl_usd || 0), 0)
     : 0;
   const pm_card = active_card(
-    'Polymarket', 'Prediction market &mdash; copy-traders &amp; autonomous bots',
+    'Poly Trading League', 'Prediction market &mdash; copy-traders &amp; autonomous bots',
     pm_active ? 'badge-live' : 'badge-idle', pm_active ? 'LIVE' : 'IDLE',
     [
       { val: copy_bots, lbl: 'Copy' },
