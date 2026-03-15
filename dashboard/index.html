@@ -579,7 +579,7 @@
   <button class="tab-btn" onclick="switch_tab('leaderboard', this)">Leaderboard</button>
   <button class="tab-btn" onclick="switch_tab('day', this)">Day</button>
   <button class="tab-btn" onclick="switch_tab('swing', this)">Swing</button>
-  <button class="tab-btn" onclick="switch_tab('arb', this)">Arb</button>
+  <button class="tab-btn" onclick="switch_tab('arb', this)">Pairs</button>
   <button class="tab-btn" onclick="switch_tab('spread', this)">Spread</button>
   <button class="tab-btn" onclick="switch_tab('polymarket', this)">Polymarket</button>
   <button class="tab-btn" onclick="switch_tab('archive', this)">Archive</button>
@@ -606,10 +606,10 @@
   </div>
 </div>
 
-<!-- Tab: Arb -->
+<!-- Tab: Pairs -->
 <div class="tab-panel" id="tab-arb">
   <div class="main" id="main-arb">
-    <div class="loading">Loading arb data...</div>
+    <div class="loading">Loading pairs trading data...</div>
   </div>
 </div>
 
@@ -1050,7 +1050,7 @@ function render_fleet(roster, pm, pm_auto) {
       : '<span class="pnl-zero">—</span>';
     const badge = b.league === 'day'   ? `<span class="badge badge-day">DAY</span>`
                 : b.league === 'swing' ? `<span class="badge badge-swing">SWING</span>`
-                : b.league === 'arb'   ? `<span class="badge" style="background:rgba(255,184,0,0.15);color:#ffb800">ARB</span>`
+                : b.league === 'arb'   ? `<span class="badge" style="background:rgba(255,184,0,0.15);color:#ffb800">PAIRS</span>`
                 : b.league === 'spread' ? `<span class="badge badge-spread">SPREAD</span>`
                 : b.league === 'copy'  ? `<span class="badge" style="background:rgba(188,140,255,0.15);color:#bc8cff">COPY</span>`
                 :                       `<span class="badge" style="background:rgba(88,166,255,0.15);color:#58a6ff">AUTO</span>`;
@@ -1108,7 +1108,7 @@ function render_fleet(roster, pm, pm_auto) {
 
   return section_table(day_bots,                    'Day Trading League')
        + section_table(swing_bots,                  'Swing Trading League')
-       + section_table(arb_bots,                    'Statistical Arb League')
+       + section_table(arb_bots,                    'Pairs Trading League')
        + section_table(copy_bots,                   'Polymarket — Copy-Traders')
        + section_table(auto_section('sports'),      'Polymarket — Sports')
        + section_table(auto_section('politics'),    'Polymarket — Politics')
@@ -1533,14 +1533,14 @@ function render_overview(data) {
     ];
     if (is_live) stats.push({ val: fmt_countdown(arb_league.live_sprint.seconds_remaining), lbl: 'Remaining' });
     arb_card = active_card(
-      'Statistical Arb League', `${fmt_duration(arb_league.sprint_duration_hours)} sprints &mdash; 5 bots, spread pairs`,
+      'Pairs Trading League', `${fmt_duration(arb_league.sprint_duration_hours)} sprints — 5 bots, correlated pairs`,
       'badge-arb', is_live ? 'LIVE' : 'IDLE',
       stats,
       leader ? leader.bot : null,
       leader ? leader.cumulative_pnl_usd : null
     );
   } else {
-    arb_card = `<div class="ov-card pending"><span class="ov-pending-badge">Not Started</span><div class="ov-card-title">Statistical Arb League</div><div class="ov-card-meta">7d sprints &mdash; 5 bots, spread pairs</div></div>`;
+    arb_card = `<div class="ov-card pending"><span class="ov-pending-badge">Not Started</span><div class="ov-card-title">Pairs Trading League</div><div class="ov-card-meta">7d sprints &mdash; 5 bots, spread pairs</div></div>`;
   }
 
   // Polymarket card
@@ -1684,7 +1684,7 @@ function render(data) {
     const arb_league = data.leagues && data.leagues.arb;
     arb_tab_el.innerHTML = (arb_league
       ? render_league('arb', arb_league, arb_cs)
-      : '<div class="idle-notice">No arb data yet &mdash; run arb_competition_start.py to begin</div>');
+      : '<div class="idle-notice">No pairs data yet — run arb_competition_start.py to begin</div>');
   }
 
   // Spread tab
