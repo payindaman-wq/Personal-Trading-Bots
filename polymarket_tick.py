@@ -263,14 +263,23 @@ def write_dashboard(state):
             "roi_pct": t.get("roi_pct", 0),
         })
 
+    sprint_started_at = state.get("sprint_started_at")
     recent_trades = []
     for entry in state.get("recent_trades", []):
+        if entry.get("action") == "OPEN":
+            continue
+        ts = entry.get("timestamp", "")
+        if sprint_started_at and ts and ts < sprint_started_at:
+            continue
         recent_trades.append({
             "bot":          entry.get("bot", ""),
             "market_title": entry.get("market", entry.get("title", "")),
             "direction":    entry.get("outcome", "YES"),
-            "outcome":      "open" if entry.get("action") == "OPEN" else "closed",
+            "outcome":      "win" if (entry.get("pnl_usd") or 0) >= 0 else "loss",
             "pnl_usd":      entry.get("pnl_usd"),
+            "pnl_pct":      entry.get("pnl_pct"),
+            "closed_at":    entry.get("timestamp", ""),
+            "reason":       entry.get("reason", ""),
         })
 
     dashboard = {

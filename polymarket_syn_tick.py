@@ -851,17 +851,24 @@ def write_dashboard(state):
                 "opened_at":      pos.get("opened_at", ""),
             })
 
+    sprint_started_at = state.get("sprint_started_at", "")
     recent = []
     for b in bots:
-        for t in b.get("closed_trades", [])[-5:]:
+        for t in b.get("closed_trades", []):
+            ts = t.get("closed_at", "")
+            if sprint_started_at and ts and ts < sprint_started_at:
+                continue
             recent.append({
                 "bot":          b["name"],
                 "market_title": t.get("title", ""),
                 "direction":    t.get("outcome", ""),
                 "outcome":      "win" if t.get("pnl_usd", 0) >= 0 else "loss",
                 "pnl_usd":      t.get("pnl_usd"),
+                "pnl_pct":      t.get("pnl_pct"),
+                "closed_at":    t.get("closed_at", ""),
+                "reason":       t.get("reason", ""),
             })
-    recent = sorted(recent, key=lambda x: x.get("pnl_usd") or 0, reverse=True)[-20:]
+    recent = sorted(recent, key=lambda x: x.get("closed_at") or "", reverse=True)
 
     dashboard = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -880,6 +887,7 @@ def write_dashboard(state):
         "bots":            norm_bots,
         "tracked_traders": [],
         "open_positions":  open_pos,
+        "closed_positions": recent,
         "recent_trades":   recent,
     }
     os.makedirs(os.path.dirname(DASH_OUTPUT), exist_ok=True)

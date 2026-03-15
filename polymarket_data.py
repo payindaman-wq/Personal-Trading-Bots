@@ -74,17 +74,25 @@ def normalize_bots(raw_bots, status):
     return out
 
 
-def build_recent_trades(raw):
-    trades = []
-    for entry in raw.get("trade_log", []):
-        trades.append({
-            "bot":          entry.get("bot", ""),
-            "market_title": entry.get("market", ""),
-            "direction":    entry.get("outcome", "YES"),
-            "outcome":      "open",
-            "pnl_usd":      None,
-        })
-    return list(reversed(trades[-20:]))
+def build_closed_positions(raw):
+    sprint_started_at = raw.get("sprint_started_at", "")
+    closed = []
+    for b in raw.get("bots", []):
+        for t in b.get("closed_trades", []):
+            ts = t.get("closed_at", "")
+            if sprint_started_at and ts and ts < sprint_started_at:
+                continue
+            closed.append({
+                "bot":          b.get("name", ""),
+                "market_title": t.get("title", t.get("market", "")),
+                "direction":    t.get("outcome", ""),
+                "outcome":      "win" if (t.get("pnl_usd") or 0) >= 0 else "loss",
+                "pnl_usd":      t.get("pnl_usd"),
+                "pnl_pct":      t.get("pnl_pct"),
+                "closed_at":    t.get("closed_at", ""),
+                "reason":       t.get("reason", ""),
+            })
+    return sorted(closed, key=lambda x: x.get("closed_at") or "", reverse=True)
 
 
 def main():
@@ -112,7 +120,8 @@ def main():
                 "bots":            normalize_bots(raw_bots, status),
                 "tracked_traders": tracked,
                 "open_positions":  build_open_positions(raw_bots),
-                "recent_trades":   build_recent_trades(raw),
+                "closed_positions": build_closed_positions(raw),
+                "recent_trades":   [],
             }
         except Exception as e:
             print(f"[polymarket_data] Error: {e}")
