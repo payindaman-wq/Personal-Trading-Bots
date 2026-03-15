@@ -5,6 +5,7 @@ Run every 5 minutes via cron to keep the dashboard live."""
 import json
 import os
 import re
+import sys
 import time
 from datetime import datetime, timezone, timedelta
 
@@ -400,6 +401,25 @@ def get_arb_cycle_state():
         return {"cycle": 1, "sprint_in_cycle": 0, "sprints_per_cycle": 4, "status": "active"}
 
 
+def get_spread_score():
+    """Import and run the spread strategy scoring script."""
+    try:
+        if WORKSPACE not in sys.path:
+            sys.path.insert(0, WORKSPACE)
+        from swing_spread_score import collect_all_stats, score_strategy, STRATEGY_GROUPS, CRITERIA
+        bot_stats, sprint_count = collect_all_stats(include_active=True)
+        results = []
+        for name, group_def in STRATEGY_GROUPS.items():
+            results.append(score_strategy(name, group_def, bot_stats))
+        return {
+            "sprint_count": sprint_count,
+            "strategies":   results,
+            "criteria":     CRITERIA,
+        }
+    except Exception as e:
+        return {"error": str(e), "strategies": [], "sprint_count": 0}
+
+
 def build():
     day_lb   = load_json(DAY_LB_PATH)
     swing_lb = load_json(SWING_LB_PATH)
@@ -451,6 +471,7 @@ def build():
         }
 
     dashboard["cycle_state"]       = get_cycle_state()
+    dashboard["spread_score"]      = get_spread_score()
     dashboard["swing_cycle_state"] = get_swing_cycle_state()
     dashboard["poly_cycle_state"]  = get_poly_cycle_state()
     dashboard["arb_cycle_state"]   = get_arb_cycle_state()
