@@ -226,8 +226,10 @@ def main():
 SPREAD_PAIRS = {
     "ETH_BTC_RATIO":  ("ETH/USD",  "BTC/USD"),
     "SOL_ETH_RATIO":  ("SOL/USD",  "ETH/USD"),
+    "SOL_BTC_RATIO":  ("SOL/USD",  "BTC/USD"),
     "LINK_ETH_RATIO": ("LINK/USD", "ETH/USD"),
     "AVAX_ETH_RATIO": ("AVAX/USD", "ETH/USD"),
+    "AAVE_ETH_RATIO": ("AAVE/USD", "ETH/USD"),
 }
 
 

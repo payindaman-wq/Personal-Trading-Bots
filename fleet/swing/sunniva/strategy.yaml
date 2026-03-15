@@ -1,0 +1,50 @@
+name: sunniva
+style: aave_eth_defi_catchup
+inspiration: Mirror of magni -- same catch-up logic on AAVE/ETH ratio instead of LINK/ETH
+pairs:
+  - AAVE/USD
+spread:
+  base: AAVE/USD
+  quote: ETH/USD
+  analysis_pair: AAVE_ETH_RATIO
+position:
+  size_pct: 25
+  max_open: 1
+  fee_rate: 0.001
+entry:
+  long:
+    conditions:
+      - indicator: price_change_pct
+        period_hours: 168
+        operator: lt
+        value: -7.0
+      - indicator: rsi
+        period_hours: 14
+        operator: lt
+        value: 38
+      - indicator: trend
+        period_hours: 24
+        operator: in
+        value: [flat, up]
+  short:
+    conditions:
+      - indicator: price_change_pct
+        period_hours: 168
+        operator: gt
+        value: 7.0
+      - indicator: rsi
+        period_hours: 14
+        operator: gt
+        value: 62
+      - indicator: trend
+        period_hours: 24
+        operator: in
+        value: [flat, down]
+exit:
+  take_profit_pct: 10.0
+  stop_loss_pct: 4.0
+  timeout_hours: 144
+risk:
+  pause_if_down_pct: 10
+  pause_hours: 48
+  stop_if_down_pct: 22
