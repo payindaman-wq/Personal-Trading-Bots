@@ -28,8 +28,8 @@ import json
 import argparse
 
 WORKSPACE   = os.environ.get("WORKSPACE", "/root/.openclaw/workspace")
-RESULTS_DIR = os.path.join(WORKSPACE, "competition", "swing", "results")
-ACTIVE_DIR  = os.path.join(WORKSPACE, "competition", "swing", "active")
+RESULTS_DIR = os.path.join(WORKSPACE, "competition", "spread", "results")
+ACTIVE_DIR  = os.path.join(WORKSPACE, "competition", "spread", "active")
 
 # ---------------------------------------------------------------------------
 # Strategy group definitions

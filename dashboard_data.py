@@ -14,13 +14,18 @@ OUT_FILE  = "/var/www/dashboard/api/dashboard.json"
 
 DAY_LB_PATH   = os.path.join(WORKSPACE, "competition", "leaderboard.json")
 SWING_LB_PATH = os.path.join(WORKSPACE, "competition", "swing", "swing_leaderboard.json")
-ARB_LB_PATH   = os.path.join(WORKSPACE, "competition", "arb", "arb_leaderboard.json")
+ARB_LB_PATH    = os.path.join(WORKSPACE, "competition", "arb", "arb_leaderboard.json")
+SPREAD_LB_PATH = os.path.join(WORKSPACE, "competition", "spread", "spread_leaderboard.json")
 
 DAY_CRON_LOG   = os.path.join(WORKSPACE, "competition", "cron.log")
-SWING_TICK_LOG = os.path.join(WORKSPACE, "competition", "swing", "tick.log")
+SWING_TICK_LOG  = os.path.join(WORKSPACE, "competition", "swing", "tick.log")
+SPREAD_TICK_LOG = os.path.join(WORKSPACE, "competition", "spread", "tick.log")
 
 DAY_RESULTS_DIR   = os.path.join(WORKSPACE, "competition", "results")
 SWING_RESULTS_DIR = os.path.join(WORKSPACE, "competition", "swing", "results")
+CYCLE_STATE_PATH  = os.path.join(WORKSPACE, "competition", "cycle_state.json")
+CYCLE_STATE_PATH  = os.path.join(WORKSPACE, "competition", "cycle_state.json")
+CYCLE_STATE_PATH  = os.path.join(WORKSPACE, "competition", "cycle_state.json")
 ARB_RESULTS_DIR   = os.path.join(WORKSPACE, "competition", "arb", "results")
 CYCLE_STATE_PATH       = os.path.join(WORKSPACE, "competition", "cycle_state.json")
 SWING_CYCLE_STATE_PATH = os.path.join(WORKSPACE, "competition", "swing", "swing_cycle_state.json")
@@ -58,6 +63,22 @@ FLEET_ROSTER = [
     {"bot": "valdis",   "league": "swing", "style": "Swing breakout",               "inspired_by": "Rekt Capital"},
     {"bot": "runa",     "league": "swing", "style": "Bitcoin maximalist",           "inspired_by": "Tone Vays"},
     {"bot": "ivar",     "league": "swing", "style": "Narrative momentum swing",     "inspired_by": "chris-crypto"},
+    # Spread fleet
+    {"bot": "skadi",    "league": "spread", "style": "ETH/BTC mean reversion",    "inspired_by": "Spread arb"},
+    {"bot": "sigrid",   "league": "spread", "style": "SOL/BTC mean reversion",    "inspired_by": "Spread arb"},
+    {"bot": "brynja",   "league": "spread", "style": "AAVE/LINK mean reversion",  "inspired_by": "Spread arb"},
+    {"bot": "herdis",   "league": "spread", "style": "AVAX/SOL mean reversion",   "inspired_by": "Spread arb"},
+    {"bot": "forseti",  "league": "spread", "style": "SOL/ETH momentum",          "inspired_by": "Spread arb"},
+    {"bot": "gunhild",  "league": "spread", "style": "AVAX/ETH momentum",         "inspired_by": "Spread arb"},
+    {"bot": "magni",    "league": "spread", "style": "LINK/ETH catch-up",         "inspired_by": "Spread arb"},
+    {"bot": "sunniva",  "league": "spread", "style": "AAVE/ETH catch-up",         "inspired_by": "Spread arb"},
+    {"bot": "ragnhild", "league": "spread", "style": "ETH/BTC breakout",          "inspired_by": "Spread arb"},
+    {"bot": "estrid",   "league": "spread", "style": "SOL/ETH breakout",          "inspired_by": "Spread arb"},
+    {"bot": "tofa",     "league": "spread", "style": "ETH/BTC dual confirmation", "inspired_by": "Spread arb"},
+    {"bot": "ingrid",   "league": "spread", "style": "LINK/ETH dual confirmation","inspired_by": "Spread arb"},
+    {"bot": "solrun",   "league": "spread", "style": "AAVE/LINK dual confirmation","inspired_by": "Spread arb"},
+    {"bot": "thordis",  "league": "spread", "style": "AVAX/SOL dual confirmation", "inspired_by": "Spread arb"},
+
 ]
 
 
@@ -109,6 +130,8 @@ def get_live_sprint(league, active_sprint_id):
         active_dir = os.path.join(WORKSPACE, "competition", "active", active_sprint_id)
     elif league == "arb":
         active_dir = os.path.join(WORKSPACE, "competition", "arb", "active", active_sprint_id)
+    elif league == "spread":
+        active_dir = os.path.join(WORKSPACE, "competition", "spread", "active", active_sprint_id)
     else:
         active_dir = os.path.join(WORKSPACE, "competition", "swing", "active", active_sprint_id)
 
@@ -169,11 +192,12 @@ def get_live_sprint(league, active_sprint_id):
     }
 
 
-def get_fleet_roster(day_lb, swing_lb, arb_lb=None):
+def get_fleet_roster(day_lb, swing_lb, arb_lb=None, spread_lb=None):
     """Build fleet roster merging static metadata with live cumulative stats."""
     day_stats   = {}
     swing_stats = {}
-    arb_stats   = {}
+    arb_stats    = {}
+    spread_stats = {}
 
     if day_lb:
         for entry in day_lb.get("rankings", []):
@@ -184,13 +208,16 @@ def get_fleet_roster(day_lb, swing_lb, arb_lb=None):
     if arb_lb:
         for entry in arb_lb.get("rankings", []):
             arb_stats[entry["bot"].lower()] = entry
+    if spread_lb:
+        for entry in spread_lb.get("rankings", []):
+            spread_stats[entry["bot"].lower()] = entry
 
     roster = []
     for member in FLEET_ROSTER:
         bot   = member["bot"]
         key   = bot.lower()
         lg    = member["league"]
-        src   = day_stats if lg == "day" else (arb_stats if lg == "arb" else swing_stats)
+        src   = day_stats if lg == "day" else (arb_stats if lg == "arb" else (spread_stats if lg == "spread" else swing_stats))
         stats = src.get(key, {})
 
         roster.append({
@@ -393,6 +420,15 @@ def get_poly_cycle_state():
         return {"cycle": 1, "sprint_in_cycle": 0, "sprints_per_cycle": 4, "status": "active"}
 
 
+def get_spread_cycle_state():
+    try:
+        p = os.path.join(WORKSPACE, "competition", "spread", "spread_cycle_state.json")
+        with open(p) as f:
+            return json.load(f)
+    except Exception:
+        return {"cycle": 1, "sprint_in_cycle": 0, "sprints_per_cycle": 4, "status": "active"}
+
+
 def get_arb_cycle_state():
     try:
         with open(ARB_CYCLE_STATE_PATH) as f:
@@ -420,22 +456,48 @@ def get_spread_score():
         return {"error": str(e), "strategies": [], "sprint_count": 0}
 
 
+
+def get_cycle_state():
+    try:
+        with open(CYCLE_STATE_PATH) as f:
+            return json.load(f)
+    except Exception:
+        return {"cycle": 1, "sprint_in_cycle": 0, "sprints_per_cycle": 7, "status": "active"}
+
+
+def get_cycle_state():
+    try:
+        with open(CYCLE_STATE_PATH) as f:
+            return json.load(f)
+    except Exception:
+        return {"cycle": 1, "sprint_in_cycle": 0, "sprints_per_cycle": 7, "status": "active"}
+
+
+def get_cycle_state():
+    try:
+        with open(CYCLE_STATE_PATH) as f:
+            return json.load(f)
+    except Exception:
+        return {"cycle": 1, "sprint_in_cycle": 0, "sprints_per_cycle": 7, "status": "active"}
+
 def build():
     day_lb   = load_json(DAY_LB_PATH)
     swing_lb = load_json(SWING_LB_PATH)
-    arb_lb   = load_json(ARB_LB_PATH)
+    arb_lb    = load_json(ARB_LB_PATH)
+    spread_lb = load_json(SPREAD_LB_PATH)
     funded   = load_json("/var/www/dashboard/api/funded.json") or []
 
     day_active_id   = day_lb.get("active_sprint")   if day_lb   else None
     swing_active_id = swing_lb.get("active_sprint") if swing_lb else None
-    arb_active_id   = arb_lb.get("active_sprint")   if arb_lb   else None
+    arb_active_id    = arb_lb.get("active_sprint")    if arb_lb    else None
+    spread_active_id = spread_lb.get("active_sprint") if spread_lb else None
 
     dashboard = {
         "generated_at":  datetime.now(timezone.utc).isoformat(),
         "leagues":       {},
         "funded_bots":   funded,
         "system_health": get_system_health(day_lb, swing_lb),
-        "fleet_roster":  get_fleet_roster(day_lb, swing_lb, arb_lb),
+        "fleet_roster":  get_fleet_roster(day_lb, swing_lb, arb_lb, spread_lb),
         "activity_feed": get_activity_feed(day_active_id, swing_active_id),
         "sprint_archive": get_sprint_archive(),
     }
@@ -470,11 +532,28 @@ def build():
             "live_sprint":           get_live_sprint("arb", arb_active_id),
         }
 
+    if spread_lb:
+        dashboard["leagues"]["spread"] = {
+            "label":                 "Spread Trading League",
+            "sprint_duration_hours": 168,
+            "active_sprint":         spread_active_id,
+            "total_sprints":         spread_lb.get("total_sprints", 0),
+            "cumulative_rankings":   spread_lb.get("rankings", []),
+            "live_sprint":           get_live_sprint("spread", spread_active_id),
+        }
+
     dashboard["cycle_state"]       = get_cycle_state()
     dashboard["spread_score"]      = get_spread_score()
+    dashboard["spread_cycle_state"] = get_spread_cycle_state()
     dashboard["swing_cycle_state"] = get_swing_cycle_state()
     dashboard["poly_cycle_state"]  = get_poly_cycle_state()
     dashboard["arb_cycle_state"]   = get_arb_cycle_state()
+
+    dashboard["cycle_state"] = get_cycle_state()
+
+    dashboard["cycle_state"] = get_cycle_state()
+
+    dashboard["cycle_state"] = get_cycle_state()
 
     os.makedirs(os.path.dirname(OUT_FILE), exist_ok=True)
     with open(OUT_FILE, "w") as f:
