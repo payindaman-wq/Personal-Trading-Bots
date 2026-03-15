@@ -1,0 +1,58 @@
+name: estrid
+style: sol_eth_spread_breakout
+inspiration: Mirror of ragnhild -- same breakout logic on SOL/ETH ratio, directly contrasts forseti on same pair
+pairs:
+  - SOL/USD
+spread:
+  base: SOL/USD
+  quote: ETH/USD
+  analysis_pair: SOL_ETH_RATIO
+position:
+  size_pct: 25
+  max_open: 1
+  fee_rate: 0.001
+entry:
+  long:
+    conditions:
+      - indicator: bollinger_position
+        period_hours: 20
+        operator: eq
+        value: above_upper
+      - indicator: trend
+        period_hours: 48
+        operator: eq
+        value: up
+      - indicator: rsi
+        period_hours: 14
+        operator: gt
+        value: 52
+      - indicator: rsi
+        period_hours: 14
+        operator: lt
+        value: 72
+  short:
+    conditions:
+      - indicator: bollinger_position
+        period_hours: 20
+        operator: eq
+        value: below_lower
+      - indicator: trend
+        period_hours: 48
+        operator: eq
+        value: down
+      - indicator: rsi
+        period_hours: 14
+        operator: lt
+        value: 48
+      - indicator: rsi
+        period_hours: 14
+        operator: gt
+        value: 28
+exit:
+  take_profit_pct: 8.0
+  stop_loss_pct: 3.0
+  timeout_hours: 120
+risk:
+  pause_if_down_pct: 9
+  pause_hours: 48
+  stop_if_down_pct: 20

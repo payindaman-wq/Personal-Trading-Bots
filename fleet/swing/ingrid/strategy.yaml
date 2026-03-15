@@ -1,0 +1,52 @@
+name: ingrid
+style: link_eth_dual_confirmation
+inspiration: Refined magni -- only long LINK when ratio lagged AND LINK absolute price is stabilizing. Filters entries where LINK is in a genuine downtrend not just temporarily lagging.
+pairs:
+  - LINK/USD
+spread:
+  base: LINK/USD
+  quote: ETH/USD
+  analysis_pair: LINK_ETH_RATIO
+position:
+  size_pct: 25
+  max_open: 1
+  fee_rate: 0.001
+entry:
+  long:
+    conditions:
+      - indicator: price_change_pct
+        period_hours: 168
+        operator: lt
+        value: -7.0
+      - indicator: rsi
+        period_hours: 14
+        operator: lt
+        value: 38
+      - indicator: trend
+        period_hours: 24
+        pair: LINK/USD
+        operator: in
+        value: [flat, up]
+  short:
+    conditions:
+      - indicator: price_change_pct
+        period_hours: 168
+        operator: gt
+        value: 7.0
+      - indicator: rsi
+        period_hours: 14
+        operator: gt
+        value: 62
+      - indicator: trend
+        period_hours: 24
+        pair: LINK/USD
+        operator: in
+        value: [flat, down]
+exit:
+  take_profit_pct: 10.0
+  stop_loss_pct: 4.0
+  timeout_hours: 144
+risk:
+  pause_if_down_pct: 10
+  pause_hours: 48
+  stop_if_down_pct: 22

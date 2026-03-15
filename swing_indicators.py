@@ -204,7 +204,8 @@ def evaluate_condition(cond, pair):
     period   = cond.get("period_hours", 24)
     operator = cond["operator"]
     expected = cond["value"]
-    actual   = compute_indicator(name, pair, period)
+    eval_pair = cond.get("pair", pair)  # per-condition pair override (for dual-confirmation strategies)
+    actual   = compute_indicator(name, eval_pair, period)
     if actual is None:
         return None
     if isinstance(expected, str):
