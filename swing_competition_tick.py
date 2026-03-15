@@ -121,8 +121,10 @@ def check_exits(portfolio, strategy, prices):
             s["total_pnl_pct"]   = round(s["total_pnl_pct"] + pnl_pct, 4)
             if net_pnl > 0:
                 s["wins"] += 1
+                s["sum_wins_usd"] = round(s.get("sum_wins_usd", 0.0) + net_pnl, 2)
             else:
                 s["losses"] += 1
+                s["sum_losses_usd"] = round(s.get("sum_losses_usd", 0.0) + net_pnl, 2)
             t = s["total_trades"]
             s["win_rate"] = round(s["wins"] / t * 100, 1) if t > 0 else 0.0
 
