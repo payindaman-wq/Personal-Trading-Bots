@@ -213,7 +213,58 @@ def main():
     print(f"Updating swing price history ({'full' if args.init else 'incremental'})...")
     for pair in args.pairs:
         update_pair(pair, full=args.init)
+    update_spread_ratios()
     print("Done.")
+
+
+
+
+# ---------------------------------------------------------------------------
+# Spread ratio pairs
+# ---------------------------------------------------------------------------
+
+SPREAD_PAIRS = {
+    "ETH_BTC_RATIO":  ("ETH/USD",  "BTC/USD"),
+    "SOL_ETH_RATIO":  ("SOL/USD",  "ETH/USD"),
+    "LINK_ETH_RATIO": ("LINK/USD", "ETH/USD"),
+    "AVAX_ETH_RATIO": ("AVAX/USD", "ETH/USD"),
+}
+
+
+def update_spread_ratios():
+    """
+    Compute and store ratio candles for spread pairs.
+    Must be called after regular pairs are updated.
+    Ratio candle: base_close / quote_close per matching timestamp.
+    """
+    os.makedirs(HISTORY_DIR, exist_ok=True)
+    for ratio_name, (base_pair, quote_pair) in SPREAD_PAIRS.items():
+        base_hist  = load_history(base_pair)
+        quote_hist = load_history(quote_pair)
+        if not base_hist or not quote_hist:
+            print(f"  {ratio_name}: insufficient history, skip")
+            continue
+
+        quote_by_ts = {c["ts"]: c for c in quote_hist}
+        ratio_candles = []
+        for bc in base_hist:
+            qc = quote_by_ts.get(bc["ts"])
+            if not qc:
+                continue
+            if qc["close"] <= 0 or qc["open"] <= 0 or qc["high"] <= 0 or qc["low"] <= 0:
+                continue
+            ratio_candles.append({
+                "ts":     bc["ts"],
+                "open":   bc["open"]  / qc["open"],
+                "high":   bc["high"]  / qc["low"],
+                "low":    bc["low"]   / qc["high"],
+                "close":  bc["close"] / qc["close"],
+                "volume": (bc["volume"] + qc["volume"]) / 2,
+            })
+
+        save_history(ratio_name, ratio_candles)
+        latest = ratio_candles[-1]["close"] if ratio_candles else 0
+        print(f"  {ratio_name}: {len(ratio_candles)} ratio candles  (latest: {latest:.6f})")
 
 
 if __name__ == "__main__":

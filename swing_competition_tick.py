@@ -17,7 +17,7 @@ import yaml
 from datetime import datetime, timezone, timedelta
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from swing_price_store import get_current_price, update_pair
+from swing_price_store import get_current_price, update_pair, update_spread_ratios
 from swing_indicators import evaluate_entry
 
 WORKSPACE    = os.environ.get("WORKSPACE", "/root/.openclaw/workspace")
@@ -181,11 +181,16 @@ def try_entries(portfolio, strategy, prices, comp_pairs):
         if current is None:
             continue
 
+
+        # Spread bots: evaluate conditions on ratio pair, trade base pair
+        spread_cfg    = strategy.get("spread", {})
+        analysis_pair = spread_cfg.get("analysis_pair", pair)
+
         for direction in ["long", "short"]:
             conditions = strategy.get("entry", {}).get(direction, {}).get("conditions", [])
             if not conditions:
                 continue
-            result = evaluate_entry(conditions, pair)
+            result = evaluate_entry(conditions, analysis_pair)
             if result is True:
                 size_usd = round(equity * size_pct, 2)
                 fee      = round(size_usd * fee_rate, 4)
@@ -264,10 +269,8 @@ def update_swing_cycle_state(comp_id):
         with open(CYCLE_STATE, "w") as f:
             json.dump(state, f, indent=2)
         tg_send(
-            f"*Swing Cycle {cycle} complete* — all {per} sprints finished.
-"
-            f"Review standings and adjust non-profitable bot strategies, then run:
-"
+            f"*Swing Cycle {cycle} complete* — all {per} sprints finished.\n"
+            f"Review standings and adjust non-profitable bot strategies, then run:\n"
             f"`python3 /root/.openclaw/workspace/swing_cycle_advance.py`"
         )
         print(f"  Swing Cycle {cycle} complete. Telegram alert sent.")
@@ -363,6 +366,7 @@ def main():
         update_pair(pair, full=False)
 
     prices = {pair: get_current_price(pair) for pair in pairs}
+    update_spread_ratios()
 
     # Check if competition has expired
     started_at   = datetime.fromisoformat(meta["started_at"])
