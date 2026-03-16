@@ -552,10 +552,14 @@ def gemini_assess(title, outcome, pm_price, vegas_data, persona, api_key):
                     err_msg = err_body.get("error", {}).get("message", "")
                 except Exception:
                     err_msg = ""
-                # "quota" in message = daily quota exhausted → abort tick
-                # otherwise = RPM limit → wait 60s and retry once
-                if "quota" in err_msg.lower() or attempt == 1:
+                # "quota" in message = daily quota exhausted → mark key exhausted
+                # attempt 1 + no quota message = RPM persists → skip candidate only
+                # attempt 0 + no quota message = RPM → wait 60s and retry
+                if "quota" in err_msg.lower():
                     raise RuntimeError("GEMINI_KEY_EXHAUSTED")
+                elif attempt == 1:
+                    log.warning("Gemini 429 RPM persists on retry — skipping candidate")
+                    return None
                 else:
                     log.warning("Gemini 429 RPM — waiting 60s before retry")
                     time.sleep(60)
