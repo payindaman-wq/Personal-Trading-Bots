@@ -1,0 +1,301 @@
+#!/usr/bin/env python3
+"""
+sys_heartbeat.py — SYN system health monitor.
+
+Run every 30 minutes via cron. Checks all leagues and services for problems
+and sends Telegram alerts ONLY when anomalies are found.
+
+Checks:
+  - Tick log freshness (stale = no activity in >2× expected interval)
+  - Active sprint exists per league
+  - Errors/tracebacks in recent log output
+  - systemd service health (polymarket, polymarket_syn)
+  - Gemini quota state
+
+Cooldown: 60 min per problem key — won't spam the same alert repeatedly.
+"""
+import json, os, subprocess, urllib.request, time
+from datetime import datetime, timezone, timedelta
+
+WORKSPACE  = "/root/.openclaw/workspace"
+STATE_FILE = f"{WORKSPACE}/competition/heartbeat_state.json"
+BOT_TOKEN  = "8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
+CHAT_ID    = "8154505910"
+
+COOLDOWN_MIN = 60   # min gap between repeated alerts for the same problem
+
+# ── League definitions ──────────────────────────────────────────────────────
+
+LEAGUES = [
+    {
+        "name":       "day",
+        "tick_log":   f"{WORKSPACE}/competition/cron.log",
+        "active_dir": f"{WORKSPACE}/competition/active",
+        "interval":   5,    # minutes between ticks
+        "stale_mul":  3,    # alert if log > interval × stale_mul minutes old
+        "error_lines": 30,
+    },
+    {
+        "name":       "swing",
+        "tick_log":   f"{WORKSPACE}/competition/swing/tick.log",
+        "active_dir": f"{WORKSPACE}/competition/swing/active",
+        "interval":   30,
+        "stale_mul":  3,
+        "error_lines": 30,
+    },
+    {
+        "name":       "arb",
+        "tick_log":   f"{WORKSPACE}/competition/arb/tick.log",
+        "active_dir": f"{WORKSPACE}/competition/arb/active",
+        "interval":   30,
+        "stale_mul":  3,
+        "error_lines": 30,
+    },
+    {
+        "name":       "spread",
+        "tick_log":   f"{WORKSPACE}/competition/spread/tick.log",
+        "active_dir": f"{WORKSPACE}/competition/spread/active",
+        "interval":   30,
+        "stale_mul":  3,
+        "error_lines": 30,
+    },
+]
+
+SERVICES = [
+    {"name": "polymarket",     "unit": "polymarket.service"},
+    {"name": "polymarket_syn", "unit": "polymarket_syn.service"},
+]
+
+# ── State / cooldown ────────────────────────────────────────────────────────
+
+def load_state():
+    if os.path.isfile(STATE_FILE):
+        try:
+            with open(STATE_FILE) as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {"last_alerted": {}}
+
+
+def save_state(state):
+    os.makedirs(os.path.dirname(STATE_FILE), exist_ok=True)
+    with open(STATE_FILE, "w") as f:
+        json.dump(state, f, indent=2)
+
+
+def should_alert(state, key):
+    """Return True if cooldown has passed for this problem key."""
+    last = state["last_alerted"].get(key)
+    if not last:
+        return True
+    last_dt = datetime.fromisoformat(last)
+    return datetime.now(timezone.utc) - last_dt > timedelta(minutes=COOLDOWN_MIN)
+
+
+def mark_alerted(state, key):
+    state["last_alerted"][key] = datetime.now(timezone.utc).isoformat()
+
+
+def clear_alert(state, key):
+    """Remove a resolved problem so it fires immediately if it recurs."""
+    state["last_alerted"].pop(key, None)
+
+
+# ── Telegram ────────────────────────────────────────────────────────────────
+
+def tg_send(msg):
+    try:
+        payload = json.dumps({
+            "chat_id":    CHAT_ID,
+            "text":       msg,
+            "parse_mode": "HTML",
+        }).encode()
+        req = urllib.request.Request(
+            f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
+            data=payload,
+            headers={"Content-Type": "application/json"},
+        )
+        urllib.request.urlopen(req, timeout=10)
+    except Exception as e:
+        print(f"[tg_send] failed: {e}")
+
+
+# ── Checks ──────────────────────────────────────────────────────────────────
+
+def check_tick_freshness(league):
+    """Return problem string if tick log is stale, else None."""
+    log = league["tick_log"]
+    if not os.path.isfile(log):
+        return f"tick log missing: {os.path.basename(log)}"
+    age_sec = time.time() - os.path.getmtime(log)
+    threshold_sec = league["interval"] * league["stale_mul"] * 60
+    if age_sec > threshold_sec:
+        age_min = int(age_sec / 60)
+        return f"stale — last tick {age_min}m ago (expected every {league['interval']}m)"
+    return None
+
+
+def check_tick_errors(league):
+    """Return last error snippet if recent log lines contain tracebacks/errors."""
+    log = league["tick_log"]
+    if not os.path.isfile(log):
+        return None
+    try:
+        with open(log) as f:
+            lines = f.readlines()
+    except Exception:
+        return None
+
+    recent = lines[-league["error_lines"]:]
+    error_keywords = ("Traceback", "KeyError", "AttributeError", "TypeError",
+                      "ValueError", "Exception", "ERROR", "CRITICAL", "SyntaxError")
+    hits = [l.rstrip() for l in recent if any(k in l for k in error_keywords)]
+    if hits:
+        snippet = hits[-1][:120]
+        return f"errors in log — {snippet}"
+    return None
+
+
+def check_active_sprint(league):
+    """Return problem string if no active sprint found."""
+    active_dir = league["active_dir"]
+    if not os.path.isdir(active_dir):
+        return "active dir missing"
+    entries = sorted(os.listdir(active_dir))
+    if not entries:
+        return "no active sprint"
+    meta_path = os.path.join(active_dir, entries[-1], "meta.json")
+    if not os.path.isfile(meta_path):
+        return "no active sprint (no meta.json)"
+    try:
+        with open(meta_path) as f:
+            meta = json.load(f)
+        if meta.get("status") != "active":
+            return f"sprint status={meta.get('status', '?')}"
+    except Exception:
+        return "meta.json unreadable"
+    return None
+
+
+def check_service(svc):
+    """Return problem string if service is not active+running."""
+    try:
+        result = subprocess.run(
+            ["systemctl", "is-active", svc["unit"]],
+            capture_output=True, text=True, timeout=5,
+        )
+        status = result.stdout.strip()
+        if status != "active":
+            return f"service {svc['unit']} is {status}"
+    except Exception as e:
+        return f"systemctl check failed: {e}"
+    return None
+
+
+def check_gemini_quota(state):
+    """Warn if any Gemini key is exhausted or daily count is high."""
+    state_path = f"{WORKSPACE}/competition/polymarket/auto_state.json"
+    if not os.path.isfile(state_path):
+        return None
+    try:
+        with open(state_path) as f:
+            s = json.load(f)
+        gd = s.get("gemini_daily", {})
+        exhausted = gd.get("exhausted", [])
+        counts    = gd.get("counts", [])
+        if exhausted:
+            return f"{len(exhausted)}/3 Gemini keys exhausted today"
+        if counts and max(counts) > 1100:
+            return f"Gemini key approaching daily limit ({max(counts)}/1200)"
+    except Exception:
+        pass
+    return None
+
+
+def check_polymarket_syn_freshness():
+    """Check syn_tick.log freshness — service being 'active' doesn't mean it's ticking."""
+    log = f"{WORKSPACE}/competition/polymarket/syn_tick.log"
+    if not os.path.isfile(log):
+        return "syn_tick.log missing"
+    age_sec = time.time() - os.path.getmtime(log)
+    if age_sec > 35 * 60:  # 15 min interval × 2.3
+        return f"stale — last tick {int(age_sec/60)}m ago (expected every 15m)"
+    return None
+
+
+# ── Main ─────────────────────────────────────────────────────────────────────
+
+def main():
+    now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    print(f"[sys_heartbeat] {now_str}")
+
+    state    = load_state()
+    problems = []   # list of (key, message)
+    resolved = []   # keys that were alerting but are now clear
+
+    # ── League checks ──────────────────────────────────────────────────────
+    for league in LEAGUES:
+        name = league["name"]
+
+        for check_fn, suffix in [
+            (check_tick_freshness, "stale"),
+            (check_tick_errors,    "errors"),
+            (check_active_sprint,  "sprint"),
+        ]:
+            key = f"{name}_{suffix}"
+            problem = check_fn(league)
+            if problem:
+                if should_alert(state, key):
+                    problems.append((key, f"[{name.upper()}] {problem}"))
+            else:
+                if key in state["last_alerted"]:
+                    resolved.append(key)
+                clear_alert(state, key)
+
+    # ── Service checks ─────────────────────────────────────────────────────
+    for svc in SERVICES:
+        key     = f"svc_{svc['name']}"
+        problem = check_service(svc)
+        if problem:
+            if should_alert(state, key):
+                problems.append((key, f"[SERVICE] {problem}"))
+        else:
+            if key in state["last_alerted"]:
+                resolved.append(key)
+            clear_alert(state, key)
+
+    # ── Polymarket SYN tick freshness ──────────────────────────────────────
+    key     = "polysyn_stale"
+    problem = check_polymarket_syn_freshness()
+    if problem:
+        if should_alert(state, key):
+            problems.append((key, f"[POLYMARKET_SYN] {problem}"))
+    else:
+        clear_alert(state, key)
+
+    # ── Gemini quota check ─────────────────────────────────────────────────
+    key     = "gemini_quota"
+    problem = check_gemini_quota(state)
+    if problem:
+        if should_alert(state, key):
+            problems.append((key, f"[GEMINI] {problem}"))
+    else:
+        clear_alert(state, key)
+
+    # ── Send alerts ────────────────────────────────────────────────────────
+    if problems:
+        lines = [f"<b>SYN ALERT</b> — {now_str}", ""]
+        for key, msg in problems:
+            lines.append(f"• {msg}")
+            mark_alerted(state, key)
+            print(f"  ALERT: {msg}")
+        tg_send("\n".join(lines))
+    else:
+        print("  All systems nominal.")
+
+    save_state(state)
+
+
+if __name__ == "__main__":
+    main()
