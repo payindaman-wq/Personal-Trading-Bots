@@ -260,11 +260,13 @@ def evaluate_entry(conditions, history, pair, sim_now):
             elif expected.lower() == "false":
                 expected = False
         op = cond["operator"]
-        passed = {"lt": actual < expected, "gt": actual > expected,
-                  "lte": actual <= expected, "gte": actual >= expected,
-                  "eq": actual == expected, "in": actual in expected}.get(op)
-        if passed is None:
-            raise ValueError(f"Unknown operator: {op}")
+        if   op == "lt":  passed = actual < expected
+        elif op == "gt":  passed = actual > expected
+        elif op == "lte": passed = actual <= expected
+        elif op == "gte": passed = actual >= expected
+        elif op == "eq":  passed = actual == expected
+        elif op == "in":  passed = actual in expected
+        else: raise ValueError(f"Unknown operator: {op}")
         if not passed:
             return False
     return True
