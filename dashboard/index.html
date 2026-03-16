@@ -981,17 +981,23 @@ function render_activity_feed(feed, league) {
     closed_html = `<div class="activity-empty">No closed positions yet</div>`;
   } else {
     closed_html = closed.slice(0, 20).map(e => {
-      const dir_cls   = e.direction === 'long' ? 'act-long' : 'act-short';
-      const exit_str  = fmt_price(e.exit_price);
-      const pnl       = Number(e.net_pnl) || 0;
-      const pnl_pct   = Number(e.pnl_pct) || 0;
-      const pnl_sign  = pnl >= 0 ? '+' : '';
-      const pnl_cls   = pnl >= 0 ? 'act-pnl-pos' : 'act-pnl-neg';
-      const ts_str    = e.timestamp ? fmt_ts_short(e.timestamp) : '';
+      const dir_cls    = e.direction === 'long' ? 'act-long' : 'act-short';
+      const entry_str  = fmt_price(e.entry_price);
+      const exit_str   = fmt_price(e.exit_price);
+      const qty_str    = fmt_qty(e.quantity);
+      const inv_str    = e.cost_basis ? `$${Number(e.cost_basis).toFixed(2)}` : '';
+      const pnl        = Number(e.net_pnl) || 0;
+      const pnl_pct    = Number(e.pnl_pct) || 0;
+      const pnl_sign   = pnl >= 0 ? '+' : '';
+      const pnl_cls    = pnl >= 0 ? 'act-pnl-pos' : 'act-pnl-neg';
+      const ts_str     = e.timestamp ? fmt_ts_short(e.timestamp) : '';
       return `<div class="activity-row">
         <span class="act-bot">${esc(e.bot)}</span>
         <span class="act-pair">${esc(e.pair)}</span>
         <span class="${dir_cls}">${e.direction.toUpperCase()}</span>
+        <span class="act-price">@ ${esc(entry_str)}</span>
+        ${qty_str ? `<span class="act-qty">${esc(qty_str)} tkns</span>` : ''}
+        ${inv_str ? `<span class="act-invested">${esc(inv_str)}</span>` : ''}
         <span class="act-price">exit ${esc(exit_str)}</span>
         <span class="${pnl_cls}">${pnl_sign}$${Math.abs(pnl).toFixed(2)} (${pnl_sign}${pnl_pct.toFixed(2)}%)</span>
         <span class="act-reason">${esc(e.reason || '')}</span>
