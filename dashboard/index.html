@@ -1432,7 +1432,7 @@ function render_polymarket(pm, cycle_state) {
       return `
       <tr>
         <td class="bot-name">${esc(p.bot || '&mdash;')}</td>
-        <td style="max-width:280px;white-space:normal;line-height:1.4;font-size:12px">${esc(p.market_title || '&mdash;')}</td>
+        <td style="max-width:280px;white-space:normal;line-height:1.4;font-size:12px">${pm_market_link(p.market_title)}</td>
         <td style="font-size:11px;color:var(--muted)">${esc(p.direction || '&mdash;')}</td>
         <td>${reason_label(p.reason)}</td>
         <td class="${pnl_cls}">${pnl_str}${pct_str}</td>
