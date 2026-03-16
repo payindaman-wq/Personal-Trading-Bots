@@ -140,6 +140,7 @@ def load_active_sprint():
         "pairs":             meta.get("pairs", []),
         "rankings":          rankings,
         "seconds_remaining": max(0, int((ends_at - now).total_seconds())),
+        "in_progress":       True,
     }
 
 
@@ -150,6 +151,7 @@ def load_active_sprint():
 def aggregate(sprints):
     bots = {}
     for sprint in sprints:
+        in_prog = sprint.get("in_progress", False)
         ranked = sorted(sprint["rankings"], key=lambda x: x["final_equity"], reverse=True)
         sc = DISPLAY_CAPITAL / sprint.get("starting_capital", DISPLAY_CAPITAL)
         for i, r in enumerate(ranked):
@@ -170,15 +172,16 @@ def aggregate(sprints):
                     "style":                "stat arb",
                 }
             e = bots[b]
-            e["points"]            += pts
             e["sprints_entered"]   += 1
             e["cumulative_pnl_usd"] = round(e["cumulative_pnl_usd"] + r["total_pnl_usd"] * sc, 2)
             e["total_trades"]      += r["total_trades"]
             e["total_wins"]        += r["wins"]
-            if i == 0:
-                e["sprint_wins"] += 1
-            if i < 3:
-                e["podiums"] += 1
+            if not in_prog:
+                e["points"] += pts
+                if i == 0:
+                    e["sprint_wins"] += 1
+                if i < 3:
+                    e["podiums"] += 1
 
     for b in bots.values():
         t = b["total_trades"]
