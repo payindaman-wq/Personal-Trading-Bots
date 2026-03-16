@@ -1618,15 +1618,22 @@ function render_overview(data) {
     ? pm_auto.bots.reduce((s, b) => s + (b.pnl_usd || 0), 0)
     : 0;
   const pm_total_bots = copy_bots + auto_bots;
+  const all_pm_bots = [
+    ...(pm     && pm.bots     ? pm.bots.map(b     => ({ bot: b.name, pnl_usd: b.pnl_usd || 0 })) : []),
+    ...(pm_auto && pm_auto.bots ? pm_auto.bots.map(b => ({ bot: b.bot,  pnl_usd: b.pnl_usd || 0 })) : []),
+  ];
+  all_pm_bots.sort((a, b) => (b.pnl_usd || 0) - (a.pnl_usd || 0));
+  const pm_leader = all_pm_bots.length > 0 ? all_pm_bots[0] : null;
   const pm_card = active_card(
-    'Poly Trading League', 'Prediction market &mdash; copy-traders &amp; autonomous bots',
+    'Poly Trading League', `7d cycles — ${pm_total_bots} bots, prediction markets`,
     pm_active ? 'badge-live' : 'badge-idle', pm_active ? 'LIVE' : 'IDLE',
     [
       { val: pm_total_bots, lbl: 'Bots' },
       { val: copy_bots,     lbl: 'Copy' },
       { val: auto_bots,     lbl: 'Auto' },
     ],
-    null, null
+    pm_leader ? pm_leader.bot : null,
+    pm_leader ? pm_leader.pnl_usd : null
   );
 
   return `
