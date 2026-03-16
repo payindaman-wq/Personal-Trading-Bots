@@ -1,24 +1,23 @@
 #!/usr/bin/env python3
 """
-spread_cycle_advance.py — End-of-cycle cleanup for the Spread League.
+arb_cycle_advance.py — End-of-cycle cleanup for the Arb League.
 
 Run manually after the last sprint of a cycle completes.
   1. Archives cycle results
   2. Advances cycle counter
   3. Sends Telegram summary
 
-Pair health check and replacement happen at cycle START via spread_start_cycle.py.
+Pair health check and replacement happen at cycle START via arb_start_cycle.py.
 
-Usage: python3 spread_cycle_advance.py [--dry-run]
+Usage: python3 arb_cycle_advance.py [--dry-run]
 """
 import argparse, json, os, shutil, urllib.request
 from datetime import datetime, timezone
 
 WORKSPACE   = "/root/.openclaw/workspace"
-FLEET_DIR   = os.path.join(WORKSPACE, "fleet", "spread")
-RESULTS_DIR = os.path.join(WORKSPACE, "competition", "spread", "results")
-ARCHIVE_DIR = os.path.join(WORKSPACE, "competition", "spread", "archive")
-CYCLE_STATE = os.path.join(WORKSPACE, "competition", "spread", "spread_cycle_state.json")
+RESULTS_DIR = os.path.join(WORKSPACE, "competition", "arb", "results")
+ARCHIVE_DIR = os.path.join(WORKSPACE, "competition", "arb", "archive")
+CYCLE_STATE = os.path.join(WORKSPACE, "competition", "arb", "arb_cycle_state.json")
 
 BOT_TOKEN = "8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
 CHAT_ID   = "8154505910"
@@ -57,7 +56,7 @@ def main():
 
     now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     print(f"\n{'='*60}")
-    print(f"  SPREAD CYCLE ADVANCE  |  {now_str}")
+    print(f"  ARB CYCLE ADVANCE  |  {now_str}")
     if dry:
         print("  DRY RUN — no changes will be made")
     print(f"{'='*60}\n")
@@ -67,7 +66,7 @@ def main():
     new_cycle   = old_cycle + 1
 
     # ── 1. Archive cycle results ──────────────────────────────────────────
-    print(f"Archiving Spread Cycle {old_cycle} results...")
+    print(f"Archiving Arb Cycle {old_cycle} results...")
     archive_dest = os.path.join(ARCHIVE_DIR, f"cycle-{old_cycle}")
     if not dry and os.path.isdir(RESULTS_DIR) and os.listdir(RESULTS_DIR):
         os.makedirs(archive_dest, exist_ok=True)
@@ -86,8 +85,6 @@ def main():
     cycle_state["status"]           = "active"
     cycle_state["cycle_started_at"] = None
     cycle_state["sprints"]          = []
-    # Clear weak_strikes — health check at cycle start handles second-strike via pair_health_check.py
-    cycle_state.pop("weak_strikes", None)
 
     if not dry:
         save_cycle_state(cycle_state)
@@ -96,10 +93,10 @@ def main():
 
     # ── 3. Telegram summary ───────────────────────────────────────────────
     lines = [
-        f"<b>Spread League — Cycle {old_cycle} Complete</b>",
+        f"<b>Arb League — Cycle {old_cycle} Complete</b>",
         f"Cycle {new_cycle} ready.",
         f"\nStart new cycle (runs pair health check + sprint start):",
-        f"python3 spread_start_cycle.py",
+        f"python3 arb_start_cycle.py",
     ]
     msg = "\n".join(lines)
     print(f"\n{msg}")
@@ -107,7 +104,7 @@ def main():
         tg_send(msg)
 
     print(f"\n{'='*60}")
-    print(f"  {'DRY RUN complete — no files modified.' if dry else f'Cycle {new_cycle} ready. Run spread_start_cycle.py to begin.'}")
+    print(f"  {'DRY RUN complete — no files modified.' if dry else f'Cycle {new_cycle} ready. Run arb_start_cycle.py to begin.'}")
     print(f"{'='*60}\n")
 
 
