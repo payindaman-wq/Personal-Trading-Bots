@@ -308,35 +308,45 @@ def run():
         json.dump(report, f, indent=2)
     print(chr(10) + f"  Report saved: {REPORT_PATH}" + chr(10))
 
-    if retire:
-        try:
-            cfg  = json.load(open("/root/.openclaw/openclaw.json"))
-            tok  = cfg["integrations"]["telegram"]["botToken"]
-            cid  = cfg["integrations"]["telegram"]["chatId"]
-            bt   = chr(96)
-            tlines = ["*Spread League: Pair Health Alert*" + chr(10)]
-            for kk in retire:
-                r      = active_results[kk]
-                issues = r.get("issues", [])
-                tlines.append(f"RETIRE: {bt}{kk}{bt} -- {', '.join(issues)}")
-            if candidates:
-                top    = candidates[0]
-                tb     = top.get("base",  "").replace("/USD", "")
-                tq     = top.get("quote", "").replace("/USD", "")
-                tscore = top.get("score", 0)
-                tlines.append(chr(10) + f"Top candidate: {bt}{tb}/{tq}{bt} (score={tscore:.1f})")
-            cmd_str = f"{bt}python3 /root/.openclaw/workspace/spread_cointegration_check.py{bt}"
-            tlines.append(chr(10) + f"Run: {cmd_str}")
-            msg  = chr(10).join(tlines)
-            import urllib.request
-            url  = f"https://api.telegram.org/bot{tok}/sendMessage"
-            data = json.dumps({"chat_id": cid, "text": msg, "parse_mode": "Markdown"}).encode()
-            req  = urllib.request.Request(url, data=data,
-                                          headers={"Content-Type": "application/json"})
-            urllib.request.urlopen(req, timeout=10)
-            print("  Telegram alert sent." + chr(10))
-        except Exception as e:
-            print(f"  Telegram alert failed: {e}" + chr(10))
+    # Telegram alert
+    try:
+        import urllib.request as _ur
+        BOT_TOKEN = "8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
+        CHAT_ID   = "8154505910"
+        tok = BOT_TOKEN; cid = CHAT_ID
+
+        lines = ["*Spread League: Pair Health Check*\n"]
+
+        if retire:
+            lines.append("*ACTION NOW — RETIRE these pairs (half-life > sprint):*")
+            for k in retire:
+                r = active_results[k]
+                lines.append(f"  RETIRE: `{k}` — {', '.join(r.get('issues', []))}")
+            repl = [f"{r['base'].replace('/USD', '')}/{r['quote'].replace('/USD', '')}"
+                    for r in candidates[:len(retire)]]
+            lines.append(f"  Replace with: {', '.join(repl)}")
+
+        if weak:
+            lines.append("\n*WATCH — review at cycle end:*")
+            for k in weak:
+                r = active_results[k]
+                lines.append(f"  WEAK: `{k}` — {', '.join(r.get('issues', []))}")
+
+        if not retire and not weak:
+            lines.append(f"All {len(strong)} active pairs healthy.")
+
+        lines.append(f"\nSTRONG:{len(strong)}  WATCH:{len(watch)}  WEAK:{len(weak)}  RETIRE:{len(retire)}")
+
+        msg  = "\n".join(lines)
+        import urllib.request
+        url  = f"https://api.telegram.org/bot{tok}/sendMessage"
+        data = json.dumps({"chat_id": cid, "text": msg, "parse_mode": "Markdown"}).encode()
+        req  = urllib.request.Request(url, data=data,
+                                      headers={"Content-Type": "application/json"})
+        urllib.request.urlopen(req, timeout=10)
+        print("  Telegram alert sent." + chr(10))
+    except Exception as e:
+        print(f"  Telegram alert failed: {e}" + chr(10))
 
     return report
 

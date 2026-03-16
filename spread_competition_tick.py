@@ -279,7 +279,7 @@ def update_spread_cycle_state(comp_id):
     else:
         with open(CYCLE_STATE, "w") as f:
             json.dump(state, f, indent=2)
-        print(f"  Swing cycle state: Cycle {cycle}, Sprint {n}/{per}")
+        print(f"  Spread cycle state: Cycle {cycle}, Sprint {n}/{per}")
 
 
 def archive_competition(comp_dir, meta, bots, prices):
