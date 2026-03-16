@@ -292,13 +292,18 @@
     font-size: 11px;
   }
   .activity-row:last-child { border-bottom: none; }
-  .act-bot   { color: var(--text); font-weight: bold; min-width: 70px; }
-  .act-pair  { color: var(--blue); min-width: 80px; }
-  .act-long  { color: var(--green); font-weight: bold; }
-  .act-short { color: var(--red); font-weight: bold; }
-  .act-price { color: var(--muted); }
-  .act-ts    { color: var(--muted); font-size: 10px; margin-left: auto; }
-  .act-raw   { color: var(--muted); font-size: 10px; overflow: hidden; text-overflow: ellipsis; max-width: 600px; }
+  .act-bot      { color: var(--text); font-weight: bold; min-width: 70px; }
+  .act-pair     { color: var(--blue); min-width: 80px; }
+  .act-long     { color: var(--green); font-weight: bold; }
+  .act-short    { color: var(--red); font-weight: bold; }
+  .act-price    { color: var(--muted); }
+  .act-qty      { color: var(--muted); font-size: 10px; }
+  .act-invested { color: var(--yellow); }
+  .act-pnl-pos  { color: var(--green); font-weight: bold; }
+  .act-pnl-neg  { color: var(--red); font-weight: bold; }
+  .act-reason   { color: var(--muted); font-size: 10px; text-transform: uppercase; }
+  .act-ts       { color: var(--muted); font-size: 10px; margin-left: auto; }
+  .act-raw      { color: var(--muted); font-size: 10px; overflow: hidden; text-overflow: ellipsis; max-width: 600px; }
   .act-league-day   { color: var(--blue);   font-size: 9px; letter-spacing: 1px; text-transform: uppercase; }
   .act-league-swing { color: var(--purple); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; }
 
@@ -936,37 +941,63 @@ function render_funded(bots) {
 function render_activity_feed(feed, league) {
   const all_feed  = (feed || []).filter(e => !league || e.league === league);
   const positions = all_feed.filter(e => e.type === 'position_open');
-  const logs      = all_feed.filter(e => e.type === 'log');
+  const closed    = all_feed.filter(e => e.type === 'position_close');
+
+  function fmt_price(p) {
+    const n = Number(p);
+    if (!n) return '—';
+    return '$' + n.toLocaleString('en', {minimumFractionDigits: n >= 100 ? 2 : 4, maximumFractionDigits: n >= 100 ? 2 : 4});
+  }
+  function fmt_qty(q) {
+    const n = Number(q);
+    if (!n) return '';
+    return n < 0.01 ? n.toFixed(6) : n < 1 ? n.toFixed(4) : n.toFixed(2);
+  }
 
   let pos_html;
   if (positions.length === 0) {
     pos_html = `<div class="activity-empty">No open positions — all bots flat</div>`;
   } else {
     pos_html = positions.map(e => {
-      const dir_cls = e.direction === 'long' ? 'act-long' : 'act-short';
-      const price_str = e.entry_price ? `@ $${Number(e.entry_price).toLocaleString('en', {minimumFractionDigits:2, maximumFractionDigits:4})}` : '';
-      const ts_str   = e.timestamp ? fmt_ts_short(e.timestamp) : '';
+      const dir_cls    = e.direction === 'long' ? 'act-long' : 'act-short';
+      const entry_str  = fmt_price(e.entry_price);
+      const qty_str    = fmt_qty(e.quantity);
+      const inv_str    = e.cost_basis ? `$${Number(e.cost_basis).toFixed(2)}` : '';
+      const ts_str     = e.timestamp ? fmt_ts_short(e.timestamp) : '';
       return `<div class="activity-row">
-        <span class="act-league-${e.league}">${e.league.toUpperCase()}</span>
         <span class="act-bot">${esc(e.bot)}</span>
         <span class="act-pair">${esc(e.pair)}</span>
         <span class="${dir_cls}">${e.direction.toUpperCase()}</span>
-        <span class="act-price">${esc(price_str)}</span>
-        ${ts_str ? `<span class="act-ts">${esc(ts_str)}</span>` : ''}
+        <span class="act-price">@ ${esc(entry_str)}</span>
+        ${qty_str ? `<span class="act-qty">${esc(qty_str)} tkns</span>` : ''}
+        ${inv_str ? `<span class="act-invested">${esc(inv_str)}</span>` : ''}
+        ${ts_str  ? `<span class="act-ts">${esc(ts_str)}</span>` : ''}
       </div>`;
     }).join('');
   }
 
-  let log_html;
-  if (logs.length === 0) {
-    log_html = `<div class="activity-empty">No recent log events</div>`;
+  let closed_html;
+  if (closed.length === 0) {
+    closed_html = `<div class="activity-empty">No closed positions yet</div>`;
   } else {
-    log_html = logs.slice(-15).map(e => `
-      <div class="activity-row">
-        <span class="act-league-${e.league}">${e.league.toUpperCase()}</span>
+    closed_html = closed.slice(0, 20).map(e => {
+      const dir_cls   = e.direction === 'long' ? 'act-long' : 'act-short';
+      const exit_str  = fmt_price(e.exit_price);
+      const pnl       = Number(e.net_pnl) || 0;
+      const pnl_pct   = Number(e.pnl_pct) || 0;
+      const pnl_sign  = pnl >= 0 ? '+' : '';
+      const pnl_cls   = pnl >= 0 ? 'act-pnl-pos' : 'act-pnl-neg';
+      const ts_str    = e.timestamp ? fmt_ts_short(e.timestamp) : '';
+      return `<div class="activity-row">
         <span class="act-bot">${esc(e.bot)}</span>
-        <span class="act-raw">${esc(e.raw || '')}</span>
-      </div>`).join('');
+        <span class="act-pair">${esc(e.pair)}</span>
+        <span class="${dir_cls}">${e.direction.toUpperCase()}</span>
+        <span class="act-price">exit ${esc(exit_str)}</span>
+        <span class="${pnl_cls}">${pnl_sign}$${Math.abs(pnl).toFixed(2)} (${pnl_sign}${pnl_pct.toFixed(2)}%)</span>
+        <span class="act-reason">${esc(e.reason || '')}</span>
+        ${ts_str ? `<span class="act-ts">${esc(ts_str)}</span>` : ''}
+      </div>`;
+    }).join('');
   }
 
   return `
@@ -975,12 +1006,12 @@ function render_activity_feed(feed, league) {
       <div class="league-title">Recent Activity</div>
     </div>
     <div class="activity-section">
-      <div class="section-label">Open Positions</div>
+      <div class="section-label">Open Positions (${positions.length})</div>
       ${pos_html}
     </div>
     <div class="activity-section">
-      <div class="section-label">Log Events</div>
-      ${log_html}
+      <div class="section-label">Closed Positions (${closed.length})</div>
+      ${closed_html}
     </div>
   </div>`;
 }

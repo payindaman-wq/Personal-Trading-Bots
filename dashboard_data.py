@@ -289,8 +289,26 @@ def get_activity_feed(day_active_id, swing_active_id):
                     "bot":         bot,
                     "pair":        pos.get("pair", "?"),
                     "direction":   pos.get("direction", "long"),
-                    "entry_price": pos.get("entry_price", pos.get("cost_basis", 0)),
+                    "entry_price": pos.get("entry_price", 0),
+                    "quantity":    pos.get("quantity", 0),
+                    "cost_basis":  pos.get("cost_basis", 0),
                     "timestamp":   pos.get("opened_at", None),
+                })
+            for ct in p.get("closed_trades", []):
+                events.append({
+                    "type":        "position_close",
+                    "league":      league,
+                    "bot":         bot,
+                    "pair":        ct.get("pair", "?"),
+                    "direction":   ct.get("direction", "long"),
+                    "entry_price": ct.get("entry_price", 0),
+                    "exit_price":  ct.get("exit_price", 0),
+                    "quantity":    ct.get("quantity", 0),
+                    "cost_basis":  ct.get("cost_basis", 0),
+                    "net_pnl":     ct.get("net_pnl", 0),
+                    "pnl_pct":     ct.get("pnl_pct", 0),
+                    "reason":      ct.get("reason", ""),
+                    "timestamp":   ct.get("closed_at", None),
                 })
 
     # ── Log file events ──
@@ -318,11 +336,12 @@ def get_activity_feed(day_active_id, swing_active_id):
                     "timestamp": None,
                 })
 
-    # Return most recent 30 events (position_open first, then logs)
+    # Return open positions + most recent 30 closed trades (sorted newest first)
     position_events = [e for e in events if e["type"] == "position_open"]
-    log_events      = [e for e in events if e["type"] == "log"]
-    combined        = position_events + log_events[-max(0, 30 - len(position_events)):]
-    return combined[:30]
+    closed_events   = [e for e in events if e["type"] == "position_close"]
+    closed_events.sort(key=lambda e: e.get("timestamp") or "", reverse=True)
+    combined        = position_events + closed_events[:30]
+    return combined[:50]
 
 
 def get_sprint_archive():
