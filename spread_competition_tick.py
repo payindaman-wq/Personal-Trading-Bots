@@ -345,6 +345,21 @@ def archive_competition(comp_dir, meta, bots, prices):
 
     print(f"  Archived: {comp_id}  winner: {final['winner']}")
     update_spread_cycle_state(comp_id)
+
+    import subprocess
+    r = subprocess.run(
+        ["python3", os.path.join(WORKSPACE, "spread_competition_start.py")],
+        capture_output=True, text=True, cwd=WORKSPACE,
+    )
+    if r.returncode == 0:
+        try:
+            d = __import__("json").loads(r.stdout)
+            print(f"  Auto-started: {d.get('comp_id', '?')}")
+        except Exception:
+            print("  Auto-started OK")
+    else:
+        print(f"  WARNING: auto-start failed: {r.stderr[:100]}")
+
     return final
 
 
