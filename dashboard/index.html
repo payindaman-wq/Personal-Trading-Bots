@@ -351,6 +351,21 @@
   .ov-stat { display: flex; flex-direction: column; gap: 1px; }
   .ov-stat-val { font-weight: bold; color: var(--text); font-size: 13px; }
   .ov-stat-lbl { color: var(--muted); font-size: 10px; letter-spacing: .5px; text-transform: uppercase; }
+  .ov-card-strategy {
+    margin-top: 10px;
+    font-size: 10px;
+    line-height: 1.6;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
+  }
+  .ov-card-strategy-label {
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 9px;
+    color: var(--muted);
+    margin-bottom: 3px;
+  }
   .ov-card-leader {
     margin-top: 10px; font-size: 11px; color: var(--muted);
     border-top: 1px solid var(--border); padding-top: 8px;
@@ -1491,9 +1506,12 @@ function render_overview(data) {
   const pm      = window._pm_data;
   const pm_auto = window._pm_auto_data;
 
-  function active_card(title, meta, badge_cls, badge_lbl, stats, leader_bot, leader_pnl) {
+  function active_card(title, meta, badge_cls, badge_lbl, stats, leader_bot, leader_pnl, strategy) {
     const leader_html = leader_bot
       ? `<div class="ov-card-leader">Leader: <span class="ov-leader-name">${esc(leader_bot)}</span>${leader_pnl !== null ? ' &mdash; ' + fmt_pnl_usd(leader_pnl) : ''}</div>`
+      : '';
+    const strategy_html = strategy
+      ? `<div class="ov-card-strategy"><div class="ov-card-strategy-label">Strategy</div>${strategy}</div>`
       : '';
     const stats_html = stats.map(s =>
       `<div class="ov-stat"><span class="ov-stat-val">${s.val}</span><span class="ov-stat-lbl">${s.lbl}</span></div>`
@@ -1505,6 +1523,7 @@ function render_overview(data) {
       <div class="ov-card-meta">${meta}</div>
       <div class="ov-card-stats">${stats_html}</div>
       ${leader_html}
+      ${strategy_html}
     </div>`;
   }
 
@@ -1535,7 +1554,8 @@ function render_overview(data) {
       'badge-day', is_live ? 'LIVE' : 'IDLE',
       stats,
       leader ? leader.bot : null,
-      leader ? leader.cumulative_pnl_usd : null
+      leader ? leader.cumulative_pnl_usd : null,
+      'Twelve bots compete in 24-hour sprints trading crypto spot pairs using technical indicator signals — momentum, VWAP reclaim, RSI reversals, Bollinger Band breakouts, and EMA crossovers. Each bot applies a distinct style inspired by a professional trader. The highest cumulative P&L across the sprint cycle earns funding.'
     );
   } else {
     day_card = `<div class="ov-card pending"><span class="ov-pending-badge">Not Started</span><div class="ov-card-title">Day Trading League</div><div class="ov-card-meta">1d sprints &mdash; 12 bots, 16 pairs</div></div>`;
@@ -1557,7 +1577,8 @@ function render_overview(data) {
       'badge-swing', is_live ? 'LIVE' : 'IDLE',
       stats,
       leader ? leader.bot : null,
-      leader ? leader.cumulative_pnl_usd : null
+      leader ? leader.cumulative_pnl_usd : null,
+      'Bots hold positions for multiple days targeting larger price moves using trend-following, macro sentiment, and pullback strategies on hourly candles. Sprints run 7 days, rewarding patience and directional conviction. Bots are evaluated on cumulative P&L across the full cycle before funding decisions are made.'
     );
   } else {
     swing_card = `<div class="ov-card pending"><span class="ov-pending-badge">Not Started</span><div class="ov-card-title">Swing Trading League</div><div class="ov-card-meta">7d sprints &mdash; 8 bots, multi-pair</div></div>`;
@@ -1580,7 +1601,8 @@ function render_overview(data) {
       'badge-spread', is_live ? 'LIVE' : 'IDLE',
       stats,
       leader ? leader.bot : null,
-      leader ? leader.cumulative_pnl_usd : null
+      leader ? leader.cumulative_pnl_usd : null,
+      'Bots trade the price spread between statistically cointegrated crypto pairs, entering when the spread reaches a historical extreme and exiting on mean reversion. Edge comes from temporary dislocations between correlated assets — no directional price prediction required. Pairs are validated by cointegration tests before each cycle.'
     );
   } else {
     spread_card = `<div class="ov-card pending"><span class="ov-pending-badge">Not Started</span><div class="ov-card-title">Spread Trading League</div><div class="ov-card-meta">7d sprints — 14 bots, ratio pairs</div></div>`;
@@ -1603,7 +1625,8 @@ function render_overview(data) {
       'badge-arb', is_live ? 'LIVE' : 'IDLE',
       stats,
       leader ? leader.bot : null,
-      leader ? leader.cumulative_pnl_usd : null
+      leader ? leader.cumulative_pnl_usd : null,
+      'Bots exploit the mean-reverting ratio between two cointegrated crypto assets. When the price ratio deviates beyond a z-score threshold, opposing positions are opened on both legs; the trade closes when the ratio reverts to its historical mean. Statistical cointegration tests gate pair selection — no directional market view required.'
     );
   } else {
     arb_card = `<div class="ov-card pending"><span class="ov-pending-badge">Not Started</span><div class="ov-card-title">Arbitrage Trading League</div><div class="ov-card-meta">7d sprints &mdash; 15 bots, correlated pairs</div></div>`;
@@ -1638,7 +1661,8 @@ function render_overview(data) {
     pm_active ? 'badge-live' : 'badge-idle', pm_active ? 'LIVE' : 'IDLE',
     pm_stats,
     pm_leader ? pm_leader.bot : null,
-    pm_leader ? pm_leader.pnl_usd : null
+    pm_leader ? pm_leader.pnl_usd : null,
+    'Bots trade probability contracts on Polymarket prediction markets. Copy-traders mirror proven top-ROI traders for execution speed and consistency. Autonomous bots use AI to compare live contract prices against external consensus sources — Vegas odds, Kalshi, Manifold — identifying and capturing edge in mispriced predictions.'
   );
 
   return `
