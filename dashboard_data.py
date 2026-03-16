@@ -258,20 +258,28 @@ def get_fleet_roster(day_lb, swing_lb, arb_lb=None, spread_lb=None):
     return roster
 
 
-def get_activity_feed(day_active_id, swing_active_id):
-    """Scan active portfolios and log files for recent activity events."""
+def get_activity_feed(day_active_id, swing_active_id, arb_active_id=None, spread_active_id=None):
+    """Scan active portfolios for open/closed position events across all leagues."""
     events = []
 
-    # ── Open positions from active portfolio files ──
-    for league, active_id in [("day", day_active_id), ("swing", swing_active_id)]:
+    ACTIVE_DIRS = {
+        "day":    os.path.join(WORKSPACE, "competition", "active"),
+        "swing":  os.path.join(WORKSPACE, "competition", "swing",   "active"),
+        "arb":    os.path.join(WORKSPACE, "competition", "arb",     "active"),
+        "spread": os.path.join(WORKSPACE, "competition", "spread",  "active"),
+    }
+    ACTIVE_IDS = {
+        "day":    day_active_id,
+        "swing":  swing_active_id,
+        "arb":    arb_active_id,
+        "spread": spread_active_id,
+    }
+
+    for league in ["day", "swing", "arb", "spread"]:
+        active_id = ACTIVE_IDS[league]
         if not active_id:
             continue
-
-        if league == "day":
-            active_dir = os.path.join(WORKSPACE, "competition", "active", active_id)
-        else:
-            active_dir = os.path.join(WORKSPACE, "competition", "swing", "active", active_id)
-
+        active_dir = os.path.join(ACTIVE_DIRS[league], active_id)
         if not os.path.isdir(active_dir):
             continue
 
@@ -282,58 +290,66 @@ def get_activity_feed(day_active_id, swing_active_id):
             if not p:
                 continue
             bot = p.get("bot", fname.replace("portfolio-", "").replace(".json", ""))
+
             for pos in p.get("positions", []):
+                if league == "arb":
+                    pair        = pos.get("pair", f"{pos.get('pair_a','?')}/{pos.get('pair_b','?')}")
+                    entry_price = pos.get("entry_price_a", 0)
+                    quantity    = 0
+                    cost_basis  = pos.get("size_usd", 0)
+                    entry_z     = pos.get("entry_z")
+                else:
+                    pair        = pos.get("pair", "?")
+                    entry_price = pos.get("entry_price", 0)
+                    quantity    = pos.get("quantity", 0)
+                    cost_basis  = pos.get("cost_basis", pos.get("size_usd", 0))
+                    entry_z     = None
                 events.append({
                     "type":        "position_open",
                     "league":      league,
                     "bot":         bot,
-                    "pair":        pos.get("pair", "?"),
+                    "pair":        pair,
                     "direction":   pos.get("direction", "long"),
-                    "entry_price": pos.get("entry_price", 0),
-                    "quantity":    pos.get("quantity", 0),
-                    "cost_basis":  pos.get("cost_basis", 0),
+                    "entry_price": entry_price,
+                    "quantity":    quantity,
+                    "cost_basis":  cost_basis,
+                    "entry_z":     entry_z,
                     "timestamp":   pos.get("opened_at", None),
                 })
+
             for ct in p.get("closed_trades", []):
+                if league == "arb":
+                    pair        = ct.get("pair", f"{ct.get('pair_a','?')}/{ct.get('pair_b','?')}")
+                    entry_price = ct.get("entry_price_a", 0)
+                    exit_price  = ct.get("entry_price_b", 0)   # not a leg price — use 0; z shown instead
+                    quantity    = 0
+                    cost_basis  = ct.get("size_usd", 0)
+                    entry_z     = ct.get("entry_z")
+                    exit_z      = ct.get("exit_z")
+                else:
+                    pair        = ct.get("pair", "?")
+                    entry_price = ct.get("entry_price", 0)
+                    exit_price  = ct.get("exit_price", 0)
+                    quantity    = ct.get("quantity", 0)
+                    cost_basis  = ct.get("cost_basis", ct.get("size_usd", 0))
+                    entry_z     = None
+                    exit_z      = None
                 events.append({
                     "type":        "position_close",
                     "league":      league,
                     "bot":         bot,
-                    "pair":        ct.get("pair", "?"),
+                    "pair":        pair,
                     "direction":   ct.get("direction", "long"),
-                    "entry_price": ct.get("entry_price", 0),
-                    "exit_price":  ct.get("exit_price", 0),
-                    "quantity":    ct.get("quantity", 0),
-                    "cost_basis":  ct.get("cost_basis", 0),
+                    "entry_price": entry_price,
+                    "exit_price":  exit_price,
+                    "quantity":    quantity,
+                    "cost_basis":  cost_basis,
+                    "entry_z":     entry_z,
+                    "exit_z":      exit_z,
                     "net_pnl":     ct.get("net_pnl", 0),
                     "pnl_pct":     ct.get("pnl_pct", 0),
                     "reason":      ct.get("reason", ""),
                     "timestamp":   ct.get("closed_at", None),
-                })
-
-    # ── Log file events ──
-    bot_pattern = r"(?i)\b(" + "|".join(BOT_NAMES) + r")\b"
-    action_pattern = r"(?i)\b(OPEN|CLOSE|BUY|SELL|EXECUTE)\b"
-
-    for league, log_path in [("day", DAY_CRON_LOG), ("swing", SWING_TICK_LOG)]:
-        try:
-            with open(log_path, "r", errors="replace") as fh:
-                lines = fh.readlines()
-        except Exception:
-            continue
-
-        # Read last 200 lines to limit scan
-        for line in lines[-200:]:
-            line = line.rstrip()
-            if re.search(bot_pattern, line) and re.search(action_pattern, line):
-                m = re.search(bot_pattern, line)
-                bot_found = m.group(1).lower() if m else "unknown"
-                events.append({
-                    "type":      "log",
-                    "league":    league,
-                    "bot":       bot_found,
-                    "raw":       line[:200],
-                    "timestamp": None,
                 })
 
     # Return open positions + most recent 30 closed trades (sorted newest first)
@@ -517,7 +533,7 @@ def build():
         "funded_bots":   funded,
         "system_health": get_system_health(day_lb, swing_lb),
         "fleet_roster":  get_fleet_roster(day_lb, swing_lb, arb_lb, spread_lb),
-        "activity_feed": get_activity_feed(day_active_id, swing_active_id),
+        "activity_feed": get_activity_feed(day_active_id, swing_active_id, arb_active_id, spread_active_id),
         "sprint_archive": get_sprint_archive(),
     }
 

@@ -136,6 +136,18 @@ def check_exits(portfolio, strategy, prices):
 
             s["current_equity"] = portfolio["equity"]
             closed.append((pair, direction, reason, round(pnl_pct, 2), round(net_pnl, 2)))
+            portfolio.setdefault("closed_trades", []).append({
+                "pair":        pair,
+                "direction":   direction,
+                "entry_price": entry,
+                "exit_price":  current,
+                "size_usd":    size_usd,
+                "pnl_pct":     round(pnl_pct, 2),
+                "net_pnl":     round(net_pnl, 2),
+                "reason":      reason,
+                "opened_at":   opened_at,
+                "closed_at":   now_iso(),
+            })
         else:
             remaining.append(pos)
 

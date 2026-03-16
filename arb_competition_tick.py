@@ -201,14 +201,24 @@ def check_exits(portfolio, strategy, pair_stats):
                 portfolio["peak_equity"] = portfolio["equity"]
             s["current_equity"] = portfolio["equity"]
 
-            closed.append({
-                "spread":    f"{strategy['pair_a']}/{strategy['pair_b']}",
-                "direction": pos["direction"],
-                "reason":    reason,
-                "pnl_pct":   round(pnl_pct, 3),
-                "net_pnl":   round(net_pnl, 2),
-                "exit_z":    round(current_z, 3),
-            })
+            ct = {
+                "pair":          f"{strategy['pair_a']}/{strategy['pair_b']}",
+                "pair_a":        strategy["pair_a"],
+                "pair_b":        strategy["pair_b"],
+                "direction":     pos["direction"],
+                "entry_price_a": pos.get("entry_price_a", 0),
+                "entry_price_b": pos.get("entry_price_b", 0),
+                "entry_z":       round(pos.get("entry_z", 0), 3),
+                "exit_z":        round(current_z, 3),
+                "size_usd":      pos["size_usd"],
+                "pnl_pct":       round(pnl_pct, 3),
+                "net_pnl":       round(net_pnl, 2),
+                "reason":        reason,
+                "opened_at":     pos.get("opened_at"),
+                "closed_at":     datetime.now(timezone.utc).isoformat(),
+            }
+            closed.append(ct)
+            portfolio.setdefault("closed_trades", []).append(ct)
         else:
             remaining.append(pos)
 
