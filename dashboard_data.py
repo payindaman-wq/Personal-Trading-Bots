@@ -23,14 +23,13 @@ SPREAD_TICK_LOG = os.path.join(WORKSPACE, "competition", "spread", "tick.log")
 
 DAY_RESULTS_DIR   = os.path.join(WORKSPACE, "competition", "results")
 SWING_RESULTS_DIR = os.path.join(WORKSPACE, "competition", "swing", "results")
-CYCLE_STATE_PATH  = os.path.join(WORKSPACE, "competition", "cycle_state.json")
-CYCLE_STATE_PATH  = os.path.join(WORKSPACE, "competition", "cycle_state.json")
-CYCLE_STATE_PATH  = os.path.join(WORKSPACE, "competition", "cycle_state.json")
 ARB_RESULTS_DIR   = os.path.join(WORKSPACE, "competition", "arb", "results")
+SPREAD_RESULTS_DIR = os.path.join(WORKSPACE, "competition", "spread", "results")
 CYCLE_STATE_PATH       = os.path.join(WORKSPACE, "competition", "cycle_state.json")
 SWING_CYCLE_STATE_PATH = os.path.join(WORKSPACE, "competition", "swing", "swing_cycle_state.json")
 POLY_CYCLE_STATE_PATH  = os.path.join(WORKSPACE, "competition", "polymarket", "polymarket_cycle_state.json")
 ARB_CYCLE_STATE_PATH   = os.path.join(WORKSPACE, "competition", "arb", "arb_cycle_state.json")
+SPREAD_CYCLE_STATE_PATH = os.path.join(WORKSPACE, "competition", "spread", "spread_cycle_state.json")
 
 BOT_NAMES = [
     "floki", "bjorn", "lagertha", "ragnar", "leif", "gunnar",
@@ -258,106 +257,142 @@ def get_fleet_roster(day_lb, swing_lb, arb_lb=None, spread_lb=None):
     return roster
 
 
+def _load_cycle_sprint_ids(league):
+    """Return the list of completed sprint IDs in the current cycle for a league."""
+    paths = {
+        "day":    CYCLE_STATE_PATH,
+        "swing":  SWING_CYCLE_STATE_PATH,
+        "arb":    ARB_CYCLE_STATE_PATH,
+        "spread": SPREAD_CYCLE_STATE_PATH,
+    }
+    try:
+        state = load_json(paths[league])
+        return state.get("sprints", []) if state else []
+    except Exception:
+        return []
+
+
+def _archived_portfolio_dir(league, sprint_id):
+    """Return the directory containing archived portfolio files for a completed sprint."""
+    if league == "day":
+        # Day archives portfolios directly in results/<sprint_id>/
+        return os.path.join(DAY_RESULTS_DIR, sprint_id)
+    results = {
+        "swing":  SWING_RESULTS_DIR,
+        "arb":    ARB_RESULTS_DIR,
+        "spread": SPREAD_RESULTS_DIR,
+    }
+    return os.path.join(results[league], sprint_id + "_portfolios")
+
+
+def _normalize_pos(league, pos):
+    if league == "arb":
+        return (
+            pos.get("pair", f"{pos.get('pair_a','?')}/{pos.get('pair_b','?')}"),
+            pos.get("entry_price_a", 0), 0,
+            pos.get("size_usd", 0), pos.get("entry_z"), None,
+        )
+    return (
+        pos.get("pair", "?"),
+        pos.get("entry_price", 0),
+        pos.get("quantity", 0),
+        pos.get("cost_basis", pos.get("size_usd", 0)),
+        None, None,
+    )
+
+
+def _normalize_ct(league, ct):
+    if league == "arb":
+        return (
+            ct.get("pair", f"{ct.get('pair_a','?')}/{ct.get('pair_b','?')}"),
+            ct.get("entry_price_a", 0), 0,
+            0, ct.get("size_usd", 0),
+            ct.get("entry_z"), ct.get("exit_z"),
+        )
+    return (
+        ct.get("pair", "?"),
+        ct.get("entry_price", 0),
+        ct.get("exit_price", 0),
+        ct.get("quantity", 0),
+        ct.get("cost_basis", ct.get("size_usd", 0)),
+        None, None,
+    )
+
+
+def _scan_portfolios(league, portfolio_dir, events, open_only=False):
+    """Read portfolio files from a directory and append events."""
+    if not os.path.isdir(portfolio_dir):
+        return
+    for fname in sorted(os.listdir(portfolio_dir)):
+        if not fname.startswith("portfolio-"):
+            continue
+        p = load_json(os.path.join(portfolio_dir, fname))
+        if not p:
+            continue
+        bot = p.get("bot", fname.replace("portfolio-", "").replace(".json", ""))
+
+        if not open_only:
+            for ct in p.get("closed_trades", []):
+                pair, ep, xp, qty, cb, ez, exz = _normalize_ct(league, ct)
+                events.append({
+                    "type": "position_close", "league": league, "bot": bot,
+                    "pair": pair, "direction": ct.get("direction", "long"),
+                    "entry_price": ep, "exit_price": xp,
+                    "quantity": qty, "cost_basis": cb,
+                    "entry_z": ez, "exit_z": exz,
+                    "net_pnl": ct.get("net_pnl", 0),
+                    "pnl_pct": ct.get("pnl_pct", 0),
+                    "reason":  ct.get("reason", ""),
+                    "timestamp": ct.get("closed_at"),
+                })
+
+        for pos in p.get("positions", []):
+            if open_only:
+                pair, ep, qty, cb, ez, _ = _normalize_pos(league, pos)
+                events.append({
+                    "type": "position_open", "league": league, "bot": bot,
+                    "pair": pair, "direction": pos.get("direction", "long"),
+                    "entry_price": ep, "quantity": qty, "cost_basis": cb,
+                    "entry_z": ez, "timestamp": pos.get("opened_at"),
+                })
+
+
 def get_activity_feed(day_active_id, swing_active_id, arb_active_id=None, spread_active_id=None):
-    """Scan active portfolios for open/closed position events across all leagues."""
+    """Open positions from active sprint + closed trades from entire current cycle."""
     events = []
 
     ACTIVE_DIRS = {
         "day":    os.path.join(WORKSPACE, "competition", "active"),
-        "swing":  os.path.join(WORKSPACE, "competition", "swing",   "active"),
-        "arb":    os.path.join(WORKSPACE, "competition", "arb",     "active"),
-        "spread": os.path.join(WORKSPACE, "competition", "spread",  "active"),
+        "swing":  os.path.join(WORKSPACE, "competition", "swing",  "active"),
+        "arb":    os.path.join(WORKSPACE, "competition", "arb",    "active"),
+        "spread": os.path.join(WORKSPACE, "competition", "spread", "active"),
     }
     ACTIVE_IDS = {
-        "day":    day_active_id,
-        "swing":  swing_active_id,
-        "arb":    arb_active_id,
-        "spread": spread_active_id,
+        "day": day_active_id, "swing": swing_active_id,
+        "arb": arb_active_id, "spread": spread_active_id,
     }
 
     for league in ["day", "swing", "arb", "spread"]:
         active_id = ACTIVE_IDS[league]
-        if not active_id:
-            continue
-        active_dir = os.path.join(ACTIVE_DIRS[league], active_id)
-        if not os.path.isdir(active_dir):
-            continue
 
-        for fname in sorted(os.listdir(active_dir)):
-            if not fname.startswith("portfolio-"):
-                continue
-            p = load_json(os.path.join(active_dir, fname))
-            if not p:
-                continue
-            bot = p.get("bot", fname.replace("portfolio-", "").replace(".json", ""))
+        # ── Open positions: active sprint only ──
+        if active_id:
+            active_dir = os.path.join(ACTIVE_DIRS[league], active_id)
+            _scan_portfolios(league, active_dir, events, open_only=True)
 
-            for pos in p.get("positions", []):
-                if league == "arb":
-                    pair        = pos.get("pair", f"{pos.get('pair_a','?')}/{pos.get('pair_b','?')}")
-                    entry_price = pos.get("entry_price_a", 0)
-                    quantity    = 0
-                    cost_basis  = pos.get("size_usd", 0)
-                    entry_z     = pos.get("entry_z")
-                else:
-                    pair        = pos.get("pair", "?")
-                    entry_price = pos.get("entry_price", 0)
-                    quantity    = pos.get("quantity", 0)
-                    cost_basis  = pos.get("cost_basis", pos.get("size_usd", 0))
-                    entry_z     = None
-                events.append({
-                    "type":        "position_open",
-                    "league":      league,
-                    "bot":         bot,
-                    "pair":        pair,
-                    "direction":   pos.get("direction", "long"),
-                    "entry_price": entry_price,
-                    "quantity":    quantity,
-                    "cost_basis":  cost_basis,
-                    "entry_z":     entry_z,
-                    "timestamp":   pos.get("opened_at", None),
-                })
+        # ── Closed trades: all completed sprints in current cycle + active sprint ──
+        cycle_sprints = _load_cycle_sprint_ids(league)
+        for sprint_id in cycle_sprints:
+            _scan_portfolios(league, _archived_portfolio_dir(league, sprint_id), events, open_only=False)
+        if active_id:
+            active_dir = os.path.join(ACTIVE_DIRS[league], active_id)
+            _scan_portfolios(league, active_dir, events, open_only=False)
 
-            for ct in p.get("closed_trades", []):
-                if league == "arb":
-                    pair        = ct.get("pair", f"{ct.get('pair_a','?')}/{ct.get('pair_b','?')}")
-                    entry_price = ct.get("entry_price_a", 0)
-                    exit_price  = ct.get("entry_price_b", 0)   # not a leg price — use 0; z shown instead
-                    quantity    = 0
-                    cost_basis  = ct.get("size_usd", 0)
-                    entry_z     = ct.get("entry_z")
-                    exit_z      = ct.get("exit_z")
-                else:
-                    pair        = ct.get("pair", "?")
-                    entry_price = ct.get("entry_price", 0)
-                    exit_price  = ct.get("exit_price", 0)
-                    quantity    = ct.get("quantity", 0)
-                    cost_basis  = ct.get("cost_basis", ct.get("size_usd", 0))
-                    entry_z     = None
-                    exit_z      = None
-                events.append({
-                    "type":        "position_close",
-                    "league":      league,
-                    "bot":         bot,
-                    "pair":        pair,
-                    "direction":   ct.get("direction", "long"),
-                    "entry_price": entry_price,
-                    "exit_price":  exit_price,
-                    "quantity":    quantity,
-                    "cost_basis":  cost_basis,
-                    "entry_z":     entry_z,
-                    "exit_z":      exit_z,
-                    "net_pnl":     ct.get("net_pnl", 0),
-                    "pnl_pct":     ct.get("pnl_pct", 0),
-                    "reason":      ct.get("reason", ""),
-                    "timestamp":   ct.get("closed_at", None),
-                })
-
-    # Return open positions + most recent 30 closed trades (sorted newest first)
+    # Open positions first, then closed sorted newest-first
     position_events = [e for e in events if e["type"] == "position_open"]
     closed_events   = [e for e in events if e["type"] == "position_close"]
     closed_events.sort(key=lambda e: e.get("timestamp") or "", reverse=True)
-    combined        = position_events + closed_events[:30]
-    return combined[:50]
+    return position_events + closed_events[:50]
 
 
 def get_sprint_archive():
