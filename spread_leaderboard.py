@@ -19,6 +19,8 @@ RESULTS_DIR  = os.path.join(WORKSPACE, "competition", "spread", "results")
 ACTIVE_DIR   = os.path.join(WORKSPACE, "competition", "spread", "active")
 LB_PATH      = os.path.join(WORKSPACE, "competition", "spread", "spread_leaderboard.json")
 CYCLE_STATE  = os.path.join(WORKSPACE, "competition", "spread", "spread_cycle_state.json")
+FLEET_DIR      = os.path.join(WORKSPACE, "fleet", "spread")
+COINT_REPORT   = os.path.join(WORKSPACE, "competition", "spread", "cointegration_report.json")
 
 POINTS_MAP = {1: 8, 2: 5, 3: 3}
 
@@ -37,6 +39,60 @@ def load_cycle_state():
 # ---------------------------------------------------------------------------
 # Data loading
 # ---------------------------------------------------------------------------
+
+def load_pair_metadata():
+    """Load each bot's assigned pair and current health verdict from cointegration report."""
+    # Load bot → pair mapping from strategy.yaml files
+    bot_pairs = {}
+    if os.path.isdir(FLEET_DIR):
+        try:
+            import yaml
+        except ImportError:
+            yaml = None
+        for bot in os.listdir(FLEET_DIR):
+            strat_path = os.path.join(FLEET_DIR, bot, "strategy.yaml")
+            if not os.path.isfile(strat_path):
+                continue
+            try:
+                if yaml:
+                    with open(strat_path) as f:
+                        d = yaml.safe_load(f)
+                else:
+                    # fallback: parse just the spread block manually
+                    d = {}
+                sp = d.get("spread", {})
+                base  = sp.get("base",  "").replace("/USD", "")
+                quote = sp.get("quote", "").replace("/USD", "")
+                bot_pairs[bot] = {
+                    "pair":         f"{base}/{quote}" if base and quote else "?",
+                    "analysis_pair": sp.get("analysis_pair", ""),
+                    "health":       "?",
+                    "half_life":    None,
+                    "corr":         None,
+                    "hurst":        None,
+                }
+            except Exception:
+                pass
+
+    # Overlay verdicts from cointegration report
+    if os.path.isfile(COINT_REPORT):
+        try:
+            with open(COINT_REPORT) as f:
+                report = json.load(f)
+            active = report.get("active_pairs", {})
+            for bot, meta in bot_pairs.items():
+                ap = meta["analysis_pair"]
+                if ap in active:
+                    r = active[ap]
+                    meta["health"]    = r.get("verdict", "?")
+                    meta["half_life"] = r.get("half_life")
+                    meta["corr"]      = r.get("corr")
+                    meta["hurst"]     = r.get("hurst")
+        except Exception:
+            pass
+
+    return bot_pairs
+
 
 def load_archived_sprints():
     sprints = []
@@ -140,6 +196,8 @@ def aggregate(sprints):
                 "best_sprint_pnl_pct":   None,
                 "worst_sprint_pnl_pct":  None,
                 "sprint_log":            [],
+                "pair":                  "?",
+                "pair_health":           "?",
             }
         return bots[name]
 
@@ -187,6 +245,16 @@ def aggregate(sprints):
         n = b["sprints_entered"]
         b["avg_pnl_pct_per_sprint"] = round(b["cumulative_pnl_pct"] / n, 4) if n > 0 else 0.0
 
+    # Attach current pair assignments and health verdicts
+    pair_meta = load_pair_metadata()
+    for name, b in bots.items():
+        if name in pair_meta:
+            b["pair"]        = pair_meta[name]["pair"]
+            b["pair_health"] = pair_meta[name]["health"]
+            b["pair_half_life"] = pair_meta[name].get("half_life")
+            b["pair_corr"]      = pair_meta[name].get("corr")
+            b["pair_hurst"]     = pair_meta[name].get("hurst")
+
     return bots
 
 
@@ -209,7 +277,7 @@ def print_leaderboard(bots_dict, active_sprint=None):
     ranked = sorted(bots_dict.values(),
                     key=lambda x: x["cumulative_pnl_usd"], reverse=True)
     now     = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-    divider = "=" * 78
+    divider = "=" * 88
 
     cycle = load_cycle_state()
     cyc_num     = cycle.get("cycle", 1)
@@ -227,22 +295,49 @@ def print_leaderboard(bots_dict, active_sprint=None):
     if active_sprint:
         print(f"  Active sprint : {active_sprint['comp_id']}  (live data included)")
     print(divider)
-    print(f"  {'#':<4} {'BOT':<12} {'PTS':>4} {'SPRINTS':>8} {'1ST':>4} {'TOP3':>5} "
+    print(f"  {'#':<4} {'BOT':<12} {'PAIR':<10} {'PTS':>4} {'SPRINTS':>8} {'1ST':>4} {'TOP3':>5} "
           f"{'CUM PNL':>11} {'AVG/SPRINT':>11} {'WIN%':>6} {'TRADES':>7}")
-    print("  " + "-" * 74)
+    print("  " + "-" * 84)
 
     for i, b in enumerate(ranked, 1):
         icon    = RANK_ICONS.get(i, f"{i}.")
         pnl_str = fmt_pnl(b["cumulative_pnl_usd"], 11)
         avg_str = fmt_pct(b["avg_pnl_pct_per_sprint"], 11)
-        print(f"  {icon:<4} {b['bot']:<12} {b['points']:>4} "
+        health = b.get("pair_health", "?")
+        pair   = b.get("pair", "?")
+        flag   = " *" if health in ("WEAK", "RETIRE") else ""
+        print(f"  {icon:<4} {b['bot']:<12} {pair+flag:<10} {b['points']:>4} "
               f"{b['sprints_entered']:>8} {b['sprint_wins']:>4} {b['podiums']:>5} "
               f"{pnl_str} {avg_str} {b['overall_win_rate']:>5.1f}% {b['total_trades']:>7}")
 
-    print("  " + "-" * 74)
-    print("  Ranked by cumulative P&L.  7-day sprints.")
+    print("  " + "-" * 84)
+    print("  Ranked by cumulative P&L.  7-day sprints.  * = WEAK/RETIRE pair (see below)")
     print("  PTS: 1st=8 | 2nd=5 | 3rd=3 | 4th-8th=1")
     print()
+
+    # Pair health context
+    pair_meta = load_pair_metadata()
+    if pair_meta:
+        by_health = {}
+        for bot, m in pair_meta.items():
+            h = m.get("health", "?")
+            by_health.setdefault(h, []).append(f"{bot}({m['pair']})")
+        print("  PAIR HEALTH CONTEXT")
+        print("  " + "-" * 84)
+        for verdict in ("STRONG", "WATCH", "WEAK", "RETIRE"):
+            bots_in = by_health.get(verdict)
+            if bots_in:
+                hl_notes = []
+                for bot in sorted(pair_meta, key=lambda x: pair_meta[x]["pair"]):
+                    if pair_meta[bot]["health"] == verdict:
+                        hl = pair_meta[bot].get("half_life")
+                        hl_str = f"hl={hl:.0f}h" if hl else ""
+                        corr = pair_meta[bot].get("corr")
+                        corr_str = f"corr={corr:.2f}" if corr else ""
+                        hl_notes.append(f"{bot}({pair_meta[bot]['pair']} {hl_str} {corr_str}".strip() + ")")
+                label = f"  {verdict:<8}"
+                print(f"{label} {' | '.join(hl_notes)}")
+        print()
 
     if active_sprint and active_sprint.get("rankings"):
         print(f"  -- LIVE SPRINT: {active_sprint['comp_id']} --")
@@ -323,6 +418,17 @@ def main():
             "sprints_per_cycle": cycle_st.get("sprints_per_cycle", 4),
             "cycle_status":      cycle_st.get("status", "active"),
             "rankings":          ranked,
+            "pair_health_summary": {
+                bot: {
+                    "pair":       ranked_bot.get("pair", "?"),
+                    "health":     ranked_bot.get("pair_health", "?"),
+                    "half_life":  ranked_bot.get("pair_half_life"),
+                    "corr":       ranked_bot.get("pair_corr"),
+                    "hurst":      ranked_bot.get("pair_hurst"),
+                }
+                for ranked_bot in ranked
+                for bot in [ranked_bot["bot"]]
+            },
         }
         with open(LB_PATH, "w") as f:
             json.dump(out, f, indent=2)
