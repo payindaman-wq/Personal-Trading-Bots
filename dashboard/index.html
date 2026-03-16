@@ -1502,9 +1502,10 @@ function render_overview(data) {
     const is_live = !!day.live_sprint;
     const bots    = (day.cumulative_rankings || []).length;
     const leader  = day.cumulative_rankings && day.cumulative_rankings[0];
+    const cycle_sprints = (day.sprint_in_cycle || 0) + (is_live ? 1 : 0);
     const stats   = [
-      { val: bots,                  lbl: 'Bots'    },
-      { val: day.total_sprints || 0, lbl: 'Sprints' },
+      { val: bots,           lbl: 'Bots'    },
+      { val: cycle_sprints,  lbl: 'Sprints' },
     ];
     if (is_live) stats.push({ val: fmt_countdown(day.live_sprint.seconds_remaining), lbl: 'Remaining' });
     day_card = active_card(
