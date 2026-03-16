@@ -543,12 +543,8 @@ def gemini_assess(title, outcome, pm_price, vegas_data, persona, api_key):
             return result
         except urllib.error.HTTPError as e:
             if e.code == 429:
-                if attempt == 0:
-                    log.warning("Gemini 429 — backing off 90s")
-                    time.sleep(90)
-                else:
-                    log.warning("Gemini 429 persists — aborting Gemini for this tick")
-                    raise RuntimeError("GEMINI_QUOTA_ABORT")
+                log.warning("Gemini 429 — skipping Gemini for this tick")
+                raise RuntimeError("GEMINI_QUOTA_ABORT")
             else:
                 log.warning(f"Gemini HTTP {e.code}")
                 return None
