@@ -1533,14 +1533,14 @@ function render_overview(data) {
     ];
     if (is_live) stats.push({ val: fmt_countdown(arb_league.live_sprint.seconds_remaining), lbl: 'Remaining' });
     arb_card = active_card(
-      'Pairs Trading League', `${fmt_duration(arb_league.sprint_duration_hours)} sprints — 5 bots, correlated pairs`,
+      'Pairs Trading League', `${fmt_duration(arb_league.sprint_duration_hours)} sprints — ${bots} bots, correlated pairs`,
       'badge-arb', is_live ? 'LIVE' : 'IDLE',
       stats,
       leader ? leader.bot : null,
       leader ? leader.cumulative_pnl_usd : null
     );
   } else {
-    arb_card = `<div class="ov-card pending"><span class="ov-pending-badge">Not Started</span><div class="ov-card-title">Pairs Trading League</div><div class="ov-card-meta">7d sprints &mdash; 5 bots, spread pairs</div></div>`;
+    arb_card = `<div class="ov-card pending"><span class="ov-pending-badge">Not Started</span><div class="ov-card-title">Pairs Trading League</div><div class="ov-card-meta">7d sprints &mdash; 15 bots, correlated pairs</div></div>`;
   }
 
   // Polymarket card
