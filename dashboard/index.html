@@ -319,6 +319,19 @@
     gap: 16px;
     margin-bottom: 28px;
   }
+  .ov-row {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .ov-row:last-of-type { margin-bottom: 28px; }
+  .ov-row > .ov-card, .ov-row > div {
+    flex: 0 0 calc(33.333% - 11px);
+    min-width: 280px;
+    max-width: 420px;
+  }
   .ov-card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -577,7 +590,7 @@
   <span class="health-label">System Health</span>
   <span class="health-item" id="health-day"><span class="health-name">Day Tick</span> <span class="health-na health-age">--</span></span>
   <span class="health-item" id="health-swing"><span class="health-name">Swing Tick</span> <span class="health-na health-age">--</span></span>
-  <span class="health-item" id="health-arb"><span class="health-name">Arb Tick</span> <span class="health-na health-age">--</span></span>
+  <span class="health-item" id="health-arb"><span class="health-name">Arbitrage Tick</span> <span class="health-na health-age">--</span></span>
   <span class="health-item" id="health-spread"><span class="health-name">Spread Tick</span> <span class="health-na health-age">--</span></span>
   <span class="health-item" id="health-poly"><span class="health-name">Poly Tick</span> <span class="health-na health-age">--</span></span>
 </div>
@@ -588,7 +601,7 @@
   <button class="tab-btn" onclick="switch_tab('leaderboard', this)">Leaderboard</button>
   <button class="tab-btn" onclick="switch_tab('day', this)">Day</button>
   <button class="tab-btn" onclick="switch_tab('swing', this)">Swing</button>
-  <button class="tab-btn" onclick="switch_tab('arb', this)">Pairs</button>
+  <button class="tab-btn" onclick="switch_tab('arb', this)">Arbitrage</button>
   <button class="tab-btn" onclick="switch_tab('spread', this)">Spread</button>
   <button class="tab-btn" onclick="switch_tab('polymarket', this)">Poly</button>
   <button class="tab-btn" onclick="switch_tab('archive', this)">Archive</button>
@@ -756,7 +769,7 @@ function render_health(health) {
   const poly_el   = document.getElementById('health-poly');
   if (day_el)    day_el.innerHTML    = age_html(health.day_tick_age_min,    health.day_tick_stalled,    10, 'Day Tick');
   if (swing_el)  swing_el.innerHTML  = age_html(health.swing_tick_age_min,  health.swing_tick_stalled,  60, 'Swing Tick');
-  if (arb_el)    arb_el.innerHTML    = age_html(health.arb_tick_age_min,    health.arb_tick_stalled,    60, 'Arb Tick');
+  if (arb_el)    arb_el.innerHTML    = age_html(health.arb_tick_age_min,    health.arb_tick_stalled,    60, 'Arbitrage Tick');
   if (spread_el) spread_el.innerHTML = age_html(health.spread_tick_age_min, health.spread_tick_stalled, 60, 'Spread Tick');
   if (poly_el) {
     const pm_auto = window._pm_auto_data;
@@ -1604,13 +1617,14 @@ function render_overview(data) {
   const auto_pnl  = pm_auto && pm_auto.bots
     ? pm_auto.bots.reduce((s, b) => s + (b.pnl_usd || 0), 0)
     : 0;
+  const pm_total_bots = copy_bots + auto_bots;
   const pm_card = active_card(
     'Poly Trading League', 'Prediction market &mdash; copy-traders &amp; autonomous bots',
     pm_active ? 'badge-live' : 'badge-idle', pm_active ? 'LIVE' : 'IDLE',
     [
-      { val: copy_bots, lbl: 'Copy' },
-      { val: auto_bots, lbl: 'Auto' },
-      { val: fmt_pnl_usd(copy_pnl + auto_pnl), lbl: 'P&L' },
+      { val: pm_total_bots, lbl: 'Bots' },
+      { val: copy_bots,     lbl: 'Copy' },
+      { val: auto_bots,     lbl: 'Auto' },
     ],
     null, null
   );
@@ -1618,12 +1632,14 @@ function render_overview(data) {
   return `
   <div>
     <div class="ov-section-title">Active Operations</div>
-    <div class="ov-grid">
+    <div class="ov-row">
       ${day_card}
       ${swing_card}
+      ${pm_card}
+    </div>
+    <div class="ov-row">
       ${arb_card}
       ${spread_card}
-      ${pm_card}
     </div>
   </div>
   ${render_funded(data.funded_bots)}
