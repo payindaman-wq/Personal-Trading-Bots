@@ -1,0 +1,13 @@
+name: ratatoskr
+description: "ETH/BTC patient holder — long lookback, wide z-threshold, slow exits on the most liquid pair"
+pair_a: ETH/USD
+pair_b: BTC/USD
+lookback_hours: 720
+z_entry: 2.5
+z_exit: 0.7
+z_stop: 5.0
+timeout_hours: 168
+max_positions: 1
+max_position_pct: 0.35
+stop_if_down_pct: 20
+starting_capital: 1000.0

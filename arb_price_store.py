@@ -25,14 +25,19 @@ OUTPUT_PATH  = os.path.join(WORKSPACE, "competition", "arb", "pair_stats.json")
 
 # Spread pairs: (pair_a, pair_b) — trade ratio = price_a / price_b
 SPREAD_PAIRS = [
-    ("ETH/USD", "BTC/USD"),   # fenrir
-    ("SOL/USD", "ETH/USD"),   # jormungandr
-    ("AVAX/USD", "ETH/USD"),  # ymir
-    ("LINK/USD", "ETH/USD"),  # surt
-    ("SOL/USD", "BTC/USD"),   # fafnir
+    ("ETH/USD",  "BTC/USD"),   # fenrir, nidhogg, ratatoskr
+    ("SOL/USD",  "ETH/USD"),   # jormungandr, hati, skoll
+    ("AVAX/USD", "ETH/USD"),   # ymir
+    ("LINK/USD", "ETH/USD"),   # surt
+    ("SOL/USD",  "BTC/USD"),   # fafnir
+    ("XRP/USD",  "BTC/USD"),   # garm, niflheim
+    ("AVAX/USD", "SOL/USD"),   # muspell, bifrost
+    ("LINK/USD", "BTC/USD"),   # utgard
+    ("AAVE/USD", "ETH/USD"),   # asgard
 ]
 
-LOOKBACK_HOURS = 480  # 20-day rolling window
+LOOKBACK_WINDOWS = [240, 480, 720]  # short (10d) / medium (20d) / long (30d)
+LOOKBACK_HOURS   = 480              # default — kept for backwards compat
 
 
 # ---------------------------------------------------------------------------
@@ -54,11 +59,27 @@ def load_closes(pair):
 # Statistics
 # ---------------------------------------------------------------------------
 
-def compute_pair_stats(pair_a, pair_b, lookback_hours=LOOKBACK_HOURS):
-    """
-    Compute rolling z-score for the ratio price_a / price_b.
+def _z_for_window(closes_a, closes_b, common_ts, lookback_hours):
+    """Compute z-score for a specific lookback window. Returns (z, mean, std, n) or None."""
+    recent_ts = common_ts[-lookback_hours:]
+    ratios = [closes_a[ts] / closes_b[ts] for ts in recent_ts if closes_b.get(ts, 0) != 0]
+    n = len(ratios)
+    if n < 24:
+        return None
+    mean = sum(ratios) / n
+    variance = sum((r - mean) ** 2 for r in ratios) / n
+    std = math.sqrt(variance)
+    if std == 0:
+        return None
+    z = (ratios[-1] - mean) / std
+    return round(z, 4), round(mean, 8), round(std, 8), n
 
-    Returns a dict with current z-score, mean, std, and metadata,
+
+def compute_pair_stats(pair_a, pair_b):
+    """
+    Compute z-scores for the ratio price_a / price_b at all LOOKBACK_WINDOWS.
+
+    Returns a dict with z_score_240/480/720, plus z_score (480, backwards compat),
     or None if there is insufficient data.
     """
     closes_a = load_closes(pair_a)
@@ -67,57 +88,53 @@ def compute_pair_stats(pair_a, pair_b, lookback_hours=LOOKBACK_HOURS):
     if not closes_a or not closes_b:
         return None
 
-    # Align on common timestamps
     common_ts = sorted(set(closes_a.keys()) & set(closes_b.keys()))
-    if len(common_ts) < 48:  # need at least 2 days of data
+    if len(common_ts) < 48:
         return None
 
-    # Use most recent lookback_hours data points
-    recent_ts = common_ts[-lookback_hours:]
-    ratios = []
-    for ts in recent_ts:
-        b = closes_b[ts]
-        if b == 0:
-            continue
-        ratios.append(closes_a[ts] / b)
+    # Compute z-score at each lookback window
+    z_by_lb = {}
+    for lb in LOOKBACK_WINDOWS:
+        result = _z_for_window(closes_a, closes_b, common_ts, lb)
+        if result:
+            z_by_lb[lb] = result
 
-    n = len(ratios)
-    if n < 24:
+    if not z_by_lb:
         return None
 
-    # Full-window mean and std
-    mean = sum(ratios) / n
-    variance = sum((r - mean) ** 2 for r in ratios) / n
-    std = math.sqrt(variance)
-    if std == 0:
-        return None
+    # Use 480 as primary; fall back to closest available
+    primary_lb   = 480 if 480 in z_by_lb else min(z_by_lb.keys(), key=lambda x: abs(x - 480))
+    z_pri, mean_pri, std_pri, n_pri = z_by_lb[primary_lb]
 
-    current_ratio = ratios[-1]
-    z_score = (current_ratio - mean) / std
+    # Momentum from primary window
+    recent_ts  = common_ts[-primary_lb:]
+    ratios_pri = [closes_a[ts] / closes_b[ts] for ts in recent_ts if closes_b.get(ts, 0) != 0]
+    z_series   = [(r - mean_pri) / std_pri for r in ratios_pri[-7:]] if len(ratios_pri) >= 7 else []
+    z_momentum = round(z_series[-1] - z_series[0], 4) if len(z_series) >= 2 else 0.0
 
-    # Short-term z-score momentum (change over last 6 candles)
-    z_recent = [(r - mean) / std for r in ratios[-7:]]
-    z_momentum = round(z_recent[-1] - z_recent[0], 4)
+    current_ratio = ratios_pri[-1] if ratios_pri else 0.0
+    price_a = closes_a.get(common_ts[-1])
+    price_b = closes_b.get(common_ts[-1])
 
-    # Latest raw prices
-    price_a = closes_a.get(recent_ts[-1])
-    price_b = closes_b.get(recent_ts[-1])
-
-    return {
+    stats = {
         "pair_a":        pair_a,
         "pair_b":        pair_b,
         "key":           f"{pair_a}/{pair_b}",
         "current_ratio": round(current_ratio, 8),
-        "ratio_mean":    round(mean, 8),
-        "ratio_std":     round(std, 8),
-        "z_score":       round(z_score, 4),
-        "z_momentum":    z_momentum,   # positive = spreading away from mean
-        "n_samples":     n,
-        "lookback_hours": lookback_hours,
+        "ratio_mean":    mean_pri,
+        "ratio_std":     std_pri,
+        "z_score":       z_pri,          # backwards compat — always the 480 window
+        "z_momentum":    z_momentum,
+        "n_samples":     n_pri,
         "price_a":       price_a,
         "price_b":       price_b,
         "computed_at":   datetime.now(timezone.utc).isoformat(),
     }
+    # Per-window z-scores for bots with custom lookbacks
+    for lb, (z, _, _, _) in z_by_lb.items():
+        stats[f"z_score_{lb}"] = z
+
+    return stats
 
 
 # ---------------------------------------------------------------------------
@@ -138,15 +155,11 @@ def main():
         result = compute_pair_stats(pair_a, pair_b)
         if result:
             stats[key] = result
-            direction = "SHORT spread" if result["z_score"] > 0 else "LONG spread "
-            signal = (
-                f"  *** ENTRY SIGNAL [{direction}]" if abs(result["z_score"]) >= 2.0
-                else ""
+            z_parts = "  ".join(
+                f"z{lb}={result[f'z_score_{lb}']:+.3f}"
+                for lb in LOOKBACK_WINDOWS if f"z_score_{lb}" in result
             )
-            print(f"  {key:<22} z={result['z_score']:+6.3f}  "
-                  f"ratio={result['current_ratio']:.6f}  "
-                  f"mean={result['ratio_mean']:.6f}  "
-                  f"n={result['n_samples']}{signal}")
+            print(f"  {key:<22} {z_parts}  ratio={result['current_ratio']:.6f}")
         else:
             print(f"  {key:<22} insufficient data (need history in {HISTORY_DIR})")
 

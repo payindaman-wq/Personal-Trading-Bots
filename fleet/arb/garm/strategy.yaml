@@ -1,0 +1,13 @@
+name: garm
+description: "XRP/BTC spread — payment coin vs store of value, diverges sharply on macro risk-on/off"
+pair_a: XRP/USD
+pair_b: BTC/USD
+lookback_hours: 480
+z_entry: 2.0
+z_exit: 0.5
+z_stop: 4.0
+timeout_hours: 120
+max_positions: 1
+max_position_pct: 0.35
+stop_if_down_pct: 20
+starting_capital: 1000.0

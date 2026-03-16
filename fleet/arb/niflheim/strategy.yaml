@@ -1,0 +1,13 @@
+name: niflheim
+description: "XRP/BTC tight scalper — short lookback on payment/store-of-value pair, quick mean reversion"
+pair_a: XRP/USD
+pair_b: BTC/USD
+lookback_hours: 240
+z_entry: 1.5
+z_exit: 0.3
+z_stop: 3.0
+timeout_hours: 72
+max_positions: 1
+max_position_pct: 0.35
+stop_if_down_pct: 20
+starting_capital: 1000.0

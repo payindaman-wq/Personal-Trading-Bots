@@ -1,0 +1,13 @@
+name: asgard
+description: "AAVE/ETH spread — DeFi blue chip vs ETH, mean reverts reliably within DeFi sector"
+pair_a: AAVE/USD
+pair_b: ETH/USD
+lookback_hours: 480
+z_entry: 2.0
+z_exit: 0.5
+z_stop: 4.0
+timeout_hours: 120
+max_positions: 1
+max_position_pct: 0.35
+stop_if_down_pct: 20
+starting_capital: 1000.0

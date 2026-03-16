@@ -144,17 +144,24 @@ def spread_pnl(pos, current_ratio):
 # Exit checking
 # ---------------------------------------------------------------------------
 
+def _get_z(stats, lookback_hours):
+    """Return z-score for the bot's lookback window, falling back to default."""
+    key = f"z_score_{lookback_hours}"
+    return stats.get(key, stats.get("z_score", 0.0))
+
+
 def check_exits(portfolio, strategy, pair_stats):
     z_exit    = strategy.get("z_exit", 0.5)
     z_stop    = strategy.get("z_stop", 4.0)
     timeout_h = strategy.get("timeout_hours", 120)
+    lookback  = strategy.get("lookback_hours", 480)
 
     pair_key = f"{strategy['pair_a']}/{strategy['pair_b']}"
     stats    = pair_stats.get(pair_key)
     if not stats:
         return portfolio, []
 
-    current_z     = stats["z_score"]
+    current_z     = _get_z(stats, lookback)
     current_ratio = stats["current_ratio"]
     closed = []
     remaining = []
@@ -218,6 +225,7 @@ def try_entry(portfolio, strategy, pair_stats):
     max_open  = strategy.get("max_positions", 1)
     size_pct  = strategy.get("max_position_pct", 0.35)
     stop_down = strategy.get("stop_if_down_pct", 20)
+    lookback  = strategy.get("lookback_hours", 480)
 
     starting = portfolio.get("starting_capital", 1000.0)
     equity   = portfolio["equity"]
@@ -233,7 +241,7 @@ def try_entry(portfolio, strategy, pair_stats):
     if not stats:
         return portfolio, None
 
-    current_z     = stats["z_score"]
+    current_z     = _get_z(stats, lookback)
     current_ratio = stats["current_ratio"]
     price_a       = stats.get("price_a")
     price_b       = stats.get("price_b")
