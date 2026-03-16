@@ -461,7 +461,7 @@ def main():
         portfolio, closed = check_exits(portfolio, strategy, pair_stats)
         for c in closed:
             sign = "+" if c["net_pnl"] >= 0 else ""
-            print(f"  CLOSE {bot:12} {c['direction']:5} {c['spread']}"
+            print(f"  CLOSE {bot:12} {c['direction']:5} {c["pair"]}"
                   f" [{c['reason']}] z={c['exit_z']:+.2f}  {sign}${c['net_pnl']:.2f}")
 
         portfolio, opened = try_entry(portfolio, strategy, pair_stats)
