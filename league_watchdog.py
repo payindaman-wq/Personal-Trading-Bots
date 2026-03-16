@@ -41,6 +41,10 @@ LEAGUES = [
 ]
 
 
+POLY_STATE  = os.path.join(WORKSPACE, "competition", "polymarket", "auto_state.json")
+POLY_CYCLE  = os.path.join(WORKSPACE, "competition", "polymarket", "polymarket_cycle_state.json")
+
+
 def find_active(active_dir):
     """Return meta dict if an active sprint exists, else None."""
     if not os.path.isdir(active_dir):
@@ -57,6 +61,28 @@ def find_active(active_dir):
     return meta if meta.get("status") == "active" else None
 
 
+def find_polymarket_active():
+    """Return sprint_id if Polymarket has an active non-expired sprint, else None.
+    Returns 'awaiting_review' if cycle needs manual review (do not auto-restart)."""
+    if not os.path.isfile(POLY_STATE):
+        return None
+    if os.path.isfile(POLY_CYCLE):
+        with open(POLY_CYCLE) as f:
+            cs = json.load(f)
+        if cs.get("status") == "awaiting_review":
+            return "awaiting_review"
+    with open(POLY_STATE) as f:
+        state = json.load(f)
+    if state.get("status") != "active":
+        return None
+    ends_at = state.get("sprint_ends_at")
+    if ends_at:
+        end_dt = datetime.fromisoformat(ends_at.replace("Z", "+00:00"))
+        if datetime.now(timezone.utc) > end_dt:
+            return None
+    return state.get("sprint_id", "active")
+
+
 def start_league(league):
     result = subprocess.run(
         league["start_cmd"],
@@ -65,7 +91,7 @@ def start_league(league):
     if result.returncode == 0:
         try:
             data = json.loads(result.stdout)
-            print(f"  [{league['name']}] started: {data.get('comp_id', '?')}")
+            print(f"  [{league['name']}] started: {data.get('comp_id', data.get('sprint_id', '?'))}")
         except Exception:
             print(f"  [{league['name']}] started OK")
     else:
@@ -75,6 +101,7 @@ def start_league(league):
 def main():
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     print(f"[league_watchdog] {now}")
+
     for league in LEAGUES:
         meta = find_active(league["active_dir"])
         if meta:
@@ -82,6 +109,19 @@ def main():
         else:
             print(f"  [{league['name']}] IDLE — restarting...")
             start_league(league)
+
+    # Polymarket — different active check (uses auto_state.json, not active/ dir)
+    poly = find_polymarket_active()
+    if poly == "awaiting_review":
+        print(f"  [polymarket] awaiting_review — skipping auto-restart")
+    elif poly:
+        print(f"  [polymarket] OK — {poly}")
+    else:
+        print(f"  [polymarket] IDLE — restarting...")
+        start_league({
+            "name":      "polymarket",
+            "start_cmd": ["python3", os.path.join(WORKSPACE, "polymarket_sprint_start.py")],
+        })
 
 
 if __name__ == "__main__":
