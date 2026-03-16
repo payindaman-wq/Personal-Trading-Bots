@@ -552,10 +552,12 @@
   .pm-pending-desc  { font-size: 11px; line-height: 1.8; color: var(--muted); max-width: 520px; margin: 0 auto; }
   .pm-pending-path  { color: var(--blue); font-size: 10px; margin-top: 10px; }
 
+  .sticky-top { position: sticky; top: 0; z-index: 100; }
 </style>
 </head>
 <body>
 
+<div class="sticky-top">
 <div class="header">
   <div class="header-left">
     <div class="logo">
@@ -589,6 +591,7 @@
   <button class="tab-btn" onclick="switch_tab('polymarket', this)">Poly</button>
   <button class="tab-btn" onclick="switch_tab('archive', this)">Archive</button>
 </div>
+</div><!-- end sticky-top -->
 
 <!-- Tab: Overview -->
 <div class="tab-panel active" id="tab-overview">
