@@ -30,8 +30,9 @@ KALSHI_SECRET    = "/root/.openclaw/secrets/kalshi.json"
 # ── Tuning ─────────────────────────────────────────────────────────────────
 POLL_SEC             = 900    # 15 min between ticks
 SCAN_EVERY           = 2      # scan new markets every 2nd tick (30 min)
-MAX_GEMINI_PER_TICK  = 12     # total Gemini calls across all bots per tick
-GEMINI_SLEEP         = 6      # seconds between Gemini calls
+MAX_GEMINI_PER_TICK  = 4      # total Gemini calls per tick (4×4ticks×24h = 384/day, well under 1500 RPD)
+GEMINI_SLEEP         = 15     # seconds between Gemini calls (~4 RPM, safely under 15 RPM limit)
+GEMINI_DAILY_LIMIT   = 1200   # hard stop at 1200/day to preserve quota headroom
 SPRINT_HOURS         = 168    # 7-day sprints
 
 SPORT_KEYS = [
@@ -543,8 +544,20 @@ def gemini_assess(title, outcome, pm_price, vegas_data, persona, api_key):
             return result
         except urllib.error.HTTPError as e:
             if e.code == 429:
-                log.warning("Gemini 429 — skipping Gemini for this tick")
-                raise RuntimeError("GEMINI_QUOTA_ABORT")
+                try:
+                    err_body = json.loads(e.read().decode())
+                    err_msg = err_body.get("error", {}).get("message", "")
+                except Exception:
+                    err_msg = ""
+                # "quota" in message = daily quota exhausted → abort tick
+                # otherwise = RPM limit → wait 60s and retry once
+                if "quota" in err_msg.lower() or attempt == 1:
+                    log.warning(f"Gemini daily quota exhausted — skipping Gemini for this tick")
+                    raise RuntimeError("GEMINI_QUOTA_ABORT")
+                else:
+                    log.warning("Gemini 429 RPM — waiting 60s before retry")
+                    time.sleep(60)
+                    continue
             else:
                 log.warning(f"Gemini HTTP {e.code}")
                 return None
@@ -552,6 +565,8 @@ def gemini_assess(title, outcome, pm_price, vegas_data, persona, api_key):
             raise
         except Exception as e:
             log.warning(f"Gemini error: {e}")
+            if attempt == 0:
+                continue  # retry once on parse/JSON errors
             return None
     return None
 
@@ -1008,7 +1023,34 @@ def run_tick(state, strategies, secrets, tick_count):
     gemini_count = 0
     gemini_aborted = False
 
-    for cid, candidate in opinion_pool.items():
+    # Daily quota tracking — reset at UTC midnight
+    today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    if state.get("gemini_daily_reset") != today_str:
+        state["gemini_daily_reset"] = today_str
+        state["gemini_daily_count"] = 0
+    daily_used = state.get("gemini_daily_count", 0)
+
+    if daily_used >= GEMINI_DAILY_LIMIT:
+        log.warning(f"Gemini daily quota used ({daily_used}/{GEMINI_DAILY_LIMIT}) — skipping Gemini this tick")
+        gemini_aborted = True
+
+    # Prioritize candidates: Vegas edge first, then by distance from 0.5
+    def _candidate_priority(item):
+        cid, candidate = item
+        outcomes = sorted(candidate["market"]["outcomes"], key=lambda x: x["price"])
+        pm_price = outcomes[0]["price"] if outcomes else 0.5
+        if pm_price < 0.04 or pm_price > 0.96:
+            return 0.0
+        vegas = candidate.get("vegas")
+        if vegas:
+            vegas_edge = abs(vegas.get("home_prob", 0.5) - pm_price)
+        else:
+            vegas_edge = 0.0
+        return -(vegas_edge * 2 + abs(pm_price - 0.5))
+
+    sorted_candidates = sorted(opinion_pool.items(), key=_candidate_priority)
+
+    for cid, candidate in sorted_candidates:
         if gemini_aborted or gemini_count >= MAX_GEMINI_PER_TICK:
             break
 
@@ -1044,6 +1086,11 @@ def run_tick(state, strategies, secrets, tick_count):
                 "outcome":  target["outcome"],
                 "pm_price": pm_price,
             }
+
+    # Update daily quota counter
+    if gemini_count > 0:
+        state["gemini_daily_count"] = daily_used + gemini_count
+        log.info(f"Gemini daily usage: {state['gemini_daily_count']}/{GEMINI_DAILY_LIMIT}")
 
     # Track Gemini calls across all bots (proportional distribution)
     if gemini_count > 0:
