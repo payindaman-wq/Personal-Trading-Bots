@@ -1555,7 +1555,7 @@ function render_overview(data) {
       stats,
       leader ? leader.bot : null,
       leader ? leader.cumulative_pnl_usd : null,
-      'Twelve bots compete in 24-hour sprints trading crypto spot pairs using technical indicator signals — momentum, VWAP reclaim, RSI reversals, Bollinger Band breakouts, and EMA crossovers. Each bot applies a distinct style inspired by a professional trader. The highest cumulative P&L across the sprint cycle earns funding.'
+      'Each bot has its own trading instinct — some chase momentum, others hunt reversals or breakouts. They read price charts and react to signals continuously throughout the sprint. Best cumulative profit takes the crown.'
     );
   } else {
     day_card = `<div class="ov-card pending"><span class="ov-pending-badge">Not Started</span><div class="ov-card-title">Day Trading League</div><div class="ov-card-meta">1d sprints &mdash; 12 bots, 16 pairs</div></div>`;
@@ -1578,7 +1578,7 @@ function render_overview(data) {
       stats,
       leader ? leader.bot : null,
       leader ? leader.cumulative_pnl_usd : null,
-      'Bots hold positions for multiple days targeting larger price moves using trend-following, macro sentiment, and pullback strategies on hourly candles. Sprints run 7 days, rewarding patience and directional conviction. Bots are evaluated on cumulative P&L across the full cycle before funding decisions are made.'
+      'Rather than reacting to every price tick, these bots look for bigger, slower-moving trends and ride them over several days. They wait for high-confidence setups and hold positions through short-term noise.'
     );
   } else {
     swing_card = `<div class="ov-card pending"><span class="ov-pending-badge">Not Started</span><div class="ov-card-title">Swing Trading League</div><div class="ov-card-meta">7d sprints &mdash; 8 bots, multi-pair</div></div>`;
@@ -1602,7 +1602,7 @@ function render_overview(data) {
       stats,
       leader ? leader.bot : null,
       leader ? leader.cumulative_pnl_usd : null,
-      'Bots trade the price spread between statistically cointegrated crypto pairs, entering when the spread reaches a historical extreme and exiting on mean reversion. Edge comes from temporary dislocations between correlated assets — no directional price prediction required. Pairs are validated by cointegration tests before each cycle.'
+      'Two coins that normally move in sync sometimes drift apart. These bots bet that they’ll snap back together — buying the laggard and selling the leader until the gap closes.'
     );
   } else {
     spread_card = `<div class="ov-card pending"><span class="ov-pending-badge">Not Started</span><div class="ov-card-title">Spread Trading League</div><div class="ov-card-meta">7d sprints — 14 bots, ratio pairs</div></div>`;
@@ -1626,7 +1626,7 @@ function render_overview(data) {
       stats,
       leader ? leader.bot : null,
       leader ? leader.cumulative_pnl_usd : null,
-      'Bots exploit the mean-reverting ratio between two cointegrated crypto assets. When the price ratio deviates beyond a z-score threshold, opposing positions are opened on both legs; the trade closes when the ratio reverts to its historical mean. Statistical cointegration tests gate pair selection — no directional market view required.'
+      'When the price ratio between two historically linked coins goes unusually high or low, bots trade both sides expecting it to normalize. The bet is on the relationship between the coins — not which direction either one moves.'
     );
   } else {
     arb_card = `<div class="ov-card pending"><span class="ov-pending-badge">Not Started</span><div class="ov-card-title">Arbitrage Trading League</div><div class="ov-card-meta">7d sprints &mdash; 15 bots, correlated pairs</div></div>`;
@@ -1662,7 +1662,7 @@ function render_overview(data) {
     pm_stats,
     pm_leader ? pm_leader.bot : null,
     pm_leader ? pm_leader.pnl_usd : null,
-    'Bots trade probability contracts on Polymarket prediction markets. Copy-traders mirror proven top-ROI traders for execution speed and consistency. Autonomous bots use AI to compare live contract prices against external consensus sources — Vegas odds, Kalshi, Manifold — identifying and capturing edge in mispriced predictions.'
+    'Bots trade yes/no prediction market contracts. Some copy the moves of the best-performing traders on the platform. Others compare contract prices against Vegas odds and forecasting sites to find bets that look mispriced.'
   );
 
   return `
