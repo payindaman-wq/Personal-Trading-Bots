@@ -577,6 +577,8 @@
   <span class="health-label">System Health</span>
   <span class="health-item" id="health-day"><span class="health-name">Day Tick</span> <span class="health-na health-age">--</span></span>
   <span class="health-item" id="health-swing"><span class="health-name">Swing Tick</span> <span class="health-na health-age">--</span></span>
+  <span class="health-item" id="health-arb"><span class="health-name">Arb Tick</span> <span class="health-na health-age">--</span></span>
+  <span class="health-item" id="health-spread"><span class="health-name">Spread Tick</span> <span class="health-na health-age">--</span></span>
   <span class="health-item" id="health-poly"><span class="health-name">Poly Tick</span> <span class="health-na health-age">--</span></span>
 </div>
 
@@ -747,11 +749,15 @@ function render_health(health) {
     return `<span class="health-name">${name}</span> <span class="${cls} health-age">${age_str}</span>${stall_badge}`;
   }
 
-  const day_el   = document.getElementById('health-day');
-  const swing_el = document.getElementById('health-swing');
-  const poly_el  = document.getElementById('health-poly');
-  if (day_el)   day_el.innerHTML   = age_html(health.day_tick_age_min,   health.day_tick_stalled,   10, 'Day Tick');
-  if (swing_el) swing_el.innerHTML = age_html(health.swing_tick_age_min, health.swing_tick_stalled, 60, 'Swing Tick');
+  const day_el    = document.getElementById('health-day');
+  const swing_el  = document.getElementById('health-swing');
+  const arb_el    = document.getElementById('health-arb');
+  const spread_el = document.getElementById('health-spread');
+  const poly_el   = document.getElementById('health-poly');
+  if (day_el)    day_el.innerHTML    = age_html(health.day_tick_age_min,    health.day_tick_stalled,    10, 'Day Tick');
+  if (swing_el)  swing_el.innerHTML  = age_html(health.swing_tick_age_min,  health.swing_tick_stalled,  60, 'Swing Tick');
+  if (arb_el)    arb_el.innerHTML    = age_html(health.arb_tick_age_min,    health.arb_tick_stalled,    60, 'Arb Tick');
+  if (spread_el) spread_el.innerHTML = age_html(health.spread_tick_age_min, health.spread_tick_stalled, 60, 'Spread Tick');
   if (poly_el) {
     const pm_auto = window._pm_auto_data;
     let poly_age = null, poly_stalled = false;

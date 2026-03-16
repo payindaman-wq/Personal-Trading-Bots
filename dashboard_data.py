@@ -98,26 +98,36 @@ def file_age_minutes(path):
         return None
 
 
-def get_system_health(day_lb, swing_lb):
-    """Compute tick freshness for both leagues."""
+def get_system_health(day_lb, swing_lb, arb_lb=None, spread_lb=None):
+    """Compute tick freshness for all leagues."""
     now_iso = datetime.now(timezone.utc).isoformat()
 
-    day_age   = file_age_minutes(DAY_LB_PATH)
-    swing_age = file_age_minutes(SWING_LB_PATH)
+    day_age    = file_age_minutes(DAY_LB_PATH)
+    swing_age  = file_age_minutes(SWING_LB_PATH)
+    arb_age    = file_age_minutes(ARB_LB_PATH)
+    spread_age = file_age_minutes(SPREAD_LB_PATH)
 
-    day_active   = bool(day_lb and day_lb.get("active_sprint"))
-    swing_active = bool(swing_lb and swing_lb.get("active_sprint"))
+    day_active    = bool(day_lb    and day_lb.get("active_sprint"))
+    swing_active  = bool(swing_lb  and swing_lb.get("active_sprint"))
+    arb_active    = bool(arb_lb    and arb_lb.get("active_sprint"))
+    spread_active = bool(spread_lb and spread_lb.get("active_sprint"))
 
     # Stalled only when a sprint is running and the tick file is too old
-    day_stalled   = day_active   and day_age   is not None and day_age   > 15
-    swing_stalled = swing_active and swing_age is not None and swing_age > 90
+    day_stalled    = day_active    and day_age    is not None and day_age    > 15
+    swing_stalled  = swing_active  and swing_age  is not None and swing_age  > 90
+    arb_stalled    = arb_active    and arb_age    is not None and arb_age    > 90
+    spread_stalled = spread_active and spread_age is not None and spread_age > 90
 
     return {
-        "day_tick_age_min":   round(day_age,   2) if day_age   is not None else None,
-        "day_tick_stalled":   day_stalled,
-        "swing_tick_age_min": round(swing_age, 2) if swing_age is not None else None,
-        "swing_tick_stalled": swing_stalled,
-        "checked_at":         now_iso,
+        "day_tick_age_min":    round(day_age,    2) if day_age    is not None else None,
+        "day_tick_stalled":    day_stalled,
+        "swing_tick_age_min":  round(swing_age,  2) if swing_age  is not None else None,
+        "swing_tick_stalled":  swing_stalled,
+        "arb_tick_age_min":    round(arb_age,    2) if arb_age    is not None else None,
+        "arb_tick_stalled":    arb_stalled,
+        "spread_tick_age_min": round(spread_age, 2) if spread_age is not None else None,
+        "spread_tick_stalled": spread_stalled,
+        "checked_at":          now_iso,
     }
 
 
@@ -566,7 +576,7 @@ def build():
         "generated_at":  datetime.now(timezone.utc).isoformat(),
         "leagues":       {},
         "funded_bots":   funded,
-        "system_health": get_system_health(day_lb, swing_lb),
+        "system_health": get_system_health(day_lb, swing_lb, arb_lb, spread_lb),
         "fleet_roster":  get_fleet_roster(day_lb, swing_lb, arb_lb, spread_lb),
         "activity_feed": get_activity_feed(day_active_id, swing_active_id, arb_active_id, spread_active_id),
         "sprint_archive": get_sprint_archive(),
