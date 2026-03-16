@@ -604,7 +604,7 @@ def build():
 
     if arb_lb:
         dashboard["leagues"]["arb"] = {
-            "label":                 "Pairs Trading League",
+            "label":                 "Arbitrage Trading League",
             "sprint_duration_hours": 168,
             "active_sprint":         arb_active_id,
             "total_sprints":         arb_lb.get("total_sprints", 0),
