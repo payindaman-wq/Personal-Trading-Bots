@@ -1727,14 +1727,6 @@ function render_overview(data) {
     </div>
   </div>
   <div>
-    <div class="ov-section-title" style="font-size:20px;font-weight:bold;color:var(--gold);letter-spacing:3px;padding-bottom:10px;margin-bottom:18px;">Future Competitions</div>
-    <div class="ov-row" style="justify-content:center;">
-      ${pending_card(5, 'Crypto Futures Day Trader', 'Leveraged perps &mdash; requires proven spot edge')}
-      ${pending_card(6, 'Crypto Futures Swing',      'Swing leverage &mdash; requires proven spot edge')}
-      ${pending_card(7, 'Stock Day Trader',          'Equities day trading &mdash; requires proven crypto edge')}
-    </div>
-  </div>
-  <div>
     <div class="ov-section-title" style="font-size:20px;font-weight:bold;color:var(--gold);letter-spacing:3px;padding-bottom:10px;margin-bottom:18px;">Executive Staff</div>
     <div class="ov-row" style="justify-content:center;">
       <div class="ov-card active" style="font-size:14px;line-height:1.7;">
@@ -1763,7 +1755,15 @@ function render_overview(data) {
       </div>
     </div>
   </div>
-  ${render_funded(data.funded_bots)}`;
+  ${render_funded(data.funded_bots)}
+  <div>
+    <div class="ov-section-title" style="font-size:14px;font-weight:bold;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;padding-bottom:10px;margin-bottom:18px;">Future Competitions</div>
+    <div class="ov-row" style="justify-content:center;">
+      ${pending_card(5, 'Crypto Futures Day Trader', 'Leveraged perps &mdash; requires proven spot edge')}
+      ${pending_card(6, 'Crypto Futures Swing',      'Swing leverage &mdash; requires proven spot edge')}
+      ${pending_card(7, 'Stock Day Trader',          'Equities day trading &mdash; requires proven crypto edge')}
+    </div>
+  </div>`;
 }
 
 // ── Data loading ──────────────────────────────────────────────────────────────
