@@ -22,7 +22,9 @@ STATE_FILE = f"{WORKSPACE}/competition/heartbeat_state.json"
 BOT_TOKEN  = "8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
 CHAT_ID    = "8154505910"
 
-COOLDOWN_MIN = 60   # min gap between repeated alerts for the same problem
+COOLDOWN_MIN        = 60    # min gap between repeated alerts for the same problem
+GEMINI_COOLDOWN_MIN = 240   # Gemini quota alerts fire at most every 4 hours
+PAUSE_FLAG          = f"{WORKSPACE}/competition/heartbeat_paused"
 
 # ── League definitions ──────────────────────────────────────────────────────
 
@@ -230,6 +232,10 @@ def main():
     now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     print(f"[sys_heartbeat] {now_str}")
 
+    if os.path.isfile(PAUSE_FLAG):
+        print("  Paused — alerts suppressed. Delete heartbeat_paused to resume.")
+        return
+
     state    = load_state()
     problems = []   # list of (key, message)
     resolved = []   # keys that were alerting but are now clear
@@ -274,14 +280,14 @@ def main():
     else:
         clear_alert(state, key)
 
-    # ── Gemini quota check ─────────────────────────────────────────────────
+    # ── Gemini quota check (4h cooldown, no clear-on-resolve — prevents flicker spam)
     key     = "gemini_quota"
     problem = check_gemini_quota(state)
     if problem:
-        if should_alert(state, key):
+        last = state["last_alerted"].get(key)
+        if not last or datetime.now(timezone.utc) - datetime.fromisoformat(last) > timedelta(minutes=GEMINI_COOLDOWN_MIN):
             problems.append((key, f"[GEMINI] {problem}"))
-    else:
-        clear_alert(state, key)
+    # intentionally not clearing on resolve — quota flickers; let cooldown expire naturally
 
     # ── Send alerts ────────────────────────────────────────────────────────
     if problems:

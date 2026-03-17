@@ -82,8 +82,13 @@ def load_history(pair):
     path = history_path(pair)
     if not os.path.isfile(path):
         return []
-    with open(path) as f:
-        return json.load(f)
+    try:
+        with open(path) as f:
+            return json.load(f)
+    except Exception:
+        print(f"  WARNING: corrupt price history for {pair} — resetting")
+        os.remove(path)
+        return []
 
 
 def save_history(pair, candles):
