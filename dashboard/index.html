@@ -1690,11 +1690,14 @@ function render_overview(data) {
     : 0;
   const pm_total_bots = copy_bots + auto_bots;
   const all_pm_bots = [
-    ...(pm     && pm.bots     ? pm.bots.map(b     => ({ bot: b.name, pnl_usd: b.pnl_usd || 0 })) : []),
+    ...(pm     && pm.bots     ? pm.bots.map(b     => ({ bot: b.bot,  pnl_usd: b.pnl_usd || 0 })) : []),
     ...(pm_auto && pm_auto.bots ? pm_auto.bots.map(b => ({ bot: b.bot,  pnl_usd: b.pnl_usd || 0 })) : []),
   ];
   all_pm_bots.sort((a, b) => (b.pnl_usd || 0) - (a.pnl_usd || 0));
-  const pm_leader = all_pm_bots.length > 0 ? all_pm_bots[0] : null;
+  const poly_cum = data.poly_cumulative_rankings || [];
+  const pm_leader = poly_cum.length > 0
+    ? poly_cum[0]
+    : (all_pm_bots.length > 0 ? { bot: all_pm_bots[0].bot, cumulative_pnl_usd: all_pm_bots[0].pnl_usd } : null);
   const pm_is_live = pm_active;
   const pm_cycle_sprints = (data.poly_cycle_state && data.poly_cycle_state.sprint_in_cycle) || 0;
   const pm_ends_at = pm_auto && pm_auto.sprint_ends_at ? new Date(pm_auto.sprint_ends_at) : null;
@@ -1709,7 +1712,7 @@ function render_overview(data) {
     pm_active ? 'badge-live' : 'badge-idle', pm_active ? 'LIVE' : 'IDLE',
     pm_stats,
     pm_leader ? pm_leader.bot : null,
-    pm_leader ? pm_leader.pnl_usd : null,
+    pm_leader ? pm_leader.cumulative_pnl_usd : null,
     'Bots trade yes/no prediction market contracts. Some copy the moves of the best-performing traders on the platform. Others compare contract prices against Vegas odds and forecasting sites to find bets that look mispriced.'
   );
 

@@ -3,7 +3,7 @@
 polymarket_auto_tick.py — Ullr autonomous sports betting bot for Polymarket.
 
 Every 15 min: refresh open position prices, auto-close resolved markets.
-Every 30 min: scan Polymarket for sports candidates, compare to Vegas,
+Every 30 min: scan Polymarket for sports candidates, compare to Kalshi,
               ask Gemini to assess edge, trade if confirmed.
 """
 import json, os, time, re, logging, urllib.request, urllib.error
@@ -12,19 +12,11 @@ from datetime import datetime, timezone, timedelta
 AUTO_STATE_FILE = "/root/.openclaw/workspace/competition/polymarket/auto_state.json"
 STRATEGY_FILE   = "/root/.openclaw/workspace/fleet/polymarket/ullr/strategy.yaml"
 GEMINI_SECRET   = "/root/.openclaw/secrets/gemini.json"
-ODDS_SECRET     = "/root/.openclaw/secrets/odds_api.json"
 DASH_OUTPUT     = "/var/www/dashboard/api/polymarket_auto.json"
 LOG_FILE        = "/root/.openclaw/workspace/competition/polymarket/auto_tick.log"
 POLL_SEC        = 900   # 15 min between ticks
 SCAN_EVERY      = 2     # scan for new markets every 2 ticks (30 min)
 
-SPORT_KEYS = [
-    "basketball_nba", "americanfootball_nfl", "baseball_mlb",
-    "soccer_epl", "soccer_spain_la_liga", "soccer_germany_bundesliga",
-    "soccer_france_ligue_one", "soccer_italy_serie_a",
-    "icehockey_nhl", "mma_mixed_martial_arts",
-    "tennis_atp_french_open", "tennis_wta_french_open",
-]
 
 os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
 logging.basicConfig(
@@ -59,9 +51,7 @@ def api_post(url, payload, headers=None, timeout=15):
 def load_secrets():
     with open(GEMINI_SECRET) as f:
         g = json.load(f)
-    with open(ODDS_SECRET) as f:
-        o = json.load(f)
-    return {"gemini_api_key": g["gemini_api_key"], "odds_api_key": o["odds_api_key"]}
+    return {"gemini_api_key": g["gemini_api_key"]}
 
 
 def load_strategy():
@@ -205,110 +195,112 @@ def fetch_market_price(condition_id):
 
 # ── Vegas odds ────────────────────────────────────────────────────────────────
 
-def _team_tokens(text):
-    """Extract meaningful words from a team/player name."""
-    return set(re.sub(r"[^a-z0-9 ]", "", text.lower()).split())
+STOP_WORDS = {"will","the","a","an","of","in","on","at","to","for","is","are",
+              "be","has","have","by","or","and","vs","vs.","who","what","when",
+              "how","does","do","can","could","would","should","may","might"}
 
+def _tokens(text):
+    words = re.sub(r"[^a-z0-9 ]", " ", text.lower()).split()
+    return set(w for w in words if w not in STOP_WORDS and len(w) > 2)
 
-def get_vegas_odds(title, odds_api_key, odds_cache):
-    """
-    Try to find Vegas consensus odds for the market.
-    odds_cache: dict keyed by sport_key, filled lazily this tick.
-    Returns {home, away, home_prob, away_prob} or None.
-    """
-    title_tokens = _team_tokens(title)
+def build_title_index(markets):
+    index = {}
+    for i, m in enumerate(markets):
+        for tok in _tokens(m["title"]):
+            index.setdefault(tok, []).append(i)
+    return index
 
-    for sport_key in SPORT_KEYS:
-        # Fetch odds for this sport if not cached
-        if sport_key not in odds_cache:
-            try:
-                url  = (f"https://api.the-odds-api.com/v4/sports/{sport_key}/odds/"
-                        f"?apiKey={odds_api_key}&regions=us&markets=h2h&oddsFormat=decimal")
-                odds_cache[sport_key] = api_get(url, timeout=10)
-                log.debug(f"Fetched odds for {sport_key} ({len(odds_cache[sport_key])} events)")
-            except urllib.error.HTTPError as e:
-                if e.code == 422:   # sport not currently active
-                    odds_cache[sport_key] = []
-                else:
-                    log.warning(f"Odds API error {sport_key}: {e.code}")
-                    odds_cache[sport_key] = []
-            except Exception as e:
-                log.warning(f"Odds fetch error {sport_key}: {e}")
-                odds_cache[sport_key] = []
+def find_best_external_match(pm_title, markets, min_score=0.25, index=None):
+    pm_toks = _tokens(pm_title)
+    if not pm_toks:
+        return None
+    if index is not None:
+        cand_indices = set()
+        for tok in pm_toks:
+            cand_indices.update(index.get(tok, []))
+        candidates = [markets[i] for i in cand_indices]
+    else:
+        candidates = markets
+    best, best_score = None, min_score
+    for m in candidates:
+        tb = _tokens(m["title"])
+        if not tb:
+            continue
+        score = len(pm_toks & tb) / len(pm_toks | tb)
+        if score > best_score:
+            best, best_score = m, score
+    return best
 
-        for event in odds_cache[sport_key]:
-            home = event.get("home_team", "")
-            away = event.get("away_team", "")
-            home_tokens = _team_tokens(home)
-            away_tokens = _team_tokens(away)
+def fetch_kalshi_markets():
+    """Fetch Kalshi markets with midpoint probability. No auth needed."""
+    markets = []
+    cursor = None
+    for _ in range(10):
+        try:
+            url = ("https://api.elections.kalshi.com/trade-api/v2/events"
+                   "?limit=200&with_nested_markets=true")
+            if cursor:
+                url += f"&cursor={cursor}"
+            page = api_get(url, timeout=20)
+        except Exception as e:
+            log.warning(f"Kalshi fetch error: {e}")
+            break
+        for event in page.get("events", []):
+            for m in event.get("markets", []):
+                yes_bid = m.get("yes_bid_dollars")
+                yes_ask = m.get("yes_ask_dollars")
+                if yes_bid is None or yes_ask is None:
+                    continue
+                try:
+                    bid, ask = float(yes_bid), float(yes_ask)
+                except (ValueError, TypeError):
+                    continue
+                if bid <= 0 or ask <= 0 or bid >= 1 or ask >= 1:
+                    continue
+                title = m.get("title", "") or event.get("title", "")
+                if not title:
+                    continue
+                markets.append({
+                    "id":    m.get("ticker", ""),
+                    "title": title,
+                    "prob":  round((bid + ask) / 2, 4),
+                    "close": m.get("close_time", ""),
+                })
+        cursor = page.get("cursor")
+        if not cursor or len(page.get("events", [])) < 200:
+            break
+    log.info(f"Fetched {len(markets)} Kalshi markets")
+    return markets
 
-            # Match if 2+ tokens from either team appear in the market title
-            home_match = len(home_tokens & title_tokens) >= min(2, len(home_tokens))
-            away_match = len(away_tokens & title_tokens) >= min(2, len(away_tokens))
-
-            if not (home_match or away_match):
-                continue
-
-            # Get best h2h odds across bookmakers
-            best_home, best_away = None, None
-            for bm in event.get("bookmakers", []):
-                for market in bm.get("markets", []):
-                    if market.get("key") != "h2h":
-                        continue
-                    for outcome in market.get("outcomes", []):
-                        price = float(outcome.get("price", 0))
-                        if price <= 1:
-                            continue
-                        name = outcome.get("name", "")
-                        if _team_tokens(name) & home_tokens:
-                            if best_home is None or price < best_home:
-                                best_home = price
-                        elif _team_tokens(name) & away_tokens:
-                            if best_away is None or price < best_away:
-                                best_away = price
-
-            if best_home and best_away:
-                # Convert decimal to implied prob, normalize to remove vig
-                raw_home = 1.0 / best_home
-                raw_away = 1.0 / best_away
-                total    = raw_home + raw_away
-                return {
-                    "home": home, "away": away,
-                    "home_prob": round(raw_home / total, 4),
-                    "away_prob": round(raw_away / total, 4),
-                }
-
-    return None
 
 
 # ── Gemini reasoning ──────────────────────────────────────────────────────────
 
-def gemini_assess(title, outcome, polymarket_price, vegas_data, gemini_api_key):
+def gemini_assess(title, outcome, polymarket_price, kalshi_match, gemini_api_key):
     """Ask Gemini to estimate true probability and assess edge."""
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
-    if vegas_data:
-        vegas_section = (
-            f"Vegas consensus (vig-free):\n"
-            f"  {vegas_data['home']}: {vegas_data['home_prob']:.1%}\n"
-            f"  {vegas_data['away']}: {vegas_data['away_prob']:.1%}"
+    if kalshi_match:
+        ref_section = (
+            f"Kalshi market consensus:\n"
+            f"  '{kalshi_match['title']}': {kalshi_match['prob']:.1%}"
         )
     else:
-        vegas_section = "No Vegas line available — use your own assessment only."
+        ref_section = "No external reference available — use your own assessment only."
 
     prompt = f"""You are a sharp sports betting analyst assessing a Polymarket prediction market.
 
 Market: {title}
 Outcome being assessed: {outcome}
 Polymarket price: {polymarket_price:.3f} (implies {polymarket_price*100:.1f}% probability)
-{vegas_section}
+{ref_section}
 Today's date: {today}
 
 Assess the TRUE probability of this outcome based on:
 - Your knowledge of the teams/players involved
 - Current season form, injuries, head-to-head record
 - Home/away advantage, venue, competition context
-- Whether Polymarket appears to be mispricing vs Vegas or your estimate
+- Whether Polymarket appears to be mispricing vs the Kalshi consensus or your estimate
 
 Respond ONLY with valid JSON (no markdown, no extra text):
 {{"estimated_prob": 0.00, "confidence": "low|medium|high", "value": "YES|NO|FAIR", "reasoning": "2-3 sentences max", "key_factors": ["factor1", "factor2"]}}
@@ -559,7 +551,10 @@ def tick(bot, strategy, secrets, tick_count):
     candidates = fetch_polymarket_sports_markets(strategy)
     bot["scan_count"] += len(candidates)
 
-    odds_cache = {}  # cache per-tick to save API calls
+    # Fetch Kalshi once per scan as the reference probability source
+    kalshi_markets = fetch_kalshi_markets()
+    kalshi_index   = build_title_index(kalshi_markets)
+
     MAX_GEMINI_PER_SCAN = 10
     gemini_this_scan = 0
 
@@ -580,33 +575,25 @@ def tick(bot, strategy, secrets, tick_count):
         if pm_price < 0.10 or pm_price > 0.90:
             continue
 
-        # Get Vegas odds
-        vegas = get_vegas_odds(market["title"], secrets["odds_api_key"], odds_cache)
+        # Match against Kalshi for a reference probability
+        kalshi_match = find_best_external_match(market["title"], kalshi_markets, min_score=0.30, index=kalshi_index)
 
-        # Pre-filter: if Vegas available, skip if gap < half of min_edge (save Gemini calls)
-        if vegas:
-            # Map Vegas prob to the outcome we're assessing
-            title_lower = market["title"].lower()
-            away_in_title = vegas["away"].split()[-1].lower() in title_lower
-            home_in_title = vegas["home"].split()[-1].lower() in title_lower
-            if away_in_title and not home_in_title:
-                vegas_prob = vegas["away_prob"]
-            else:
-                vegas_prob = vegas["home_prob"]
-            gap = abs(vegas_prob - pm_price)
+        # Pre-filter: if Kalshi match found, skip if gap < half of min_edge (save Gemini calls)
+        if kalshi_match:
+            gap = abs(kalshi_match["prob"] - pm_price)
             if gap < strategy["min_edge_pts"] / 2:
-                log.debug(f"  Skipping {market['title'][:40]} — Vegas gap too small ({gap:.3f})")
+                log.debug(f"  Skipping {market['title'][:40]} — Kalshi gap too small ({gap:.3f})")
                 continue
 
-        # Only call Gemini when Vegas line found (saves quota on noise)
-        if not vegas:
+        # Only call Gemini when Kalshi reference found (saves quota on noise)
+        if not kalshi_match:
             continue
 
         # Rate limit: 6s between calls (~10/min, free tier is 15 RPM)
         time.sleep(6)
         try:
             assessment = gemini_assess(
-                market["title"], target["outcome"], pm_price, vegas, secrets["gemini_api_key"]
+                market["title"], target["outcome"], pm_price, kalshi_match, secrets["gemini_api_key"]
             )
         except RuntimeError:
             log.warning("  Scan aborted due to Gemini quota — waiting for next tick")

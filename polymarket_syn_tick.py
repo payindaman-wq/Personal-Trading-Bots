@@ -3,7 +3,7 @@
 polymarket_syn_tick.py — SYN orchestrator for 15 autonomous Polymarket bots.
 
 SYN is the manager. Each tick:
-  1. Fetches ALL data once (Polymarket, Vegas, Metaculus, Manifold)
+  1. Fetches ALL data once (Polymarket, Kalshi, Metaculus, Manifold)
   2. Distributes pre-filtered candidates to each specialist bot
   3. Runs Gemini once per unique market (deduplicated across bots)
   4. Arb bots skip Gemini — pure price-gap math
@@ -21,11 +21,11 @@ FLEET_DIR        = f"{WORKSPACE}/fleet/polymarket"
 DASH_OUTPUT      = "/var/www/dashboard/api/polymarket_auto.json"
 LOG_FILE         = f"{WORKSPACE}/competition/polymarket/syn_tick.log"
 CYCLE_STATE_FILE = f"{WORKSPACE}/competition/polymarket/polymarket_cycle_state.json"
-BOT_TOKEN        = "8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
-CHAT_ID          = "8154505910"
+BOT_TOKEN        = None  # loaded from TELEGRAM_SECRET at startup
+CHAT_ID          = None
 GEMINI_SECRET    = "/root/.openclaw/secrets/gemini.json"
-ODDS_SECRET      = "/root/.openclaw/secrets/odds_api.json"
 KALSHI_SECRET    = "/root/.openclaw/secrets/kalshi.json"
+TELEGRAM_SECRET  = "/root/.openclaw/secrets/telegram.json"
 
 # ── Tuning ─────────────────────────────────────────────────────────────────
 POLL_SEC             = 900    # 15 min between ticks
@@ -35,12 +35,6 @@ GEMINI_SLEEP         = 6      # seconds between Gemini calls
 GEMINI_DAILY_LIMIT   = 1200   # per-key hard stop (1200 × 3 keys = 3600/day; actual use: 384/key/day)
 SPRINT_HOURS         = 168    # 7-day sprints
 
-SPORT_KEYS = [
-    "basketball_nba", "americanfootball_nfl", "baseball_mlb",
-    "soccer_epl", "soccer_spain_la_liga", "soccer_germany_bundesliga",
-    "soccer_france_ligue_one", "soccer_italy_serie_a", "icehockey_nhl",
-    "mma_mixed_martial_arts", "tennis_atp_french_open", "tennis_wta_french_open",
-]
 
 os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
 logging.basicConfig(
@@ -76,21 +70,26 @@ def api_post(url, payload, timeout=20):
 # ── Secrets + strategies ───────────────────────────────────────────────────
 
 def load_secrets():
+    global BOT_TOKEN, CHAT_ID
     with open(GEMINI_SECRET) as f:
         g = json.load(f)
-    with open(ODDS_SECRET) as f:
-        o = json.load(f)
     kalshi_key = None
     if os.path.isfile(KALSHI_SECRET):
         with open(KALSHI_SECRET) as f:
             k = json.load(f)
             kalshi_key = k.get("kalshi_api_key")
+    if os.path.isfile(TELEGRAM_SECRET):
+        with open(TELEGRAM_SECRET) as f:
+            t = json.load(f)
+            BOT_TOKEN = t.get("bot_token")
+            CHAT_ID   = t.get("chat_id")
+    else:
+        log.warning(f"Telegram secret not found: {TELEGRAM_SECRET} — notifications disabled")
     # Support single key (legacy) or list of keys for rotation
     gemini_keys = g.get("gemini_api_keys") or [g["gemini_api_key"]]
     return {
         "gemini_api_key":  gemini_keys[0],
         "gemini_api_keys": gemini_keys,
-        "odds_api_key":    o["odds_api_key"],
         "kalshi_api_key":  kalshi_key,
     }
 
@@ -225,25 +224,6 @@ def fetch_polymarket_markets(strategies):
     log.info(f"SYN fetched {len(markets)} Polymarket markets")
     return markets
 
-
-def fetch_vegas_odds(odds_api_key):
-    """Fetch all available Vegas h2h odds. Cached by sport."""
-    cache = {}
-    for sport in SPORT_KEYS:
-        try:
-            url  = (f"https://api.the-odds-api.com/v4/sports/{sport}/odds/"
-                    f"?apiKey={odds_api_key}&regions=us&markets=h2h&oddsFormat=decimal")
-            data = api_get(url, timeout=10)
-            cache[sport] = data
-            log.debug(f"  Vegas {sport}: {len(data)} events")
-        except urllib.error.HTTPError as e:
-            cache[sport] = []
-            if e.code not in (422, 404):
-                log.debug(f"  Vegas {sport}: HTTP {e.code}")
-        except Exception as e:
-            cache[sport] = []
-    log.info(f"SYN fetched Vegas odds ({sum(len(v) for v in cache.values())} events)")
-    return cache
 
 
 def fetch_metaculus_markets():
@@ -408,46 +388,6 @@ def _team_tokens(text):
     return set(re.sub(r"[^a-z0-9 ]", "", text.lower()).split())
 
 
-def find_vegas_match(pm_title, vegas_cache):
-    """Match Polymarket market to Vegas odds event."""
-    title_tok = _team_tokens(pm_title)
-    for sport_events in vegas_cache.values():
-        for event in sport_events:
-            home = event.get("home_team", "")
-            away = event.get("away_team", "")
-            ht   = _team_tokens(home)
-            at   = _team_tokens(away)
-            hm   = len(ht & title_tok) >= min(2, len(ht)) if ht else False
-            am   = len(at & title_tok) >= min(2, len(at)) if at else False
-            if not (hm or am):
-                continue
-            # Extract best h2h odds
-            best_home, best_away = None, None
-            for bm in event.get("bookmakers", []):
-                for mkt in bm.get("markets", []):
-                    if mkt.get("key") != "h2h":
-                        continue
-                    for outcome in mkt.get("outcomes", []):
-                        price = float(outcome.get("price", 0))
-                        if price <= 1:
-                            continue
-                        name_tok = _team_tokens(outcome.get("name", ""))
-                        if name_tok & ht:
-                            if best_home is None or price < best_home:
-                                best_home = price
-                        elif name_tok & at:
-                            if best_away is None or price < best_away:
-                                best_away = price
-            if best_home and best_away:
-                raw_h = 1.0 / best_home
-                raw_a = 1.0 / best_away
-                tot   = raw_h + raw_a
-                return {
-                    "home": home, "away": away,
-                    "home_prob": round(raw_h / tot, 4),
-                    "away_prob": round(raw_a / tot, 4),
-                }
-    return None
 
 
 # ── Bot candidate filtering ────────────────────────────────────────────────
@@ -500,15 +440,14 @@ def filter_for_bot(markets, strategy, existing_cids):
 
 # ── Gemini reasoning ───────────────────────────────────────────────────────
 
-def gemini_assess(title, outcome, pm_price, vegas_data, persona, api_key):
+def gemini_assess(title, outcome, pm_price, kalshi_match, persona, api_key):
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
-    if vegas_data:
-        vegas_section = (f"Vegas consensus (vig-free):\n"
-                         f"  {vegas_data['home']}: {vegas_data['home_prob']:.1%}\n"
-                         f"  {vegas_data['away']}: {vegas_data['away_prob']:.1%}")
+    if kalshi_match:
+        ref_section = (f"Kalshi market consensus:\n"
+                       f"  '{kalshi_match['title']}': {kalshi_match['prob']:.1%}")
     else:
-        vegas_section = "No Vegas line available."
+        ref_section = "No external reference available — use your own assessment only."
 
     prompt = (
         f"{persona}\n\n"
@@ -516,7 +455,7 @@ def gemini_assess(title, outcome, pm_price, vegas_data, persona, api_key):
         f"Market: {title}\n"
         f"Outcome assessed: {outcome}\n"
         f"Polymarket price: {pm_price:.3f} (implies {pm_price*100:.1f}% probability)\n"
-        f"{vegas_section}\n"
+        f"{ref_section}\n"
         f"Today: {today}\n\n"
         f"Estimate the TRUE probability considering all relevant factors. "
         f"Respond ONLY with valid JSON:\n"
@@ -951,7 +890,6 @@ def run_tick(state, strategies, secrets, tick_count):
 
     do_scan = (tick_count % SCAN_EVERY == 0)
     if do_scan:
-        vegas_cache       = fetch_vegas_odds(secrets["odds_api_key"])
         metaculus_markets = fetch_metaculus_markets()
         manifold_markets  = fetch_manifold_markets()
         kalshi_markets    = fetch_kalshi_markets(secrets.get("kalshi_api_key"))
@@ -960,7 +898,7 @@ def run_tick(state, strategies, secrets, tick_count):
         manif_index  = build_title_index(manifold_markets)
         kalshi_index = build_title_index(kalshi_markets)
     else:
-        vegas_cache, metaculus_markets, manifold_markets, kalshi_markets = {}, [], [], []
+        metaculus_markets, manifold_markets, kalshi_markets = [], [], []
         meta_index = manif_index = kalshi_index = {}
         log.info("Skipping external data fetch this tick (price refresh only)")
 
@@ -1015,11 +953,11 @@ def run_tick(state, strategies, secrets, tick_count):
             for market in candidates:
                 cid = market["condition_id"]
                 if cid not in opinion_pool:
-                    vegas = find_vegas_match(market["title"], vegas_cache)
+                    kalshi_m = find_best_external_match(market["title"], kalshi_markets, min_score=0.30, index=kalshi_index)
                     opinion_pool[cid] = {
-                        "market": market,
-                        "vegas":  vegas,
-                        "bots":   [],
+                        "market":   market,
+                        "kalshi":   kalshi_m,
+                        "bots":     [],
                         "category": strategy.get("category", ""),
                     }
                 opinion_pool[cid]["bots"].append(bot["name"])
@@ -1056,19 +994,16 @@ def run_tick(state, strategies, secrets, tick_count):
 
     key_cursor = 0  # round-robin cursor within available_keys
 
-    # Prioritize candidates: Vegas edge first, then by distance from 0.5
+    # Prioritize candidates: Kalshi edge first, then by distance from 0.5
     def _candidate_priority(item):
         cid, candidate = item
         outcomes = sorted(candidate["market"]["outcomes"], key=lambda x: x["price"])
         pm_price = outcomes[0]["price"] if outcomes else 0.5
         if pm_price < 0.04 or pm_price > 0.96:
             return 0.0
-        vegas = candidate.get("vegas")
-        if vegas:
-            vegas_edge = abs(vegas.get("home_prob", 0.5) - pm_price)
-        else:
-            vegas_edge = 0.0
-        return -(vegas_edge * 2 + abs(pm_price - 0.5))
+        kalshi = candidate.get("kalshi")
+        kalshi_edge = abs(kalshi["prob"] - pm_price) if kalshi else 0.0
+        return -(kalshi_edge * 2 + abs(pm_price - 0.5))
 
     sorted_candidates = sorted(opinion_pool.items(), key=_candidate_priority)
 
@@ -1097,7 +1032,7 @@ def run_tick(state, strategies, secrets, tick_count):
             try:
                 assessment = gemini_assess(
                     market["title"], target["outcome"], pm_price,
-                    candidate.get("vegas"), persona, gemini_keys[key_idx]
+                    candidate.get("kalshi"), persona, gemini_keys[key_idx]
                 )
                 counts[key_idx] += 1
                 key_cursor += 1
