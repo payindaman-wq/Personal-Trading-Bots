@@ -94,8 +94,13 @@ def load_history(pair):
 def save_history(pair, candles):
     # Keep only the most recent MAX_CANDLES
     candles = sorted(candles, key=lambda x: x["ts"])[-MAX_CANDLES:]
-    with open(history_path(pair), "w") as f:
+    # Atomic write: write to temp file then rename to avoid race condition with readers
+    import tempfile
+    path = history_path(pair)
+    tmp = path + '.tmp'
+    with open(tmp, "w") as f:
         json.dump(candles, f)
+    os.replace(tmp, path)
 
 
 def merge_candles(existing, new_candles):

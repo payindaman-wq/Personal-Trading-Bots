@@ -30,6 +30,7 @@ SWING_CYCLE_STATE_PATH = os.path.join(WORKSPACE, "competition", "swing", "swing_
 POLY_CYCLE_STATE_PATH  = os.path.join(WORKSPACE, "competition", "polymarket", "polymarket_cycle_state.json")
 ARB_CYCLE_STATE_PATH   = os.path.join(WORKSPACE, "competition", "arb", "arb_cycle_state.json")
 SPREAD_CYCLE_STATE_PATH = os.path.join(WORKSPACE, "competition", "spread", "spread_cycle_state.json")
+POLY_LB_PATH   = os.path.join(WORKSPACE, "competition", "polymarket", "polymarket_leaderboard.json")
 
 BOT_NAMES = [
     "floki", "bjorn", "lagertha", "ragnar", "leif", "gunnar",
@@ -653,6 +654,15 @@ def build():
     dashboard["spread_cycle_state"] = get_spread_cycle_state()
     dashboard["swing_cycle_state"] = get_swing_cycle_state()
     dashboard["poly_cycle_state"]  = get_poly_cycle_state()
+    poly_lb = load_json(POLY_LB_PATH) if os.path.exists(POLY_LB_PATH) else None
+    if poly_lb:
+        dashboard["poly_cumulative_rankings"] = poly_lb.get("rankings", [])
+        dashboard["poly_live_sprint_rankings"] = poly_lb.get("live_sprint_rankings", [])
+        dashboard["poly_total_sprints"]       = poly_lb.get("total_sprints", 0)
+    else:
+        dashboard["poly_cumulative_rankings"] = []
+        dashboard["poly_live_sprint_rankings"] = []
+        dashboard["poly_total_sprints"]       = 0
     dashboard["arb_cycle_state"]   = get_arb_cycle_state()
 
     dashboard["cycle_state"] = get_cycle_state()

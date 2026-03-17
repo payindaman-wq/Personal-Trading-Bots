@@ -613,7 +613,6 @@
 <!-- Tab Bar -->
 <div class="tab-bar">
   <button class="tab-btn active" onclick="switch_tab('overview', this)">Overview</button>
-  <button class="tab-btn" onclick="switch_tab('leaderboard', this)">Leaderboard</button>
   <button class="tab-btn" onclick="switch_tab('day', this)">Day</button>
   <button class="tab-btn" onclick="switch_tab('swing', this)">Swing</button>
   <button class="tab-btn" onclick="switch_tab('arb', this)">Arbitrage</button>
@@ -658,12 +657,6 @@
   </div>
 </div>
 
-<!-- Tab: Leaderboard -->
-<div class="tab-panel" id="tab-leaderboard">
-  <div class="main" id="main-leaderboard">
-    <div class="loading">Loading leaderboard data...</div>
-  </div>
-</div>
 
 <!-- Tab: Poly -->
 <div class="tab-panel" id="tab-polymarket">
@@ -799,7 +792,7 @@ function render_health(health) {
 
 // ── Overview: League Rendering ────────────────────────────────────────────────
 
-function render_live_sprint(ls) {
+function render_live_sprint(ls, cycle_num, sprint_num) {
   if (!ls || !ls.bots || ls.bots.length === 0) return '';
 
   const rows = ls.bots.map(b => {
@@ -825,7 +818,7 @@ function render_live_sprint(ls) {
 
   return `
   <div class="section">
-    <div class="section-label">Live Sprint Standings</div>
+    <div style="margin-bottom:12px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:8px;"><div><div style="font-size:16px;font-weight:bold;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Live Action</div><div class="section-label" style="margin-bottom:0">Cycle #${cycle_num} &mdash; Sprint #${sprint_num} &middot; <span class="sprint-id">${esc(ls.sprint_id)}</span> &middot; ${ls.pairs.map(esc).join(' &middot; ')} &middot; ${fmt_duration(ls.duration_hours)}</div></div><div style="font-size:15px;font-weight:bold;color:var(--yellow);white-space:nowrap;">${fmt_countdown(ls.seconds_remaining)}</div></div>
     <table>
       <thead><tr>
         <th>Rank</th><th>Bot</th><th>Equity</th><th>P&amp;L</th>
@@ -861,7 +854,7 @@ function render_cumulative(rankings, label) {
 
   return `
   <div class="section">
-    <div class="section-label">${label}</div>
+    <div style="margin-bottom:12px;"><div style="font-size:16px;font-weight:bold;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Leaderboard</div><div class="section-label" style="margin-bottom:0">${label}</div></div>
     <table>
       <thead><tr>
         <th>Rank</th><th>Bot</th><th>Pts</th>
@@ -885,20 +878,13 @@ function render_league(id, league, cycle_state) {
   const cycle_num = cs.cycle || 1;
   const sprint_num = cs.sprint_in_cycle + 1; // completed in cycle + 1 = current sprint
 
-  const sprint_bar = ls ? `
-  <div class="sprint-bar">
-    <span style="color:var(--text);font-weight:bold">Cycle #${cycle_num} &mdash; Sprint #${sprint_num}</span>
-    <span class="sprint-id hide-mobile">${esc(ls.sprint_id)}</span>
-    <span>Ends in: <span class="countdown">${fmt_countdown(ls.seconds_remaining)}</span></span>
-    <span class="hide-mobile pairs">Pairs: ${ls.pairs.map(esc).join(' &middot; ')}</span>
-    <span>Duration: ${fmt_duration(ls.duration_hours)}</span>
-  </div>` : '';
+  const sprint_bar = '';
 
   const live_section = is_live
-    ? render_live_sprint(ls)
+    ? render_live_sprint(ls, cycle_num, sprint_num)
     : `<div class="idle-notice">No active sprint — awaiting next competition start</div>`;
 
-  const cum_label = `Cycle #${cycle_num} &mdash; Cumulative Standings &mdash; ${league.total_sprints} sprint${league.total_sprints !== 1 ? 's' : ''} recorded`;
+  const cum_label = `Cycle #${cycle_num} &mdash; ${league.total_sprints} sprint${league.total_sprints !== 1 ? 's' : ''} recorded`;
   const cum_section = league.cumulative_rankings && league.cumulative_rankings.length > 0
     ? render_cumulative(league.cumulative_rankings, cum_label)
     : '';
@@ -913,8 +899,8 @@ function render_league(id, league, cycle_state) {
       <span class="badge ${is_live ? 'badge-live' : 'badge-idle'}">${is_live ? 'Live' : 'Idle'}</span>
     </div>
     ${sprint_bar}
-    ${live_section}
     ${cum_section}
+    ${live_section}
   </div>`;
 }
 
@@ -1293,7 +1279,7 @@ function pm_market_link(title) {
   return `<a href="${url}" target="_blank" rel="noopener" style="color:var(--blue);text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${esc(title)}</a>`;
 }
 
-function render_polymarket(pm, cycle_state) {
+function render_polymarket(pm, cycle_state, cum_rankings, total_sprints) {
   if (!pm || pm.status === 'pending_setup') {
     return `
     <div class="pm-pending">
@@ -1314,38 +1300,61 @@ function render_polymarket(pm, cycle_state) {
   const mode_lbl  = (pm.mode || 'paper').toUpperCase();
   const mode_cls  = pm.mode === 'live' ? 'live' : 'paper';
 
-  // Sprint countdown from sprint_ends_at
+  // Sprint countdown
   const ends_at = pm.sprint_ends_at || (pm_auto && pm_auto.sprint_ends_at);
   const secs_remaining = ends_at
     ? Math.max(0, Math.floor((new Date(ends_at).getTime() - Date.now()) / 1000))
     : null;
 
-  // ── League card ──
-  let html = `
-  <div class="league-card">
-    <div class="league-header">
-      <div>
-        <div class="league-title">Poly Trading League</div>
-        <div class="league-meta">7d sprints &mdash; copy-traders &amp; autonomous bots</div>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <span class="pm-mode-badge ${mode_cls}">${mode_lbl}</span>
-        <span class="badge ${is_active ? 'badge-live' : 'badge-idle'}">${is_active ? 'Live' : 'Idle'}</span>
-      </div>
-    </div>
-    <div class="sprint-bar">
-      <span style="color:var(--text);font-weight:bold">Cycle #${cycle_num} &mdash; Sprint #${sprint_num}</span>
-      <span class="sprint-id hide-mobile">${esc(pm.sprint_id || '')}</span>
-      ${secs_remaining !== null ? `<span>Ends in: <span class="countdown">${fmt_countdown(secs_remaining)}</span></span>` : ''}
-      <span>Duration: 7d</span>
-    </div>`;
+  // ── Normalize all bots into one combined fleet ──
+  const copy_bots = (pm.bots || []).map(b => ({
+    bot:              b.bot,
+    type:             'copy',
+    username:         b.assigned_trader || '—',
+    pnl_usd:          b.pnl_usd || 0,
+    sprint_pnl_usd:   b.sprint_pnl_usd || 0,
+    win_rate:         b.win_rate || 0,
+    sprint_win_rate:  b.sprint_win_rate || 0,
+    trades:           b.trades || 0,
+    sprint_trades:    b.sprint_trades || 0,
+    active_positions: b.active_positions || 0,
+  }));
+  const auto_bots = ((pm_auto && pm_auto.bots) || []).map(b => ({
+    bot:              b.bot,
+    type:             b.category || 'auto',
+    username:         '',
+    pnl_usd:          b.pnl_usd || 0,
+    sprint_pnl_usd:   b.pnl_usd || 0,
+    win_rate:         b.win_rate || 0,
+    sprint_win_rate:  b.win_rate || 0,
+    trades:           b.trades || 0,
+    sprint_trades:    b.trades || 0,
+    active_positions: b.active_positions || 0,
+  }));
+  const all_bots = [...copy_bots, ...auto_bots];
 
-  // ── Helper: standings section ──
-  function pm_standings(bots_list, title, pnl_key, wr_key, tr_key, type_badge_fn) {
-    if (!bots_list || bots_list.length === 0) {
-      return `<div class="section"><div class="section-label">${title}</div><div class="idle-notice">No data</div></div>`;
+  // ── Type badge ──
+  function type_badge(type) {
+    if (type === 'copy') {
+      return `<span class="badge" style="background:rgba(88,166,255,0.15);color:#58a6ff;border:1px solid rgba(88,166,255,0.3);font-size:9px;padding:2px 5px">COPY</span>`;
     }
-    const sorted = [...bots_list].sort((a, b) => (b[pnl_key] || 0) - (a[pnl_key] || 0));
+    const colors = {
+      sports:          ['rgba(86,211,100,0.12)',  '#56d364', 'rgba(86,211,100,0.3)'],
+      politics:        ['rgba(255,165,0,0.12)',    '#f0a500', 'rgba(255,165,0,0.3)'],
+      crypto:          ['rgba(210,153,34,0.15)',   'var(--gold)', 'rgba(210,153,34,0.3)'],
+      arb:             ['rgba(188,140,255,0.12)',  '#bc8cff', 'rgba(188,140,255,0.3)'],
+      world_economics: ['rgba(255,107,107,0.12)',  '#ff6b6b', 'rgba(255,107,107,0.3)'],
+      world_events:    ['rgba(255,180,50,0.12)',   '#ffb432', 'rgba(255,180,50,0.3)'],
+    };
+    const c = colors[type] || ['rgba(150,150,150,0.12)', 'var(--muted)', 'rgba(150,150,150,0.3)'];
+    const label = type.replace(/_/g, ' ').toUpperCase();
+    return `<span class="badge" style="background:${c[0]};color:${c[1]};border:1px solid ${c[2]};font-size:9px;padding:2px 5px">${label}</span>`;
+  }
+
+  // ── Standings table builder ──
+  function pm_table(bots, pnl_key, wr_key, tr_key) {
+    if (!bots || bots.length === 0) return '<div class="idle-notice">No data</div>';
+    const sorted = [...bots].sort((a, b) => (b[pnl_key] || 0) - (a[pnl_key] || 0));
     const rows = sorted.map((b, i) => {
       const rank = i + 1;
       const pnl  = b[pnl_key] || 0;
@@ -1356,7 +1365,8 @@ function render_polymarket(pm, cycle_state) {
       <tr class="${rank_class(rank)}">
         <td>${rank_label(rank)}</td>
         <td class="bot-name">${esc(b.bot || '—')}</td>
-        <td>${type_badge_fn(b)}</td>
+        <td>${type_badge(b.type)}</td>
+        <td style="color:var(--muted);font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.type === 'copy' ? esc(b.username || '—') : '<span style="color:var(--muted);font-size:10px">—</span>'}</td>
         <td>${fmt_pnl_usd(pnl)}</td>
         <td>${wr > 0 ? `<span class="win-rate">${wr.toFixed(0)}%</span>` : '<span class="pnl-zero">—</span>'}</td>
         <td>${tr}</td>
@@ -1364,36 +1374,76 @@ function render_polymarket(pm, cycle_state) {
       </tr>`;
     }).join('');
     return `
-    <div class="section">
-      <div class="section-label">${title}</div>
-      <table>
-        <thead><tr>
-          <th>Rank</th><th>Bot</th><th>Type</th><th>P&amp;L</th>
-          <th>Win%</th><th>Trades</th><th>Open</th>
-        </tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>`;
+    <table>
+      <thead><tr>
+        <th>Rank</th><th>Bot</th><th>Type</th><th>Username</th>
+        <th>P&amp;L</th><th>Win%</th><th>Trades</th><th>Open</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
   }
 
-  // Copy-trader standings
-  html += pm_standings(
-    pm.bots, 'Live Sprint &mdash; Copy-Traders',
-    'sprint_pnl_usd', 'sprint_win_rate', 'sprint_trades',
-    b => `<span style="color:var(--muted);font-size:11px">${esc(b.assigned_trader || '—')}</span>`
-  );
+  const sprint_id = pm.sprint_id || (pm_auto && pm_auto.sprint_id) || '';
 
-  // Autonomous bot standings
-  const auto_bots = pm_auto && pm_auto.bots ? pm_auto.bots : [];
-  html += pm_standings(
-    auto_bots, 'Live Sprint &mdash; Autonomous Bots',
-    'pnl_usd', 'win_rate', 'trades',
-    b => `<span class="badge" style="background:rgba(88,166,255,0.12);color:#58a6ff;border:1px solid rgba(88,166,255,0.3);font-size:9px">${esc((b.category || 'auto').toUpperCase())}</span>`
-  );
+  // Leaderboard (points-based cumulative, like other leagues)
+  const cum_label = 'Cycle #' + cycle_num + ' &mdash; ' + (total_sprints || 0) + ' sprint' + ((total_sprints||0) !== 1 ? 's' : '') + ' recorded &middot; ' + all_bots.length + ' bots';
+  function render_cum_poly(rankings, label) {
+    if (!rankings || rankings.length === 0) {
+      const hdr = '<div style="margin-bottom:12px;"><div style="font-size:16px;font-weight:bold;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Leaderboard</div><div class="section-label" style="margin-bottom:0">' + label + '</div></div>';
+      return '<div class="section">' + hdr + '<div class="idle-notice">Sprint 1 in progress &mdash; standings update when first sprint closes</div></div>';
+    }
+    const rows = rankings.map(function(b, i) {
+      const rank = b.rank || (i + 1);
+      const wr   = b.overall_win_rate || 0;
+      const wr_cell = wr > 0 ? '<span class="win-rate">' + wr.toFixed(0) + '%</span>' : '<span class="pnl-zero">—</span>';
+      return '<tr class="' + rank_class(rank) + '">'
+        + '<td>' + rank_label(rank) + '</td>'
+        + '<td class="bot-name">' + esc(b.bot || '—') + '</td>'
+        + '<td>' + type_badge(b.type || 'auto') + '</td>'
+        + '<td class="pts">' + (b.points || 0) + '</td>'
+        + '<td class="hide-mobile">' + (b.sprints_entered || 0) + '</td>'
+        + '<td class="hide-mobile">' + (b.sprint_wins || 0) + '</td>'
+        + '<td class="hide-mobile">' + (b.podiums || 0) + '</td>'
+        + '<td>' + fmt_pnl_usd(b.cumulative_pnl_usd || 0) + '</td>'
+        + '<td class="hide-mobile">' + wr_cell + '</td>'
+        + '<td class="hide-mobile">' + (b.total_trades || 0) + '</td>'
+        + '</tr>';
+    }).join('');
+    const thead = '<thead><tr><th>Rank</th><th>Bot</th><th>Type</th><th>Pts</th>'
+      + '<th class="hide-mobile">Sprints</th><th class="hide-mobile">1st</th><th class="hide-mobile">Podiums</th>'
+      + '<th>Cum P&amp;L</th><th class="hide-mobile">Win%</th><th class="hide-mobile">Trades</th>'
+      + '</tr></thead>';
+    const hdr = '<div style="margin-bottom:12px;"><div style="font-size:16px;font-weight:bold;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Leaderboard</div><div class="section-label" style="margin-bottom:0">' + label + '</div></div>';
+    return '<div class="section">' + hdr + '<table>' + thead + '<tbody>' + rows + '</tbody></table></div>';
+  }
+  const cum_section = render_cum_poly(cum_rankings && cum_rankings.length ? cum_rankings : null, cum_label);
 
-  html += `</div>`; // close league-card
+  // Live Action (sprint)
+  const live_label = `Cycle #${cycle_num} &mdash; Sprint #${sprint_num}` + (sprint_id ? ` &middot; <span class="sprint-id">${esc(sprint_id)}</span>` : '') + ` &middot; 7d`;
+  const countdown_html = secs_remaining !== null ? `<div style="font-size:15px;font-weight:bold;color:var(--yellow);white-space:nowrap;">${fmt_countdown(secs_remaining)}</div>` : '';
+  const live_section = `
+  <div class="section">
+    <div style="margin-bottom:12px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:8px;"><div><div style="font-size:16px;font-weight:bold;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Live Action</div><div class="section-label" style="margin-bottom:0">${live_label}</div></div>${countdown_html}</div>
+    ${pm_table(all_bots, 'sprint_pnl_usd', 'sprint_win_rate', 'sprint_trades')}
+  </div>`;
 
-  // ── Open Positions ──
+  let html = `
+  <div class="league-card">
+    <div class="league-header">
+      <div>
+        <div class="league-title">Poly Trading League</div>
+        <div class="league-meta">7d sprints &mdash; ${all_bots.length} bots &mdash; copy-traders &amp; autonomous</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="pm-mode-badge ${mode_cls}">${mode_lbl}</span>
+        <span class="badge ${is_active ? 'badge-live' : 'badge-idle'}">${is_active ? 'Live' : 'Idle'}</span>
+      </div>
+    </div>
+    ${cum_section}
+    ${live_section}
+  </div>`;
+
+  // Open Positions
   const copy_pos = pm.open_positions || [];
   const auto_pos = pm_auto && pm_auto.open_positions ? pm_auto.open_positions : [];
   const all_pos  = [...copy_pos, ...auto_pos];
@@ -1437,7 +1487,7 @@ function render_polymarket(pm, cycle_state) {
     <div class="section" style="padding:0">${pos_html}</div>
   </div>`;
 
-  // ── Closed Positions (current sprint) ──
+  // Closed Positions (current sprint)
   const copy_closed = pm.closed_positions || [];
   const auto_closed = pm_auto && pm_auto.closed_positions ? pm_auto.closed_positions : [];
   const all_closed  = [...auto_closed, ...copy_closed]
@@ -1455,7 +1505,7 @@ function render_polymarket(pm, cycle_state) {
       return '<span style="color:var(--muted);font-size:10px">' + esc(r.toUpperCase()) + '</span>';
     };
     const fmt_date = ts => {
-      if (!ts) return '—';
+      if (!ts) return '\u2014';
       try { return new Date(ts).toLocaleDateString('en-US', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); }
       catch { return ts.slice(0,16).replace('T',' '); }
     };
@@ -1465,7 +1515,6 @@ function render_polymarket(pm, cycle_state) {
       const pnl_cls = pnl === null ? '' : pnl >= 0 ? 'pnl-pos' : 'pnl-neg';
       const pnl_str = pnl === null ? '&mdash;' : fmt_pnl_usd(pnl);
       const pct_str = pnl_pct === null ? '' : ` <span style="color:var(--muted);font-size:11px">(${pnl_pct > 0 ? '+' : ''}${pnl_pct.toFixed(1)}%)</span>`;
-      const oc_cls  = p.outcome === 'win' ? 'pnl-pos' : 'pnl-neg';
       return `
       <tr>
         <td class="bot-name">${esc(p.bot || '&mdash;')}</td>
@@ -1495,7 +1544,6 @@ function render_polymarket(pm, cycle_state) {
 
   return html;
 }
-
 
 // ── Overview Tab ──────────────────────────────────────────────────────────────
 
@@ -1550,7 +1598,7 @@ function render_overview(data) {
     ];
     if (is_live) stats.push({ val: fmt_countdown(day.live_sprint.seconds_remaining), lbl: 'Remaining' });
     day_card = active_card(
-      'Day Trading League', `${fmt_duration(day.sprint_duration_hours)} sprints &mdash; 12 bots, 16 pairs`,
+      'Day Trading League', `${fmt_duration(day.sprint_duration_hours)} sprints &mdash; ${(data.cycle_state || {}).sprints_per_cycle || 7}-sprint cycles, 16 pairs`,
       'badge-day', is_live ? 'LIVE' : 'IDLE',
       stats,
       leader ? leader.bot : null,
@@ -1558,7 +1606,7 @@ function render_overview(data) {
       'Each bot has its own trading instinct — some chase momentum, others hunt reversals or breakouts. They read price charts and react to signals continuously throughout the sprint. Best cumulative profit takes the crown.'
     );
   } else {
-    day_card = `<div class="ov-card pending"><span class="ov-pending-badge">Not Started</span><div class="ov-card-title">Day Trading League</div><div class="ov-card-meta">1d sprints &mdash; 12 bots, 16 pairs</div></div>`;
+    day_card = `<div class="ov-card pending"><span class="ov-pending-badge">Not Started</span><div class="ov-card-title">Day Trading League</div><div class="ov-card-meta">1d sprints &mdash; 7-sprint cycles, 16 pairs</div></div>`;
   }
 
   // Swing League card
@@ -1573,7 +1621,7 @@ function render_overview(data) {
     ];
     if (is_live) stats.push({ val: fmt_countdown(swing.live_sprint.seconds_remaining), lbl: 'Remaining' });
     swing_card = active_card(
-      'Swing Trading League', `${fmt_duration(swing.sprint_duration_hours)} sprints &mdash; 8 bots, multi-pair`,
+      'Swing Trading League', `${fmt_duration(swing.sprint_duration_hours)} sprints &mdash; ${(data.swing_cycle_state || {}).sprints_per_cycle || 4}-sprint cycles, multi-pair`,
       'badge-swing', is_live ? 'LIVE' : 'IDLE',
       stats,
       leader ? leader.bot : null,
@@ -1581,7 +1629,7 @@ function render_overview(data) {
       'Rather than reacting to every price tick, these bots look for bigger, slower-moving trends and ride them over several days. They wait for high-confidence setups and hold positions through short-term noise.'
     );
   } else {
-    swing_card = `<div class="ov-card pending"><span class="ov-pending-badge">Not Started</span><div class="ov-card-title">Swing Trading League</div><div class="ov-card-meta">7d sprints &mdash; 8 bots, multi-pair</div></div>`;
+    swing_card = `<div class="ov-card pending"><span class="ov-pending-badge">Not Started</span><div class="ov-card-title">Swing Trading League</div><div class="ov-card-meta">7d sprints &mdash; 4-sprint cycles, multi-pair</div></div>`;
   }
 
   // Spread League card
@@ -1597,7 +1645,7 @@ function render_overview(data) {
     ];
     if (is_live) stats.push({ val: fmt_countdown(spread_league.live_sprint.seconds_remaining), lbl: 'Remaining' });
     spread_card = active_card(
-      'Spread Trading League', `${fmt_duration(spread_league.sprint_duration_hours)} sprints — 14 bots, ratio pairs`,
+      'Spread Trading League', `${fmt_duration(spread_league.sprint_duration_hours)} sprints — ${(data.spread_cycle_state || {}).sprints_per_cycle || 4}-sprint cycles, ratio pairs`,
       'badge-spread', is_live ? 'LIVE' : 'IDLE',
       stats,
       leader ? leader.bot : null,
@@ -1605,7 +1653,7 @@ function render_overview(data) {
       'Two coins that normally move in sync sometimes drift apart. These bots bet that they’ll snap back together — buying the laggard and selling the leader until the gap closes.'
     );
   } else {
-    spread_card = `<div class="ov-card pending"><span class="ov-pending-badge">Not Started</span><div class="ov-card-title">Spread Trading League</div><div class="ov-card-meta">7d sprints — 14 bots, ratio pairs</div></div>`;
+    spread_card = `<div class="ov-card pending"><span class="ov-pending-badge">Not Started</span><div class="ov-card-title">Spread Trading League</div><div class="ov-card-meta">7d sprints — 4-sprint cycles, ratio pairs</div></div>`;
   }
 
   // Arb League card
@@ -1621,7 +1669,7 @@ function render_overview(data) {
     ];
     if (is_live) stats.push({ val: fmt_countdown(arb_league.live_sprint.seconds_remaining), lbl: 'Remaining' });
     arb_card = active_card(
-      'Arbitrage Trading League', `${fmt_duration(arb_league.sprint_duration_hours)} sprints — ${bots} bots, correlated pairs`,
+      'Arbitrage Trading League', `${fmt_duration(arb_league.sprint_duration_hours)} sprints — ${(data.arb_cycle_state || {}).sprints_per_cycle || 4}-sprint cycles, correlated pairs`,
       'badge-arb', is_live ? 'LIVE' : 'IDLE',
       stats,
       leader ? leader.bot : null,
@@ -1629,7 +1677,7 @@ function render_overview(data) {
       'When the price ratio between two historically linked coins goes unusually high or low, bots trade both sides expecting it to normalize. The bet is on the relationship between the coins — not which direction either one moves.'
     );
   } else {
-    arb_card = `<div class="ov-card pending"><span class="ov-pending-badge">Not Started</span><div class="ov-card-title">Arbitrage Trading League</div><div class="ov-card-meta">7d sprints &mdash; 15 bots, correlated pairs</div></div>`;
+    arb_card = `<div class="ov-card pending"><span class="ov-pending-badge">Not Started</span><div class="ov-card-title">Arbitrage Trading League</div><div class="ov-card-meta">7d sprints &mdash; 4-sprint cycles, correlated pairs</div></div>`;
   }
 
   // Polymarket card
@@ -1657,7 +1705,7 @@ function render_overview(data) {
   ];
   if (pm_is_live && pm_secs_remaining > 0) pm_stats.push({ val: fmt_countdown(pm_secs_remaining), lbl: 'Remaining' });
   const pm_card = active_card(
-    'Poly Trading League', `7d sprints — ${pm_total_bots} bots, prediction markets`,
+    'Poly Trading League', `7d sprints — ${(data.poly_cycle_state || {}).sprints_per_cycle || 4}-sprint cycles, prediction markets`,
     pm_active ? 'badge-live' : 'badge-idle', pm_active ? 'LIVE' : 'IDLE',
     pm_stats,
     pm_leader ? pm_leader.bot : null,
@@ -1693,6 +1741,7 @@ function render_overview(data) {
 
 let refresh_timer = null;
 let countdown_val = 30;
+let _loading = false;
 
 function start_countdown() {
   clearInterval(refresh_timer);
@@ -1708,6 +1757,10 @@ function start_countdown() {
 }
 
 async function load_data() {
+  if (_loading) return;
+  _loading = true;
+  const _btn = document.querySelector('.refresh-btn');
+  if (_btn) { _btn.textContent = 'Loading...'; _btn.disabled = true; }
   try {
     const res = await fetch('/api/dashboard.json?t=' + Date.now());
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -1735,6 +1788,10 @@ async function load_data() {
     const ov = document.getElementById('main-overview');
     if (ov) ov.innerHTML = `<div class="error">Failed to load dashboard data: ${esc(e.message)}<br>Retrying in 30s</div>`;
     start_countdown();
+  } finally {
+    _loading = false;
+    const _btn2 = document.querySelector('.refresh-btn');
+    if (_btn2) { _btn2.textContent = 'Refresh now'; _btn2.disabled = false; }
   }
 }
 
@@ -1752,10 +1809,6 @@ function render(data) {
   // Overview tab
   const ov = document.getElementById('main-overview');
   if (ov) ov.innerHTML = render_overview(data);
-
-  // Leaderboard tab
-  const lb_el = document.getElementById('main-leaderboard');
-  if (lb_el) lb_el.innerHTML = render_fleet(data.fleet_roster, window._pm_data || null, window._pm_auto_data || null);
 
   // Cycle states
   const day_cs   = data.cycle_state       || { cycle: 1, sprint_in_cycle: 0, sprints_per_cycle: 7 };
@@ -1811,7 +1864,9 @@ function render(data) {
   // Polymarket tab
   const poly_cs = data.poly_cycle_state || { cycle: 1, sprint_in_cycle: 0, sprints_per_cycle: 4 };
   const pm_el = document.getElementById('main-polymarket');
-  if (pm_el) pm_el.innerHTML = render_polymarket(window._pm_data || null, poly_cs);
+  const poly_cum   = data.poly_cumulative_rankings || [];
+  const poly_total = data.poly_total_sprints || 0;
+  if (pm_el) pm_el.innerHTML = render_polymarket(window._pm_data || null, poly_cs, poly_cum, poly_total);
 }
 
 // ── Boot ─────────────────────────────────────────────────────────────────────

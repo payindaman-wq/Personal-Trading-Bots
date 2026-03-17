@@ -753,52 +753,54 @@ def score_and_archive_sprint(state):
     log.info(f"Sprint {sprint_id} expired — scoring...")
 
     bots = sorted(state["bots"], key=lambda b: b["equity"], reverse=True)
-    points_map = {0: 8, 1: 5, 2: 3, 3: 1}
-    rankings = []
     for i, bot in enumerate(bots):
-        pts = points_map.get(i, 1) if i < 4 else 0
-        rankings.append({
-            "rank":          i + 1,
-            "bot":           bot["name"],
-            "category":      bot["category"],
-            "final_equity":  bot["equity"],
-            "pnl_usd":       bot["pnl_usd"],
-            "pnl_pct":       bot["pnl_pct"],
-            "total_trades":  bot["total_trades"],
-            "wins":          bot["wins"],
-            "losses":        bot["losses"],
-            "points":        pts,
-        })
-        log.info(f"  #{i+1} {bot['name']:<12} equity=${bot['equity']:.2f} pnl=${bot['pnl_usd']:+.2f} pts={pts}")
+        log.info(f"  #{i+1} {bot['name']:<12} equity=${bot['equity']:.2f} pnl=${bot['pnl_usd']:+.2f}")
 
+    # Write to unified sprint_results dir (same as copy-traders)
+    unified_dir = os.path.join(os.path.dirname(RESULTS_DIR), "sprint_results")
+    os.makedirs(unified_dir, exist_ok=True)
+
+    bots_data = []
+    for bot in bots:
+        trades = bot.get("total_trades", 0)
+        wins   = bot.get("wins", 0)
+        pnl    = bot.get("pnl_usd", 0.0)
+        bots_data.append({
+            "bot":            bot["name"],
+            "type":           bot.get("category", "auto"),
+            "username":       "",
+            "sprint_pnl_usd": round(pnl, 2),
+            "sprint_pnl_pct": round(bot.get("pnl_pct", 0.0), 2),
+            "sprint_trades":  trades,
+            "sprint_wins":    wins,
+            "win_rate":       round(wins / trades * 100, 1) if trades > 0 else 0.0,
+        })
+
+    result_file = os.path.join(unified_dir, f"{sprint_id}_auto.json")
+    with open(result_file, "w") as f:
+        json.dump({
+            "sprint_id":  sprint_id,
+            "started_at": state.get("sprint_started_at"),
+            "ended_at":   datetime.now(timezone.utc).isoformat(),
+            "bots":       bots_data,
+        }, f, indent=2)
+    log.info(f"Auto sprint results archived: {result_file}")
+
+    # Keep legacy auto_results for backward compat
     result_dir = os.path.join(RESULTS_DIR, sprint_id)
     os.makedirs(result_dir, exist_ok=True)
     with open(os.path.join(result_dir, "final_score.json"), "w") as f:
-        json.dump({
-            "sprint_id":   sprint_id,
-            "scored_at":   datetime.now(timezone.utc).isoformat(),
-            "rankings":    rankings,
-        }, f, indent=2)
-    with open(os.path.join(result_dir, "meta.json"), "w") as f:
-        json.dump({
-            "sprint_id":        sprint_id,
-            "started_at":       state.get("sprint_started_at"),
-            "ended_at":         datetime.now(timezone.utc).isoformat(),
-            "duration_hours":   SPRINT_HOURS,
-            "starting_capital": 1000.0,
-        }, f, indent=2)
-    log.info(f"Sprint archived to {result_dir}")
-    # Stamp cycle info onto archived meta
-    cs = load_cycle_state()
+        json.dump({"sprint_id": sprint_id, "scored_at": datetime.now(timezone.utc).isoformat(),
+                   "bots": bots_data}, f, indent=2)
+
+    # Regenerate unified leaderboard
     try:
-        meta_path = os.path.join(result_dir, "meta.json")
-        with open(meta_path) as f:
-            _m = json.load(f)
-        _m["cycle"] = cs.get("cycle", 1)
-        with open(meta_path, "w") as f:
-            json.dump(_m, f, indent=2)
-    except Exception:
-        pass
+        import subprocess as _sp
+        lb_script = os.path.join(os.path.dirname(RESULTS_DIR), "..", "polymarket_leaderboard.py")
+        lb_script = os.path.normpath(lb_script)
+        _sp.Popen(["python3", lb_script, "--json"])
+    except Exception as _e:
+        log.warning(f"Could not run leaderboard: {_e}")
 
 
 def start_new_sprint(state):

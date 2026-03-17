@@ -62,15 +62,26 @@ def fetch_activity(wallet, since_ts=0, limit=20):
     return sorted(trades, key=lambda x: x["timestamp"])
 
 
-def fetch_market_price(condition_id):
-    """Get current best price for a condition (0-1)."""
+def fetch_market_price(condition_id, outcome):
+    """Get current price for a specific outcome in a market (0-1)."""
     try:
-        url = f"https://clob.polymarket.com/midpoints?conditionIds={condition_id}"
-        data = api_get(url, timeout=5)
-        # returns {"midpoints": {"conditionId": price}}
-        midpoints = data.get("midpoints", {})
-        val = midpoints.get(condition_id)
-        return float(val) if val is not None else None
+        url = f"https://gamma-api.polymarket.com/markets?condition_ids={condition_id}"
+        data = api_get(url, timeout=10)
+        if not data:
+            return None
+        market = data[0] if isinstance(data, list) else data
+        outcomes = market.get("outcomes", [])
+        prices = market.get("outcomePrices", [])
+        # outcomes and outcomePrices may be JSON-encoded strings
+        if isinstance(outcomes, str):
+            outcomes = json.loads(outcomes)
+        if isinstance(prices, str):
+            prices = json.loads(prices)
+        if outcome in outcomes:
+            idx = outcomes.index(outcome)
+            if idx < len(prices):
+                return float(prices[idx])
+        return None
     except Exception:
         return None
 
@@ -181,7 +192,7 @@ def update_bot_equity(bot):
     """Refresh current prices on open positions and recompute equity."""
     total_position_value = 0.0
     for cid, pos in list(bot["positions"].items()):
-        price = fetch_market_price(cid)
+        price = fetch_market_price(cid, pos["outcome"])
         if price is not None:
             pos["current_price"] = price
             pos["current_value"] = round(pos["shares"] * price, 4)
@@ -323,29 +334,61 @@ def recompute_stats(state):
 
 def advance_sprint(state):
     now = datetime.now(timezone.utc)
-    sprint_id = state.get("sprint_id", f"copy-{now.strftime('%Y%m%d-%H%M')}")
+    sprint_id = state.get("sprint_id", f"poly-{now.strftime('%Y%m%d-%H%M')}")
     os.makedirs(SPRINT_RESULTS, exist_ok=True)
-    results = {
-        "sprint_id": sprint_id,
-        "started_at": state.get("sprint_started_at"),
-        "ended_at": now.isoformat(),
-        "bots": [
-            {
-                "bot":             b["name"],
-                "trader":          b["trader"],
-                "sprint_pnl_usd":  round(b.get("sprint_pnl_usd", 0), 2),
-                "sprint_wins":     b.get("sprint_wins", 0),
-                "sprint_trades":   b.get("sprint_trades", 0),
-                "sprint_win_rate": round(b.get("sprint_wins", 0) / b["sprint_trades"] * 100, 1)
-                                   if b.get("sprint_trades", 0) > 0 else 0.0,
-            }
-            for b in state["bots"]
-        ],
-    }
-    with open(os.path.join(SPRINT_RESULTS, f"{sprint_id}.json"), "w") as f:
-        json.dump(results, f, indent=2)
 
-    new_id   = f"copy-{now.strftime('%Y%m%d-%H%M')}"
+    # Archive copy-trader results in unified sprint_results dir
+    bots_data = []
+    for b in state["bots"]:
+        sp_trades = b.get("sprint_trades", 0)
+        sp_wins   = b.get("sprint_wins", 0)
+        sp_pnl    = round(b.get("sprint_pnl_usd", 0), 2)
+        bots_data.append({
+            "bot":            b["name"],
+            "type":           "copy",
+            "username":       b.get("trader", ""),
+            "sprint_pnl_usd": sp_pnl,
+            "sprint_pnl_pct": round((sp_pnl / b.get("starting_capital", 1000.0)) * 100, 2),
+            "sprint_trades":  sp_trades,
+            "sprint_wins":    sp_wins,
+            "win_rate":       round(sp_wins / sp_trades * 100, 1) if sp_trades > 0 else 0.0,
+        })
+    results = {
+        "sprint_id":  sprint_id,
+        "started_at": state.get("sprint_started_at"),
+        "ended_at":   now.isoformat(),
+        "bots":       bots_data,
+    }
+    result_file = os.path.join(SPRINT_RESULTS, f"{sprint_id}_copy.json")
+    with open(result_file, "w") as f:
+        json.dump(results, f, indent=2)
+    log.info(f"Copy-trader sprint results archived: {result_file}")
+
+    # Advance cycle state
+    try:
+        import subprocess as _sp
+        cycle_path = os.path.join(os.path.dirname(SPRINT_RESULTS), "polymarket_cycle_state.json")
+        with open(cycle_path) as _f:
+            cs = json.load(_f)
+        cs["sprint_in_cycle"] = cs.get("sprint_in_cycle", 0) + 1
+        if cs["sprint_in_cycle"] >= cs.get("sprints_per_cycle", 4):
+            cs["cycle"]           = cs.get("cycle", 1) + 1
+            cs["sprint_in_cycle"] = 0
+        with open(cycle_path, "w") as _f:
+            json.dump(cs, _f, indent=2)
+    except Exception as _e:
+        log.warning(f"Could not advance cycle state: {_e}")
+
+    # Regenerate unified leaderboard
+    try:
+        import subprocess as _sp
+        lb_script = os.path.join(os.path.dirname(SPRINT_RESULTS), "..", "..", "polymarket_leaderboard.py")
+        lb_script = os.path.normpath(lb_script)
+        _sp.Popen(["python3", lb_script, "--json"])
+    except Exception as _e:
+        log.warning(f"Could not run leaderboard: {_e}")
+
+    new_id   = f"poly-{now.strftime('%Y%m%d-%H%M')}"
     ends_at  = now + timedelta(hours=SPRINT_HOURS)
     state["sprint_id"]         = new_id
     state["sprint_started_at"] = now.isoformat()
