@@ -73,11 +73,11 @@ from datetime import datetime, timezone, timedelta
 d = '/root/.openclaw/workspace/competition/active'
 entries = sorted(os.listdir(d)) if os.path.isdir(d) else []
 if entries:
-    meta = json.load(open(f'{d}/{entries[0]}/meta.json'))
+    meta = json.load(open(f'{d}/{entries[-1]}/meta.json'))
     started = datetime.fromisoformat(meta['started_at'].replace('Z', '+00:00'))
     ends = started + timedelta(hours=meta['duration_hours'])
     if datetime.now(timezone.utc) > ends:
-        print(f'EXPIRED: {entries[0]}')
+        print(f'EXPIRED: {entries[-1]}')
 ```
 - If expired: score and archive it (no alert needed — routine)
   ```bash

@@ -26,6 +26,16 @@ import yaml
 import shutil
 from datetime import datetime, timezone, timedelta
 
+
+import fcntl
+LOCK_FILE = "/tmp/arb_competition_tick.lock"
+lock_fh = open(LOCK_FILE, 'w')
+try:
+    fcntl.flock(lock_fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
+except BlockingIOError:
+    print("Another tick instance is running. Exiting.")
+    import sys as _sys; _sys.exit(0)
+
 WORKSPACE    = os.environ.get("WORKSPACE", "/root/.openclaw/workspace")
 ACTIVE_DIR   = os.path.join(WORKSPACE, "competition", "arb", "active")
 RESULTS_DIR  = os.path.join(WORKSPACE, "competition", "arb", "results")
@@ -394,20 +404,6 @@ def archive_competition(comp_dir, meta, bots, pair_stats):
     print(f"  Archived: {comp_id}  winner: {final['winner']}")
     update_arb_cycle_state(comp_id)
 
-    import subprocess
-    r = subprocess.run(
-        ["python3", os.path.join(WORKSPACE, "arb_competition_start.py")],
-        capture_output=True, text=True, cwd=WORKSPACE,
-    )
-    if r.returncode == 0:
-        try:
-            d = __import__("json").loads(r.stdout)
-            print(f"  Auto-started: {d.get('comp_id', '?')}")
-        except Exception:
-            print("  Auto-started OK")
-    else:
-        print(f"  WARNING: auto-start failed: {r.stderr[:100]}")
-
     return final
 
 
@@ -476,4 +472,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    finally:
+        fcntl.flock(lock_fh, fcntl.LOCK_UN)
+        lock_fh.close()

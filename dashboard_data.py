@@ -410,9 +410,10 @@ def get_sprint_archive():
     archive = []
 
     sources = [
-        ("day",   DAY_RESULTS_DIR),
-        ("swing", SWING_RESULTS_DIR),
-        ("arb",   ARB_RESULTS_DIR),
+        ("day",    DAY_RESULTS_DIR),
+        ("swing",  SWING_RESULTS_DIR),
+        ("arb",    ARB_RESULTS_DIR),
+        ("spread", SPREAD_RESULTS_DIR),
     ]
 
     for league, results_dir in sources:
@@ -425,7 +426,19 @@ def get_sprint_archive():
                 continue
 
             final_score = load_json(os.path.join(entry_path, "final_score.json"))
-            meta        = load_json(os.path.join(entry_path, "meta.json"))
+            # meta.json may be in entry_path directly (day) or in _portfolios dir (swing/arb/spread)
+            meta = load_json(os.path.join(entry_path, "meta.json"))
+            if meta is None:
+                portfolios_dir = os.path.join(results_dir, entry_name + "_portfolios")
+                meta = load_json(os.path.join(portfolios_dir, "meta.json"))
+            # Final fallback: reconstruct minimal meta from final_score.json
+            if meta is None and final_score:
+                meta = {
+                    "started_at":      final_score.get("scored_at", ""),
+                    "duration_hours":  final_score.get("duration_hours", 0),
+                    "pairs":           final_score.get("pairs", []),
+                    "starting_capital": 1000.0,
+                }
 
             if not final_score or not meta:
                 continue
@@ -459,6 +472,18 @@ def get_sprint_archive():
             scored_at_raw  = final_score.get("scored_at", meta.get("ended_at", ""))
             duration_hours = meta.get("duration_hours", 0)
 
+            # Compute is_complete: True if end time has passed
+            try:
+                from datetime import datetime, timezone, timedelta as _td
+                _utc = timezone.utc
+                _started = datetime.fromisoformat(started_at_raw.replace("Z", "+00:00")) if started_at_raw else None
+                if _started and duration_hours:
+                    is_complete = datetime.now(_utc) >= _started + _td(hours=duration_hours)
+                else:
+                    is_complete = True  # if we can't determine, assume complete
+            except Exception:
+                is_complete = True
+
             archive.append({
                 "comp_id":        entry_name,
                 "league":         league,
@@ -468,6 +493,7 @@ def get_sprint_archive():
                 "scored_at":      scored_at_raw,
                 "pairs":          meta.get("pairs", []),
                 "rankings":       rankings,
+                "is_complete":    is_complete,
             })
 
     # Sort newest first by comp_id (lexicographic on timestamp-based IDs)

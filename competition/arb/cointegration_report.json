@@ -1,0 +1,416 @@
+{
+  "generated_at": "2026-03-16T06:43:46.731109+00:00",
+  "league": "arb",
+  "active_pairs": {
+    "AAVE_ETH_RATIO": {
+      "base": "AAVE/USD",
+      "quote": "ETH/USD",
+      "candles": 720,
+      "corr": 0.764,
+      "half_life": 142.5,
+      "hurst": 0.519,
+      "vol_cv": 0.0592,
+      "issues": [
+        "slow_reversion(142h)",
+        "trending(H=0.52)"
+      ],
+      "verdict": "WEAK",
+      "score": 79.9,
+      "bots": [
+        "asgard"
+      ]
+    },
+    "AVAX_ETH_RATIO": {
+      "base": "AVAX/USD",
+      "quote": "ETH/USD",
+      "candles": 720,
+      "corr": 0.857,
+      "half_life": 21.9,
+      "hurst": 0.411,
+      "vol_cv": 0.0169,
+      "issues": [],
+      "verdict": "STRONG",
+      "score": 28.2,
+      "bots": [
+        "ymir"
+      ]
+    },
+    "AVAX_SOL_RATIO": {
+      "base": "AVAX/USD",
+      "quote": "SOL/USD",
+      "candles": 720,
+      "corr": 0.841,
+      "half_life": 22.8,
+      "hurst": 0.338,
+      "vol_cv": 0.018,
+      "issues": [],
+      "verdict": "STRONG",
+      "score": 18.1,
+      "bots": [
+        "muspell",
+        "bifrost"
+      ]
+    },
+    "ETH_BTC_RATIO": {
+      "base": "ETH/USD",
+      "quote": "BTC/USD",
+      "candles": 720,
+      "corr": 0.915,
+      "half_life": 22.8,
+      "hurst": 0.444,
+      "vol_cv": 0.0123,
+      "issues": [],
+      "verdict": "STRONG",
+      "score": 31.7,
+      "bots": [
+        "fenrir",
+        "ratatoskr",
+        "nidhogg"
+      ]
+    },
+    "LINK_BTC_RATIO": {
+      "base": "LINK/USD",
+      "quote": "BTC/USD",
+      "candles": 720,
+      "corr": 0.888,
+      "half_life": 33.5,
+      "hurst": 0.452,
+      "vol_cv": 0.0191,
+      "issues": [],
+      "verdict": "STRONG",
+      "score": 37.3,
+      "bots": [
+        "utgard"
+      ]
+    },
+    "LINK_ETH_RATIO": {
+      "base": "LINK/USD",
+      "quote": "ETH/USD",
+      "candles": 720,
+      "corr": 0.936,
+      "half_life": 32.7,
+      "hurst": 0.431,
+      "vol_cv": 0.0146,
+      "issues": [],
+      "verdict": "STRONG",
+      "score": 32.5,
+      "bots": [
+        "surt"
+      ]
+    },
+    "SOL_BTC_RATIO": {
+      "base": "SOL/USD",
+      "quote": "BTC/USD",
+      "candles": 720,
+      "corr": 0.886,
+      "half_life": 32.3,
+      "hurst": 0.462,
+      "vol_cv": 0.0195,
+      "issues": [],
+      "verdict": "STRONG",
+      "score": 38.5,
+      "bots": [
+        "fafnir"
+      ]
+    },
+    "SOL_ETH_RATIO": {
+      "base": "SOL/USD",
+      "quote": "ETH/USD",
+      "candles": 720,
+      "corr": 0.897,
+      "half_life": 29.2,
+      "hurst": 0.461,
+      "vol_cv": 0.0168,
+      "issues": [],
+      "verdict": "STRONG",
+      "score": 37.0,
+      "bots": [
+        "skoll",
+        "hati",
+        "jormungandr"
+      ]
+    },
+    "XRP_BTC_RATIO": {
+      "base": "XRP/USD",
+      "quote": "BTC/USD",
+      "candles": 720,
+      "corr": 0.801,
+      "half_life": 81.7,
+      "hurst": 0.424,
+      "vol_cv": 0.0329,
+      "issues": [],
+      "verdict": "STRONG",
+      "score": 51.8,
+      "bots": [
+        "niflheim",
+        "garm"
+      ]
+    }
+  },
+  "candidates": [
+    {
+      "base": "AVAX/USD",
+      "quote": "SUI/USD",
+      "candles": 720,
+      "corr": 0.843,
+      "half_life": 27.7,
+      "hurst": 0.265,
+      "vol_cv": 0.0229,
+      "issues": [],
+      "verdict": "STRONG",
+      "score": 13.9
+    },
+    {
+      "base": "SOL/USD",
+      "quote": "LINK/USD",
+      "candles": 720,
+      "corr": 0.892,
+      "half_life": 14.9,
+      "hurst": 0.349,
+      "vol_cv": 0.0121,
+      "issues": [],
+      "verdict": "STRONG",
+      "score": 15.6
+    },
+    {
+      "base": "AVAX/USD",
+      "quote": "LINK/USD",
+      "candles": 720,
+      "corr": 0.892,
+      "half_life": 34.7,
+      "hurst": 0.349,
+      "vol_cv": 0.0166,
+      "issues": [],
+      "verdict": "STRONG",
+      "score": 22.2
+    },
+    {
+      "base": "ETH/USD",
+      "quote": "SUI/USD",
+      "candles": 720,
+      "corr": 0.848,
+      "half_life": 36.8,
+      "hurst": 0.375,
+      "vol_cv": 0.0262,
+      "issues": [],
+      "verdict": "STRONG",
+      "score": 28.1
+    },
+    {
+      "base": "DOGE/USD",
+      "quote": "XRP/USD",
+      "candles": 720,
+      "corr": 0.807,
+      "half_life": 24.9,
+      "hurst": 0.403,
+      "vol_cv": 0.0216,
+      "issues": [],
+      "verdict": "STRONG",
+      "score": 29.5
+    },
+    {
+      "base": "SOL/USD",
+      "quote": "SUI/USD",
+      "candles": 720,
+      "corr": 0.849,
+      "half_life": 52.0,
+      "hurst": 0.359,
+      "vol_cv": 0.0301,
+      "issues": [],
+      "verdict": "STRONG",
+      "score": 30.7
+    },
+    {
+      "base": "BTC/USD",
+      "quote": "SUI/USD",
+      "candles": 720,
+      "corr": 0.84,
+      "half_life": 34.0,
+      "hurst": 0.399,
+      "vol_cv": 0.0272,
+      "issues": [],
+      "verdict": "STRONG",
+      "score": 31.0
+    },
+    {
+      "base": "LINK/USD",
+      "quote": "SUI/USD",
+      "candles": 720,
+      "corr": 0.885,
+      "half_life": 63.6,
+      "hurst": 0.35,
+      "vol_cv": 0.0294,
+      "issues": [],
+      "verdict": "STRONG",
+      "score": 32.1
+    },
+    {
+      "base": "XRP/USD",
+      "quote": "SUI/USD",
+      "candles": 720,
+      "corr": 0.832,
+      "half_life": 46.0,
+      "hurst": 0.394,
+      "vol_cv": 0.0275,
+      "issues": [],
+      "verdict": "STRONG",
+      "score": 34.5
+    },
+    {
+      "base": "AAVE/USD",
+      "quote": "XRP/USD",
+      "candles": 720,
+      "corr": 0.713,
+      "half_life": 31.6,
+      "hurst": 0.412,
+      "vol_cv": 0.0328,
+      "issues": [],
+      "verdict": "STRONG",
+      "score": 35.9
+    },
+    {
+      "base": "AAVE/USD",
+      "quote": "DOGE/USD",
+      "candles": 720,
+      "corr": 0.701,
+      "half_life": 27.3,
+      "hurst": 0.427,
+      "vol_cv": 0.0305,
+      "issues": [],
+      "verdict": "STRONG",
+      "score": 37.1
+    },
+    {
+      "base": "BTC/USD",
+      "quote": "AVAX/USD",
+      "candles": 720,
+      "corr": 0.838,
+      "half_life": 30.2,
+      "hurst": 0.458,
+      "vol_cv": 0.0202,
+      "issues": [],
+      "verdict": "STRONG",
+      "score": 38.6
+    },
+    {
+      "base": "SOL/USD",
+      "quote": "APT/USD",
+      "candles": 720,
+      "corr": 0.7,
+      "half_life": 40.0,
+      "hurst": 0.413,
+      "vol_cv": 0.0397,
+      "issues": [],
+      "verdict": "STRONG",
+      "score": 39.3
+    },
+    {
+      "base": "LINK/USD",
+      "quote": "APT/USD",
+      "candles": 720,
+      "corr": 0.771,
+      "half_life": 46.6,
+      "hurst": 0.425,
+      "vol_cv": 0.0409,
+      "issues": [],
+      "verdict": "STRONG",
+      "score": 41.1
+    },
+    {
+      "base": "AVAX/USD",
+      "quote": "APT/USD",
+      "candles": 720,
+      "corr": 0.757,
+      "half_life": 52.5,
+      "hurst": 0.421,
+      "vol_cv": 0.0426,
+      "issues": [],
+      "verdict": "STRONG",
+      "score": 42.9
+    },
+    {
+      "base": "ETH/USD",
+      "quote": "APT/USD",
+      "candles": 720,
+      "corr": 0.716,
+      "half_life": 44.8,
+      "hurst": 0.43,
+      "vol_cv": 0.0383,
+      "issues": [],
+      "verdict": "STRONG",
+      "score": 43.0
+    },
+    {
+      "base": "BTC/USD",
+      "quote": "APT/USD",
+      "candles": 720,
+      "corr": 0.698,
+      "half_life": 52.6,
+      "hurst": 0.462,
+      "vol_cv": 0.0431,
+      "issues": [],
+      "verdict": "STRONG",
+      "score": 50.9
+    },
+    {
+      "base": "LINK/USD",
+      "quote": "XRP/USD",
+      "candles": 720,
+      "corr": 0.833,
+      "half_life": 85.0,
+      "hurst": 0.421,
+      "vol_cv": 0.0334,
+      "issues": [],
+      "verdict": "STRONG",
+      "score": 51.5
+    },
+    {
+      "base": "DOGE/USD",
+      "quote": "SUI/USD",
+      "candles": 720,
+      "corr": 0.833,
+      "half_life": 77.9,
+      "hurst": 0.437,
+      "vol_cv": 0.0357,
+      "issues": [],
+      "verdict": "STRONG",
+      "score": 51.5
+    },
+    {
+      "base": "SOL/USD",
+      "quote": "XRP/USD",
+      "candles": 720,
+      "corr": 0.82,
+      "half_life": 92.3,
+      "hurst": 0.408,
+      "vol_cv": 0.0354,
+      "issues": [],
+      "verdict": "STRONG",
+      "score": 52.4
+    }
+  ],
+  "summary": {
+    "strong": [
+      "AVAX_ETH_RATIO",
+      "AVAX_SOL_RATIO",
+      "ETH_BTC_RATIO",
+      "LINK_BTC_RATIO",
+      "LINK_ETH_RATIO",
+      "SOL_BTC_RATIO",
+      "SOL_ETH_RATIO",
+      "XRP_BTC_RATIO"
+    ],
+    "watch": [],
+    "weak": [
+      "AAVE_ETH_RATIO"
+    ],
+    "retire": []
+  },
+  "replacements": [],
+  "thresholds": {
+    "min_corr": 0.65,
+    "max_half_life": 120,
+    "max_hurst": 0.5,
+    "retire_half_life": 168
+  }
+}

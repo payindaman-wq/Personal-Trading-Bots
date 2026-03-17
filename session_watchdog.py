@@ -102,7 +102,7 @@ def main() -> None:
     lines = [f"  {k}: {s:.0f}KB" for k, s in rotated]
     msg = "Session watchdog rotated bloated sessions:\n" + "\n".join(lines)
     log(msg)
-    send_telegram(msg)
+    # send_telegram(msg)  # silenced — routine maintenance, not actionable
 
 
 if __name__ == "__main__":

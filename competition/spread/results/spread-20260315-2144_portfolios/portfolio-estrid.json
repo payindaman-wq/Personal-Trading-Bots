@@ -1,0 +1,32 @@
+{
+  "bot": "estrid",
+  "competition_id": "spread-20260315-2144",
+  "league": "spread",
+  "duration_hours": 168.0,
+  "started_at": "2026-03-15T21:44:45.119593+00:00",
+  "pairs": [
+    "BTC/USD",
+    "ETH/USD",
+    "SOL/USD",
+    "XRP/USD",
+    "AVAX/USD",
+    "LINK/USD",
+    "AAVE/USD"
+  ],
+  "starting_capital": 1000.0,
+  "fee_rate": 0.001,
+  "equity": 1000.0,
+  "peak_equity": 1000.0,
+  "positions": [],
+  "stats": {
+    "total_trades": 0,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "total_pnl_usd": 0.0,
+    "total_pnl_pct": 0.0,
+    "total_fees": 0.0,
+    "max_drawdown_pct": 0.0,
+    "current_equity": 1000.0
+  }
+}

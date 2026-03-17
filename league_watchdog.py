@@ -46,19 +46,24 @@ POLY_CYCLE  = os.path.join(WORKSPACE, "competition", "polymarket", "polymarket_c
 
 
 def find_active(active_dir):
-    """Return meta dict if an active sprint exists, else None."""
+    """Return (meta, has_multiple) if an active sprint exists, else (None, False).
+    If multiple entries exist, logs a warning and picks the newest."""
     if not os.path.isdir(active_dir):
-        return None
+        return None, False
     entries = sorted(os.listdir(active_dir))
     if not entries:
-        return None
+        return None, False
+    has_multiple = len(entries) > 1
+    if has_multiple:
+        print(f"  WARNING: {len(entries)} entries in {active_dir} — orphaned sprints detected: {entries[:-1]}")
     comp_dir  = os.path.join(active_dir, entries[-1])
     meta_path = os.path.join(comp_dir, "meta.json")
     if not os.path.isfile(meta_path):
-        return None
+        return None, has_multiple
     with open(meta_path) as f:
         meta = json.load(f)
-    return meta if meta.get("status") == "active" else None
+    result = meta if meta.get("status") == "active" else None
+    return result, has_multiple
 
 
 def find_polymarket_active():
@@ -103,12 +108,17 @@ def main():
     print(f"[league_watchdog] {now}")
 
     for league in LEAGUES:
-        meta = find_active(league["active_dir"])
+        meta, has_multiple = find_active(league["active_dir"])
         if meta:
             print(f"  [{league['name']}] OK — {meta['comp_id']}")
         else:
-            print(f"  [{league['name']}] IDLE — restarting...")
-            start_league(league)
+            # Guard: if active/ has any entries (even orphaned), skip restart
+            active_dir = league["active_dir"]
+            if os.path.isdir(active_dir) and os.listdir(active_dir):
+                print(f"  [{league['name']}] WARNING: no active sprint but active/ is non-empty — skipping restart to avoid stacking")
+            else:
+                print(f"  [{league['name']}] IDLE — restarting...")
+                start_league(league)
 
     # Polymarket — different active check (uses auto_state.json, not active/ dir)
     poly = find_polymarket_active()
