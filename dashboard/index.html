@@ -1715,7 +1715,7 @@ function render_overview(data) {
 
   return `
   <div>
-    <div class="ov-section-title">Active Operations</div>
+    <div class="ov-section-title" style="font-size:20px;font-weight:bold;color:var(--gold);letter-spacing:3px;padding-bottom:10px;margin-bottom:18px;">Competitions</div>
     <div class="ov-row">
       ${day_card}
       ${swing_card}
@@ -1726,15 +1726,44 @@ function render_overview(data) {
       ${spread_card}
     </div>
   </div>
-  ${render_funded(data.funded_bots)}
   <div>
-    <div class="ov-section-title">Expansion Pipeline</div>
+    <div class="ov-section-title">Future Competitions</div>
     <div class="ov-grid">
       ${pending_card(5, 'Crypto Futures Day Trader', 'Leveraged perps &mdash; requires proven spot edge')}
       ${pending_card(6, 'Crypto Futures Swing',      'Swing leverage &mdash; requires proven spot edge')}
-      ${pending_card(7, 'Macro Governor',            'Always-on risk officer &mdash; controls all bots')}
+      ${pending_card(7, 'Stock Day Trader',          'Equities day trading &mdash; requires proven crypto edge')}
     </div>
-  </div>`;
+  </div>
+  <div>
+    <div class="ov-section-title">Executive Staff</div>
+    <div class="ov-grid">
+      <div class="ov-card active">
+        <span class="badge badge-live" style="display:inline-block;margin-bottom:8px">Active</span>
+        <div class="ov-card-title">SYN</div>
+        <div class="ov-card-meta">Commander &amp; Orchestrator</div>
+        <div class="ov-card-strategy" style="margin-top:8px">
+          Manages all bot fleets across every league. Monitors system health, routes alerts, coordinates competition starts and scoring, and acts as the central decision-maker for the entire Viking operation.
+        </div>
+      </div>
+      <div class="ov-card pending">
+        <span class="ov-pending-badge">Pending</span>
+        <div class="ov-card-title">Macro Governor</div>
+        <div class="ov-card-meta">Risk Officer</div>
+        <div class="ov-card-strategy" style="margin-top:8px">
+          Always-on macro watchdog. Tracks BTC dominance, Fear &amp; Greed Index, and macro regime signals. Issues directives to reduce position sizes or suspend trading across the fleet when conditions deteriorate.
+        </div>
+      </div>
+      <div class="ov-card pending">
+        <span class="ov-pending-badge">Pending</span>
+        <div class="ov-card-title">Treasurer</div>
+        <div class="ov-card-meta">Capital Allocator</div>
+        <div class="ov-card-strategy" style="margin-top:8px">
+          Controls the capital ledger. Reviews competition results, approves funded bot deployments, enforces portfolio-level drawdown limits, and manages capital reallocation between live strategies.
+        </div>
+      </div>
+    </div>
+  </div>
+  ${render_funded(data.funded_bots)}`;
 }
 
 // ── Data loading ──────────────────────────────────────────────────────────────
