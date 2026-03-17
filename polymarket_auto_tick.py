@@ -575,19 +575,15 @@ def tick(bot, strategy, secrets, tick_count):
         if pm_price < 0.10 or pm_price > 0.90:
             continue
 
-        # Match against Kalshi for a reference probability
+        # Match against Kalshi for a reference probability (optional — used as context for Gemini)
         kalshi_match = find_best_external_match(market["title"], kalshi_markets, min_score=0.30, index=kalshi_index)
 
-        # Pre-filter: if Kalshi match found, skip if gap < half of min_edge (save Gemini calls)
+        # Pre-filter: if Kalshi match found and gap is tiny, skip (save Gemini calls)
         if kalshi_match:
             gap = abs(kalshi_match["prob"] - pm_price)
             if gap < strategy["min_edge_pts"] / 2:
                 log.debug(f"  Skipping {market['title'][:40]} — Kalshi gap too small ({gap:.3f})")
                 continue
-
-        # Only call Gemini when Kalshi reference found (saves quota on noise)
-        if not kalshi_match:
-            continue
 
         # Rate limit: 6s between calls (~10/min, free tier is 15 RPM)
         time.sleep(6)
