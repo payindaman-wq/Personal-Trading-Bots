@@ -22,8 +22,8 @@ STATE_FILE = f"{WORKSPACE}/competition/heartbeat_state.json"
 BOT_TOKEN  = "8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
 CHAT_ID    = "8154505910"
 
-COOLDOWN_MIN        = 60    # min gap between repeated alerts for the same problem
-GEMINI_COOLDOWN_MIN = 240   # Gemini quota alerts fire at most every 4 hours
+COOLDOWN_MIN        = 1440    # min gap between repeated alerts for the same problem
+GEMINI_COOLDOWN_MIN = 1440   # Gemini quota alerts fire at most every 4 hours
 PAUSE_FLAG          = f"{WORKSPACE}/competition/heartbeat_paused"
 
 # ── League definitions ──────────────────────────────────────────────────────

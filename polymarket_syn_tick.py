@@ -529,7 +529,7 @@ def gemini_assess(title, outcome, pm_price, vegas_data, persona, api_key):
     )
 
     url     = (f"https://generativelanguage.googleapis.com/v1beta/models/"
-               f"gemini-2.0-flash:generateContent?key={api_key}")
+               f"gemini-2.5-flash-lite:generateContent?key={api_key}")
     payload = {
         "contents": [{"parts": [{"text": prompt}]}],
         "generationConfig": {"temperature": 0.2, "maxOutputTokens": 300},
