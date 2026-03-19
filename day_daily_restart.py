@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-day_daily_restart.py - Daily 10:00 UTC (2:00am PST) restart for Day Trading League.
+day_daily_restart.py - Daily 09:00 UTC (2:00am PDT) restart for Day Trading League.
 
-Called by cron: 0 10 * * *
+Called by cron: 0 9 * * *
 
 Logic:
   - If no active sprint: start new 24h sprint immediately.
@@ -15,9 +15,24 @@ import json
 import subprocess
 from datetime import datetime, timezone
 
-WORKSPACE    = os.environ.get("WORKSPACE", "/root/.openclaw/workspace")
-ACTIVE_DIR   = os.path.join(WORKSPACE, "competition", "active")
-START_SCRIPT = "/root/.openclaw/skills/competition-start/scripts/competition_start.py"
+WORKSPACE        = os.environ.get("WORKSPACE", "/root/.openclaw/workspace")
+ACTIVE_DIR       = os.path.join(WORKSPACE, "competition", "active")
+CYCLE_STATE_PATH = os.path.join(WORKSPACE, "competition", "cycle_state.json")
+START_SCRIPT     = "/root/.openclaw/skills/competition-start/scripts/competition_start.py"
+
+
+def load_cycle_state():
+    try:
+        with open(CYCLE_STATE_PATH) as f:
+            return json.load(f)
+    except Exception:
+        return {"cycle": 1, "sprint_in_cycle": 0, "sprints_per_cycle": 7,
+                "status": "active", "sprints": []}
+
+
+def save_cycle_state(state):
+    with open(CYCLE_STATE_PATH, "w") as f:
+        json.dump(state, f, indent=2)
 
 
 def find_active():
@@ -41,13 +56,24 @@ def hours_running(meta):
 
 
 def start_new():
+    cycle_state = load_cycle_state()
+    new_sprint_n = cycle_state.get("sprint_in_cycle", 0) + 1
     result = subprocess.run(
         ["python3", START_SCRIPT, "24"],
         capture_output=True, text=True, cwd=WORKSPACE,
     )
     if result.returncode == 0:
         data = json.loads(result.stdout)
-        print(f"  Started: {data['comp_id']}")
+        comp_id = data["comp_id"]
+        print(f"  Started: {comp_id}")
+        # Update cycle state
+        sprints = cycle_state.get("sprints", [])
+        if comp_id not in sprints:
+            sprints.append(comp_id)
+        cycle_state["sprint_in_cycle"] = new_sprint_n
+        cycle_state["sprints"] = sprints
+        save_cycle_state(cycle_state)
+        print(f"  Cycle {cycle_state['cycle']}, Sprint {new_sprint_n} started")
     else:
         print(f"  ERROR starting: {result.stderr[:300]}")
 

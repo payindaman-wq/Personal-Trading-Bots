@@ -33,6 +33,8 @@ SCAN_EVERY           = 2      # scan new markets every 2nd tick (30 min)
 MAX_GEMINI_PER_TICK  = 12     # total Gemini calls per tick (4 per key × 3 keys)
 GEMINI_SLEEP         = 6      # seconds between Gemini calls
 GEMINI_DAILY_LIMIT   = 1200   # per-key hard stop (1200 × 3 keys = 3600/day; actual use: 384/key/day)
+GEMINI_CACHE_TTL_H   = 4      # reuse assessment if < 4h old and price unchanged
+GEMINI_CACHE_DELTA   = 0.02   # skip cache if PM price moved more than 2 cents
 SPRINT_HOURS         = 168    # 7-day sprints
 
 
@@ -471,7 +473,7 @@ def gemini_assess(title, outcome, pm_price, kalshi_match, persona, api_key):
                f"gemini-2.5-flash-lite:generateContent?key={api_key}")
     payload = {
         "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {"temperature": 0.2, "maxOutputTokens": 300},
+        "generationConfig": {"temperature": 0.2, "maxOutputTokens": 150},
     }
 
     for attempt in range(2):
@@ -992,6 +994,15 @@ def run_tick(state, strategies, secrets, tick_count):
         log.warning("All Gemini keys daily quota exhausted — skipping Gemini this tick")
         gemini_aborted = True
 
+    # Cross-tick assessment cache (persists in state, TTL = GEMINI_CACHE_TTL_H)
+    now_ts = datetime.now(timezone.utc).timestamp()
+    ac = state.setdefault("assessment_cache", {})
+    # Prune expired entries
+    stale = [k for k, v in ac.items() if now_ts - v.get("ts", 0) > GEMINI_CACHE_TTL_H * 3600]
+    for k in stale:
+        del ac[k]
+    cache_hits = 0
+
     key_cursor = 0  # round-robin cursor within available_keys
 
     # Prioritize candidates: Kalshi edge first, then by distance from 0.5
@@ -1025,6 +1036,13 @@ def run_tick(state, strategies, secrets, tick_count):
             continue
         persona = strategies.get(first_bot, {}).get("prompt_persona", "You are a prediction market analyst.")
 
+        # Check cross-tick cache: skip Gemini if assessed recently and price unchanged
+        cached = ac.get(cid)
+        if cached and (now_ts - cached["ts"] < GEMINI_CACHE_TTL_H * 3600) and (abs(pm_price - cached["pm_price"]) < GEMINI_CACHE_DELTA):
+            gemini_cache[cid] = cached["assessment"]
+            cache_hits += 1
+            continue
+
         time.sleep(GEMINI_SLEEP)
         assessment = None
         while available_keys:
@@ -1057,16 +1075,18 @@ def run_tick(state, strategies, secrets, tick_count):
 
         gemini_count += 1
         if assessment:
-            gemini_cache[cid] = {
+            entry = {
                 **assessment,
                 "outcome":  target["outcome"],
                 "pm_price": pm_price,
             }
+            gemini_cache[cid] = entry
+            ac[cid] = {"assessment": entry, "pm_price": pm_price, "ts": now_ts}
 
     # Log daily usage after tick
-    if gemini_count > 0:
+    if gemini_count > 0 or cache_hits > 0:
         usage_str = " | ".join(f"key{i}={counts[i]}" for i in range(len(gemini_keys)))
-        log.info(f"Gemini daily usage: {usage_str} (limit {GEMINI_DAILY_LIMIT}/key)")
+        log.info(f"Gemini this tick: {gemini_count} calls, {cache_hits} cache hits | daily: {usage_str} (limit {GEMINI_DAILY_LIMIT}/key)")
 
     # Track Gemini calls across all bots (proportional distribution)
     if gemini_count > 0:
