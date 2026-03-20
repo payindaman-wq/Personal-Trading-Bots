@@ -24,11 +24,9 @@ jobs:
             git fetch origin master
             git reset --hard origin/master
 
-            # Deploy dashboard HTML if present
-            if [ -f /root/.openclaw/workspace/dashboard/index.html ]; then
-              cp /root/.openclaw/workspace/dashboard/index.html /var/www/dashboard/index.html
-              echo "Dashboard HTML deployed"
-            fi
+            # Ensure /var/www/dashboard/index.html is a symlink to the workspace file
+            # (cp would replace the symlink with a regular file on every deploy)
+            ln -sf /root/.openclaw/workspace/dashboard/index.html /var/www/dashboard/index.html
 
             # Refresh dashboard data
             python3 /root/.openclaw/workspace/dashboard_data.py
