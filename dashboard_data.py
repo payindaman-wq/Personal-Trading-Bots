@@ -682,11 +682,19 @@ def get_odin_research():
 
         result["generations"]  = len(rows)
         result["improvements"] = improvements
-        if best_row:
-            result["best_sharpe"]   = round(best_row["sharpe"],   4)
-            result["best_win_rate"] = round(best_row["win_rate"], 1)
-            result["best_pnl_pct"]  = round(best_row["pnl_pct"],  2)
-            result["best_trades"]   = best_row["trades"]
+        # If the kept best has 0 trades (0-trade baseline artifact),
+        # find the most recent row with actual trades for display.
+        display_row = best_row
+        if best_row and best_row["trades"] == 0:
+            for r in reversed(rows):
+                if r["trades"] > 0:
+                    display_row = r
+                    break
+        if display_row:
+            result["best_sharpe"]   = round(display_row["sharpe"],   4)
+            result["best_win_rate"] = round(display_row["win_rate"], 1)
+            result["best_pnl_pct"]  = round(display_row["pnl_pct"],  2)
+            result["best_trades"]   = display_row["trades"]
         if rows:
             result["last_activity"] = rows[-1]["ts"]
         # Sparkline: last 30 sharpe values
