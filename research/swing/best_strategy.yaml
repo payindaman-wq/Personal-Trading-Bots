@@ -2,6 +2,8 @@ name: skadi
 style: multi_tf_trend_macd_rsi — weekly trend with MACD confirmation and RSI range filter
 pairs:
   - BTC/USD
+  - ETH/USD
+  - SOL/USD
 position:
   size_pct: 25
   max_open: 1

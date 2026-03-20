@@ -1,8 +1,9 @@
 name: autobotday
-style: multi_tf_trend_rsi_vwap — trend-confirmed RSI pullback with VWAP filter, refined entry and exit conditions for higher Sharpe ratio
+style: multi_tf_trend_rsi_vwap — trend-confirmed RSI pullback with VWAP filter
 pairs:
   - BTC/USD
   - ETH/USD
+  - SOL/USD
 position:
   size_pct: 20
   max_open: 1
@@ -10,30 +11,45 @@ position:
 entry:
   long:
     conditions:
-      # Increased RSI filter for more robust entry signals, changed operator to gt and increased value threshold as per the rule of thumb that extreme values signify potential trends reversal or continuation with higher conviction
+      - indicator: trend
+        period_minutes: 240
+        operator: eq
+        value: up
       - indicator: rsi
         period_minutes: 30
-        operator: ge
-        value: 45 # RSI above historical highs (>70) provides stronger signals for long positions in directionally confirmed uptrends. Adjusted based on recent performance to align with the secondary goal of a positive P&L and Sharpe ratio improvement objective.
+        operator: lt
+        value: 38
+      - indicator: price_vs_vwap
+        period_minutes: 5
+        operator: eq
+        value: below
       - indicator: trend
-        period_minutes: 240 # Confirmation over longer timeframe reduces false signals, enhancing trade validity for longs in uptrends
+        period_minutes: 15
+        operator: in
+        value: [down, flat]
+  short:
     conditions:
-      # Short condition logic adjusted to tighten down the short entry criteria based on RSI and VWAP directional alignment with trend. Higher threshold ensures stronger conviction before initiating a sell signal when both indicators suggest bearish sentiment aligned with an overall market decline, thus targeting win rate improvement
-      - indicator: rsi # Maintaining low-level conditions for shorts due to their higher volatility and risk profile. Using RSI as one of the dual confirmation signals aligns more closely with secondary goals by aiming at reasonable wins within a lower acceptable drawdown range, ensuring not exceeded 30% max drawdown
-        period_minutes: 240 # Confirm trend direction and increase signal strength for short entry. Longer periods provide additional confirmation on the market's trajectory while allowing time to observe price action reacting to initial conditions set by other indicators, such as RSI or VWAP
-        operator: ge
-        value: 40 # Adjusted lower threshold based on risk appetite and drawdown tolerance. While still aggressive for shorts, setting a conservative upper bound of extreme out-of-range values helps to prevent overextended positions during volatile downtrends that can lead to rapid losses
-      - indicator: price_vs_vwap # Adding VWAP alignment with trend direction as the second condition before opening a short position. This enhances trade validity by filtering out false positives, where high RSI readings might not be sustainable if prices are diverging from their expected path according to volume and price movements
-        period_minutes: 5 # Short timeframe for VWAP as it's a faster indicator which can more quickly reflect shifts in supply/demand dynamics, essential when entering short positions that rely on prompt market reversals or continuations with opposite sentiment from the direction of long holds. This also aligns well within permissible range to avoid premature exits and ensure trades are held for a meaningful period
-        operator: eq # VWAP below price points outperforming as an additional confirmation that not only is there downtrend, but assets sell off in comparison with their value-implied trajectory. Ensures short conditions have dual signals of momentum reversal and bearish divergence before position entry for better Sharpe ratio
-      - indicator: trend # Including a third VWAP alignment condition increases reliability by not solely depending on RSI as the confirmation signal, which can sometimes lag in rapidly moving markets. This ensures that shorts are only taken when there is clear bearish momentum with strong technical divergence from expected pricing behavior
-        period_minutes: 15 # Shortened timeframe for trend to ensure immediate reaction within a market cycle and avoid holding an over-extended position should the confirmation window expire without directional movement. This also keeps drawdown below threshold by ensuring that we do not enter positions too late in potential downtrends
-        operator: eq # Ensures strict alignment with bearish trend for short condition, increasing confidence against false positive signals and aligns better with risk tolerance levels set within the strategy parameters without introducing new elements or operators. This change aims at improving win rate consistency while adhering to Sharpe ratio targets
-  exit:
-    take_profit_pct: 1.8 # Maintained as it is aligned with historical performance and secondary goals, allowing for reasonable P&L within the risk tolerance window without compromising strategy effectiveness
-    stop_loss_pct: 0.6 # Adjusted to lower threshold based on win rate optimization goal which aims at keeping drawdown below set maximum while improving overall Sharpe ratio by increasing chances of winning trades and reducing the impact of potential bad losses, thus enhancing trade quality
-    timeout_minutes: 120 # Adjusted as per secondary goals to ensure that positions have enough timeframe for significant development without causing an excessive drawdown. This provides a balance between risk control by preventing overly long holds which can increase unforeseen slippage and exposure, while also avoiding early exits that could limit potential gains
+      - indicator: trend
+        period_minutes: 240
+        operator: eq
+        value: down
+      - indicator: rsi
+        period_minutes: 30
+        operator: gt
+        value: 62
+      - indicator: price_vs_vwap
+        period_minutes: 5
+        operator: eq
+        value: above
+      - indicator: trend
+        period_minutes: 15
+        operator: in
+        value: [up, flat]
+exit:
+  take_profit_pct: 2.2
+  stop_loss_pct: 0.6
+  timeout_minutes: 120
 risk:
-  pause_if_down_pct: 5 # Increased threshold as per the secondary goal to prioritize maintaining a reasonable win rate. The higher pausing criterion allows for some downtrends with strong momentum without immediately halting operations, thus reducing false positives due to short-term volatility and improving overall Sharpe ratio
-  pause_minutes: 60 # Increased threshold aligns better towards the secondary goals of reasonable P&L by avoiding excessive pauses for non-critical drawdown conditions, thus optimizing operational efficiency without sacrificing risk control. Ensures that there is enough time to recover from minor downturns and reinforces strategic pause application in more severe market dips
-  stop_if_down_pct: 10 # Increased threshold based on secondary win rate optimization goal, allowing for some drawdown without stopping prematurely. Helps maintain a positive P&L by not exiting trades too early but still provides enough buffer to limit potential losses in severe market downturns
+  pause_if_down_pct: 4
+  pause_minutes: 60
+  stop_if_down_pct: 10

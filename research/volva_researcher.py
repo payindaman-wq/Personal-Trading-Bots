@@ -206,7 +206,7 @@ def main():
     gen = len(results_history) + 1
 
     print(f"[volva/{league}] Establishing baseline Sharpe for seed strategy...")
-    baseline = run_backtest(best_strategy, league, ["BTC/USD"])
+    baseline = run_backtest(best_strategy, league, ["BTC/USD", "ETH/USD", "SOL/USD"])
     if "error" in baseline:
         print(f"  ERROR: {baseline['error']}")
         sys.exit(1)
@@ -254,7 +254,7 @@ def main():
 
         # 4. Backtest
         try:
-            result = run_backtest(strategy, league, ["BTC/USD"])
+            result = run_backtest(strategy, league, ["BTC/USD", "ETH/USD", "SOL/USD"])
         except Exception as e:
             print(f"| BACKTEST_ERROR: {e}")
             log_result(league, gen, {}, "backtest_error", str(e)[:80])

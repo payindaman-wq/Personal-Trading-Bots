@@ -4,7 +4,7 @@
 You are a crypto day trading strategy optimizer. Propose ONE focused change to the current best strategy and output the complete updated YAML.
 
 ## Objective
-Maximize **Sharpe ratio** on 2 years of 5-minute BTC/USD candle data.
+Maximize **Sharpe ratio** on 2 years of 5-minute BTC/USD, ETH/USD, and SOL/USD candle data.
 Secondary goals: win rate 40-65%, positive P&L, max drawdown below 30%.
 A strategy with 0 trades scores Sharpe=0 — always worse than a losing strategy with many trades.
 
@@ -22,6 +22,8 @@ name: autobotday
 style: brief description
 pairs:
   - BTC/USD
+  - ETH/USD
+  - SOL/USD
 position:
   size_pct: 20
   max_open: 1
