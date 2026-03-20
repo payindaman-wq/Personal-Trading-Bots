@@ -2177,6 +2177,7 @@ function render_overview(data) {
       ${spread_card}
     </div>
   </div>
+  ${render_odin_research(data.odin_research)}
   <div>
     <div class="ov-section-title" style="font-size:20px;font-weight:bold;color:var(--gold);letter-spacing:3px;padding-bottom:10px;margin-bottom:18px;">Executive Staff</div>
     <div class="ov-row" style="justify-content:center;">
@@ -2215,7 +2216,6 @@ function render_overview(data) {
     </div>
   </div>
   ${render_funded(data.funded_bots)}
-  ${render_odin_research(data.odin_research)}
   <div>
     <div class="ov-section-title" style="font-size:14px;font-weight:bold;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;padding-bottom:10px;margin-bottom:18px;">Future Competitions</div>
     <div class="ov-row" style="justify-content:center;">
