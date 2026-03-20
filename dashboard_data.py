@@ -592,6 +592,36 @@ ODIN_DAY_RESULTS   = "/root/.openclaw/workspace/research/day/results.tsv"
 ODIN_SWING_RESULTS = "/root/.openclaw/workspace/research/swing/results.tsv"
 
 
+
+MIMIR_LOG = "/root/.openclaw/workspace/research/mimir_log.jsonl"
+
+
+def get_mimir_state():
+    """Read Mimir analysis log and return dashboard state."""
+    state = {"analyses": [], "last_day": None, "last_swing": None}
+    if not os.path.exists(MIMIR_LOG):
+        return state
+    entries = []
+    with open(MIMIR_LOG) as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                try:
+                    entries.append(json.loads(line))
+                except Exception:
+                    pass
+    for e in reversed(entries):
+        lg = e.get("league")
+        if lg == "day"   and state["last_day"]   is None:
+            state["last_day"]   = {"ts": e["ts"], "generation": e["generation"], "program_updated": e.get("program_updated", False)}
+        if lg == "swing" and state["last_swing"] is None:
+            state["last_swing"] = {"ts": e["ts"], "generation": e["generation"], "program_updated": e.get("program_updated", False)}
+        if state["last_day"] and state["last_swing"]:
+            break
+    state["total_analyses"] = len(entries)
+    return state
+
+
 def get_odin_research():
     """Parse Odin research results for both leagues and return dashboard data."""
     import subprocess
@@ -732,6 +762,7 @@ def build():
         }
 
     dashboard["odin_research"]     = get_odin_research()
+    dashboard["mimir_state"]       = get_mimir_state()
     dashboard["cycle_state"]       = get_cycle_state()
     dashboard["spread_score"]      = get_spread_score()
     dashboard["spread_cycle_state"] = get_spread_cycle_state()

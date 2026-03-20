@@ -2159,6 +2159,21 @@ function render_overview(data) {
     'Bots trade yes/no prediction market contracts. Some copy the moves of the best-performing traders on the platform. Others compare contract prices against Vegas odds and forecasting sites to find bets that look mispriced.'
   );
 
+
+  // Populate Mimir last analysis info
+  const mimir = data.mimir_state || {};
+  const mimir_el = document.getElementById('mimir-last');
+  if (mimir_el) {
+    const parts = [];
+    if (mimir.last_day)   parts.push('Day: gen ' + mimir.last_day.generation   + ' — ' + (mimir.last_day.ts   || '').replace('T',' ') + ' UTC');
+    if (mimir.last_swing) parts.push('Swing: gen ' + mimir.last_swing.generation + ' — ' + (mimir.last_swing.ts || '').replace('T',' ') + ' UTC');
+    if (parts.length) {
+      mimir_el.innerHTML = 'Last analysis: ' + parts.join(' | ');
+    } else {
+      mimir_el.innerHTML = 'No analyses yet — first milestone at gen 100';
+    }
+  }
+
   return `
   <div>
     <div style="margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--border);display:flex;align-items:baseline;gap:24px;flex-wrap:wrap;">
@@ -2196,6 +2211,15 @@ function render_overview(data) {
         <div class="ov-card-strategy" style="margin-top:8px;font-size:12px;line-height:1.7;">
           Runs continuous auto-research loops for every league. Proposes strategy modifications, backtests each against 2 years of market data, and promotes only those that improve the Sharpe ratio. Feeds winning strategies to AutoBotDay and AutoBotSwing at each sprint reset.
         </div>
+      </div>
+      <div class="ov-card active" style="font-size:14px;line-height:1.7;">
+        <span class="badge badge-live" style="display:inline-block;margin-bottom:8px">Active</span>
+        <div class="ov-card-title" style="font-size:16px;margin-bottom:6px;">MIMIR</div>
+        <div class="ov-card-meta" style="font-size:13px;margin-bottom:10px;">Analysis Officer</div>
+        <div class="ov-card-strategy" style="margin-top:8px;font-size:12px;line-height:1.7;" id="mimir-card-body">
+          Performs deep analysis at every 100-generation milestone. Reviews research history and live sprint results, identifies failure patterns and improvement opportunities, then rewrites Odin's research program with sharper guidance for the next cycle.
+        </div>
+        <div id="mimir-last" style="margin-top:8px;font-size:11px;color:var(--muted);"></div>
       </div>
       <div class="ov-card pending" style="font-size:14px;line-height:1.7;">
         <span class="ov-pending-badge">Pending</span>

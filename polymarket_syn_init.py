@@ -24,7 +24,7 @@ BOT_ROSTER = [
     {"name": "skuld",    "category": "politics",        "type": "opinion"},
     {"name": "vor",      "category": "politics",        "type": "opinion"},
     # Crypto (5)
-    {"name": "mimir",    "category": "crypto",          "type": "opinion"},
+    {"name": "njal",    "category": "crypto",          "type": "opinion"},
     {"name": "gerd",     "category": "crypto",          "type": "opinion"},
     {"name": "skadi",    "category": "crypto",          "type": "opinion"},
     {"name": "kvasir",   "category": "crypto",          "type": "opinion"},

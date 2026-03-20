@@ -15,6 +15,7 @@ import json
 import os
 import re
 import sys
+import subprocess
 import time
 import urllib.request
 from datetime import datetime, timezone
@@ -303,6 +304,19 @@ def main():
         results_history.append({"gen": str(gen), "sharpe": f"{sharpe:.4f}",
                                  "win_rate": f"{win_rate:.1f}", "pnl_pct": f"{pnl_pct:.2f}",
                                  "trades": str(trades), "status": status})
+
+        # Mimir milestone: deep analysis every 100 generations
+        if gen % 100 == 0:
+            print(f'  [mimir] Gen {gen} milestone — launching deep analysis...')
+            try:
+                subprocess.Popen(
+                    ['python3', os.path.join(RESEARCH, 'mimir.py'),
+                     '--league', league, '--generation', str(gen)],
+                    stdout=open(os.path.join(league_dir(league), 'mimir.log'), 'a'),
+                    stderr=subprocess.STDOUT,
+                )
+            except Exception as e:
+                print(f'  [mimir] Failed to launch: {e}')
 
         gen += 1
         time.sleep(args.sleep)

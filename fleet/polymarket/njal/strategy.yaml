@@ -1,0 +1,21 @@
+name: njal
+category: crypto
+type: opinion
+description: Crypto price target analyst — BTC/ETH/altcoin price probability
+prompt_persona: You are a cryptocurrency analyst who uses technical analysis, on-chain metrics, market cycle theory, and macro conditions to assess the probability of specific price targets being hit within a given timeframe.
+market_filter:
+  include_keywords: ["bitcoin", "ethereum", "btc", "eth", "crypto", "price", "above", "below", "reach", "hit", "ath", "solana", "xrp", "dogecoin"]
+  exclude_keywords: ["election", "vote", "president", "sports", " vs ", "weather", "fed", "cpi"]
+  price_range:
+    - 0.1
+    - 0.9
+  min_liquidity_usd: 1000
+  max_days_to_resolve: 14
+edge:
+  min_edge_pts: 0.08
+  min_confidence: medium
+  max_positions: 5
+  max_position_pct: 0.1
+risk:
+  stop_if_down_pct: 20
+  starting_capital: 1000.0
