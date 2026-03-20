@@ -1924,6 +1924,72 @@ function render_polymarket(pm, cycle_state, cum_rankings, total_sprints) {
 
 // ── Overview Tab ──────────────────────────────────────────────────────────────
 
+
+function odin_sparkline(values) {
+  if (!values || values.length < 2) return '';
+  const W = 160, H = 36, pad = 2;
+  const mn = Math.min(...values), mx = Math.max(...values);
+  const range = mx - mn || 1;
+  const pts = values.map((v, i) => {
+    const x = pad + (i / (values.length - 1)) * (W - pad * 2);
+    const y = H - pad - ((v - mn) / range) * (H - pad * 2);
+    return x.toFixed(1) + ',' + y.toFixed(1);
+  }).join(' ');
+  const last  = values[values.length - 1];
+  const pct   = (last - mn) / range;
+  const color = last >= 0 ? '#4caf7d' : (pct > 0.5 ? '#e8b84b' : '#e05c5c');
+  return `<svg width="${W}" height="${H}" style="display:block;margin:6px auto 0;">
+    <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linejoin="round"/>
+  </svg>`;
+}
+
+function render_odin_research(odin) {
+  if (!odin) return '';
+  function league_card(label, d) {
+    if (!d) return '';
+    const running  = d.service_running;
+    const badge    = running
+      ? '<span class="badge badge-live" style="display:inline-block;margin-bottom:8px">Running</span>'
+      : '<span class="badge" style="display:inline-block;margin-bottom:8px;background:var(--muted);color:#000">Stopped</span>';
+    const sharpe_val = d.best_sharpe !== null ? d.best_sharpe.toFixed(4) : '\u2014';
+    const sharpe_col = (d.best_sharpe !== null && d.best_sharpe >= 0) ? 'var(--green)' : 'var(--red)';
+    const last_ts    = d.last_activity ? d.last_activity.replace('T', ' ') + ' UTC' : '\u2014';
+    const spark      = odin_sparkline(d.sparkline);
+    return `<div class="ov-card active" style="font-size:13px;line-height:1.8;min-width:220px;max-width:320px;">
+      ${badge}
+      <div class="ov-card-title" style="font-size:15px;margin-bottom:4px;">${label} League</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 14px;margin:8px 0;">
+        <div style="color:var(--muted);font-size:11px;">Generations</div>
+        <div style="font-size:12px;">${d.generations.toLocaleString()}</div>
+        <div style="color:var(--muted);font-size:11px;">Improvements</div>
+        <div style="font-size:12px;">${d.improvements}</div>
+        <div style="color:var(--muted);font-size:11px;">Best Sharpe</div>
+        <div style="font-size:12px;color:${sharpe_col};font-weight:bold;">${sharpe_val}</div>
+        <div style="color:var(--muted);font-size:11px;">Win Rate</div>
+        <div style="font-size:12px;">${d.best_win_rate !== null ? d.best_win_rate.toFixed(1) + '%' : '\u2014'}</div>
+        <div style="color:var(--muted);font-size:11px;">Best Trades</div>
+        <div style="font-size:12px;">${d.best_trades !== null ? d.best_trades.toLocaleString() : '\u2014'}</div>
+        <div style="color:var(--muted);font-size:11px;">Last Active</div>
+        <div style="font-size:11px;color:var(--muted);">${last_ts}</div>
+      </div>
+      ${spark}
+      <div style="font-size:10px;color:var(--muted);margin-top:6px;text-align:center;">Sharpe trajectory \u2014 last ${d.sparkline ? d.sparkline.length : 0} generations</div>
+    </div>`;
+  }
+  return `
+  <div style="margin-top:32px;">
+    <div class="ov-section-title" style="font-size:20px;font-weight:bold;color:var(--gold);letter-spacing:3px;padding-bottom:10px;margin-bottom:18px;">Odin Research Lab</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:16px;max-width:640px;">
+      Continuous strategy optimization. Each generation proposes one change, backtests it against 2 years of BTC data,
+      and keeps it only if the Sharpe ratio improves. Winning strategies are injected at each sprint reset.
+    </div>
+    <div class="ov-row" style="justify-content:center;">
+      ${league_card('Day', odin.day)}
+      ${league_card('Swing', odin.swing)}
+    </div>
+  </div>`;
+}
+
 function render_overview(data) {
   const leagues = data.leagues || {};
   const day     = leagues.day;
@@ -2149,6 +2215,7 @@ function render_overview(data) {
     </div>
   </div>
   ${render_funded(data.funded_bots)}
+  ${render_odin_research(data.odin_research)}
   <div>
     <div class="ov-section-title" style="font-size:14px;font-weight:bold;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;padding-bottom:10px;margin-bottom:18px;">Future Competitions</div>
     <div class="ov-row" style="justify-content:center;">
