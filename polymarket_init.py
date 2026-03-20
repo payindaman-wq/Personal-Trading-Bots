@@ -14,14 +14,14 @@ STARTING_CAPITAL = 1000.0
 BOTS = [
     {"name": "sol",      "trader": "SecondWindCapital",  "wallet": "0x8c80d213c0cbad777d06ee3f58f6ca4bc03102c3"},
     {"name": "freyr",    "trader": "beachboy4",           "wallet": "0xc2e7800b5af46e6093872b177b7a5e7f0563be51"},
-    {"name": "odin",     "trader": "WoofMaster",          "wallet": "0x916f7165c2c836aba22edb6453cdbb5f3ea253ba"},
+    {"name": "haakon",     "trader": "WoofMaster",          "wallet": "0x916f7165c2c836aba22edb6453cdbb5f3ea253ba"},
     {"name": "thor",     "trader": "majorexploiter",      "wallet": "0x019782cab5d844f02bafb71f512758be78579f3c"},
-    {"name": "tyr",      "trader": "HorizonSplendidView", "wallet": "0x02227b8f5a9636e895607edd3185ed6ee5598ff7"},
+    {"name": "torkel",      "trader": "HorizonSplendidView", "wallet": "0x02227b8f5a9636e895607edd3185ed6ee5598ff7"},
     {"name": "bragi",    "trader": "Blessed-Sunshine",    "wallet": "0x59a0744db1f39ff3afccd175f80e6e8dfc239a09"},
     {"name": "heimdall", "trader": "FTWUTB",              "wallet": "0xdb2223cc5202a4718c3069f577ec971f71c96478"},
     {"name": "baldur",   "trader": "UAEVALORANTFAN",      "wallet": "0xc65ca4755436f82d8eb461e65781584b8cadea39"},
     {"name": "vidar",    "trader": "ewelmealt",           "wallet": "0x07921379f7b31ef93da634b688b2fe36897db778"},
-    {"name": "njord",    "trader": "Countryside",         "wallet": "0xbddf61af533ff524d27154e589d2d7a81510c684"},
+    {"name": "hallvard",    "trader": "Countryside",         "wallet": "0xbddf61af533ff524d27154e589d2d7a81510c684"},
 ]
 
 # Position sizing: each trade uses this fraction of remaining cash
