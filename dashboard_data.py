@@ -587,6 +587,88 @@ def get_cycle_state():
     except Exception:
         return {"cycle": 1, "sprint_in_cycle": 0, "sprints_per_cycle": 7, "status": "active"}
 
+
+ODIN_DAY_RESULTS   = "/root/.openclaw/workspace/research/day/results.tsv"
+ODIN_SWING_RESULTS = "/root/.openclaw/workspace/research/swing/results.tsv"
+
+
+def get_odin_research():
+    """Parse Odin research results for both leagues and return dashboard data."""
+    import subprocess
+
+    def parse_league(tsv_path, service_name):
+        result = {
+            "generations": 0,
+            "improvements": 0,
+            "best_sharpe": None,
+            "best_win_rate": None,
+            "best_pnl_pct": None,
+            "best_trades": None,
+            "last_activity": None,
+            "service_running": False,
+            "sparkline": [],
+        }
+        # Service status
+        try:
+            rc = subprocess.run(
+                ["systemctl", "is-active", service_name],
+                capture_output=True, text=True, timeout=5
+            )
+            result["service_running"] = rc.stdout.strip() == "active"
+        except Exception:
+            pass
+
+        if not os.path.exists(tsv_path):
+            return result
+
+        rows = []
+        best_sharpe = None
+        best_row = None
+        improvements = 0
+
+        with open(tsv_path) as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("gen"):
+                    continue
+                parts = line.split("	")
+                if len(parts) < 6:
+                    continue
+                try:
+                    sharpe = float(parts[1])
+                except ValueError:
+                    continue
+                rows.append({
+                    "sharpe":   sharpe,
+                    "win_rate": float(parts[2]) if parts[2] else 0,
+                    "pnl_pct":  float(parts[3]) if parts[3] else 0,
+                    "trades":   int(parts[4])   if parts[4] else 0,
+                    "status":   parts[5],
+                    "ts":       parts[7] if len(parts) > 7 else "",
+                })
+                if parts[5] == "new_best":
+                    improvements += 1
+                    best_row = rows[-1]
+
+        result["generations"]  = len(rows)
+        result["improvements"] = improvements
+        if best_row:
+            result["best_sharpe"]   = round(best_row["sharpe"],   4)
+            result["best_win_rate"] = round(best_row["win_rate"], 1)
+            result["best_pnl_pct"]  = round(best_row["pnl_pct"],  2)
+            result["best_trades"]   = best_row["trades"]
+        if rows:
+            result["last_activity"] = rows[-1]["ts"]
+        # Sparkline: last 30 sharpe values
+        result["sparkline"] = [r["sharpe"] for r in rows[-30:]]
+        return result
+
+    return {
+        "day":   parse_league(ODIN_DAY_RESULTS,   "volva_day.service"),
+        "swing": parse_league(ODIN_SWING_RESULTS, "volva_swing.service"),
+    }
+
+
 def build():
     day_lb   = load_json(DAY_LB_PATH)
     swing_lb = load_json(SWING_LB_PATH)
@@ -649,6 +731,7 @@ def build():
             "live_sprint":           get_live_sprint("spread", spread_active_id),
         }
 
+    dashboard["odin_research"]     = get_odin_research()
     dashboard["cycle_state"]       = get_cycle_state()
     dashboard["spread_score"]      = get_spread_score()
     dashboard["spread_cycle_state"] = get_spread_cycle_state()
