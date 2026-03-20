@@ -2,13 +2,13 @@
 """
 volva_researcher.py - Volva auto-research loop.
 
-Continuously proposes strategy modifications via local Ollama (phi3:mini),
+Continuously proposes strategy modifications via Groq (llama-3.1-8b-instant),
 backtests them against 2yr historical data, and keeps winners.
 
 Usage:
   python3 volva_researcher.py --league day
   python3 volva_researcher.py --league swing
-  python3 volva_researcher.py --league day --sleep 300  (seconds between cycles)
+  python3 volva_researcher.py --league day --sleep 60
 """
 import argparse
 import json
@@ -21,13 +21,19 @@ from datetime import datetime, timezone
 
 import yaml
 
-WORKSPACE    = "/root/.openclaw/workspace"
-RESEARCH     = os.path.join(WORKSPACE, "research")
-OLLAMA_URL   = "http://localhost:11434/api/generate"
-OLLAMA_MODEL = "phi3:mini"
+WORKSPACE     = "/root/.openclaw/workspace"
+RESEARCH      = os.path.join(WORKSPACE, "research")
+GROQ_SECRET   = "/root/.openclaw/secrets/groq.json"
+GROQ_MODEL    = "llama-3.1-8b-instant"
+GROQ_URL      = "https://api.groq.com/openai/v1/chat/completions"
 
 # Look-ahead bias guard
 SUSPICIOUS_SHARPE = 3.5
+
+
+def load_groq_key():
+    with open(GROQ_SECRET) as f:
+        return json.load(f)["groq_api_key"]
 
 
 def league_dir(league):
@@ -105,21 +111,25 @@ def log_result(league, gen, result, status, description=""):
         f.write(f"{gen}\t{sharpe:.4f}\t{win_rate:.1f}\t{pnl_pct:.2f}\t{trades}\t{status}\t{description}\t{ts}\n")
 
 
-def call_ollama(prompt):
+def call_groq(prompt, api_key):
     payload = json.dumps({
-        "model":  OLLAMA_MODEL,
-        "prompt": prompt,
-        "stream": False,
+        "model":    GROQ_MODEL,
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature":  0.7,
+        "max_tokens":   600,
     }).encode()
     req = urllib.request.Request(
-        OLLAMA_URL,
+        GROQ_URL,
         data=payload,
-        headers={"Content-Type": "application/json"},
+        headers={
+            "Content-Type":  "application/json",
+            "Authorization": f"Bearer {api_key}",
+            "User-Agent": "Mozilla/5.0",
+        },
     )
-    # 1800s timeout — phi3:mini on ARM64 CPU can take 15-20min for a full prompt
-    with urllib.request.urlopen(req, timeout=1800) as r:
+    with urllib.request.urlopen(req, timeout=30) as r:
         data = json.loads(r.read())
-    return data.get("response", "")
+    return data["choices"][0]["message"]["content"].strip()
 
 
 def extract_yaml(text):
@@ -160,18 +170,20 @@ def build_prompt(league, program_md, current_strategy_yaml, results_history, gen
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--league", choices=["day", "swing"], required=True)
-    parser.add_argument("--sleep", type=int, default=300,
-                        help="Seconds to sleep between cycles (default 300 — prevents Ollama contention)")
+    parser.add_argument("--sleep", type=int, default=60,
+                        help="Seconds to sleep between cycles (default 60)")
     parser.add_argument("--offset", type=int, default=0,
-                        help="Startup delay in seconds (stagger multiple instances)")
+                        help="Startup delay in seconds to stagger instances")
     args = parser.parse_args()
     league = args.league
 
     sys.path.insert(0, RESEARCH)
     from volva_backtest import run_backtest
 
+    api_key = load_groq_key()
+
     if args.offset > 0:
-        print(f"[volva/{league}] Startup offset {args.offset}s to avoid Ollama contention...")
+        print(f"[volva/{league}] Startup offset {args.offset}s...")
         time.sleep(args.offset)
 
     os.makedirs(league_dir(league), exist_ok=True)
@@ -201,22 +213,22 @@ def main():
     best_sharpe = baseline["sharpe"]
     print(f"  Baseline Sharpe={best_sharpe:.4f}  pnl={baseline['total_pnl_pct']:+.2f}%  "
           f"trades={baseline['total_trades']}  win_rate={baseline['win_rate_pct']}%")
-    print(f"\n[volva/{league}] Starting research loop (phi3:mini, {args.sleep}s sleep).\n")
+    print(f"\n[volva/{league}] Starting research loop (Groq/{GROQ_MODEL}, {args.sleep}s sleep).\n")
 
     while True:
         ts = datetime.now(timezone.utc).strftime("%H:%M:%S")
         print(f"[{ts}] Gen {gen} | best_sharpe={best_sharpe:.4f}", end=" ", flush=True)
 
-        # 1. Call Ollama
+        # 1. Call Groq
         try:
             prompt   = build_prompt(league, program_md, best_strategy_yaml,
                                     results_history, gen, best_sharpe)
-            response = call_ollama(prompt)
+            response = call_groq(prompt, api_key)
         except Exception as e:
-            print(f"| OLLAMA ERROR: {e}")
-            log_result(league, gen, {}, "ollama_error", str(e)[:80])
+            print(f"| GROQ ERROR: {e}")
+            log_result(league, gen, {}, "groq_error", str(e)[:80])
             gen += 1
-            time.sleep(60)
+            time.sleep(30)
             continue
 
         # 2. Extract YAML
