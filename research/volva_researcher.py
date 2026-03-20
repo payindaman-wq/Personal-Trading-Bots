@@ -2,13 +2,13 @@
 """
 volva_researcher.py - Volva auto-research loop.
 
-Continuously proposes strategy modifications via Ollama/Mistral,
+Continuously proposes strategy modifications via local Ollama (phi3:mini),
 backtests them against 2yr historical data, and keeps winners.
 
 Usage:
   python3 volva_researcher.py --league day
   python3 volva_researcher.py --league swing
-  python3 volva_researcher.py --league day --sleep 30  (seconds between cycles)
+  python3 volva_researcher.py --league day --sleep 300  (seconds between cycles)
 """
 import argparse
 import json
@@ -21,12 +21,12 @@ from datetime import datetime, timezone
 
 import yaml
 
-WORKSPACE   = "/root/.openclaw/workspace"
-RESEARCH    = os.path.join(WORKSPACE, "research")
-OLLAMA_URL  = "http://localhost:11434/api/generate"
+WORKSPACE    = "/root/.openclaw/workspace"
+RESEARCH     = os.path.join(WORKSPACE, "research")
+OLLAMA_URL   = "http://localhost:11434/api/generate"
 OLLAMA_MODEL = "phi3:mini"
 
-# Look-ahead bias guard: reject if Sharpe suspiciously high
+# Look-ahead bias guard
 SUSPICIOUS_SHARPE = 3.5
 
 
@@ -53,7 +53,6 @@ def save_best_strategy(league, strategy_yaml, sharpe, gen):
     path = os.path.join(league_dir(league), "best_strategy.yaml")
     with open(path, "w") as f:
         f.write(strategy_yaml)
-    # Also write to fleet dir so sprint reset can pick it up
     fleet_path = get_fleet_path(league)
     if fleet_path:
         os.makedirs(os.path.dirname(fleet_path), exist_ok=True)
@@ -64,9 +63,9 @@ def save_best_strategy(league, strategy_yaml, sharpe, gen):
 
 def get_fleet_path(league):
     if league == "day":
-        return os.path.join(WORKSPACE, "fleet", "ivar", "strategy.yaml")
+        return os.path.join(WORKSPACE, "fleet", "autobotday", "strategy.yaml")
     elif league == "swing":
-        return os.path.join(WORKSPACE, "fleet", "swing", "sigrid", "strategy.yaml")
+        return os.path.join(WORKSPACE, "fleet", "swing", "autobotswing", "strategy.yaml")
     return None
 
 
@@ -117,7 +116,8 @@ def call_ollama(prompt):
         data=payload,
         headers={"Content-Type": "application/json"},
     )
-    with urllib.request.urlopen(req, timeout=600) as r:
+    # 1800s timeout — phi3:mini on ARM64 CPU can take 15-20min for a full prompt
+    with urllib.request.urlopen(req, timeout=1800) as r:
         data = json.loads(r.read())
     return data.get("response", "")
 
@@ -126,7 +126,6 @@ def extract_yaml(text):
     m = re.search(r"```yaml\s*(.*?)\s*```", text, re.DOTALL)
     if m:
         return m.group(1).strip()
-    # Fallback: look for "name:" as start of YAML
     m = re.search(r"(name:.*)", text, re.DOTALL)
     if m:
         return m.group(1).strip()
@@ -151,7 +150,7 @@ def build_prompt(league, program_md, current_strategy_yaml, results_history, gen
         + f"## Recent Results (last {len(recent)} generations)\n\n"
         + results_text
         + "\n\n---\n"
-        + f"## Your Task\n\n"
+        + "## Your Task\n\n"
         + f"Generation {gen}. Propose ONE focused improvement to the strategy above.\n"
         + "Output ONLY the complete modified strategy YAML between ```yaml and ``` markers.\n"
         + "Do not explain or add commentary outside the YAML block.\n"
@@ -161,14 +160,19 @@ def build_prompt(league, program_md, current_strategy_yaml, results_history, gen
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--league", choices=["day", "swing"], required=True)
-    parser.add_argument("--sleep",  type=int, default=0,
-                        help="Extra seconds to sleep between cycles (default 0 = model-speed limited)")
+    parser.add_argument("--sleep", type=int, default=300,
+                        help="Seconds to sleep between cycles (default 300 — prevents Ollama contention)")
+    parser.add_argument("--offset", type=int, default=0,
+                        help="Startup delay in seconds (stagger multiple instances)")
     args = parser.parse_args()
     league = args.league
 
-    # Import backtest here (same directory)
     sys.path.insert(0, RESEARCH)
     from volva_backtest import run_backtest
+
+    if args.offset > 0:
+        print(f"[volva/{league}] Startup offset {args.offset}s to avoid Ollama contention...")
+        time.sleep(args.offset)
 
     os.makedirs(league_dir(league), exist_ok=True)
     program_md = load_program_md(league)
@@ -183,13 +187,12 @@ def main():
             best_strategy = yaml.safe_load(best_strategy_yaml)
             print(f"  Seeded from {fleet_path}")
         else:
-            print("  No seed found. Create best_strategy.yaml manually or run with --seed.")
+            print("  No seed found. Create best_strategy.yaml manually.")
             sys.exit(1)
 
     results_history = load_results(league)
     gen = len(results_history) + 1
 
-    # Establish baseline Sharpe for seed strategy
     print(f"[volva/{league}] Establishing baseline Sharpe for seed strategy...")
     baseline = run_backtest(best_strategy, league, ["BTC/USD"])
     if "error" in baseline:
@@ -198,13 +201,13 @@ def main():
     best_sharpe = baseline["sharpe"]
     print(f"  Baseline Sharpe={best_sharpe:.4f}  pnl={baseline['total_pnl_pct']:+.2f}%  "
           f"trades={baseline['total_trades']}  win_rate={baseline['win_rate_pct']}%")
-    print(f"\n[volva/{league}] Starting research loop. Ctrl+C to stop.\n")
+    print(f"\n[volva/{league}] Starting research loop (phi3:mini, {args.sleep}s sleep).\n")
 
     while True:
         ts = datetime.now(timezone.utc).strftime("%H:%M:%S")
         print(f"[{ts}] Gen {gen} | best_sharpe={best_sharpe:.4f}", end=" ", flush=True)
 
-        # 1. Call Mistral
+        # 1. Call Ollama
         try:
             prompt   = build_prompt(league, program_md, best_strategy_yaml,
                                     results_history, gen, best_sharpe)
@@ -213,7 +216,7 @@ def main():
             print(f"| OLLAMA ERROR: {e}")
             log_result(league, gen, {}, "ollama_error", str(e)[:80])
             gen += 1
-            time.sleep(10)
+            time.sleep(60)
             continue
 
         # 2. Extract YAML
@@ -222,8 +225,7 @@ def main():
             print("| YAML_NOT_FOUND")
             log_result(league, gen, {}, "yaml_not_found")
             gen += 1
-            if args.sleep:
-                time.sleep(args.sleep)
+            time.sleep(args.sleep)
             continue
 
         # 3. Parse YAML
@@ -235,8 +237,7 @@ def main():
             print(f"| YAML_PARSE_ERROR: {e}")
             log_result(league, gen, {}, "yaml_parse_error", str(e)[:80])
             gen += 1
-            if args.sleep:
-                time.sleep(args.sleep)
+            time.sleep(args.sleep)
             continue
 
         # 4. Backtest
@@ -246,16 +247,14 @@ def main():
             print(f"| BACKTEST_ERROR: {e}")
             log_result(league, gen, {}, "backtest_error", str(e)[:80])
             gen += 1
-            if args.sleep:
-                time.sleep(args.sleep)
+            time.sleep(args.sleep)
             continue
 
         if "error" in result:
             print(f"| BACKTEST_ERROR: {result['error']}")
             log_result(league, gen, {}, "backtest_error", result["error"][:80])
             gen += 1
-            if args.sleep:
-                time.sleep(args.sleep)
+            time.sleep(args.sleep)
             continue
 
         sharpe   = result["sharpe"]
@@ -272,16 +271,15 @@ def main():
                                      "win_rate": f"{win_rate:.1f}", "pnl_pct": f"{pnl_pct:.2f}",
                                      "trades": str(trades), "status": "rejected_lookahead"})
             gen += 1
-            if args.sleep:
-                time.sleep(args.sleep)
+            time.sleep(args.sleep)
             continue
 
         # 6. Compare to best
         if sharpe > best_sharpe:
             status = "new_best"
             save_best_strategy(league, strategy_yaml, sharpe, gen)
-            best_sharpe       = sharpe
-            best_strategy     = strategy
+            best_sharpe        = sharpe
+            best_strategy      = strategy
             best_strategy_yaml = strategy_yaml
         else:
             status = "discarded"
@@ -295,8 +293,7 @@ def main():
                                  "trades": str(trades), "status": status})
 
         gen += 1
-        if args.sleep:
-            time.sleep(args.sleep)
+        time.sleep(args.sleep)
 
 
 if __name__ == "__main__":

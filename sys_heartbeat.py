@@ -64,6 +64,8 @@ LEAGUES = [
 ]
 
 SERVICES = [
+    {"name": "volva_day",   "unit": "volva_day.service"},
+    {"name": "volva_swing", "unit": "volva_swing.service"},
     {"name": "polymarket",     "unit": "polymarket.service"},
     {"name": "polymarket_syn", "unit": "polymarket_syn.service"},
 ]
@@ -215,6 +217,42 @@ def check_gemini_quota(state):
     return None
 
 
+
+def check_volva_health(league):
+    """Return problem string if Volva has had no successful generation in >6h."""
+    results_path = f"{WORKSPACE}/research/{league}/results.tsv"
+    if not os.path.exists(results_path):
+        return None  # not started yet — service check covers this
+    successful_statuses = {"new_best", "discarded", "rejected_lookahead"}
+    last_success_ts = None
+    consecutive_errors = 0
+    with open(results_path) as f:
+        lines = [l.strip() for l in f if l.strip() and not l.startswith("gen")]
+    if not lines:
+        return None
+    for line in lines:
+        parts = line.split("	")
+        if len(parts) >= 8:
+            status = parts[5]
+            ts_str = parts[7]
+            if status in successful_statuses:
+                last_success_ts = ts_str
+                consecutive_errors = 0
+            else:
+                consecutive_errors += 1
+    if consecutive_errors >= 5:
+        return f"last 5 generations all errors — Ollama may be stuck"
+    if last_success_ts:
+        try:
+            from datetime import timezone
+            last_dt = datetime.fromisoformat(last_success_ts).replace(tzinfo=timezone.utc)
+            age_h = (datetime.now(timezone.utc) - last_dt).total_seconds() / 3600
+            if age_h > 6:
+                return f"no successful generation in {age_h:.1f}h"
+        except Exception:
+            pass
+    return None
+
 def check_polymarket_syn_freshness():
     """Check syn_tick.log freshness — service being 'active' doesn't mean it's ticking."""
     log = f"{WORKSPACE}/competition/polymarket/syn_tick.log"
@@ -266,6 +304,18 @@ def main():
         if problem:
             if should_alert(state, key):
                 problems.append((key, f"[SERVICE] {problem}"))
+        else:
+            if key in state["last_alerted"]:
+                resolved.append(key)
+            clear_alert(state, key)
+
+    # ── Volva researcher health ────────────────────────────────────────────
+    for vleague in ["day", "swing"]:
+        key     = f"volva_{vleague}_health"
+        problem = check_volva_health(vleague)
+        if problem:
+            if should_alert(state, key):
+                problems.append((key, f"[VOLVA/{vleague.upper()}] {problem}"))
         else:
             if key in state["last_alerted"]:
                 resolved.append(key)

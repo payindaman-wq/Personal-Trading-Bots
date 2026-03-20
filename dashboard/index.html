@@ -1980,7 +1980,7 @@ function render_overview(data) {
       stats,
       leader ? leader.bot : null,
       leader ? leader.cumulative_pnl_usd : null,
-      'Each bot has its own trading instinct — some chase momentum, others hunt reversals or breakouts. They read price charts and react to signals continuously throughout the sprint. Best cumulative profit takes the crown.'
+      'Each bot has its own trading instinct — some chase momentum, others hunt reversals or breakouts. AutoBotDay is Völva's dedicated research slot, running the best strategy found through continuous backtesting. Best cumulative profit takes the crown.'
     );
   } else {
     day_card = `<div class="ov-card pending"><span class="ov-pending-badge">Not Started</span><div class="ov-card-title">Day Trading League</div><div class="ov-card-meta">1d sprints &mdash; 7-sprint cycles, 16 pairs</div></div>`;
@@ -2003,7 +2003,7 @@ function render_overview(data) {
       stats,
       leader ? leader.bot : null,
       leader ? leader.cumulative_pnl_usd : null,
-      'Rather than reacting to every price tick, these bots look for bigger, slower-moving trends and ride them over several days. They wait for high-confidence setups and hold positions through short-term noise.'
+      'Rather than reacting to every price tick, these bots look for bigger, slower-moving trends and ride them over several days. AutoBotSwing is Völva's dedicated research slot, running the best swing strategy found through continuous backtesting.'
     );
   } else {
     swing_card = `<div class="ov-card pending"><span class="ov-pending-badge">Not Started</span><div class="ov-card-title">Swing Trading League</div><div class="ov-card-meta">7d sprints &mdash; 4-sprint cycles, multi-pair</div></div>`;
@@ -2127,7 +2127,7 @@ function render_overview(data) {
         <div class="ov-card-title" style="font-size:16px;margin-bottom:6px;">V&Ouml;LVA</div>
         <div class="ov-card-meta" style="font-size:13px;margin-bottom:10px;">Research Director</div>
         <div class="ov-card-strategy" style="margin-top:8px;font-size:12px;line-height:1.7;">
-          Runs continuous auto-research loops for every league. Proposes strategy modifications, backtests each against 2 years of market data, and promotes only those that improve the Sharpe ratio. Feeds winning strategies to Ivar (Day) and Sigrid (Swing) at each sprint reset. Powered by local Mistral 7B — zero ongoing API cost.
+          Runs continuous auto-research loops for every league. Proposes strategy modifications, backtests each against 2 years of market data, and promotes only those that improve the Sharpe ratio. Feeds winning strategies to AutoBotDay and AutoBotSwing at each sprint reset. Powered by local phi3:mini via Ollama — zero ongoing API cost.
         </div>
       </div>
       <div class="ov-card pending" style="font-size:14px;line-height:1.7;">

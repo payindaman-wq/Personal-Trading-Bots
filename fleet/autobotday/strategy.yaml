@@ -1,4 +1,4 @@
-name: ivar
+name: autobotday
 style: multi_tf_trend_rsi_vwap — trend-confirmed RSI pullback with VWAP filter
 pairs:
   - BTC/USD
