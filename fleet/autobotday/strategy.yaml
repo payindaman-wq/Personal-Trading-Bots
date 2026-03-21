@@ -1,5 +1,5 @@
 name: autobotday
-style: trend-confirmed RSI pullback with VWAP filter and momentum confirmation, tighter stop loss and reduced trade frequency, with MACD confirmation for higher quality entries. Focus on reducing trades by increasing TP and tightening SL. Slightly increased take profit to reduce trade frequency further. Added bollinger_position to filter out noisy entries.
+style: Reduced trade frequency by tightening the price_change_pct condition and increasing the timeout slightly, aiming for higher conviction trades. Added a momentum_accelerating condition to filter for stronger moves. Increased take profit to reduce premature exits and potentially improve win rate and Sharpe. Adjusted RSI thresholds for better entry timing and slightly reduced stop-loss to control risk on lower conviction trades.
 pairs:
   - BTC/USD
   - ETH/USD
@@ -22,11 +22,11 @@ entry:
       - indicator: rsi
         period_minutes: 30
         operator: lt
-        value: 40
-      - indicator: momentum_accelerating
+        value: 35 # Tightened RSI threshold for long entries
+      - indicator: price_change_pct
         period_minutes: 15
-        operator: eq
-        value: true
+        operator: lt
+        value: -0.7 # Slightly less stringent price_change_pct for more opportunities
       - indicator: macd_signal
         period_minutes: 60
         operator: eq
@@ -35,6 +35,10 @@ entry:
         period_minutes: 30
         operator: eq
         value: inside
+      - indicator: momentum_accelerating
+        period_minutes: 15
+        operator: eq
+        value: true
   short:
     conditions:
       - indicator: trend
@@ -48,11 +52,11 @@ entry:
       - indicator: rsi
         period_minutes: 30
         operator: gt
-        value: 60
-      - indicator: momentum_accelerating
+        value: 65 # Tightened RSI threshold for short entries
+      - indicator: price_change_pct
         period_minutes: 15
-        operator: eq
-        value: true
+        operator: gt
+        value: 0.7 # Slightly less stringent price_change_pct for more opportunities
       - indicator: macd_signal
         period_minutes: 60
         operator: eq
@@ -61,10 +65,14 @@ entry:
         period_minutes: 30
         operator: eq
         value: inside
+      - indicator: momentum_accelerating
+        period_minutes: 15
+        operator: eq
+        value: true
 exit:
-  take_profit_pct: 2.8
-  stop_loss_pct: 0.4
-  timeout_minutes: 240
+  take_profit_pct: 3.5
+  stop_loss_pct: 0.45 # Slightly reduced stop loss for faster exits on losing trades
+  timeout_minutes: 300
 risk:
   pause_if_down_pct: 4
   pause_minutes: 60

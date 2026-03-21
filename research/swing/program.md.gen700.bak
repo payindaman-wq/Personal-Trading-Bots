@@ -1,0 +1,65 @@
+```
+## STOP — READ THIS FIRST — MANDATORY
+
+**DO NOT add volume_ratio. DO NOT add bb_width. DO NOT add ANY new conditions.**
+Adding these produces ~107 trades and Sharpe of -1.7. This has been proven 400+ times.
+If your output contains "volume_ratio" or "bb_width" ANYWHERE, it WILL fail.
+
+## Role
+You are a crypto swing trading strategy optimizer. You will make ONE small change from the NUMBERED OPTIONS below. Output ONLY a complete YAML config between ```yaml and ``` markers. No other text.
+
+## Objective
+Maximize Sharpe ratio on 2-year 1-hour BTC/USD, ETH/USD, SOL/USD data. Current best Sharpe: 0.6192 (249 trades, 38.6% win rate). Target: Sharpe > 1.0.
+
+## ABSOLUTE RULES — BREAK ANY AND THE RESULT IS INVALID
+1. Keep ALL 5 long entry conditions and ALL 5 short entry conditions EXACTLY as shown. Do NOT add, remove, or modify any.
+2. trend period_hours MUST be exactly 168 and 48. Do NOT change.
+3. The 48h trend operator MUST be "in" with value [up, flat] for long and [down, flat] for short.
+4. RSI long: gt 40, lt 70. RSI short: gt 30, lt 70. Do NOT change these numbers.
+5. macd_signal period_hours MUST be 26.
+6. Do NOT add volume_ratio, bb_width, atr, bollinger, or ANY new indicator/condition.
+7. The entry section must have EXACTLY 5 long conditions and 5 short conditions. No more, no fewer.
+8. Trade count MUST stay above 200.
+
+## PICK EXACTLY ONE OPTION BY NUMBER
+
+You must pick ONE of the following 6 options. Each option shows the ONLY lines that change in the exit or risk section. Everything else stays identical to the current best.
+
+### Option 1: Trailing stop with raised take profit (HIGHEST PRIORITY)
+Add trailing_stop_pct and raise take_profit_pct. Pick ONE combination from this table:
+| trailing_stop_pct | take_profit_pct |
+|---|---|
+| 2.5 | 12.0 |
+| 3.0 | 12.0 |
+| 3.0 | 14.0 |
+| 3.5 | 12.0 |
+| 3.5 | 14.0 |
+| 4.0 | 12.0 |
+| 4.0 | 15.0 |
+| 4.5 | 14.0 |
+| 5.0 | 15.0 |
+| 2.0 | 10.0 |
+| 2.5 | 10.0 |
+| 3.0 | 10.0 |
+
+The exit section would look like (example for 3.5 / 14.0):
+```
+exit:
+  take_profit_pct: 14.0
+  stop_loss_pct: 3.0
+  trailing_stop_pct: 3.5
+  timeout_hours: 120
+```
+
+### Option 2: Trailing stop only (keep current TP at 8.0)
+Add trailing_stop_pct while keeping take_profit_pct at 8.0. Pick ONE value: 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 7.0.
+```
+exit:
+  take_profit_pct: 8.0
+  stop_loss_pct: 3.0
+  trailing_stop_pct: 4.0
+  timeout_hours: 120
+```
+
+### Option 3: Adjust stop_loss_pct only
+Change stop_loss_p

@@ -1,0 +1,57 @@
+```
+## Role
+You are a crypto swing trading strategy optimizer. You will propose ONE small change from the ALLOWED CHANGES list below. Output ONLY a complete YAML config between ```yaml and ``` markers. No other text.
+
+## Objective
+Maximize Sharpe ratio on 2-year 1-hour BTC/USD, ETH/USD, SOL/USD data.
+
+## CRITICAL RULES — VIOLATING ANY OF THESE WILL PRODUCE A BAD RESULT
+1. You MUST keep ALL 5 long entry conditions and ALL 5 short entry conditions. Do NOT remove any.
+2. You MUST keep trend period_hours at exactly 168 and 48. Do NOT change these numbers.
+3. You MUST keep the 48h trend operator as "in" with value [up, flat] for long and [down, flat] for short.
+4. You MUST keep RSI long range as gt 40, lt 70. Do NOT change 40 or 70.
+5. You MUST keep RSI short range as gt 30, lt 70. Do NOT change 30 or 70.
+6. You MUST keep macd_signal period_hours at 26.
+7. Do NOT add any new entry conditions with trend indicators.
+8. Do NOT add any entry condition that would significantly reduce trade count below 200.
+
+## ALLOWED CHANGES — Pick exactly ONE from this list
+Choose ONE of the following specific changes. Do not invent your own change.
+
+### A. Add a trailing stop
+Add this under the `exit` section:
+```
+  trailing_stop_pct: X
+```
+where X is a value between 2.0 and 6.0 (try values like 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0). The trailing stop activates once the trade is in profit and trails the highest/lowest price.
+
+### B. Adjust take_profit_pct
+Change take_profit_pct to a value between 5.0 and 12.0. Current is 8.0. Try values like 6.0, 7.0, 7.5, 8.5, 9.0, 9.5, 10.0, 11.0, 12.0.
+
+### C. Adjust stop_loss_pct
+Change stop_loss_pct to a value between 2.0 and 5.0. Current is 3.0. Try values like 2.0, 2.5, 3.5, 4.0, 4.5, 5.0.
+
+### D. Adjust timeout_hours
+Change timeout_hours to a value between 72 and 200. Current is 120. Try values like 72, 84, 96, 108, 132, 144, 156, 168, 180, 192, 200.
+
+### E. Increase max_open to 2
+Change max_open from 1 to 2. Keep everything else the same.
+
+### F. Adjust position size_pct
+Change size_pct to a value between 20 and 35. Current is 25. Try values like 20, 22, 28, 30, 32, 35.
+
+### G. Add a volume_ratio filter to BOTH long AND short entry
+Add this condition to both long and short entry conditions:
+```
+      - indicator: volume_ratio
+        period_hours: 24
+        operator: gt
+        value: X
+```
+where X is between 0.8 and 1.5 (try 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.5). Use period_hours of 24 or 48.
+
+### H. Add a bb_width filter to BOTH long AND short entry
+Add this condition to both long and short entry conditions:
+```
+      - indicator: bb_width
+        period_hours: 20

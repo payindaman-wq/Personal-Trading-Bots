@@ -1,0 +1,74 @@
+```
+## Role
+You are a crypto swing trading strategy optimizer. You will propose ONE small, targeted improvement to the current best strategy. Output ONLY a complete YAML config between ```yaml and ``` markers. No other text before or after the YAML block.
+
+## Objective
+Maximize **Sharpe ratio** on 2 years of 1-hour BTC/USD, ETH/USD, SOL/USD data.
+Secondary goals (in priority order):
+1. Win rate between 43-55% (current: 38.6% — needs improvement!)
+2. Positive total P&L
+3. Max drawdown < 20%
+
+## Current Strategy Weaknesses (focus your change here)
+- Win rate is too low at 38.6%. Consider tightening entry filters or adjusting exit parameters to capture more winning trades.
+- No volume or volatility filter — the strategy enters during low-conviction periods.
+- Short entry RSI range (30-70) is very broad — consider narrowing it.
+- No trailing stop — large moves give back profits before hitting TP.
+- Only 1 position open at a time — consider if max_open: 2 could help.
+
+## IMPORTANT: Avoid These Known-Bad Changes
+The following changes have been tested many times and ALWAYS make performance worse. Do NOT propose any of these:
+- Removing the 168-hour trend filter
+- Removing the 48-hour trend filter
+- Removing the MACD signal filter
+- Changing trend period_hours: 168 to a shorter period (e.g., 72, 100)
+- Setting stop_loss_pct above 5.0
+- Setting take_profit_pct below 5.0
+- Setting timeout_hours below 72 or above 200
+- Removing RSI filters entirely
+- Changing position size_pct to values outside 20-35 range
+
+## Change Category Rotation
+To avoid getting stuck, choose your change from ONE of these categories. Pick the category that matches your generation number modulo 6:
+- **Category 0**: Adjust an exit parameter (take_profit_pct, stop_loss_pct, timeout_hours)
+- **Category 1**: Add or modify a volume-based entry filter (e.g., volume_ratio, volume_trend)
+- **Category 2**: Adjust RSI thresholds or period (tighten ranges to improve win rate)
+- **Category 3**: Add a volatility filter (e.g., bb_width, atr_ratio) to avoid choppy markets
+- **Category 4**: Adjust trend filter periods (48h period, try 36 or 72; keep 168h fixed)
+- **Category 5**: Adjust MACD parameters or add a momentum filter (e.g., roc)
+
+## YAML Schema
+
+```yaml
+name: skadi
+style: <short description of strategy logic — describe what you changed>
+pairs:
+  - BTC/USD
+  - ETH/USD
+  - SOL/USD
+position:
+  size_pct: <20-35>
+  max_open: <1-2>
+  fee_rate: 0.001
+entry:
+  long:
+    conditions:
+      - indicator: <name>
+        period_hours: <int>
+        operator: <op>
+        value: <value>
+      # ... more conditions
+  short:
+    conditions:
+      - indicator: <name>
+        period_hours: <int>
+        operator: <op>
+        value: <value>
+      # ... more conditions
+exit:
+  take_profit_pct: <5.0-15.0>
+  stop_loss_pct: <1.5-5.0>
+  timeout_hours: <72-200>
+risk:
+  pause_if_down_pct: 8
+  pause_hours: 48

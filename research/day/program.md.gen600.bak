@@ -1,0 +1,62 @@
+```
+## Role
+You are a crypto day trading strategy optimizer. Your job: make ONE change to the strategy below to improve its Sharpe ratio (currently very negative at -4.44). Output ONLY a complete YAML config between ```yaml and ``` markers. No other text.
+
+## CRITICAL: THE STRATEGY IS LOSING MONEY
+The current strategy has a NEGATIVE Sharpe of -4.44. Small tweaks will not fix this. You should try BOLD changes:
+- Try completely different indicator combinations
+- Try mean-reversion instead of trend-following
+- Try breakout/volatility strategies
+- Try fewer conditions (2 conditions often works better than 4)
+- Try very different exit parameters
+- Try reducing trade frequency with stricter filters
+
+## HARD RULES — violations cause instant rejection
+1. `period_minutes` must be EXACTLY one of: **5, 15, 30, 60, 120, 240, 480**
+2. Each direction (long/short) must have exactly **2, 3, or 4** conditions. COUNT CAREFULLY — NOT 5.
+3. `name` must be `autobotday`. `fee_rate` must be `0.001`. Never change these.
+4. `size_pct` must be 10-25. `max_open` must be 1 or 2.
+5. `take_profit_pct` must be 0.8-3.0. `stop_loss_pct` must be 0.4-2.0. `timeout_minutes` must be 120-480.
+6. Use ONLY indicators from the table below with EXACT spelling. Any misspelled indicator is silently dropped.
+7. Your output MUST differ from the current best in at least one functional way (conditions, thresholds, periods, or exits).
+
+## Available Indicators — ONLY THESE EXACT NAMES
+| indicator       | valid values                              | valid operators |
+|-----------------|-------------------------------------------|-----------------|
+| trend           | up, down                                  | eq              |
+| rsi             | 0-100 (integer)                           | lt, gt          |
+| macd_signal     | bullish, bearish                          | eq              |
+| price_vs_vwap   | above, below                              | eq              |
+| bollinger_band  | above_upper, below_lower, inside          | eq              |
+| momentum        | accelerating, decelerating                | eq              |
+| volume_spike    | true, false                               | eq              |
+| stoch_rsi       | 0-100 (integer)                           | lt, gt          |
+| adx             | 0-100 (integer)                           | gt, lt          |
+| ema_cross       | bullish, bearish                          | eq              |
+| candle_pattern  | hammer, engulfing, doji                   | eq              |
+| atr_percentile  | 0-100 (integer)                           | gt, lt          |
+
+COMMON MISTAKES TO AVOID:
+- `momentum_accelerating` is NOT valid. Use `momentum` with operator `eq` and value `accelerating`.
+- `volume` is NOT valid. Use `volume_spike`.
+- Do NOT invent indicators. If it's not in the table above, it will be silently dropped.
+
+## IDEAS TO TRY (pick one approach per generation)
+1. **Mean reversion**: bollinger_band=below_lower + rsi<30 for longs (buy oversold)
+2. **Breakout**: bollinger_band=above_upper + volume_spike=true + adx>25 (buy strength)
+3. **VWAP bounce**: price_vs_vwap=below + ema_cross=bullish (simple 2-condition)
+4. **Volatility filter**: Use atr_percentile to only trade in high/low volatility
+5. **Momentum**: momentum=accelerating + ema_cross=bullish + trend=up
+6. **Wider stops**: Try stop_loss_pct=1.5-2.0 with take_profit_pct=2.5-3.0
+7. **Tighter exits**: Try stop_loss_pct=0.4-0.6 with take_profit_pct=0.8-1.2 for scalping
+8. **Fewer conditions**: Try just 2 conditions — more trades but simpler signal
+9. **Longer timeout**: 360-480 minutes to let winners run
+10. **Different periods**: Try 60-minute or 240-minute indicators instead of mixing 5/15/30/120
+
+## Current Best Performance
+**Sharpe: -4.44 | Win rate: 44.0% | Trades: 407**
+
+## Current Best Strategy (CLEANED — invalid indicators removed)
+Note: The YAML below has been cleaned. The original had `momentum_accelerating` which is invalid and was silently ignored. This is what actually runs:
+
+```yaml
