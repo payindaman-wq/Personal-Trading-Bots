@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-prepare.py - Fetch 2 years of OHLCV data for Volva research.
+prepare.py - Fetch 2 years of OHLCV data for Odin research.
 
 Source : Binance public API (no key needed, best free historical coverage)
 Pairs  : BTC/USD, ETH/USD, SOL/USD
@@ -48,7 +48,7 @@ def binance_klines(symbol, interval, start_ms, end_ms, limit=1000):
         "&endTime=" + str(end_ms) +
         "&limit=" + str(limit)
     )
-    req = urllib.request.Request(url, headers={"User-Agent": "volva-research/1.0"})
+    req = urllib.request.Request(url, headers={"User-Agent": "odin-research/1.0"})
     with urllib.request.urlopen(req, timeout=30) as r:
         return json.loads(r.read())
 

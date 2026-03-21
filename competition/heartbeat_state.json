@@ -5,8 +5,8 @@
   },
   "error_consecutive": {
     "day_errors": 0,
-    "swing_errors": 1,
+    "swing_errors": 0,
     "arb_errors": 0,
-    "spread_errors": 1
+    "spread_errors": 0
   }
 }

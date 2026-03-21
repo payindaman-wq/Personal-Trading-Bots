@@ -15,9 +15,17 @@
   ],
   "starting_capital": 1000.0,
   "fee_rate": 0.001,
-  "equity": 991.63,
+  "equity": 991.33,
   "peak_equity": 1000.0,
-  "positions": [],
+  "positions": [
+    {
+      "pair": "ETH/USD",
+      "direction": "short",
+      "entry_price": 2153.1,
+      "size_usd": 297.49,
+      "opened_at": "2026-03-21T21:30:04.778537+00:00"
+    }
+  ],
   "stats": {
     "total_trades": 1,
     "wins": 0,
@@ -25,9 +33,9 @@
     "win_rate": 0.0,
     "total_pnl_usd": -8.07,
     "total_pnl_pct": -2.5904,
-    "total_fees": 0.6,
+    "total_fees": 0.8975,
     "max_drawdown_pct": 0.837,
-    "current_equity": 991.63,
+    "current_equity": 991.33,
     "sum_losses_usd": -8.07
   },
   "closed_trades": [

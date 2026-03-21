@@ -161,6 +161,30 @@
     border-bottom-color: var(--gold);
   }
 
+  /* ── Sub-Tab Bar (Past Sprints / Auto Research) ── */
+  .sub-tab-bar {
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    gap: 0;
+  }
+  .sub-tab-btn {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--muted);
+    font-family: inherit;
+    font-size: 10px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .sub-tab-btn:hover { color: var(--text); }
+  .sub-tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
+
   /* ── Tab Panels ── */
   .tab-panel { display: none; }
   .tab-panel.active { display: block; }
@@ -995,7 +1019,10 @@
   <button class="tab-btn" onclick="switch_tab('arb', this)">Arbitrage</button>
   <button class="tab-btn" onclick="switch_tab('spread', this)">Spread</button>
   <button class="tab-btn" onclick="switch_tab('polymarket', this)">Prediction</button>
-  <button class="tab-btn" onclick="switch_tab('archive', this)">Archive</button>
+</div>
+<div class="sub-tab-bar">
+  <button class="sub-tab-btn" onclick="switch_tab('archive', this)">Past Sprints</button>
+  <button class="sub-tab-btn" onclick="switch_tab('research', this)">Auto Research</button>
 </div>
 </div><!-- end sticky-top -->
 
@@ -1042,7 +1069,14 @@
   </div>
 </div>
 
-<!-- Tab: Archive -->
+<!-- Tab: Auto Research -->
+<div class="tab-panel" id="tab-research">
+  <div class="main" id="main-research">
+    <div class="loading">Loading auto research data...</div>
+  </div>
+</div>
+
+<!-- Tab: Past Sprints -->
 <div class="tab-panel" id="tab-archive">
   <div class="main" id="main-archive">
     <div class="loading">Loading archive data...</div>
@@ -1054,9 +1088,9 @@
 
 function switch_tab(name, btn) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-btn, .sub-tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
-  btn.classList.add('active');
+  if (btn) btn.classList.add('active');
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -1106,12 +1140,21 @@ function rank_class(r) {
   return '';
 }
 
-function fmt_ts_short(iso) {
-  if (!iso) return '';
+function to_pst(iso) {
+  if (!iso) return '—';
   try {
-    const d = new Date(iso);
-    return d.toUTCString().slice(5, 22) + ' UTC';
-  } catch(e) { return iso; }
+    // Stored timestamps have no timezone suffix — force UTC interpretation
+    const s = /[Z+\-]\d*$/.test(iso.trim()) ? iso : iso.trim() + 'Z';
+    return new Date(s).toLocaleString('en-US', {
+      timeZone: 'America/Los_Angeles',
+      month: 'short', day: 'numeric',
+      hour: '2-digit', minute: '2-digit', hour12: false
+    }).replace(',', '');
+  } catch(e) { return iso.slice(0, 16).replace('T', ' '); }
+}
+
+function fmt_ts_short(iso) {
+  return to_pst(iso);
 }
 
 function esc(s) {
@@ -1261,7 +1304,10 @@ function render_league(id, league, cycle_state) {
     ? render_live_sprint(ls, cycle_num, sprint_num)
     : `<div class="idle-notice">No active sprint — awaiting next competition start</div>`;
 
-  const cum_label = `Cycle #${cycle_num} &mdash; ${league.total_sprints} sprint${league.total_sprints !== 1 ? 's' : ''} recorded`;
+  const completed_sprints = Math.max(0, league.total_sprints - (is_live ? 1 : 0));
+  const cum_label = completed_sprints > 0
+    ? `Cycle #${cycle_num} &mdash; ${completed_sprints} sprint${completed_sprints !== 1 ? 's' : ''} completed &middot; sprint #${sprint_num} in progress`
+    : `Cycle #${cycle_num} &mdash; Sprint #${sprint_num} in progress`;
   const cum_section = league.cumulative_rankings && league.cumulative_rankings.length > 0
     ? render_cumulative(league.cumulative_rankings, cum_label)
     : '';
@@ -1560,6 +1606,76 @@ function render_fleet(roster, pm, pm_auto) {
        + section_table(auto_section('world_events'),'Prediction — World Events')
        + section_table(auto_section('arb'),         'Prediction — Arb');
 }
+
+// ── Auto Research Tab ─────────────────────────────────────────────────────────────────
+
+function render_auto_research(mimir, odin) {
+  if (!mimir || !mimir.analyses || mimir.analyses.length === 0) {
+    return '<div style="padding:40px;text-align:center;color:var(--muted);font-size:11px;letter-spacing:.5px;">No Mimir analyses yet &mdash; analyses are generated every 100 ODIN generations</div>';
+  }
+  const total        = mimir.total_analyses || mimir.analyses.length;
+  const day_gen      = odin && odin.day   ? odin.day.generations   : null;
+  const swing_gen    = odin && odin.swing ? odin.swing.generations : null;
+  const day_count    = mimir.analyses.filter(a => a.league === 'day').length;
+  const swing_count  = mimir.analyses.filter(a => a.league === 'swing').length;
+  const update_count = mimir.analyses.filter(a => a.program_updated).length;
+
+  function next_ms(g) { return g ? (Math.floor(g / 100) + 1) * 100 : null; }
+
+  let html = `
+  <div style="padding:24px 0 8px;">
+    <div style="font-size:20px;font-weight:bold;color:var(--gold);letter-spacing:3px;margin-bottom:8px;">AUTO RESEARCH</div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:20px;max-width:720px;">
+      Mimir performs a deep analysis at every 100-generation ODIN milestone, reviewing research results and live sprint performance. It then rewrites the research program to guide the next 100 generations.
+    </div>
+    <div style="display:flex;gap:28px;flex-wrap:wrap;margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid var(--border);">
+      <div style="font-size:11px;color:var(--muted);">Total Analyses: <span style="color:var(--text);font-weight:bold;">${total}</span></div>
+      <div style="font-size:11px;color:var(--muted);">Day: <span style="color:var(--text);">${day_count}</span></div>
+      <div style="font-size:11px;color:var(--muted);">Swing: <span style="color:var(--text);">${swing_count}</span></div>
+      <div style="font-size:11px;color:var(--muted);">Program Updated: <span style="color:var(--green);font-weight:bold;">${update_count}/${total}</span></div>
+      ${day_gen   ? `<div style="font-size:11px;color:var(--muted);">Next Day Milestone: Gen <span style="color:var(--text);">${next_ms(day_gen).toLocaleString()}</span> (${next_ms(day_gen)-day_gen} away)</div>` : ""}
+      ${swing_gen ? `<div style="font-size:11px;color:var(--muted);">Next Swing Milestone: Gen <span style="color:var(--text);">${next_ms(swing_gen).toLocaleString()}</span> (${next_ms(swing_gen)-swing_gen} away)</div>` : ""}
+    </div>
+  </div>`;
+
+  mimir.analyses.forEach((entry, idx) => {
+    const lg = entry.league || 'unknown';
+    const badge_cls = lg === 'day' ? 'badge-day' : lg === 'swing' ? 'badge-swing' : '';
+    const updated_badge = entry.program_updated
+      ? '<span style="font-size:10px;background:var(--green);color:#000;padding:2px 7px;border-radius:3px;white-space:nowrap;">Program Updated</span>'
+      : '<span style="font-size:10px;background:var(--border);color:var(--muted);padding:2px 7px;border-radius:3px;white-space:nowrap;">No Change</span>';
+    const formatted = esc(entry.analysis || '')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n\n/g, '</p><p style="margin:10px 0 0;">')
+      .replace(/\n/g, '<br>');
+    html += `
+    <div class="archive-card" id="mir-${idx}">
+      <div class="archive-row" onclick="toggle_mimir(${idx})" style="gap:12px;align-items:center;">
+        <span class="badge ${badge_cls}" style="min-width:52px;text-align:center;">${lg.toUpperCase()}</span>
+        <span style="display:flex;flex-direction:column;gap:2px;min-width:160px;">
+          <span style="font-size:12px;font-weight:bold;color:var(--text);">Gen ${entry.generation.toLocaleString()} Milestone</span>
+          <span style="font-size:10px;color:var(--muted);">${to_pst(entry.ts || '')}</span>
+        </span>
+        ${updated_badge}
+        <span style="flex:1;font-size:11px;color:var(--muted);font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" class="hide-mobile">${esc(entry.snippet || '')}</span>
+        <span class="archive-expand-icon"></span>
+      </div>
+      <div class="archive-detail">
+        <div style="font-size:13px;color:var(--text);line-height:1.8;">
+          <p style="margin:0;">${formatted}</p>
+        </div>
+      </div>
+    </div>`;
+  });
+
+  return `<div style="display:flex;flex-direction:column;gap:0;">${html}</div>`;
+}
+
+function toggle_mimir(idx) {
+  const card = document.getElementById('mir-' + idx);
+  if (card) card.classList.toggle('expanded');
+}
+
 
 // ── Archive Tab ────────────────────────────────────────────────────────────────
 
@@ -1883,7 +1999,7 @@ function render_polymarket(pm, cycle_state, cum_rankings, total_sprints) {
     };
     const fmt_date = ts => {
       if (!ts) return '\u2014';
-      try { return new Date(ts).toLocaleDateString('en-US', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); }
+      try { return new Date(ts).toLocaleString('en-US', {timeZone:'America/Los_Angeles',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).replace(',',''); }
       catch { return ts.slice(0,16).replace('T',' '); }
     };
     const closed_rows = all_closed.map(p => {
@@ -1948,7 +2064,7 @@ function pm_research_card(pm) {
   const total    = pm.total || 0;
   const ready    = pm.researcher_ready || total >= 500;
   const by_src   = pm.by_source || {};
-  const last_run = pm.last_run ? pm.last_run.replace('T', ' ').substring(0, 19) + ' UTC' : '\u2014';
+  const last_run = to_pst(pm.last_run);
   const status_badge = ready
     ? '<span class="badge badge-live" style="display:inline-block;margin-bottom:8px">Data Ready</span>'
     : '<span class="badge" style="display:inline-block;margin-bottom:8px;background:#e6a817;color:#000">Collecting</span>';
@@ -1999,7 +2115,7 @@ function render_mimir_activity(mimir, odin) {
       <div style="flex:1;min-width:220px;">
         <div style="font-size:11px;font-weight:bold;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">${label} League</div>
         <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">
-          Gen ${entry.generation.toLocaleString()} &mdash; ${(entry.ts || '').replace('T', ' ')} UTC ${updated_badge}
+          Gen ${entry.generation.toLocaleString()} &mdash; ${to_pst(entry.ts || '')} ${updated_badge}
         </div>
         <div style="font-size:12px;color:var(--text);line-height:1.65;font-style:italic;margin-bottom:6px;">"${entry.snippet || '\u2014'}"</div>
         ${(gens_away !== null && gens_away > 0) ? `<div style="font-size:10px;color:var(--muted);">Next analysis at gen ${next_milestone.toLocaleString()} &mdash; ${gens_away.toLocaleString()} generations away</div>` : ''}
@@ -2009,8 +2125,9 @@ function render_mimir_activity(mimir, odin) {
   const swing_gen = odin && odin.swing ? odin.swing.generations : null;
   return `
   <div style="border-top:1px solid var(--border);padding-top:20px;margin-top:4px;margin-bottom:28px;">
-    <div style="font-size:11px;font-weight:bold;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">
-      MIMIR &mdash; Last Analysis
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:bold;color:var(--muted);letter-spacing:2px;text-transform:uppercase;">MIMIR &mdash; Last Analysis</div>
+      <button onclick="switch_tab('research',null)" style="background:none;border:1px solid var(--border);color:var(--blue);font-size:11px;letter-spacing:1px;padding:3px 10px;border-radius:4px;cursor:pointer;">View Auto Research &rsaquo;</button>
     </div>
     <div style="display:flex;gap:32px;flex-wrap:wrap;">
       ${league_block('Day',   mimir.last_day,   day_gen)}
@@ -2029,7 +2146,7 @@ function render_odin_research(odin) {
       : '<span class="badge" style="display:inline-block;margin-bottom:8px;background:var(--muted);color:#000">Stopped</span>';
     const sharpe_val = d.best_sharpe !== null ? d.best_sharpe.toFixed(4) : '\u2014';
     const sharpe_col = (d.best_sharpe !== null && d.best_sharpe >= 0) ? 'var(--green)' : 'var(--red)';
-    const last_ts    = d.last_activity ? d.last_activity.replace('T', ' ') + ' UTC' : '\u2014';
+    const last_ts    = to_pst(d.last_activity);
     const spark      = odin_sparkline(d.sparkline);
     return `<div class="ov-card active" style="font-size:13px;line-height:1.8;min-width:220px;max-width:320px;">
       ${badge}
@@ -2087,18 +2204,19 @@ function render_overview(data) {
   const pm      = window._pm_data;
   const pm_auto = window._pm_auto_data;
 
-  function active_card(title, meta, badge_cls, badge_lbl, stats, leader_bot, leader_pnl, strategy) {
+  function active_card(title, meta, badge_cls, badge_lbl, stats, leader_bot, leader_pnl, strategy, tab_id) {
     const leader_html = leader_bot
       ? `<div class="ov-card-leader">Leader: <span class="ov-leader-name">${esc(leader_bot)}</span>${leader_pnl !== null ? ' &mdash; ' + fmt_pnl_usd(leader_pnl) : ''}</div>`
       : '';
     const strategy_html = strategy
-      ? `<div class="ov-card-strategy"><div class="ov-card-strategy-label">Strategy</div>${strategy}</div>`
+      ? `<div class="ov-card-strategy">${strategy}</div>`
       : '';
     const stats_html = stats.map(s =>
       `<div class="ov-stat"><span class="ov-stat-val">${s.val}</span><span class="ov-stat-lbl">${s.lbl}</span></div>`
     ).join('');
+    const click = tab_id ? ` onclick="switch_tab('${tab_id}',null)" style="cursor:pointer;"` : '';
     return `
-    <div class="ov-card active">
+    <div class="ov-card active"${click}>
       <span class="badge ${badge_cls}" style="display:inline-block;margin-bottom:8px">${badge_lbl}</span>
       <div class="ov-card-title">${title}</div>
       <div class="ov-card-meta">${meta}</div>
@@ -2124,7 +2242,7 @@ function render_overview(data) {
     const is_live = !!day.live_sprint;
     const bots    = (day.cumulative_rankings || []).length;
     const leader  = day.cumulative_rankings && day.cumulative_rankings[0];
-    const cycle_sprints = (day.sprint_in_cycle || 0) + (is_live ? 1 : 0);
+    const cycle_sprints = day.sprint_in_cycle || 0;
     const stats   = [
       { val: bots,           lbl: 'Bots'    },
       { val: cycle_sprints,  lbl: 'Sprints' },
@@ -2136,7 +2254,8 @@ function render_overview(data) {
       stats,
       leader ? leader.bot : null,
       leader ? leader.cumulative_pnl_usd : null,
-      'Each bot has its own trading instinct — some chase momentum, others hunt reversals or breakouts. AutoBotDay is V\u00f6lva research slot, running the best strategy found through continuous backtesting. Best cumulative profit takes the crown.'
+      'Each bot has its own trading instinct — some chase momentum, others hunt reversals or breakouts. AutoBotDay is Odin\'s research slot, running the best strategy found through continuous backtesting. Best cumulative profit takes the crown.',
+      'day'
     );
   } else {
     day_card = `<div class="ov-card pending"><span class="ov-pending-badge">Not Started</span><div class="ov-card-title">Day Trading League</div><div class="ov-card-meta">1d sprints &mdash; 7-sprint cycles, 16 pairs</div></div>`;
@@ -2159,7 +2278,8 @@ function render_overview(data) {
       stats,
       leader ? leader.bot : null,
       leader ? leader.cumulative_pnl_usd : null,
-      'Rather than reacting to every price tick, these bots look for bigger, slower-moving trends and ride them over several days. AutoBotSwing is V\u00f6lva research slot, running the best swing strategy found through continuous backtesting.'
+      'Rather than reacting to every price tick, these bots look for bigger, slower-moving trends and ride them over several days. AutoBotSwing is Odin\'s research slot, running the best swing strategy found through continuous backtesting.',
+      'swing'
     );
   } else {
     swing_card = `<div class="ov-card pending"><span class="ov-pending-badge">Not Started</span><div class="ov-card-title">Swing Trading League</div><div class="ov-card-meta">7d sprints &mdash; 4-sprint cycles, multi-pair</div></div>`;
@@ -2183,7 +2303,8 @@ function render_overview(data) {
       stats,
       leader ? leader.bot : null,
       leader ? leader.cumulative_pnl_usd : null,
-      'Two coins that normally move in sync sometimes drift apart. These bots bet that they’ll snap back together — buying the laggard and selling the leader until the gap closes.'
+      'Two coins that normally move in sync sometimes drift apart. These bots bet that they’ll snap back together — buying the laggard and selling the leader until the gap closes.',
+      'spread'
     );
   } else {
     spread_card = `<div class="ov-card pending"><span class="ov-pending-badge">Not Started</span><div class="ov-card-title">Spread Trading League</div><div class="ov-card-meta">7d sprints — 4-sprint cycles, ratio pairs</div></div>`;
@@ -2207,7 +2328,8 @@ function render_overview(data) {
       stats,
       leader ? leader.bot : null,
       leader ? leader.cumulative_pnl_usd : null,
-      'When the price ratio between two historically linked coins goes unusually high or low, bots trade both sides expecting it to normalize. The bet is on the relationship between the coins — not which direction either one moves.'
+      'When the price ratio between two historically linked coins goes unusually high or low, bots trade both sides expecting it to normalize. The bet is on the relationship between the coins — not which direction either one moves.',
+      'arb'
     );
   } else {
     arb_card = `<div class="ov-card pending"><span class="ov-pending-badge">Not Started</span><div class="ov-card-title">Arbitrage Trading League</div><div class="ov-card-meta">7d sprints &mdash; 4-sprint cycles, correlated pairs</div></div>`;
@@ -2232,7 +2354,7 @@ function render_overview(data) {
     ? poly_cum[0]
     : (all_pm_bots.length > 0 ? { bot: all_pm_bots[0].bot, cumulative_pnl_usd: all_pm_bots[0].pnl_usd } : null);
   const pm_is_live = pm_active;
-  const pm_cycle_sprints = (data.poly_cycle_state && data.poly_cycle_state.sprint_in_cycle) || 0;
+  const pm_cycle_sprints = data.poly_total_sprints || 0;
   const pm_ends_at = pm_auto && pm_auto.sprint_ends_at ? new Date(pm_auto.sprint_ends_at) : null;
   const pm_secs_remaining = pm_ends_at ? Math.max(0, Math.round((pm_ends_at.getTime() - Date.now()) / 1000)) : 0;
   const pm_stats = [
@@ -2246,7 +2368,8 @@ function render_overview(data) {
     pm_stats,
     pm_leader ? pm_leader.bot : null,
     pm_leader ? pm_leader.cumulative_pnl_usd : null,
-    'Bots trade yes/no prediction market contracts. Some copy the moves of the best-performing traders on the platform. Others compare contract prices against Vegas odds and forecasting sites to find bets that look mispriced.'
+    'Bots trade yes/no prediction market contracts. Some copy the moves of the best-performing traders on the platform. Others compare contract prices against Vegas odds and forecasting sites to find bets that look mispriced.',
+    'polymarket'
   );
 
 
@@ -2255,8 +2378,8 @@ function render_overview(data) {
   const mimir_el = document.getElementById('mimir-last');
   if (mimir_el) {
     const parts = [];
-    if (mimir.last_day)   parts.push('Day: gen ' + mimir.last_day.generation   + ' — ' + (mimir.last_day.ts   || '').replace('T',' ') + ' UTC');
-    if (mimir.last_swing) parts.push('Swing: gen ' + mimir.last_swing.generation + ' — ' + (mimir.last_swing.ts || '').replace('T',' ') + ' UTC');
+    if (mimir.last_day)   parts.push('Day: gen ' + mimir.last_day.generation   + ' — ' + to_pst(mimir.last_day.ts   || ''));
+    if (mimir.last_swing) parts.push('Swing: gen ' + mimir.last_swing.generation + ' — ' + to_pst(mimir.last_swing.ts || ''));
     if (parts.length) {
       mimir_el.innerHTML = 'Last analysis: ' + parts.join(' | ');
     } else {
@@ -2409,8 +2532,7 @@ function render(data) {
   // Update header timestamp
   const updated_el = document.getElementById('updated');
   if (updated_el && data.generated_at) {
-    const d = new Date(data.generated_at);
-    updated_el.textContent = d.toUTCString().replace('GMT', 'UTC');
+    updated_el.textContent = to_pst(data.generated_at);
   }
 
   // System health bar
@@ -2465,6 +2587,10 @@ function render(data) {
       : '<div class="idle-notice">No spread data yet &mdash; run spread_competition_start.py to begin</div>')
       + render_activity_feed(data.activity_feed, 'spread');
   }
+
+  // Auto Research tab
+  const research_el = document.getElementById('main-research');
+  if (research_el) research_el.innerHTML = render_auto_research(data.mimir_state, data.odin_research);
 
   // Archive tab
   const cycle_configs = { day: day_cs, swing: swing_cs, arb: arb_cs };

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-pm_collector.py — Collects resolved prediction market data for Volva research.
+pm_collector.py — Collects resolved prediction market data for Odin research.
 Runs every 4h via cron. Appends new resolved markets to resolved_markets.jsonl.
 Sources: Polymarket (Gamma API), Kalshi, Manifold.
 """
@@ -20,7 +20,7 @@ os.makedirs(RESEARCH_DIR, exist_ok=True)
 def api_get(url, headers=None, timeout=20):
     req = urllib.request.Request(
         url,
-        headers={"User-Agent": "volva-pm-collector/1.0",
+        headers={"User-Agent": "odin-pm-collector/1.0",
                  "Accept": "application/json", **(headers or {})}
     )
     try:

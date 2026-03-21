@@ -638,7 +638,7 @@ MIMIR_LOG = "/root/.openclaw/workspace/research/mimir_log.jsonl"
 
 def get_mimir_state():
     """Read Mimir analysis log and return dashboard state."""
-    state = {"analyses": [], "last_day": None, "last_swing": None}
+    state = {"analyses": [], "last_day": None, "last_swing": None, "total_analyses": 0}
     if not os.path.exists(MIMIR_LOG):
         return state
     entries = []
@@ -650,10 +650,10 @@ def get_mimir_state():
                     entries.append(json.loads(line))
                 except Exception:
                     pass
+    analyses = []
     for e in reversed(entries):
-        lg = e.get("league")
+        lg = e.get("league", "")
         analysis = e.get("analysis", "")
-        # First 2 sentences or 280 chars, whichever is shorter
         snippet = ""
         if analysis:
             sentences = analysis.replace("\n", " ").split(". ")
@@ -662,21 +662,22 @@ def get_mimir_state():
                 snippet = snippet[:277] + "..."
             elif not snippet.endswith("."):
                 snippet += "."
-        entry = {
+        entry_full = {
             "ts":              e["ts"],
+            "league":          lg,
             "generation":      e["generation"],
             "program_updated": e.get("program_updated", False),
+            "analysis":        analysis,
             "snippet":         snippet,
         }
-        if lg == "day"   and state["last_day"]   is None:
-            state["last_day"]   = entry
+        analyses.append(entry_full)
+        if lg == "day" and state["last_day"] is None:
+            state["last_day"] = {k: v for k, v in entry_full.items() if k != "analysis"}
         if lg == "swing" and state["last_swing"] is None:
-            state["last_swing"] = entry
-        if state["last_day"] and state["last_swing"]:
-            break
+            state["last_swing"] = {k: v for k, v in entry_full.items() if k != "analysis"}
+    state["analyses"]       = analyses
     state["total_analyses"] = len(entries)
     return state
-
 
 PM_COLLECTOR_STATE = "/root/.openclaw/workspace/research/polymarket/collector_state.json"
 PM_RESOLVED_FILE   = "/root/.openclaw/workspace/research/polymarket/resolved_markets.jsonl"
@@ -780,8 +781,8 @@ def get_odin_research():
         return result
 
     return {
-        "day":   parse_league(ODIN_DAY_RESULTS,   "volva_day.service"),
-        "swing": parse_league(ODIN_SWING_RESULTS, "volva_swing.service"),
+        "day":   parse_league(ODIN_DAY_RESULTS,   "odin_day.service"),
+        "swing": parse_league(ODIN_SWING_RESULTS, "odin_swing.service"),
     }
 
 
@@ -813,6 +814,8 @@ def build():
             "sprint_duration_hours": 24,
             "active_sprint":         day_active_id,
             "total_sprints":         day_lb.get("total_sprints", 0),
+            "archived_sprints":      day_lb.get("archived", 0),
+            "sprint_in_cycle":       day_lb.get("sprint_in_cycle", 0),
             "cumulative_rankings":   day_lb.get("rankings", []),
             "live_sprint":           get_live_sprint("day", day_active_id),
         }
@@ -823,6 +826,8 @@ def build():
             "sprint_duration_hours": 168,
             "active_sprint":         swing_active_id,
             "total_sprints":         swing_lb.get("total_sprints", 0),
+            "archived_sprints":      swing_lb.get("archived", 0),
+            "sprint_in_cycle":       swing_lb.get("sprint_in_cycle", 0),
             "cumulative_rankings":   swing_lb.get("rankings", []),
             "live_sprint":           get_live_sprint("swing", swing_active_id),
         }

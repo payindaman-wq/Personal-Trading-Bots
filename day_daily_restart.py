@@ -19,7 +19,7 @@ WORKSPACE           = os.environ.get("WORKSPACE", "/root/.openclaw/workspace")
 ACTIVE_DIR          = os.path.join(WORKSPACE, "competition", "active")
 CYCLE_STATE_PATH    = os.path.join(WORKSPACE, "competition", "cycle_state.json")
 START_SCRIPT        = "/root/.openclaw/skills/competition-start/scripts/competition_start.py"
-VOLVA_BEST_DAY      = os.path.join(WORKSPACE, "research", "day", "best_strategy.yaml")
+ODIN_BEST_DAY      = os.path.join(WORKSPACE, "research", "day", "best_strategy.yaml")
 AUTOBOTDAY_STRATEGY = os.path.join(WORKSPACE, "fleet", "autobotday", "strategy.yaml")
 
 
@@ -57,17 +57,17 @@ def hours_running(meta):
     return (datetime.now(timezone.utc) - started).total_seconds() / 3600
 
 
-def inject_volva_strategy():
-    """Copy Volva's current best day strategy into AutoBotDay's fleet slot before sprint starts."""
-    if not os.path.exists(VOLVA_BEST_DAY):
-        print("  [volva] No best_strategy.yaml yet — AutoBotDay keeps current strategy.")
+def inject_odin_strategy():
+    """Copy Odin's current best day strategy into AutoBotDay's fleet slot before sprint starts."""
+    if not os.path.exists(ODIN_BEST_DAY):
+        print("  [odin] No best_strategy.yaml yet — AutoBotDay keeps current strategy.")
         return
     try:
         import shutil
-        shutil.copy2(VOLVA_BEST_DAY, AUTOBOTDAY_STRATEGY)
-        print(f"  [volva] Injected best day strategy -> {AUTOBOTDAY_STRATEGY}")
+        shutil.copy2(ODIN_BEST_DAY, AUTOBOTDAY_STRATEGY)
+        print(f"  [odin] Injected best day strategy -> {AUTOBOTDAY_STRATEGY}")
     except Exception as e:
-        print(f"  [volva] Injection failed: {e} — AutoBotDay keeps current strategy.")
+        print(f"  [odin] Injection failed: {e} — AutoBotDay keeps current strategy.")
 
 
 def start_new():
@@ -101,7 +101,7 @@ def main():
 
     if meta is None:
         print("  No active sprint — starting new 24h sprint.")
-        inject_volva_strategy()
+        inject_odin_strategy()
         start_new()
         return
 
@@ -110,7 +110,7 @@ def main():
 
     if elapsed >= 20.0:
         print(f"  Sprint >= 20h — patching to expire now. Tick will archive; watchdog restarts.")
-        inject_volva_strategy()
+        inject_odin_strategy()
         meta["duration_hours"] = round(elapsed - 0.01, 4)
         with open(os.path.join(comp_dir, "meta.json"), "w") as f:
             json.dump(meta, f, indent=2)

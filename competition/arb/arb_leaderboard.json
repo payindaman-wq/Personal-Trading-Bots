@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-21T09:08:01.486026+00:00",
+  "generated_at": "2026-03-21T21:38:01.471077+00:00",
   "league": "arb",
   "total_sprints": 1,
   "archived": 0,
@@ -10,7 +10,7 @@
   "cycle_status": "active",
   "rankings": [
     {
-      "bot": "fafnir",
+      "bot": "skoll",
       "points": 0,
       "sprints_entered": 1,
       "sprint_wins": 0,
@@ -23,7 +23,7 @@
       "style": "stat arb"
     },
     {
-      "bot": "ymir",
+      "bot": "fafnir",
       "points": 0,
       "sprints_entered": 1,
       "sprint_wins": 0,
@@ -101,16 +101,16 @@
       "style": "stat arb"
     },
     {
-      "bot": "skoll",
+      "bot": "ymir",
       "points": 0,
       "sprints_entered": 1,
       "sprint_wins": 0,
       "podiums": 0,
-      "cumulative_pnl_usd": 0.0,
-      "total_trades": 0,
+      "cumulative_pnl_usd": -0.12,
+      "total_trades": 1,
       "total_wins": 0,
       "overall_win_rate": 0.0,
-      "avg_pnl_pct_per_sprint": 0.0,
+      "avg_pnl_pct_per_sprint": -0.012,
       "style": "stat arb"
     },
     {
@@ -140,6 +140,19 @@
       "style": "stat arb"
     },
     {
+      "bot": "hati",
+      "points": 0,
+      "sprints_entered": 1,
+      "sprint_wins": 0,
+      "podiums": 0,
+      "cumulative_pnl_usd": -7.9,
+      "total_trades": 24,
+      "total_wins": 4,
+      "overall_win_rate": 16.7,
+      "avg_pnl_pct_per_sprint": -0.79,
+      "style": "stat arb"
+    },
+    {
       "bot": "ratatoskr",
       "points": 0,
       "sprints_entered": 1,
@@ -150,19 +163,6 @@
       "total_wins": 0,
       "overall_win_rate": 0.0,
       "avg_pnl_pct_per_sprint": -0.81,
-      "style": "stat arb"
-    },
-    {
-      "bot": "hati",
-      "points": 0,
-      "sprints_entered": 1,
-      "sprint_wins": 0,
-      "podiums": 0,
-      "cumulative_pnl_usd": -12.95,
-      "total_trades": 23,
-      "total_wins": 3,
-      "overall_win_rate": 13.0,
-      "avg_pnl_pct_per_sprint": -1.295,
       "style": "stat arb"
     },
     {
