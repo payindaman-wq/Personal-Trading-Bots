@@ -25,6 +25,7 @@ DAY_RESULTS_DIR   = os.path.join(WORKSPACE, "competition", "results")
 SWING_RESULTS_DIR = os.path.join(WORKSPACE, "competition", "swing", "results")
 ARB_RESULTS_DIR   = os.path.join(WORKSPACE, "competition", "arb", "results")
 SPREAD_RESULTS_DIR = os.path.join(WORKSPACE, "competition", "spread", "results")
+POLY_RESULTS_DIR   = os.path.join(WORKSPACE, "competition", "polymarket", "sprint_results")
 CYCLE_STATE_PATH       = os.path.join(WORKSPACE, "competition", "cycle_state.json")
 SWING_CYCLE_STATE_PATH = os.path.join(WORKSPACE, "competition", "swing", "swing_cycle_state.json")
 POLY_CYCLE_STATE_PATH  = os.path.join(WORKSPACE, "competition", "polymarket", "polymarket_cycle_state.json")
@@ -416,6 +417,45 @@ def get_sprint_archive():
         ("arb",    ARB_RESULTS_DIR),
         ("spread", SPREAD_RESULTS_DIR),
     ]
+
+    # Polymarket sprint results (copy + auto bots, different format)
+    if os.path.isdir(POLY_RESULTS_DIR):
+        for fname in sorted(os.listdir(POLY_RESULTS_DIR), reverse=True):
+            if not fname.endswith(".json"):
+                continue
+            fpath = os.path.join(POLY_RESULTS_DIR, fname)
+            try:
+                with open(fpath) as _f:
+                    pm_data = json.load(_f)
+            except Exception:
+                continue
+            bots_list = pm_data.get("bots", [])
+            if not bots_list:
+                continue
+            bots_sorted = sorted(bots_list, key=lambda b: b.get("sprint_pnl_usd", 0), reverse=True)
+            pm_type = "copy" if fname.endswith("_copy.json") else "auto"
+            rankings = []
+            for rank_i, b in enumerate(bots_sorted, 1):
+                rankings.append({
+                    "rank":          rank_i,
+                    "bot":           b.get("bot", ""),
+                    "final_equity":  round(1000.0 + b.get("sprint_pnl_usd", 0), 2),
+                    "total_pnl_usd": round(b.get("sprint_pnl_usd", 0), 2),
+                    "total_pnl_pct": round(b.get("sprint_pnl_pct", 0), 4),
+                    "total_trades":  b.get("sprint_trades", 0),
+                    "win_rate":      b.get("win_rate", 0),
+                })
+            archive.append({
+                "comp_id":        pm_data.get("sprint_id", fname.replace(".json", "")),
+                "league":         f"polymarket-{pm_type}",
+                "winner":         rankings[0]["bot"] if rankings else "",
+                "duration_hours": 168,
+                "started_at":     pm_data.get("started_at", ""),
+                "scored_at":      pm_data.get("ended_at", ""),
+                "pairs":          ["PM Markets"],
+                "rankings":       rankings,
+                "is_complete":    True,
+            })
 
     for league, results_dir in sources:
         if not os.path.isdir(results_dir):
