@@ -3,7 +3,7 @@
 mimir.py - Mimir deep analysis agent.
 
 Triggered at every 100-generation milestone by the Odin research loop.
-Uses Groq llama-3.3-70b-versatile to analyze research results + sprint
+Uses Claude Sonnet 4.6 to analyze research results + sprint
 performance, then rewrites program.md with improved guidance.
 
 Usage:
@@ -17,41 +17,40 @@ import shutil
 import urllib.request
 from datetime import datetime, timezone
 
-WORKSPACE   = "/root/.openclaw/workspace"
-RESEARCH    = os.path.join(WORKSPACE, "research")
-GROQ_SECRET = "/root/.openclaw/secrets/groq.json"
-GROQ_MODEL  = "llama-3.3-70b-versatile"
-GROQ_URL    = "https://api.groq.com/openai/v1/chat/completions"
-MIMIR_LOG   = os.path.join(RESEARCH, "mimir_log.jsonl")
+WORKSPACE         = "/root/.openclaw/workspace"
+RESEARCH          = os.path.join(WORKSPACE, "research")
+ANTHROPIC_SECRET  = "/root/.openclaw/secrets/anthropic.json"
+ANTHROPIC_MODEL   = "claude-opus-4-6"
+ANTHROPIC_URL     = "https://api.anthropic.com/v1/messages"
+MIMIR_LOG         = os.path.join(RESEARCH, "mimir_log.jsonl")
 
 DAY_RESULTS_DIR   = os.path.join(WORKSPACE, "competition", "results")
 SWING_RESULTS_DIR = os.path.join(WORKSPACE, "competition", "swing", "results")
 
 
-def load_groq_key():
-    with open(GROQ_SECRET) as f:
-        return json.load(f)["groq_api_key"]
+def load_anthropic_key():
+    with open(ANTHROPIC_SECRET) as f:
+        return json.load(f)["anthropic_api_key"]
 
 
-def call_groq(prompt, api_key):
+def call_claude(prompt, api_key):
     payload = json.dumps({
-        "model":       GROQ_MODEL,
-        "messages":    [{"role": "user", "content": prompt}],
-        "temperature": 0.3,
-        "max_tokens":  2000,
+        "model":      ANTHROPIC_MODEL,
+        "max_tokens": 2000,
+        "messages":   [{"role": "user", "content": prompt}],
     }).encode()
     req = urllib.request.Request(
-        GROQ_URL,
+        ANTHROPIC_URL,
         data=payload,
         headers={
-            "Content-Type":  "application/json",
-            "Authorization": f"Bearer {api_key}",
-            "User-Agent":    "Mozilla/5.0",
+            "Content-Type":      "application/json",
+            "x-api-key":         api_key,
+            "anthropic-version": "2023-06-01",
         },
     )
-    with urllib.request.urlopen(req, timeout=60) as r:
+    with urllib.request.urlopen(req, timeout=90) as r:
         data = json.loads(r.read())
-    return data["choices"][0]["message"]["content"].strip()
+    return data["content"][0]["text"].strip()
 
 
 def load_research_results(league):
@@ -241,7 +240,7 @@ def main():
 
     print(f"[mimir/{league}] Gen {generation} milestone — deep analysis starting...")
 
-    api_key = load_groq_key()
+    api_key = load_anthropic_key()
 
     program_path  = os.path.join(RESEARCH, league, "program.md")
     best_path     = os.path.join(RESEARCH, league, "best_strategy.yaml")
@@ -258,11 +257,11 @@ def main():
         research_summary, sprint_summary, generation,
     )
 
-    print(f"  Calling Groq ({GROQ_MODEL})...")
+    print(f"  Calling Claude ({ANTHROPIC_MODEL})...")
     try:
-        response = call_groq(prompt, api_key)
+        response = call_claude(prompt, api_key)
     except Exception as e:
-        print(f"  ERROR calling Groq: {e}")
+        print(f"  ERROR calling Claude: {e}")
         return
 
     analysis, new_program = parse_response(response)

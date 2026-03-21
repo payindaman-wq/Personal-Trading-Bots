@@ -612,10 +612,26 @@ def get_mimir_state():
                     pass
     for e in reversed(entries):
         lg = e.get("league")
+        analysis = e.get("analysis", "")
+        # First 2 sentences or 280 chars, whichever is shorter
+        snippet = ""
+        if analysis:
+            sentences = analysis.replace("\n", " ").split(". ")
+            snippet = ". ".join(sentences[:2]).strip()
+            if len(snippet) > 280:
+                snippet = snippet[:277] + "..."
+            elif not snippet.endswith("."):
+                snippet += "."
+        entry = {
+            "ts":              e["ts"],
+            "generation":      e["generation"],
+            "program_updated": e.get("program_updated", False),
+            "snippet":         snippet,
+        }
         if lg == "day"   and state["last_day"]   is None:
-            state["last_day"]   = {"ts": e["ts"], "generation": e["generation"], "program_updated": e.get("program_updated", False)}
+            state["last_day"]   = entry
         if lg == "swing" and state["last_swing"] is None:
-            state["last_swing"] = {"ts": e["ts"], "generation": e["generation"], "program_updated": e.get("program_updated", False)}
+            state["last_swing"] = entry
         if state["last_day"] and state["last_swing"]:
             break
     state["total_analyses"] = len(entries)

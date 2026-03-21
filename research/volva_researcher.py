@@ -8,7 +8,7 @@ backtests them against 2yr historical data, and keeps winners.
 Usage:
   python3 volva_researcher.py --league day
   python3 volva_researcher.py --league swing
-  python3 volva_researcher.py --league day --sleep 60
+  python3 volva_researcher.py --league day --sleep 90
 """
 import argparse
 import json
@@ -17,6 +17,7 @@ import re
 import sys
 import subprocess
 import time
+import fcntl
 import urllib.request
 from datetime import datetime, timezone
 
@@ -27,6 +28,7 @@ RESEARCH      = os.path.join(WORKSPACE, "research")
 GROQ_SECRET   = "/root/.openclaw/secrets/groq.json"
 GROQ_MODEL    = "llama-3.1-8b-instant"
 GROQ_URL      = "https://api.groq.com/openai/v1/chat/completions"
+GROQ_LOCK     = "/tmp/volva_groq.lock"  # shared lock — only one researcher calls Groq at a time
 
 # Look-ahead bias guard
 SUSPICIOUS_SHARPE = 3.5
@@ -128,8 +130,14 @@ def call_groq(prompt, api_key):
             "User-Agent": "Mozilla/5.0",
         },
     )
-    with urllib.request.urlopen(req, timeout=30) as r:
-        data = json.loads(r.read())
+    # Acquire shared lock — prevents Day and Swing from calling Groq simultaneously
+    with open(GROQ_LOCK, "w") as lf:
+        fcntl.flock(lf, fcntl.LOCK_EX)
+        try:
+            with urllib.request.urlopen(req, timeout=30) as r:
+                data = json.loads(r.read())
+        finally:
+            fcntl.flock(lf, fcntl.LOCK_UN)
     return data["choices"][0]["message"]["content"].strip()
 
 
@@ -171,7 +179,7 @@ def build_prompt(league, program_md, current_strategy_yaml, results_history, gen
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--league", choices=["day", "swing"], required=True)
-    parser.add_argument("--sleep", type=int, default=60,
+    parser.add_argument("--sleep", type=int, default=90,
                         help="Seconds to sleep between cycles (default 60)")
     parser.add_argument("--offset", type=int, default=0,
                         help="Startup delay in seconds to stagger instances")
@@ -226,10 +234,13 @@ def main():
                                     results_history, gen, best_sharpe)
             response = call_groq(prompt, api_key)
         except Exception as e:
-            print(f"| GROQ ERROR: {e}")
-            log_result(league, gen, {}, "groq_error", str(e)[:80])
+            err_str = str(e)
+            print(f"| GROQ ERROR: {err_str}")
+            log_result(league, gen, {}, "groq_error", err_str[:80])
             gen += 1
-            time.sleep(30)
+            # 429 rate limit: back off longer so the window resets
+            wait = 180 if "429" in err_str else 60
+            time.sleep(wait)
             continue
 
         # 2. Extract YAML

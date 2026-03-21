@@ -410,7 +410,7 @@ def main():
         out = {
             "generated_at":      datetime.now(timezone.utc).isoformat(),
             "league":            "swing",
-            "total_sprints":     len(all_sprints),
+            "total_sprints":     len(archived),
             "archived":          len(archived),
             "active_sprint":     active["comp_id"] if active else None,
             "cycle":             cycle_st.get("cycle", 1),

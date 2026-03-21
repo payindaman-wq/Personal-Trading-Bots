@@ -1956,9 +1956,7 @@ function pm_research_card(pm) {
   const bar_width = ready ? 100 : pct;
   const bar_color = ready ? 'var(--green)' : '#e6a817';
   return `
-  <div style="margin-top:24px;border-top:1px solid var(--border);padding-top:20px;">
-    <div style="font-size:13px;font-weight:bold;color:var(--gold);letter-spacing:2px;margin-bottom:10px;">PREDICTION MARKETS RESEARCH</div>
-    <div class="ov-card active" style="font-size:13px;line-height:1.8;max-width:680px;">
+    <div class="ov-card active" style="font-size:13px;line-height:1.8;max-width:480px;margin:0 auto;">
       ${status_badge}
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:2px 14px;margin:8px 0;">
         <div style="color:var(--muted);font-size:11px;">Total Markets</div>
@@ -1976,8 +1974,47 @@ function pm_research_card(pm) {
       </div>
       ${!ready ? `<div style="margin-top:8px;"><div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Dataset progress — ${total.toLocaleString()} / 500 minimum</div><div style="background:var(--border);border-radius:3px;height:6px;"><div style="background:${bar_color};width:${bar_width}%;height:6px;border-radius:3px;transition:width 0.3s;"></div></div></div>` : ''}
       <div style="font-size:11px;color:var(--muted);margin-top:8px;">
-        Collecting resolved markets every 4h. Phase 2 simulation engine and researcher loop build next.
+        Resolved markets collected every 4h from Polymarket, Kalshi, and Manifold.
+        The simulation engine replays each market against bot strategy parameters to score ROI and win rate.
+        The researcher proposes one parameter change per generation and keeps it only if fitness improves.
+        Winning parameters are injected at each 7-day sprint reset.
       </div>
+    </div>`;
+}
+
+function render_mimir_activity(mimir, odin) {
+  if (!mimir) return '';
+  function league_block(label, entry, current_gen) {
+    const next_milestone = current_gen ? (Math.floor(current_gen / 100) + 1) * 100 : null;
+    const gens_away = (next_milestone && current_gen) ? next_milestone - current_gen : null;
+    if (!entry) return `
+      <div style="flex:1;min-width:220px;">
+        <div style="font-size:11px;font-weight:bold;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">${label} League</div>
+        <div style="font-size:11px;color:var(--muted);">No analysis yet &mdash; ${next_milestone ? 'next milestone at gen ' + next_milestone.toLocaleString() + ' (' + gens_away + ' gens away)' : 'first milestone at gen 100'}.</div>
+      </div>`;
+    const updated_badge = entry.program_updated
+      ? '<span style="font-size:10px;background:var(--green);color:#000;padding:1px 6px;border-radius:3px;margin-left:8px;">Program Updated</span>'
+      : '<span style="font-size:10px;background:var(--border);color:var(--muted);padding:1px 6px;border-radius:3px;margin-left:8px;">No Change</span>';
+    return `
+      <div style="flex:1;min-width:220px;">
+        <div style="font-size:11px;font-weight:bold;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">${label} League</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">
+          Gen ${entry.generation.toLocaleString()} &mdash; ${(entry.ts || '').replace('T', ' ')} UTC ${updated_badge}
+        </div>
+        <div style="font-size:12px;color:var(--text);line-height:1.65;font-style:italic;margin-bottom:6px;">"${entry.snippet || '\u2014'}"</div>
+        ${gens_away !== null ? `<div style="font-size:10px;color:var(--muted);">Next analysis at gen ${next_milestone.toLocaleString()} &mdash; ${gens_away.toLocaleString()} generations away</div>` : ''}
+      </div>`;
+  }
+  const day_gen   = odin && odin.day   ? odin.day.generations   : null;
+  const swing_gen = odin && odin.swing ? odin.swing.generations : null;
+  return `
+  <div style="border-top:1px solid var(--border);padding-top:20px;margin-top:4px;margin-bottom:28px;">
+    <div style="font-size:11px;font-weight:bold;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">
+      MIMIR &mdash; Last Analysis
+    </div>
+    <div style="display:flex;gap:32px;flex-wrap:wrap;">
+      ${league_block('Day',   mimir.last_day,   day_gen)}
+      ${league_block('Swing', mimir.last_swing, swing_gen)}
     </div>
   </div>`;
 }
@@ -2017,16 +2054,30 @@ function render_odin_research(odin) {
   }
   return `
   <div style="margin-top:32px;">
-    <div class="ov-section-title" style="font-size:20px;font-weight:bold;color:var(--gold);letter-spacing:3px;padding-bottom:10px;margin-bottom:18px;">Odin Research Lab</div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:16px;max-width:640px;">
-      Continuous strategy optimization. Each generation proposes one change, backtests it against 2 years of BTC, ETH, and SOL data,
-      and keeps it only if the Sharpe ratio improves. Winning strategies are injected at each sprint reset.
+    <div class="ov-section-title" style="font-size:20px;font-weight:bold;color:var(--gold);letter-spacing:3px;padding-bottom:10px;margin-bottom:24px;">Research Lab</div>
+
+    <div style="margin-bottom:28px;">
+      <div style="font-size:13px;font-weight:bold;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">Crypto Markets</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:16px;">
+        Two years of BTC, ETH, and SOL price data are replayed against the current best strategy to score its Sharpe ratio — a measure of return relative to risk. Odin then proposes one change per generation and keeps it only if the score improves. Winning strategies are injected at each sprint reset.
+      </div>
+      <div class="ov-row" style="justify-content:center;">
+        ${league_card('Day', odin.day)}
+        ${league_card('Swing', odin.swing)}
+      </div>
     </div>
-    <div class="ov-row" style="justify-content:center;">
-      ${league_card('Day', odin.day)}
-      ${league_card('Swing', odin.swing)}
+
+    ${render_mimir_activity(odin.mimir, odin)}
+    <div style="border-top:1px solid var(--border);padding-top:24px;">
+      <div style="font-size:13px;font-weight:bold;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">Prediction Markets</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:16px;">
+        Resolved markets are collected every four hours from Polymarket, Kalshi, and Manifold and replayed against each bot\'s strategy parameters to score ROI and win rate. Freya then proposes one parameter change per generation and keeps it only if the score improves. Winning parameters are injected at each 7-day sprint reset.
+      </div>
+      <div style="display:flex;justify-content:center;">
+        ${pm_research_card(odin.pm_research)}
+      </div>
     </div>
-    ${pm_research_card(odin.pm_research)}
+
   </div>`;
 }
 
@@ -2216,11 +2267,9 @@ function render_overview(data) {
 
   return `
   <div>
-    <div style="margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--border);display:flex;align-items:baseline;gap:24px;flex-wrap:wrap;">
-      <div style="font-size:20px;font-weight:bold;color:var(--gold);letter-spacing:3px;white-space:nowrap;">Competitions</div>
-      <div style="font-size:11px;color:var(--muted);line-height:1.7;flex:1;min-width:280px;">
-        Bots compete in repeated <span style="color:var(--text)">sprints</span> — fixed-duration trading windows grouped into a <span style="color:var(--text)">cycle</span>. Each sprint is scored independently; points accumulate across the cycle (1st&nbsp;=&nbsp;8&nbsp;pts, 2nd&nbsp;=&nbsp;5, 3rd&nbsp;=&nbsp;3, 4th+&nbsp;=&nbsp;1) to determine the cycle leader. The bot with the most points at cycle end earns a <span style="color:var(--gold)">live capital allocation</span> on Kraken or Kalshi. Underperforming bots at the end of each cycle are <span style="color:var(--text)">reprogrammed</span> — their strategies rewritten and refined — driving continuous <span style="color:var(--gold)">Evolution</span> across the fleet. Five leagues run in parallel, each testing a different strategy and timeframe.
-      </div>
+    <div class="ov-section-title" style="font-size:20px;font-weight:bold;color:var(--gold);letter-spacing:3px;padding-bottom:10px;margin-bottom:18px;">Competitions</div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:20px;">
+      Bots compete in repeated <span style="color:var(--text)">sprints</span> — fixed-duration trading windows grouped into a <span style="color:var(--text)">cycle</span>. Each sprint is scored independently; points accumulate across the cycle (1st&nbsp;=&nbsp;8&nbsp;pts, 2nd&nbsp;=&nbsp;5, 3rd&nbsp;=&nbsp;3, 4th+&nbsp;=&nbsp;1) to determine the cycle leader. The bot with the most points at cycle end earns a <span style="color:var(--gold)">live capital allocation</span> on Kraken or Kalshi. Underperforming bots at the end of each cycle are <span style="color:var(--text)">reprogrammed</span> — their strategies rewritten and refined — driving continuous <span style="color:var(--gold)">Evolution</span> across the fleet. Five leagues run in parallel, each testing a different strategy and timeframe.
     </div>
     <div class="ov-row">
       ${day_card}
@@ -2232,7 +2281,7 @@ function render_overview(data) {
       ${spread_card}
     </div>
   </div>
-  ${render_odin_research({...data.odin_research, pm_research: data.pm_research})}
+  ${render_odin_research({...data.odin_research, pm_research: data.pm_research, mimir: data.mimir_state})}
   <div>
     <div class="ov-section-title" style="font-size:20px;font-weight:bold;color:var(--gold);letter-spacing:3px;padding-bottom:10px;margin-bottom:18px;">Executive Staff</div>
     <div class="ov-row" style="justify-content:center;">
@@ -2247,9 +2296,17 @@ function render_overview(data) {
       <div class="ov-card active" style="font-size:14px;line-height:1.7;">
         <span class="badge badge-live" style="display:inline-block;margin-bottom:8px">Active</span>
         <div class="ov-card-title" style="font-size:16px;margin-bottom:6px;">ODIN</div>
-        <div class="ov-card-meta" style="font-size:13px;margin-bottom:10px;">Strategy Officer</div>
+        <div class="ov-card-meta" style="font-size:13px;margin-bottom:10px;">Crypto Strategy Officer</div>
         <div class="ov-card-strategy" style="margin-top:8px;font-size:12px;line-height:1.7;">
-          Runs continuous auto-research loops for every league. Proposes strategy modifications, backtests each against 2 years of market data, and promotes only those that improve the Sharpe ratio. Feeds winning strategies to AutoBotDay and AutoBotSwing at each sprint reset.
+          Runs continuous auto-research loops for every crypto league. Proposes strategy modifications, backtests each against 2 years of market data, and promotes only those that improve the Sharpe ratio. Feeds winning strategies to AutoBotDay and AutoBotSwing at each sprint reset.
+        </div>
+      </div>
+      <div class="ov-card active" style="font-size:14px;line-height:1.7;">
+        <span class="badge badge-live" style="display:inline-block;margin-bottom:8px">Active</span>
+        <div class="ov-card-title" style="font-size:16px;margin-bottom:6px;">FREYA</div>
+        <div class="ov-card-meta" style="font-size:13px;margin-bottom:10px;">Prediction Strategy Officer</div>
+        <div class="ov-card-strategy" style="margin-top:8px;font-size:12px;line-height:1.7;">
+          Oversees strategy and research for the prediction markets fleet. Collects resolved markets from Polymarket, Kalshi, and Manifold, optimizes bot parameters through continuous simulation, and feeds winning configurations to the 28 autonomous bots at each 7-day sprint reset.
         </div>
       </div>
       <div class="ov-card active" style="font-size:14px;line-height:1.7;">
@@ -2261,7 +2318,7 @@ function render_overview(data) {
         </div>
         <div id="mimir-last" style="margin-top:8px;font-size:11px;color:var(--muted);"></div>
       </div>
-      <div class="ov-card pending" style="font-size:14px;line-height:1.7;">
+            <div class="ov-card pending" style="font-size:14px;line-height:1.7;">
         <span class="ov-pending-badge">Pending</span>
         <div class="ov-card-title" style="font-size:16px;margin-bottom:6px;">TYR</div>
         <div class="ov-card-meta" style="font-size:13px;margin-bottom:10px;">Risk Officer</div>
