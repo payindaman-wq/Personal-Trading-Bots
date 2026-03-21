@@ -1984,8 +1984,8 @@ function pm_research_card(pm) {
 
 function render_mimir_activity(mimir, odin) {
   if (!mimir) return '';
-  function league_block(label, entry, current_gen, next_milestone_abs) {
-    const next_milestone = next_milestone_abs || (current_gen ? (Math.floor(current_gen / 100) + 1) * 100 : null);
+  function league_block(label, entry, current_gen) {
+    const next_milestone = current_gen ? (Math.floor(current_gen / 100) + 1) * 100 : null;
     const gens_away = (next_milestone && current_gen) ? next_milestone - current_gen : null;
     if (!entry) return `
       <div style="flex:1;min-width:220px;">
@@ -2007,16 +2007,14 @@ function render_mimir_activity(mimir, odin) {
   }
   const day_gen   = odin && odin.day   ? odin.day.generations   : null;
   const swing_gen = odin && odin.swing ? odin.swing.generations : null;
-  const day_next_abs   = mimir && mimir.last_day   ? mimir.last_day.generation   + 100 : null;
-  const swing_next_abs = mimir && mimir.last_swing ? mimir.last_swing.generation + 100 : null;
   return `
   <div style="border-top:1px solid var(--border);padding-top:20px;margin-top:4px;margin-bottom:28px;">
     <div style="font-size:11px;font-weight:bold;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">
       MIMIR &mdash; Last Analysis
     </div>
     <div style="display:flex;gap:32px;flex-wrap:wrap;">
-      ${league_block('Day',   mimir.last_day,   day_gen,   day_next_abs)}
-      ${league_block('Swing', mimir.last_swing, swing_gen, swing_next_abs)}
+      ${league_block('Day',   mimir.last_day,   day_gen)}
+      ${league_block('Swing', mimir.last_swing, swing_gen)}
     </div>
   </div>`;
 }
