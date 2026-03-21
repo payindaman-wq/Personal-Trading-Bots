@@ -295,7 +295,7 @@ def compute_sharpe(snapshots):
     mean_r = sum(rets) / len(rets)
     std_r  = math.sqrt(sum((r - mean_r)**2 for r in rets) / len(rets))
     if std_r == 0:
-        return 0.0
+        return -999.0  # flat equity = 0 trades = always worse than any trading strategy
     return round(mean_r / std_r * math.sqrt(365), 4)
 
 
