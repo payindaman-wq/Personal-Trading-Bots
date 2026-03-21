@@ -34,3 +34,4 @@ gen	sharpe	win_rate	pnl_pct	trades	status	description	ts
 103	0.0000	0.0	0.00	0	gemini_error	HTTP Error 429: Too Many Requests	2026-03-21T07:29
 104	0.0000	0.0	0.00	0	gemini_error	HTTP Error 429: Too Many Requests	2026-03-21T07:32
 105	0.0000	0.0	0.00	0	gemini_error	HTTP Error 429: Too Many Requests	2026-03-21T07:35
+36	-11.4280	42.7	-10.00	302	discarded		2026-03-21T07:36
