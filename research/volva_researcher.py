@@ -117,7 +117,7 @@ def call_gemini(prompt, api_key):
     url = f"{GEMINI_BASE}/{GEMINI_MODEL}:generateContent?key={api_key}"
     payload = json.dumps({
         "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {"temperature": 0.7, "maxOutputTokens": 600},
+        "generationConfig": {"temperature": 0.7, "maxOutputTokens": 1500},
     }).encode()
     req = urllib.request.Request(
         url, data=payload, headers={"Content-Type": "application/json"}
@@ -198,7 +198,15 @@ def main():
             sys.exit(1)
 
     results_history = load_results(league)
-    gen = len(results_history) + 1
+    # Persist gen counter in state to survive restarts
+    state_path = os.path.join(league_dir(league), "gen_state.json")
+    if os.path.exists(state_path):
+        with open(state_path) as _f:
+            _gs = json.load(_f)
+        gen = _gs.get("gen", len(results_history) + 1)
+    else:
+        gen = len(results_history) + 1
+    state = {"consec_429": 0}
 
     print(f"[volva/{league}] Establishing baseline Sharpe for seed strategy...")
     baseline = run_backtest(best_strategy, league, ["BTC/USD", "ETH/USD", "SOL/USD"])
@@ -224,8 +232,15 @@ def main():
             print(f"| GEMINI ERROR: {err_str}")
             log_result(league, gen, {}, "gemini_error", err_str[:80])
             gen += 1
-            # 429 rate limit: back off longer so the window resets
-            wait = 180 if "429" in err_str else 60
+            # 429 rate limit: exponential backoff
+            consec_429 = state.get("consec_429", 0)
+            if "429" in err_str:
+                consec_429 += 1
+                state["consec_429"] = consec_429
+                wait = min(60 * (2 ** (consec_429 - 1)), 600)
+            else:
+                state["consec_429"] = 0
+                wait = 60
             time.sleep(wait)
             continue
 
@@ -316,6 +331,9 @@ def main():
                 print(f'  [mimir] Failed to launch: {e}')
 
         gen += 1
+        # Persist gen counter
+        with open(state_path, "w") as _f:
+            json.dump({"gen": gen}, _f)
         time.sleep(args.sleep)
 
 

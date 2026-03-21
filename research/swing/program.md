@@ -79,8 +79,13 @@ risk:
 Try changes in this order. Pick the FIRST one you haven't tried yet:
 
 ### High Priority (likely to improve Sharpe)
-1. **Widen RSI band for longs**: Change RSI gt value from 40 to 30 (catch earlier uptrends)
-2. **Asymmetric short RSI**: Change short RSI to gt 50, lt 70 (catch overbought reversals)
-3. **Tighten timeout**: Reduce timeout_hours from 120 to 96 (reduce stale trade losses)
-4. **Adjust TP/SL ratio**: Try take_profit_pct: 6.0 with stop_loss_pct: 2.5
-5. **Replace one RSI condition with price_vs_ema**: Add
+1. **Fix short RSI asymmetry**: Change short entry to RSI lt 65 AND RSI gt 50 (currently 30-70 is too wide; shorts should enter overbought territory)
+2. **Widen RSI band for longs**: Change long RSI gt value from 40 to 30 (catch earlier uptrends before momentum builds)
+3. **Tighten timeout**: Reduce timeout_hours from 120 to 96 (stale 5-day trades lose money; let fresh signals re-enter)
+4. **Adjust TP/SL ratio**: Try take_profit_pct: 10.0 with stop_loss_pct: 4.0 (wider swings need room to breathe)
+5. **Add VWAP directional filter**: Add price_vs_vwap eq above for long, eq below for short (removes counter-trend entries)
+6. **Replace weekly trend with price_vs_ema**: Try price_vs_ema period_hours 168 eq above for long instead of trend eq up (EMA is smoother signal)
+7. **Reduce position size**: Try size_pct 20 (less capital at risk per swing, allows max_open 2)
+8. **Add bollinger breakout**: Add bollinger_position inside for longs (entering within bands avoids overstretched entries)
+9. **Shorten medium trend lookback**: Change 48h trend to 24h trend (more responsive to recent direction changes)
+10. **Loosen medium trend**: Change 48h trend from eq up to in [up, flat] for longs (already done for shorts)
