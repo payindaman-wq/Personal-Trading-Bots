@@ -1,6 +1,6 @@
 ```yaml
 name: autobotday
-style: trend-confirmed RSI pullback with VWAP filter and exploration of new indicators
+style: trend-confirmed RSI pullback with VWAP filter
 pairs:
   - BTC/USD
   - ETH/USD
@@ -16,87 +16,75 @@ entry:
         period_minutes: 240
         operator: eq
         value: up
+      - indicator: rsi
+        period_minutes: 15
+        operator: lt
+        value: 45
       - indicator: price_vs_vwap
         period_minutes: 15
         operator: eq
         value: below
-      - indicator: rsi
-        period_minutes: 30
-        operator: lt
-        value: 40
-      - indicator: rsi
-        period_minutes: 15
-        operator: lt
-        value: 30
   short:
     conditions:
       - indicator: trend
         period_minutes: 240
         operator: eq
         value: down
+      - indicator: rsi
+        period_minutes: 15
+        operator: gt
+        value: 55
       - indicator: price_vs_vwap
         period_minutes: 15
         operator: eq
         value: above
-      - indicator: rsi
-        period_minutes: 30
-        operator: gt
-        value: 60
-      - indicator: rsi
-        period_minutes: 15
-        operator: gt
-        value: 70
 exit:
-  take_profit_pct: 1.7
-  stop_loss_pct: 0.7
+  take_profit_pct: 1.3
+  stop_loss_pct: 1.0
   timeout_minutes: 120
 risk:
   pause_if_down_pct: 4
   pause_minutes: 60
   stop_if_down_pct: 10
 guidance:
-  # ---------------------------------------------------------------
-  # CRITICAL: READ ALL RULES BEFORE PROPOSING ANY CHANGE
-  # ---------------------------------------------------------------
-
-  # === RULE 1: VALID INDICATORS ONLY ===
-  # You MUST only use indicators from this exact list.
-  # Any other name will cause a fatal error and waste a generation.
-  # Valid indicators:
-  #   - trend          (operators: eq, values: up / down)
-  #   - price_vs_vwap  (operators: eq, values: above / below)
-  #   - rsi            (operators: lt / gt, values: integer 10-90)
-  #   - macd           (operators: eq, values: bullish / bearish)
-  #   - bb_position    (operators: eq, values: above_upper / below_lower / inside)
-  #   - stoch          (operators: lt / gt, values: integer 10-90)
-  #   - volume_spike   (operators: eq, values: true / false)
-
-  # === RULE 2: VALID PERIODS ===
-  # period_minutes must be one of: 5, 15, 30, 60, 120, 240, 480
-  # No other values are allowed.
-
-  # === RULE 3: VALID EXIT PARAMETERS ===
-  # take_profit_pct: float between 0.5 and 5.0
-  # stop_loss_pct:   float between 0.3 and 3.0
-  # timeout_minutes: integer, one of: 60, 120, 240, 360, 480
-
-  # === RULE 4: VALID RISK PARAMETERS ===
-  # pause_if_down_pct:  float between 2.0 and 8.0
-  # pause_minutes:      integer between 30 and 240
-  # stop_if_down_pct:   float between 5.0 and 20.0
-
-  # === RULE 5: VALID POSITION PARAMETERS ===
-  # size_pct:  integer between 5 and 40
-  # max_open:  integer 1 or 2
-
-  # === RULE 6: CONDITION COUNT ===
-  # Each of entry.long and entry.short must have between 2 and 5 conditions.
-  # Do not remove the trend condition — it is the most important filter.
-
-  # ---------------------------------------------------------------
-  # WHAT TO CHANGE (pick exactly ONE of these per generation)
-  # ---------------------------------------------------------------
-  # A) Adjust a single numeric threshold (e.g. rsi lt 30 -> rsi lt 35)
-  #    Good candidates: rsi values, take_profit_pct, stop_loss_pct,
-  #    timeout_minutes, pause_if_down_pct
+  # ===========================================================
+  # YOUR JOB: Change EXACTLY ONE number or value below.
+  # Output the COMPLETE strategy YAML. Change nothing else.
+  # ===========================================================
   #
+  # STEP 1: Pick ONE thing to change from this list:
+  #
+  #   a) RSI long threshold  (currently 45) -> try 35, 40, or 50
+  #   b) RSI short threshold (currently 55) -> try 50, 60, or 65
+  #   c) take_profit_pct     (currently 1.3) -> try 1.0, 1.1, 1.2, 1.5, 1.7, 2.0
+  #   d) stop_loss_pct       (currently 1.0) -> try 0.5, 0.7, 0.8, 1.2, 1.5
+  #   e) timeout_minutes     (currently 120) -> try 60, 240, or 360
+  #   f) RSI period_minutes  (currently 15) -> try 5, 30, or 60
+  #   g) VWAP period_minutes (currently 15) -> try 5, 30, or 60
+  #   h) Add ONE new condition (max 4 per side). Pick from:
+  #        macd / bb_position / stoch / volume_spike
+  #   i) Remove one non-trend condition (min 2 per side)
+  #   j) pause_if_down_pct   (currently 4) -> try 3, 5, or 6
+  #
+  # STEP 2: Make the change symmetrically for long AND short
+  #         (e.g. if you change RSI long to 40, change RSI short to 60)
+  #
+  # STEP 3: Output the full YAML. Do NOT add commentary.
+  #
+  # ===========================================================
+  # RULES - VIOLATIONS CAUSE ERRORS
+  # ===========================================================
+  #
+  # Valid indicators ONLY:
+  #   trend         (eq: up/down)
+  #   price_vs_vwap (eq: above/below)
+  #   rsi           (lt/gt: 10-90)
+  #   macd          (eq: bullish/bearish)
+  #   bb_position   (eq: above_upper/below_lower/inside)
+  #   stoch         (lt/gt: 10-90)
+  #   volume_spike  (eq: true/false)
+  #
+  # Valid period_minutes: 5, 15, 30, 60, 120, 240, 480
+  # take_profit_pct: 0.5 to 5.0
+  # stop_loss_pct: 0.3 to 3.0
+  # timeout_minutes: 60, 120, 240,

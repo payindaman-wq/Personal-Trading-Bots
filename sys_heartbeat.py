@@ -75,7 +75,7 @@ def load_state():
                 return json.load(f)
         except Exception:
             pass
-    return {"last_alerted": {}}
+    return {"last_alerted": {}, "error_consecutive": {}}
 
 
 def save_state(state):
@@ -273,8 +273,8 @@ def check_volva_health(league):
                 consecutive_errors = 0
             else:
                 consecutive_errors += 1
-    if consecutive_errors >= 5:
-        return f"last 5 generations all errors — Ollama may be stuck"
+    if consecutive_errors >= 3:
+        return f"last 3 generations all errors — Ollama may be stuck"
     if last_success_ts:
         try:
             from datetime import timezone
@@ -368,6 +368,37 @@ def check_polymarket_syn_freshness():
     return None
 
 
+
+def check_price_data_freshness():
+    """Alert if swing price store or arb pair_stats haven't updated in >90 minutes."""
+    problems = []
+    now = time.time()
+    swing_btc = os.path.join(WORKSPACE, "competition", "swing", "price_history", "BTC-USD.json")
+    arb_stats  = os.path.join(WORKSPACE, "competition", "arb", "pair_stats.json")
+    if os.path.isfile(swing_btc):
+        age_min = (now - os.path.getmtime(swing_btc)) / 60
+        if age_min > 90:
+            problems.append(f"swing price data stale ({int(age_min)}m old, expected hourly) — address with Claude Code")
+    if os.path.isfile(arb_stats):
+        age_min = (now - os.path.getmtime(arb_stats)) / 60
+        if age_min > 90:
+            problems.append(f"arb pair_stats stale ({int(age_min)}m old, expected hourly) — address with Claude Code")
+    return problems
+
+
+def check_disk_space():
+    """Alert if disk usage on / exceeds 80%."""
+    try:
+        result = subprocess.run(["df", "/", "--output=pcent"],
+                                capture_output=True, text=True, timeout=5)
+        pct = int(result.stdout.strip().split("\n")[-1].strip().rstrip("%"))
+        if pct >= 80:
+            return f"disk {pct}% full — address with Claude Code"
+    except Exception:
+        pass
+    return None
+
+
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 def main():
@@ -394,9 +425,18 @@ def main():
             key = f"{name}_{suffix}"
             problem = check_fn(league)
             if problem:
-                if should_alert(state, key):
-                    problems.append((key, f"[{name.upper()}] {problem}"))
+                if suffix == "errors":
+                    # Dedup: only alert after 2 consecutive runs with an error
+                    ec = state.setdefault("error_consecutive", {})
+                    ec[key] = ec.get(key, 0) + 1
+                    if ec[key] >= 2 and should_alert(state, key):
+                        problems.append((key, f"[{name.upper()}] {problem}"))
+                else:
+                    if should_alert(state, key):
+                        problems.append((key, f"[{name.upper()}] {problem}"))
             else:
+                if suffix == "errors":
+                    state.setdefault("error_consecutive", {})[key] = 0
                 if key in state["last_alerted"]:
                     resolved.append(key)
                 clear_alert(state, key)
@@ -464,6 +504,22 @@ def main():
     else:
         if key in state["last_alerted"]:
             resolved.append(key)
+        clear_alert(state, key)
+
+
+    # ── Price data freshness ───────────────────────────────────────────────
+    for price_problem in check_price_data_freshness():
+        pk = "price_data_" + ("swing" if "swing" in price_problem else "arb")
+        if should_alert(state, pk):
+            problems.append((pk, f"[DATA] {price_problem}"))
+
+    # ── Disk space ────────────────────────────────────────────────────────
+    key     = "disk_space"
+    problem = check_disk_space()
+    if problem:
+        if should_alert(state, key):
+            problems.append((key, f"[SYSTEM] {problem}"))
+    else:
         clear_alert(state, key)
 
     # ── Gemini quota check (4h cooldown, no clear-on-resolve — prevents flicker spam)

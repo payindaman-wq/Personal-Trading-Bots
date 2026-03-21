@@ -9,7 +9,7 @@
   "spread_name": "SOL/ETH",
   "starting_capital": 1000.0,
   "fee_rate": 0.001,
-  "equity": 999.65,
+  "equity": 995.62,
   "peak_equity": 1000.0,
   "positions": [
     {
@@ -17,23 +17,41 @@
       "direction": "long",
       "pair_a": "SOL/USD",
       "pair_b": "ETH/USD",
-      "entry_ratio": 0.04129642,
-      "entry_z": -2.5657,
-      "entry_price_a": 93.301,
-      "entry_price_b": 2259.3,
-      "size_usd": 350.0,
-      "opened_at": "2026-03-16T05:30:01.307383+00:00"
+      "entry_ratio": 0.04050956,
+      "entry_z": -3.4015,
+      "entry_price_a": 94.047,
+      "entry_price_b": 2321.6,
+      "size_usd": 348.59,
+      "opened_at": "2026-03-21T07:30:02.083757+00:00"
     }
   ],
   "stats": {
-    "total_trades": 0,
+    "total_trades": 1,
     "wins": 0,
-    "losses": 0,
+    "losses": 1,
     "win_rate": 0.0,
-    "total_pnl_usd": 0.0,
-    "total_pnl_pct": 0.0,
-    "total_fees": 0.35,
-    "max_drawdown_pct": 0.0,
-    "current_equity": 999.65
-  }
+    "total_pnl_usd": -3.68,
+    "total_pnl_pct": -0.368,
+    "total_fees": 1.0486,
+    "max_drawdown_pct": 0.403,
+    "current_equity": 995.62
+  },
+  "closed_trades": [
+    {
+      "pair": "SOL/USD/ETH/USD",
+      "pair_a": "SOL/USD",
+      "pair_b": "ETH/USD",
+      "direction": "long",
+      "entry_price_a": 93.301,
+      "entry_price_b": 2259.3,
+      "entry_z": -2.566,
+      "exit_z": -3.401,
+      "size_usd": 350.0,
+      "pnl_pct": -1.905,
+      "net_pnl": -3.68,
+      "reason": "TIMEOUT",
+      "opened_at": "2026-03-16T05:30:01.307383+00:00",
+      "closed_at": "2026-03-21T07:30:02.083724+00:00"
+    }
+  ]
 }

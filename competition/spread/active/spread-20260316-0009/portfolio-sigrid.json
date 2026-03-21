@@ -15,26 +15,33 @@
   ],
   "starting_capital": 1000.0,
   "fee_rate": 0.001,
-  "equity": 999.7,
-  "peak_equity": 1000.0,
-  "positions": [
+  "equity": 1018.31,
+  "peak_equity": 1018.31,
+  "positions": [],
+  "stats": {
+    "total_trades": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "total_pnl_usd": 18.61,
+    "total_pnl_pct": 6.3033,
+    "total_fees": 0.6,
+    "max_drawdown_pct": 0.0,
+    "current_equity": 1018.31,
+    "sum_wins_usd": 18.61
+  },
+  "closed_trades": [
     {
       "pair": "SOL/USD",
       "direction": "short",
       "entry_price": 96.426,
+      "exit_price": 90.348,
       "size_usd": 300.0,
-      "opened_at": "2026-03-16T22:30:05.249170+00:00"
+      "pnl_pct": 6.3,
+      "net_pnl": 18.61,
+      "reason": "TP",
+      "opened_at": "2026-03-16T22:30:05.249170+00:00",
+      "closed_at": "2026-03-21T07:30:05.756791+00:00"
     }
-  ],
-  "stats": {
-    "total_trades": 0,
-    "wins": 0,
-    "losses": 0,
-    "win_rate": 0.0,
-    "total_pnl_usd": 0.0,
-    "total_pnl_pct": 0.0,
-    "total_fees": 0.3,
-    "max_drawdown_pct": 0.0,
-    "current_equity": 999.7
-  }
+  ]
 }

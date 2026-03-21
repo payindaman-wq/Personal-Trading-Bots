@@ -9,7 +9,7 @@
   "spread_name": "ETH/BTC",
   "starting_capital": 1000.0,
   "fee_rate": 0.001,
-  "equity": 963.62,
+  "equity": 963.4,
   "peak_equity": 1000.0,
   "positions": [
     {
@@ -17,24 +17,24 @@
       "direction": "short",
       "pair_a": "ETH/USD",
       "pair_b": "BTC/USD",
-      "entry_ratio": 0.03126719,
-      "entry_z": 3.0291,
-      "entry_price_a": 2352.7,
-      "entry_price_b": 75245.0,
-      "size_usd": 337.39,
-      "opened_at": "2026-03-17T04:00:01.205962+00:00"
+      "entry_ratio": 0.03118209,
+      "entry_z": 2.8319,
+      "entry_price_a": 2321.6,
+      "entry_price_b": 74453.0,
+      "size_usd": 337.31,
+      "opened_at": "2026-03-21T07:30:02.087115+00:00"
     }
   ],
   "stats": {
-    "total_trades": 38,
-    "wins": 4,
+    "total_trades": 39,
+    "wins": 5,
     "losses": 34,
-    "win_rate": 10.5,
-    "total_pnl_usd": -23.03,
-    "total_pnl_pct": -2.303,
-    "total_fees": 26.3562,
-    "max_drawdown_pct": 3.604,
-    "current_equity": 963.62
+    "win_rate": 12.8,
+    "total_pnl_usd": -22.91,
+    "total_pnl_pct": -2.291,
+    "total_fees": 27.0309,
+    "max_drawdown_pct": 3.626,
+    "current_equity": 963.4
   },
   "closed_trades": [
     {
@@ -644,6 +644,22 @@
       "reason": "STOP",
       "opened_at": "2026-03-17T03:30:01.944168+00:00",
       "closed_at": "2026-03-17T04:00:01.205929+00:00"
+    },
+    {
+      "pair": "ETH/USD/BTC/USD",
+      "pair_a": "ETH/USD",
+      "pair_b": "BTC/USD",
+      "direction": "short",
+      "entry_price_a": 2352.7,
+      "entry_price_b": 75245.0,
+      "entry_z": 3.029,
+      "exit_z": 2.832,
+      "size_usd": 337.39,
+      "pnl_pct": 0.272,
+      "net_pnl": 0.12,
+      "reason": "TIMEOUT",
+      "opened_at": "2026-03-17T04:00:01.205962+00:00",
+      "closed_at": "2026-03-21T07:30:02.087082+00:00"
     }
   ]
 }

@@ -30,7 +30,7 @@ entry:
       - indicator: rsi
         period_hours: 14
         operator: lt
-        value: 60
+        value: 70
   short:
     conditions:
       - indicator: trend
@@ -48,11 +48,11 @@ entry:
       - indicator: rsi
         period_hours: 14
         operator: lt
-        value: 60
+        value: 70
       - indicator: rsi
         period_hours: 14
         operator: gt
-        value: 40
+        value: 30
 exit:
   take_profit_pct: 8.0
   stop_loss_pct: 3.0
