@@ -1005,7 +1005,9 @@ def run_tick(state, strategies, secrets, tick_count):
 
     key_cursor = 0  # round-robin cursor within available_keys
 
-    # Prioritize candidates: Kalshi edge first, then by distance from 0.5
+    # Per-category round-robin: ensures all bot categories get Gemini slots,
+    # then within each category prioritize by Kalshi edge + distance from 0.5.
+    # Prevents winner-take-all where political/popular markets exhaust the 12-call budget.
     def _candidate_priority(item):
         cid, candidate = item
         outcomes = sorted(candidate["market"]["outcomes"], key=lambda x: x["price"])
@@ -1016,7 +1018,20 @@ def run_tick(state, strategies, secrets, tick_count):
         kalshi_edge = abs(kalshi["prob"] - pm_price) if kalshi else 0.0
         return -(kalshi_edge * 2 + abs(pm_price - 0.5))
 
-    sorted_candidates = sorted(opinion_pool.items(), key=_candidate_priority)
+    # Group by category, sort within each, then round-robin interleave
+    category_buckets = {}
+    for cid, candidate in opinion_pool.items():
+        cat = candidate.get("category", "general")
+        category_buckets.setdefault(cat, []).append((cid, candidate))
+    for cat in category_buckets:
+        category_buckets[cat].sort(key=_candidate_priority)
+    category_lists = list(category_buckets.values())
+    sorted_candidates = []
+    max_len = max((len(v) for v in category_lists), default=0)
+    for i in range(max_len):
+        for cat_list in category_lists:
+            if i < len(cat_list):
+                sorted_candidates.append(cat_list[i])
 
     for cid, candidate in sorted_candidates:
         if gemini_aborted or gemini_count >= MAX_GEMINI_PER_TICK:

@@ -94,13 +94,21 @@ def load_history(pair):
 def save_history(pair, candles):
     # Keep only the most recent MAX_CANDLES
     candles = sorted(candles, key=lambda x: x["ts"])[-MAX_CANDLES:]
-    # Atomic write: write to temp file then rename to avoid race condition with readers
+    # Atomic write: unique temp per process to avoid race when swing+spread ticks run concurrently
     import tempfile
     path = history_path(pair)
-    tmp = path + '.tmp'
-    with open(tmp, "w") as f:
-        json.dump(candles, f)
-    os.replace(tmp, path)
+    dir_ = os.path.dirname(path)
+    fd, tmp = tempfile.mkstemp(dir=dir_, suffix='.tmp')
+    try:
+        with os.fdopen(fd, "w") as f:
+            json.dump(candles, f)
+        os.replace(tmp, path)
+    except Exception:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        raise
 
 
 def merge_candles(existing, new_candles):

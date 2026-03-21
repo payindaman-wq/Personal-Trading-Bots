@@ -17,7 +17,7 @@ STATE_FILE = f"{WORKSPACE}/competition/heartbeat_state.json"
 BOT_TOKEN  = "8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
 CHAT_ID    = "8154505910"
 
-COOLDOWN_MIN        = 240     # min gap between repeated alerts for the same problem
+COOLDOWN_MIN        = 1440    # min gap between repeated alerts for the same problem (24h)
 SERVICE_COOLDOWN_MIN = 60
 GEMINI_COOLDOWN_MIN = 1440   # Gemini quota alerts fire at most once per day
 PAUSE_FLAG          = f"{WORKSPACE}/competition/heartbeat_paused"
@@ -437,9 +437,12 @@ def main():
             else:
                 if suffix == "errors":
                     state.setdefault("error_consecutive", {})[key] = 0
-                if key in state["last_alerted"]:
-                    resolved.append(key)
-                clear_alert(state, key)
+                    # Do NOT clear error cooldown on resolve — let 24h expire naturally
+                    # This prevents transient errors from re-alerting every 30 min
+                else:
+                    if key in state["last_alerted"]:
+                        resolved.append(key)
+                    clear_alert(state, key)
 
     # ── Service checks — attempt auto-restart before alerting ────────────
     for svc in SERVICES:
