@@ -9,7 +9,7 @@
   "spread_name": "XRP/BTC",
   "starting_capital": 1000.0,
   "fee_rate": 0.001,
-  "equity": 975.3,
+  "equity": 974.62,
   "peak_equity": 1000.0,
   "positions": [
     {
@@ -21,20 +21,20 @@
       "entry_z": 3.3332,
       "entry_price_a": 1.5428,
       "entry_price_b": 74453.0,
-      "size_usd": 341.47,
-      "opened_at": "2026-03-21T08:00:01.523376+00:00"
+      "size_usd": 341.24,
+      "opened_at": "2026-03-21T09:00:01.498080+00:00"
     }
   ],
   "stats": {
-    "total_trades": 28,
+    "total_trades": 29,
     "wins": 5,
-    "losses": 23,
-    "win_rate": 17.9,
-    "total_pnl_usd": -14.68,
-    "total_pnl_pct": -1.468,
-    "total_fees": 19.6779,
+    "losses": 24,
+    "win_rate": 17.2,
+    "total_pnl_usd": -15.02,
+    "total_pnl_pct": -1.502,
+    "total_fees": 20.3606,
     "max_drawdown_pct": 2.646,
-    "current_equity": 975.3
+    "current_equity": 974.62
   },
   "closed_trades": [
     {
@@ -484,6 +484,22 @@
       "reason": "STOP",
       "opened_at": "2026-03-21T07:30:02.089549+00:00",
       "closed_at": "2026-03-21T08:00:01.523296+00:00"
+    },
+    {
+      "pair": "XRP/USD/BTC/USD",
+      "pair_a": "XRP/USD",
+      "pair_b": "BTC/USD",
+      "direction": "short",
+      "entry_price_a": 1.5428,
+      "entry_price_b": 74453.0,
+      "entry_z": 3.333,
+      "exit_z": 3.333,
+      "size_usd": 341.47,
+      "pnl_pct": -0.0,
+      "net_pnl": -0.34,
+      "reason": "STOP",
+      "opened_at": "2026-03-21T08:00:01.523376+00:00",
+      "closed_at": "2026-03-21T09:00:01.498028+00:00"
     }
   ]
 }
