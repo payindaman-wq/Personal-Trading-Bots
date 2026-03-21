@@ -69,3 +69,6 @@ price_history.json
 research/data/
 research/day/results.tsv
 research/swing/results.tsv
+
+# --- Prediction market research data (large, VPS-only) ---------------------
+research/polymarket/resolved_markets.jsonl

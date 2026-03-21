@@ -622,6 +622,28 @@ def get_mimir_state():
     return state
 
 
+PM_COLLECTOR_STATE = "/root/.openclaw/workspace/research/polymarket/collector_state.json"
+PM_RESOLVED_FILE   = "/root/.openclaw/workspace/research/polymarket/resolved_markets.jsonl"
+
+
+def get_pm_research():
+    """Return prediction market data collection state for dashboard."""
+    state = {
+        "total": 0,
+        "by_source": {"polymarket": 0, "kalshi": 0, "manifold": 0},
+        "last_run": None,
+        "new_this_run": 0,
+        "researcher_ready": False,
+    }
+    if os.path.exists(PM_COLLECTOR_STATE):
+        try:
+            with open(PM_COLLECTOR_STATE) as f:
+                state.update(json.load(f))
+        except Exception:
+            pass
+    return state
+
+
 def get_odin_research():
     """Parse Odin research results for both leagues and return dashboard data."""
     import subprocess
@@ -769,6 +791,7 @@ def build():
             "live_sprint":           get_live_sprint("spread", spread_active_id),
         }
 
+    dashboard["pm_research"]        = get_pm_research()
     dashboard["odin_research"]     = get_odin_research()
     dashboard["mimir_state"]       = get_mimir_state()
     dashboard["cycle_state"]       = get_cycle_state()
