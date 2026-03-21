@@ -1,7 +1,12 @@
 {
   "last_alerted": {
     "gemini_quota": "2026-03-17T01:00:02.022434+00:00",
-    "spread_errors": "2026-03-21T07:30:02.246487+00:00",
     "poly_bot_activity": "2026-03-21T07:30:02.246517+00:00"
+  },
+  "error_consecutive": {
+    "day_errors": 0,
+    "swing_errors": 0,
+    "arb_errors": 0,
+    "spread_errors": 0
   }
 }
