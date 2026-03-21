@@ -2,19 +2,14 @@
 """
 sys_heartbeat.py — SYN system health monitor.
 
-Run every 30 minutes via cron. Checks all leagues and services for problems
-and sends Telegram alerts ONLY when anomalies are found.
+Run every 30 minutes via cron. Checks all leagues and services for problems,
+attempts auto-remediation where safe, and alerts via Telegram.
 
-Checks:
-  - Tick log freshness (stale = no activity in >2× expected interval)
-  - Active sprint exists per league
-  - Errors/tracebacks in recent log output
-  - systemd service health (polymarket, polymarket_syn)
-  - Gemini quota state
-
-Cooldown: 60 min per problem key — won't spam the same alert repeatedly.
+Auto-fix (no approval needed): service restarts, Volva restart when Ollama stuck.
+Everything else: Telegram alert directing Chris to address with Claude Code.
+After any file change: git commit + push to origin/master.
 """
-import json, os, subprocess, urllib.request, time
+import json, os, subprocess, urllib.request, time, glob
 from datetime import datetime, timezone, timedelta
 
 WORKSPACE  = "/root/.openclaw/workspace"
@@ -22,8 +17,9 @@ STATE_FILE = f"{WORKSPACE}/competition/heartbeat_state.json"
 BOT_TOKEN  = "8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
 CHAT_ID    = "8154505910"
 
-COOLDOWN_MIN        = 1440    # min gap between repeated alerts for the same problem
-GEMINI_COOLDOWN_MIN = 1440   # Gemini quota alerts fire at most every 4 hours
+COOLDOWN_MIN        = 240     # min gap between repeated alerts for the same problem
+SERVICE_COOLDOWN_MIN = 60
+GEMINI_COOLDOWN_MIN = 1440   # Gemini quota alerts fire at most once per day
 PAUSE_FLAG          = f"{WORKSPACE}/competition/heartbeat_paused"
 
 # ── League definitions ──────────────────────────────────────────────────────
@@ -88,13 +84,15 @@ def save_state(state):
         json.dump(state, f, indent=2)
 
 
-def should_alert(state, key):
+def should_alert(state, key, cooldown_min=None):
     """Return True if cooldown has passed for this problem key."""
+    if cooldown_min is None:
+        cooldown_min = COOLDOWN_MIN
     last = state["last_alerted"].get(key)
     if not last:
         return True
     last_dt = datetime.fromisoformat(last)
-    return datetime.now(timezone.utc) - last_dt > timedelta(minutes=COOLDOWN_MIN)
+    return datetime.now(timezone.utc) - last_dt > timedelta(minutes=cooldown_min)
 
 
 def mark_alerted(state, key):
@@ -127,6 +125,41 @@ def tg_send(msg):
 
 # ── Checks ──────────────────────────────────────────────────────────────────
 
+def attempt_auto_restart(unit):
+    """Restart a systemd unit. Returns True if active afterwards."""
+    try:
+        subprocess.run(["systemctl", "restart", unit], timeout=15, check=False)
+        time.sleep(5)
+        r = subprocess.run(["systemctl", "is-active", unit],
+                           capture_output=True, text=True, timeout=5)
+        return r.stdout.strip() == "active"
+    except Exception as e:
+        print(f"  [auto-restart] {unit} failed: {e}")
+        return False
+
+
+def git_commit_push(message):
+    """Commit any dirty workspace files and push to remote. No-op if nothing changed."""
+    try:
+        subprocess.run(["git", "-C", WORKSPACE, "add", "-A"], timeout=30, check=False)
+        dirty = subprocess.run(
+            ["git", "-C", WORKSPACE, "diff", "--cached", "--quiet"], timeout=10
+        )
+        if dirty.returncode == 0:
+            print(f"  [git] nothing to commit for: {message}")
+            return
+        subprocess.run(
+            ["git", "-C", WORKSPACE, "commit", "-m", f"SYN auto-fix: {message}"],
+            timeout=30, check=False
+        )
+        subprocess.run(["git", "-C", WORKSPACE, "push", "origin", "master"],
+                       timeout=60, check=False)
+        print(f"  [git] pushed: {message}")
+    except Exception as e:
+        print(f"  [git] push failed: {e}")
+
+
+
 def check_tick_freshness(league):
     """Return problem string if tick log is stale, else None."""
     log = league["tick_log"]
@@ -136,7 +169,7 @@ def check_tick_freshness(league):
     threshold_sec = league["interval"] * league["stale_mul"] * 60
     if age_sec > threshold_sec:
         age_min = int(age_sec / 60)
-        return f"stale — last tick {age_min}m ago (expected every {league['interval']}m)"
+        return f"stale — last tick {age_min}m ago (expected every {league['interval']}m) — address with Claude Code"
     return None
 
 
@@ -157,7 +190,7 @@ def check_tick_errors(league):
     hits = [l.rstrip() for l in recent if any(k in l for k in error_keywords)]
     if hits:
         snippet = hits[-1][:120]
-        return f"errors in log — {snippet}"
+        return f"errors in log — {snippet} — address with Claude Code"
     return None
 
 
@@ -166,7 +199,7 @@ def check_active_sprint(league):
     active_dir = league["active_dir"]
     if not os.path.isdir(active_dir):
         return "active dir missing"
-    entries = sorted(os.listdir(active_dir))
+    entries = sorted(e for e in os.listdir(active_dir) if not e.startswith("."))
     if not entries:
         return "no active sprint"
     meta_path = os.path.join(active_dir, entries[-1], "meta.json")
@@ -209,9 +242,9 @@ def check_gemini_quota(state):
         exhausted = gd.get("exhausted", [])
         counts    = gd.get("counts", [])
         if exhausted:
-            return f"{len(exhausted)}/3 Gemini keys exhausted today"
+            return f"{len(exhausted)}/3 Gemini keys exhausted today — address with Claude Code"
         if counts and max(counts) > 1100:
-            return f"Gemini key approaching daily limit ({max(counts)}/1200)"
+            return f"Gemini key approaching daily limit ({max(counts)}/1200) — address with Claude Code"
     except Exception:
         pass
     return None
@@ -253,6 +286,77 @@ def check_volva_health(league):
             pass
     return None
 
+def check_polymarket_bot_activity():
+    """Return alert string if opinion bots show suspicious position patterns, else None."""
+    try:
+        import yaml
+        state_path = f"{WORKSPACE}/competition/polymarket/auto_state.json"
+        if not os.path.isfile(state_path):
+            return None
+        with open(state_path) as f:
+            s = json.load(f)
+
+        # Skip if sprint is < 24h old
+        sprint_started_at = s.get("sprint_started_at")
+        if sprint_started_at:
+            try:
+                started_dt = datetime.fromisoformat(sprint_started_at)
+                if started_dt.tzinfo is None:
+                    started_dt = started_dt.replace(tzinfo=timezone.utc)
+                age_h = (datetime.now(timezone.utc) - started_dt).total_seconds() / 3600
+                if age_h < 24:
+                    return None
+            except Exception:
+                pass
+
+        # Load strategy yamls for opinion bots
+        strategy_files = glob.glob(f"{WORKSPACE}/fleet/polymarket/*/strategy.yaml")
+        opinion_bot_names = set()
+        max_positions_by_bot = {}
+        for sf in strategy_files:
+            try:
+                with open(sf) as f:
+                    strat = yaml.safe_load(f)
+                if strat and strat.get("type") == "opinion":
+                    bot_name = os.path.basename(os.path.dirname(sf))
+                    opinion_bot_names.add(bot_name)
+                    edge = strat.get("edge", {})
+                    max_pos = edge.get("max_positions", 5)
+                    max_positions_by_bot[bot_name] = max_pos
+            except Exception:
+                pass
+
+        if not opinion_bot_names:
+            return None
+
+        # Get bot states from auto_state.json
+        bots = s.get("bots", [])
+        if isinstance(bots, dict):
+            bots = list(bots.values())
+
+        opinion_bots = [b for b in bots if b.get("name") in opinion_bot_names]
+        if not opinion_bots:
+            return None
+
+        total = len(opinion_bots)
+        zero_pos = sum(1 for b in opinion_bots if len(b.get("positions", {})) == 0)
+        at_cap = sum(
+            1 for b in opinion_bots
+            if len(b.get("positions", {})) >= max_positions_by_bot.get(b.get("name", ""), 5)
+        )
+
+        alerts = []
+        if zero_pos / total >= 0.5:
+            alerts.append(f"{zero_pos}/{total} opinion bots have 0 positions — address with Claude Code")
+        if at_cap / total >= 0.3:
+            alerts.append(f"{at_cap}/{total} opinion bots at max_positions cap — address with Claude Code")
+
+        if alerts:
+            return "PM opinion bot activity: " + "; ".join(alerts)
+    except Exception:
+        pass
+    return None
+
 def check_polymarket_syn_freshness():
     """Check syn_tick.log freshness — service being 'active' doesn't mean it's ticking."""
     log = f"{WORKSPACE}/competition/polymarket/syn_tick.log"
@@ -260,7 +364,7 @@ def check_polymarket_syn_freshness():
         return "syn_tick.log missing"
     age_sec = time.time() - os.path.getmtime(log)
     if age_sec > 35 * 60:  # 15 min interval × 2.3
-        return f"stale — last tick {int(age_sec/60)}m ago (expected every 15m)"
+        return f"stale — last tick {int(age_sec/60)}m ago (expected every 15m) — address with Claude Code"
     return None
 
 
@@ -297,25 +401,46 @@ def main():
                     resolved.append(key)
                 clear_alert(state, key)
 
-    # ── Service checks ─────────────────────────────────────────────────────
+    # ── Service checks — attempt auto-restart before alerting ────────────
     for svc in SERVICES:
         key     = f"svc_{svc['name']}"
         problem = check_service(svc)
         if problem:
-            if should_alert(state, key):
-                problems.append((key, f"[SERVICE] {problem}"))
+            print(f"  [{svc['name']}] {problem} — attempting auto-restart...")
+            restarted = attempt_auto_restart(svc["unit"])
+            if restarted:
+                tg_send(f"<b>SYN AUTO-FIX</b> — {now_str}\n\n• {svc['unit']} was down — auto-restarted successfully")
+                git_commit_push(f"heartbeat auto-restarted {svc['unit']}")
+                clear_alert(state, key)
+                print(f"  [{svc['name']}] auto-restarted successfully")
+            else:
+                if should_alert(state, key, cooldown_min=SERVICE_COOLDOWN_MIN):
+                    problems.append((key, f"[SERVICE] {problem} — auto-restart failed — address with Claude Code"))
         else:
             if key in state["last_alerted"]:
                 resolved.append(key)
             clear_alert(state, key)
 
-    # ── Volva researcher health ────────────────────────────────────────────
+    # ── Volva researcher health — force-restart if Ollama stuck ───────────
     for vleague in ["day", "swing"]:
         key     = f"volva_{vleague}_health"
         problem = check_volva_health(vleague)
         if problem:
-            if should_alert(state, key):
-                problems.append((key, f"[VOLVA/{vleague.upper()}] {problem}"))
+            if "Ollama may be stuck" in problem:
+                unit = f"volva_{vleague}.service"
+                print(f"  [volva_{vleague}] Ollama stuck — force-restarting {unit}...")
+                restarted = attempt_auto_restart(unit)
+                if restarted:
+                    tg_send(f"<b>SYN AUTO-FIX</b> — {now_str}\n\n• volva_{vleague}: Ollama was stuck — service restarted")
+                    git_commit_push(f"heartbeat force-restarted {unit} (Ollama stuck)")
+                    clear_alert(state, key)
+                    print(f"  [volva_{vleague}] restarted successfully")
+                else:
+                    if should_alert(state, key):
+                        problems.append((key, f"[VOLVA/{vleague.upper()}] {problem} — auto-restart failed — address with Claude Code"))
+            else:
+                if should_alert(state, key):
+                    problems.append((key, f"[VOLVA/{vleague.upper()}] {problem} — address with Claude Code"))
         else:
             if key in state["last_alerted"]:
                 resolved.append(key)
@@ -328,6 +453,17 @@ def main():
         if should_alert(state, key):
             problems.append((key, f"[POLYMARKET_SYN] {problem}"))
     else:
+        clear_alert(state, key)
+
+    # ── Polymarket bot activity ────────────────────────────────────────────────
+    key     = "poly_bot_activity"
+    problem = check_polymarket_bot_activity()
+    if problem:
+        if should_alert(state, key):
+            problems.append((key, f"[POLYMARKET] {problem}"))
+    else:
+        if key in state["last_alerted"]:
+            resolved.append(key)
         clear_alert(state, key)
 
     # ── Gemini quota check (4h cooldown, no clear-on-resolve — prevents flicker spam)
