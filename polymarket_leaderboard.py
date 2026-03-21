@@ -223,7 +223,7 @@ def main():
 
     output = {
         "generated_at":       datetime.now(timezone.utc).isoformat(),
-        "total_sprints":      len(completed),
+        "total_sprints":      len(completed) + (1 if active_id else 0),
         "cycle":              cs.get("cycle", 1),
         "sprint_in_cycle":    cs.get("sprint_in_cycle", 0),
         "sprints_per_cycle":  cs.get("sprints_per_cycle", 4),
