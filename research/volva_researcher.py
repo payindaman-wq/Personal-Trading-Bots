@@ -2,7 +2,7 @@
 """
 volva_researcher.py - Volva auto-research loop.
 
-Continuously proposes strategy modifications via Groq (llama-3.1-8b-instant),
+Continuously proposes strategy modifications via Gemini Flash (free API),
 backtests them against 2yr historical data, and keeps winners.
 
 Usage:
@@ -17,7 +17,6 @@ import re
 import sys
 import subprocess
 import time
-import fcntl
 import urllib.request
 from datetime import datetime, timezone
 
@@ -25,18 +24,18 @@ import yaml
 
 WORKSPACE     = "/root/.openclaw/workspace"
 RESEARCH      = os.path.join(WORKSPACE, "research")
-GROQ_SECRET   = "/root/.openclaw/secrets/groq.json"
-GROQ_MODEL    = "llama-3.1-8b-instant"
-GROQ_URL      = "https://api.groq.com/openai/v1/chat/completions"
-GROQ_LOCK     = "/tmp/volva_groq.lock"  # shared lock — only one researcher calls Groq at a time
+GEMINI_SECRET = "/root/.openclaw/secrets/gemini.json"
+GEMINI_MODEL  = "gemini-2.5-flash-lite"
+GEMINI_BASE   = "https://generativelanguage.googleapis.com/v1beta/models"
 
 # Look-ahead bias guard
 SUSPICIOUS_SHARPE = 3.5
 
 
-def load_groq_key():
-    with open(GROQ_SECRET) as f:
-        return json.load(f)["groq_api_key"]
+def load_gemini_key(league):
+    with open(GEMINI_SECRET) as f:
+        data = json.load(f)
+    return data.get(f"gemini_{league}_key") or data["gemini_api_key"]
 
 
 def league_dir(league):
@@ -114,31 +113,18 @@ def log_result(league, gen, result, status, description=""):
         f.write(f"{gen}\t{sharpe:.4f}\t{win_rate:.1f}\t{pnl_pct:.2f}\t{trades}\t{status}\t{description}\t{ts}\n")
 
 
-def call_groq(prompt, api_key):
+def call_gemini(prompt, api_key):
+    url = f"{GEMINI_BASE}/{GEMINI_MODEL}:generateContent?key={api_key}"
     payload = json.dumps({
-        "model":    GROQ_MODEL,
-        "messages": [{"role": "user", "content": prompt}],
-        "temperature":  0.7,
-        "max_tokens":   600,
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {"temperature": 0.7, "maxOutputTokens": 600},
     }).encode()
     req = urllib.request.Request(
-        GROQ_URL,
-        data=payload,
-        headers={
-            "Content-Type":  "application/json",
-            "Authorization": f"Bearer {api_key}",
-            "User-Agent": "Mozilla/5.0",
-        },
+        url, data=payload, headers={"Content-Type": "application/json"}
     )
-    # Acquire shared lock — prevents Day and Swing from calling Groq simultaneously
-    with open(GROQ_LOCK, "w") as lf:
-        fcntl.flock(lf, fcntl.LOCK_EX)
-        try:
-            with urllib.request.urlopen(req, timeout=30) as r:
-                data = json.loads(r.read())
-        finally:
-            fcntl.flock(lf, fcntl.LOCK_UN)
-    return data["choices"][0]["message"]["content"].strip()
+    with urllib.request.urlopen(req, timeout=30) as r:
+        data = json.loads(r.read())
+    return data["candidates"][0]["content"]["parts"][0]["text"].strip()
 
 
 def extract_yaml(text):
@@ -189,7 +175,7 @@ def main():
     sys.path.insert(0, RESEARCH)
     from volva_backtest import run_backtest
 
-    api_key = load_groq_key()
+    api_key = load_gemini_key(league)
 
     if args.offset > 0:
         print(f"[volva/{league}] Startup offset {args.offset}s...")
@@ -222,7 +208,7 @@ def main():
     best_sharpe = baseline["sharpe"]
     print(f"  Baseline Sharpe={best_sharpe:.4f}  pnl={baseline['total_pnl_pct']:+.2f}%  "
           f"trades={baseline['total_trades']}  win_rate={baseline['win_rate_pct']}%")
-    print(f"\n[volva/{league}] Starting research loop (Groq/{GROQ_MODEL}, {args.sleep}s sleep).\n")
+    print(f"\n[volva/{league}] Starting research loop (Gemini/{GEMINI_MODEL}, {args.sleep}s sleep).\n")
 
     while True:
         ts = datetime.now(timezone.utc).strftime("%H:%M:%S")
@@ -232,11 +218,11 @@ def main():
         try:
             prompt   = build_prompt(league, program_md, best_strategy_yaml,
                                     results_history, gen, best_sharpe)
-            response = call_groq(prompt, api_key)
+            response = call_gemini(prompt, api_key)
         except Exception as e:
             err_str = str(e)
-            print(f"| GROQ ERROR: {err_str}")
-            log_result(league, gen, {}, "groq_error", err_str[:80])
+            print(f"| GEMINI ERROR: {err_str}")
+            log_result(league, gen, {}, "gemini_error", err_str[:80])
             gen += 1
             # 429 rate limit: back off longer so the window resets
             wait = 180 if "429" in err_str else 60
