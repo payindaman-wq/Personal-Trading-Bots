@@ -1013,7 +1013,7 @@
 
 <!-- Tab Bar -->
 <div class="tab-bar">
-  <button class="tab-btn active" onclick="switch_tab('overview', this)">Overview</button>
+  <button class="tab-btn active" onclick="switch_tab('overview', this)" style="font-size:14px;letter-spacing:1px;">Headquarters</button>
   <button class="tab-btn" onclick="switch_tab('day', this)">Day</button>
   <button class="tab-btn" onclick="switch_tab('swing', this)">Swing</button>
   <button class="tab-btn" onclick="switch_tab('arb', this)">Arbitrage</button>
@@ -1144,7 +1144,7 @@ function to_pst(iso) {
   if (!iso) return '—';
   try {
     // Stored timestamps have no timezone suffix — force UTC interpretation
-    const s = /[Z+\-]\d*$/.test(iso.trim()) ? iso : iso.trim() + 'Z';
+    const s = /Z$|[+\-]\d\d:\d\d$/.test(iso.trim()) ? iso : iso.trim() + 'Z';
     return new Date(s).toLocaleString('en-US', {
       timeZone: 'America/Los_Angeles',
       month: 'short', day: 'numeric',
