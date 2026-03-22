@@ -633,27 +633,24 @@
 
   .sticky-top { position: sticky; top: 0; z-index: 100; }
 
-  /* ── Headquarters decorative margin bars ── */
+  /* HQ margin bars */
   .hq-margin-bar {
     position: fixed;
     top: 0;
     height: 100vh;
     pointer-events: none;
-    z-index: 0;
+    z-index: 2;
     overflow: hidden;
-    /* Half of each side margin — only visible when viewport > 1400px */
     width: max(0px, calc((100vw - 1400px) / 4));
   }
   .hq-margin-left  { left: 0; }
   .hq-margin-right { right: 0; }
-  .hq-margin-left > svg,
-  .hq-margin-right > svg {
+  .hq-margin-bar > svg {
     position: absolute;
     top: 0;
     height: 100%;
     width: 56px;
     display: block;
-    opacity: 0.85;
   }
   .hq-margin-left  > svg { right: 0; }
   .hq-margin-right > svg { left: 0; }
@@ -764,80 +761,62 @@
 
 <!-- Tab: Overview -->
 <div class="tab-panel active" id="tab-overview">
-  <!-- Left decorative margin (Headquarters tab only) -->
-  <div class="hq-margin-bar hq-margin-left" aria-hidden="true">
-    <svg xmlns="http://www.w3.org/2000/svg" width="56" height="100%">
-      <defs>
-        <pattern id="hq-pl" x="0" y="0" width="56" height="96" patternUnits="userSpaceOnUse">
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 96">
-  <rect width="56" height="96" fill="#060810" opacity="0.25"/>
-  <line x1="36" y1="0" x2="20" y2="30" stroke="#c9a232" stroke-width="2" opacity="0.45"/>
-  <circle cx="28" cy="15" r="3.5" fill="#060810"/>
-  <line x1="20" y1="0" x2="36" y2="30" stroke="#c9a232" stroke-width="2" opacity="0.8"/>
-  <circle cx="28" cy="15" r="1.2" fill="#c9a232" opacity="0.65"/>
-  <circle cx="28" cy="48" r="17" stroke="#c9a232" stroke-width="1.3" fill="#060810"/>
-  <circle cx="28" cy="48" r="11" stroke="#c9a232" stroke-width="0.6" fill="none" opacity="0.55"/>
-  <line x1="28" y1="30" x2="28" y2="37" stroke="#c9a232" stroke-width="1.3" opacity="0.8"/>
-  <line x1="24.5" y1="32.5" x2="31.5" y2="32.5" stroke="#c9a232" stroke-width="0.9" opacity="0.65"/>
-  <line x1="28" y1="59" x2="28" y2="66" stroke="#c9a232" stroke-width="1.3" opacity="0.8"/>
-  <line x1="24.5" y1="63" x2="31.5" y2="63" stroke="#c9a232" stroke-width="0.9" opacity="0.65"/>
-  <line x1="39" y1="48" x2="48" y2="48" stroke="#c9a232" stroke-width="1.3" opacity="0.8"/>
-  <line x1="8" y1="48" x2="17" y2="48" stroke="#c9a232" stroke-width="1.3" opacity="0.8"/>
-  <line x1="40" y1="36" x2="44.5" y2="31.5" stroke="#c9a232" stroke-width="0.9" opacity="0.5"/>
-  <line x1="16" y1="36" x2="11.5" y2="31.5" stroke="#c9a232" stroke-width="0.9" opacity="0.5"/>
-  <line x1="40" y1="60" x2="44.5" y2="64.5" stroke="#c9a232" stroke-width="0.9" opacity="0.5"/>
-  <line x1="16" y1="60" x2="11.5" y2="64.5" stroke="#c9a232" stroke-width="0.9" opacity="0.5"/>
-  <circle cx="28" cy="48" r="3.2" fill="#c9a232" opacity="0.9"/>
-  <line x1="20" y1="66" x2="36" y2="96" stroke="#c9a232" stroke-width="2" opacity="0.45"/>
-  <circle cx="28" cy="81" r="3.5" fill="#060810"/>
-  <line x1="36" y1="66" x2="20" y2="96" stroke="#c9a232" stroke-width="2" opacity="0.8"/>
-  <circle cx="28" cy="81" r="1.2" fill="#c9a232" opacity="0.65"/>
-  <line x1="51" y1="0" x2="51" y2="96" stroke="#c9a232" stroke-width="1" opacity="0.7"/>
-  <line x1="55" y1="0" x2="55" y2="96" stroke="#c9a232" stroke-width="0.5" opacity="0.4"/>
-  <line x1="48" y1="48" x2="51" y2="48" stroke="#c9a232" stroke-width="0.8" opacity="0.5"/>
-</svg>
-        </pattern>
-      </defs>
-      <rect width="56" height="100%" fill="url(#hq-pl)"/>
-    </svg>
-  </div>
-  <!-- Right decorative margin (Headquarters tab only) -->
-  <div class="hq-margin-bar hq-margin-right" aria-hidden="true">
-    <svg xmlns="http://www.w3.org/2000/svg" width="56" height="100%">
-      <defs>
-        <pattern id="hq-pr" x="0" y="0" width="56" height="96" patternUnits="userSpaceOnUse">
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 96">
-  <rect width="56" height="96" fill="#060810" opacity="0.25"/>
-  <line x1="20.0" y1="0" x2="36.0" y2="30" stroke="#c9a232" stroke-width="2" opacity="0.45"/>
-  <circle cx="28.0" cy="15" r="3.5" fill="#060810"/>
-  <line x1="36.0" y1="0" x2="20.0" y2="30" stroke="#c9a232" stroke-width="2" opacity="0.8"/>
-  <circle cx="28.0" cy="15" r="1.2" fill="#c9a232" opacity="0.65"/>
-  <circle cx="28.0" cy="48" r="17" stroke="#c9a232" stroke-width="1.3" fill="#060810"/>
-  <circle cx="28.0" cy="48" r="11" stroke="#c9a232" stroke-width="0.6" fill="none" opacity="0.55"/>
-  <line x1="28.0" y1="30" x2="28.0" y2="37" stroke="#c9a232" stroke-width="1.3" opacity="0.8"/>
-  <line x1="31.5" y1="32.5" x2="24.5" y2="32.5" stroke="#c9a232" stroke-width="0.9" opacity="0.65"/>
-  <line x1="28.0" y1="59" x2="28.0" y2="66" stroke="#c9a232" stroke-width="1.3" opacity="0.8"/>
-  <line x1="31.5" y1="63" x2="24.5" y2="63" stroke="#c9a232" stroke-width="0.9" opacity="0.65"/>
-  <line x1="17.0" y1="48" x2="8.0" y2="48" stroke="#c9a232" stroke-width="1.3" opacity="0.8"/>
-  <line x1="48.0" y1="48" x2="39.0" y2="48" stroke="#c9a232" stroke-width="1.3" opacity="0.8"/>
-  <line x1="16.0" y1="36" x2="11.5" y2="31.5" stroke="#c9a232" stroke-width="0.9" opacity="0.5"/>
-  <line x1="40.0" y1="36" x2="44.5" y2="31.5" stroke="#c9a232" stroke-width="0.9" opacity="0.5"/>
-  <line x1="16.0" y1="60" x2="11.5" y2="64.5" stroke="#c9a232" stroke-width="0.9" opacity="0.5"/>
-  <line x1="40.0" y1="60" x2="44.5" y2="64.5" stroke="#c9a232" stroke-width="0.9" opacity="0.5"/>
-  <circle cx="28.0" cy="48" r="3.2" fill="#c9a232" opacity="0.9"/>
-  <line x1="36.0" y1="66" x2="20.0" y2="96" stroke="#c9a232" stroke-width="2" opacity="0.45"/>
-  <circle cx="28.0" cy="81" r="3.5" fill="#060810"/>
-  <line x1="20.0" y1="66" x2="36.0" y2="96" stroke="#c9a232" stroke-width="2" opacity="0.8"/>
-  <circle cx="28.0" cy="81" r="1.2" fill="#c9a232" opacity="0.65"/>
-  <line x1="5.0" y1="0" x2="5.0" y2="96" stroke="#c9a232" stroke-width="1" opacity="0.7"/>
-  <line x1="1.0" y1="0" x2="1.0" y2="96" stroke="#c9a232" stroke-width="0.5" opacity="0.4"/>
-  <line x1="8.0" y1="48" x2="5.0" y2="48" stroke="#c9a232" stroke-width="0.8" opacity="0.5"/>
-</svg>
-        </pattern>
-      </defs>
-      <rect width="56" height="100%" fill="url(#hq-pr)"/>
-    </svg>
-  </div>
+  <!-- Left decorative margin -->
+  <div class="hq-margin-bar hq-margin-left" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="56" height="100%"><defs><pattern id="hq-pl" x="0" y="0" width="56" height="96" patternUnits="userSpaceOnUse">
+        <rect width="56" height="96" fill="#060810" opacity="0.2"/>
+        <line x1="36" y1="0" x2="20" y2="30" stroke="#c9a232" stroke-width="2.2" opacity="0.4"/>
+        <circle cx="28" cy="15" r="3.8" fill="#060810"/>
+        <line x1="20" y1="0" x2="36" y2="30" stroke="#c9a232" stroke-width="2.2" opacity="0.75"/>
+        <circle cx="28" cy="15" r="1.3" fill="#c9a232" opacity="0.7"/>
+        <circle cx="28" cy="48" r="17" stroke="#c9a232" stroke-width="1.4" fill="#060810"/>
+        <circle cx="28" cy="48" r="11" stroke="#c9a232" stroke-width="0.7" fill="none" opacity="0.5"/>
+        <line x1="28" y1="30" x2="28" y2="37" stroke="#c9a232" stroke-width="1.4" opacity="0.8"/>
+        <line x1="24.5" y1="33" x2="31.5" y2="33" stroke="#c9a232" stroke-width="1" opacity="0.65"/>
+        <line x1="28" y1="59" x2="28" y2="66" stroke="#c9a232" stroke-width="1.4" opacity="0.8"/>
+        <line x1="24.5" y1="62.5" x2="31.5" y2="62.5" stroke="#c9a232" stroke-width="1" opacity="0.65"/>
+        <line x1="39" y1="48" x2="49" y2="48" stroke="#c9a232" stroke-width="1.4" opacity="0.8"/>
+        <line x1="7" y1="48" x2="17" y2="48" stroke="#c9a232" stroke-width="1.4" opacity="0.8"/>
+        <line x1="40" y1="36" x2="44.5" y2="31.5" stroke="#c9a232" stroke-width="1" opacity="0.5"/>
+        <line x1="16" y1="36" x2="11.5" y2="31.5" stroke="#c9a232" stroke-width="1" opacity="0.5"/>
+        <line x1="40" y1="60" x2="44.5" y2="64.5" stroke="#c9a232" stroke-width="1" opacity="0.5"/>
+        <line x1="16" y1="60" x2="11.5" y2="64.5" stroke="#c9a232" stroke-width="1" opacity="0.5"/>
+        <circle cx="28" cy="48" r="3.5" fill="#c9a232" opacity="0.9"/>
+        <line x1="20" y1="66" x2="36" y2="96" stroke="#c9a232" stroke-width="2.2" opacity="0.4"/>
+        <circle cx="28" cy="81" r="3.8" fill="#060810"/>
+        <line x1="36" y1="66" x2="20" y2="96" stroke="#c9a232" stroke-width="2.2" opacity="0.75"/>
+        <circle cx="28" cy="81" r="1.3" fill="#c9a232" opacity="0.7"/>
+        <line x1="51" y1="0" x2="51" y2="96" stroke="#c9a232" stroke-width="1.2" opacity="0.75"/>
+        <line x1="55" y1="0" x2="55" y2="96" stroke="#c9a232" stroke-width="0.6" opacity="0.4"/>
+        <line x1="49" y1="48" x2="51" y2="48" stroke="#c9a232" stroke-width="0.9" opacity="0.5"/>
+      </pattern></defs><rect width="100%" height="100%" fill="url(#hq-pl)"/></svg></div>
+  <!-- Right decorative margin -->
+  <div class="hq-margin-bar hq-margin-right" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="56" height="100%"><defs><pattern id="hq-pr" x="0" y="0" width="56" height="96" patternUnits="userSpaceOnUse">
+        <rect width="56" height="96" fill="#060810" opacity="0.2"/>
+        <line x1="20.0" y1="0" x2="36.0" y2="30" stroke="#c9a232" stroke-width="2.2" opacity="0.4"/>
+        <circle cx="28.0" cy="15" r="3.8" fill="#060810"/>
+        <line x1="36.0" y1="0" x2="20.0" y2="30" stroke="#c9a232" stroke-width="2.2" opacity="0.75"/>
+        <circle cx="28.0" cy="15" r="1.3" fill="#c9a232" opacity="0.7"/>
+        <circle cx="28.0" cy="48" r="17" stroke="#c9a232" stroke-width="1.4" fill="#060810"/>
+        <circle cx="28.0" cy="48" r="11" stroke="#c9a232" stroke-width="0.7" fill="none" opacity="0.5"/>
+        <line x1="28.0" y1="30" x2="28.0" y2="37" stroke="#c9a232" stroke-width="1.4" opacity="0.8"/>
+        <line x1="31.5" y1="33" x2="24.5" y2="33" stroke="#c9a232" stroke-width="1" opacity="0.65"/>
+        <line x1="28.0" y1="59" x2="28.0" y2="66" stroke="#c9a232" stroke-width="1.4" opacity="0.8"/>
+        <line x1="31.5" y1="62.5" x2="24.5" y2="62.5" stroke="#c9a232" stroke-width="1" opacity="0.65"/>
+        <line x1="17.0" y1="48" x2="7.0" y2="48" stroke="#c9a232" stroke-width="1.4" opacity="0.8"/>
+        <line x1="49.0" y1="48" x2="39.0" y2="48" stroke="#c9a232" stroke-width="1.4" opacity="0.8"/>
+        <line x1="16.0" y1="36" x2="11.5" y2="31.5" stroke="#c9a232" stroke-width="1" opacity="0.5"/>
+        <line x1="40.0" y1="36" x2="44.5" y2="31.5" stroke="#c9a232" stroke-width="1" opacity="0.5"/>
+        <line x1="16.0" y1="60" x2="11.5" y2="64.5" stroke="#c9a232" stroke-width="1" opacity="0.5"/>
+        <line x1="40.0" y1="60" x2="44.5" y2="64.5" stroke="#c9a232" stroke-width="1" opacity="0.5"/>
+        <circle cx="28.0" cy="48" r="3.5" fill="#c9a232" opacity="0.9"/>
+        <line x1="36.0" y1="66" x2="20.0" y2="96" stroke="#c9a232" stroke-width="2.2" opacity="0.4"/>
+        <circle cx="28.0" cy="81" r="3.8" fill="#060810"/>
+        <line x1="20.0" y1="66" x2="36.0" y2="96" stroke="#c9a232" stroke-width="2.2" opacity="0.75"/>
+        <circle cx="28.0" cy="81" r="1.3" fill="#c9a232" opacity="0.7"/>
+        <line x1="5.0" y1="0" x2="5.0" y2="96" stroke="#c9a232" stroke-width="1.2" opacity="0.75"/>
+        <line x1="1.0" y1="0" x2="1.0" y2="96" stroke="#c9a232" stroke-width="0.6" opacity="0.4"/>
+        <line x1="7.0" y1="48" x2="5.0" y2="48" stroke="#c9a232" stroke-width="0.9" opacity="0.5"/>
+      </pattern></defs><rect width="100%" height="100%" fill="url(#hq-pr)"/></svg></div>
   <div class="main" id="main-overview">
     <div class="loading">Loading...</div>
   </div>
