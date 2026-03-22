@@ -43,7 +43,7 @@ PAIRS = {
     "ARB/USD":  "ARBUSDT",
     "OP/USD":   "OPUSDT",
     "ADA/USD":  "ADAUSDT",
-    "POL/USD":  "POLUSDT",
+    "POL/USD":  "MATICUSDT",
 }
 
 LEAGUES = {

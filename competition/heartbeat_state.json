@@ -1,7 +1,9 @@
 {
   "last_alerted": {
     "gemini_quota": "2026-03-17T01:00:02.022434+00:00",
-    "poly_bot_activity": "2026-03-21T07:30:02.246517+00:00"
+    "poly_bot_activity": "2026-03-21T07:30:02.246517+00:00",
+    "svc_odin_swing": "2026-03-22T00:00:13.177427+00:00",
+    "polysyn_stale": "2026-03-22T00:00:13.177460+00:00"
   },
   "error_consecutive": {
     "day_errors": 0,
