@@ -13,6 +13,9 @@ Usage: python3 spread_cycle_advance.py [--dry-run]
 """
 import argparse, json, os, shutil, urllib.request
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
+
+PST = ZoneInfo("America/Los_Angeles")
 
 WORKSPACE   = "/root/.openclaw/workspace"
 FLEET_DIR   = os.path.join(WORKSPACE, "fleet", "spread")
@@ -55,7 +58,7 @@ def main():
     args = parser.parse_args()
     dry  = args.dry_run
 
-    now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    now_str = datetime.now(PST).strftime("%Y-%m-%d %H:%M %Z")
     print(f"\n{'='*60}")
     print(f"  SPREAD CYCLE ADVANCE  |  {now_str}")
     if dry:

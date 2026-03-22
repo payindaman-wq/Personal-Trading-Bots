@@ -28,7 +28,7 @@ KRAKEN_TO_HL = {
     "BTC/USD": "BTC", "ETH/USD": "ETH", "SOL/USD": "SOL", "XRP/USD": "XRP",
     "DOGE/USD": "DOGE", "AVAX/USD": "AVAX", "LINK/USD": "LINK", "UNI/USD": "UNI",
     "AAVE/USD": "AAVE", "NEAR/USD": "NEAR", "APT/USD": "APT", "SUI/USD": "SUI",
-    "ARB/USD": "ARB", "OP/USD": "OP", "WIF/USD": "WIF", "PEPE/USD": "PEPE",
+    "ARB/USD": "ARB", "OP/USD": "OP", "ADA/USD": "ADA", "POL/USD": "POL",
 }
 
 ALL_PAIRS = list(KRAKEN_TO_HL.keys())

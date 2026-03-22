@@ -3,7 +3,11 @@
 You are a crypto swing trading strategy optimizer. Your job is to propose ONE small, targeted improvement to the current best strategy. Output ONLY a complete YAML config between ```yaml and ``` markers. No explanation, no commentary — just the YAML block.
 
 ## Objective
-Maximize **Sharpe ratio** on 2 years of 1-hour BTC/USD, ETH/USD, SOL/USD data.
+Maximize **Sharpe ratio** on 2 years of 1-hour data across all 16 available pairs:
+BTC/USD, ETH/USD, SOL/USD, XRP/USD, DOGE/USD, AVAX/USD, LINK/USD, UNI/USD,
+AAVE/USD, NEAR/USD, APT/USD, SUI/USD, ARB/USD, OP/USD, ADA/USD, POL/USD.
+
+You may trade any subset of these pairs. Changing the pairs: list counts as ONE change.
 Secondary goals (in priority order):
 1. Win rate between 43–55%
 2. Positive total P&L
@@ -21,6 +25,19 @@ pairs:
   - BTC/USD
   - ETH/USD
   - SOL/USD
+  - XRP/USD
+  - DOGE/USD
+  - AVAX/USD
+  - LINK/USD
+  - UNI/USD
+  - AAVE/USD
+  - NEAR/USD
+  - APT/USD
+  - SUI/USD
+  - ARB/USD
+  - OP/USD
+  - ADA/USD
+  - POL/USD
 position:
   size_pct: <15-40, integer>
   max_open: <1-2, integer>
@@ -70,6 +87,19 @@ pairs:
   - BTC/USD
   - ETH/USD
   - SOL/USD
+  - XRP/USD
+  - DOGE/USD
+  - AVAX/USD
+  - LINK/USD
+  - UNI/USD
+  - AAVE/USD
+  - NEAR/USD
+  - APT/USD
+  - SUI/USD
+  - ARB/USD
+  - OP/USD
+  - ADA/USD
+  - POL/USD
 position:
   size_pct: 25
   max_open: 1

@@ -28,9 +28,22 @@ DATA_DIR = "/root/.openclaw/workspace/research/data"
 YEARS    = 2
 
 PAIRS = {
-    "BTC/USD": "BTCUSDT",
-    "ETH/USD": "ETHUSDT",
-    "SOL/USD": "SOLUSDT",
+    "BTC/USD":  "BTCUSDT",
+    "ETH/USD":  "ETHUSDT",
+    "SOL/USD":  "SOLUSDT",
+    "XRP/USD":  "XRPUSDT",
+    "DOGE/USD": "DOGEUSDT",
+    "AVAX/USD": "AVAXUSDT",
+    "LINK/USD": "LINKUSDT",
+    "UNI/USD":  "UNIUSDT",
+    "AAVE/USD": "AAVEUSDT",
+    "NEAR/USD": "NEARUSDT",
+    "APT/USD":  "APTUSDT",
+    "SUI/USD":  "SUIUSDT",
+    "ARB/USD":  "ARBUSDT",
+    "OP/USD":   "OPUSDT",
+    "ADA/USD":  "ADAUSDT",
+    "POL/USD":  "POLUSDT",
 }
 
 LEAGUES = {

@@ -41,7 +41,7 @@ FLEET_DIR    = os.path.join(WORKSPACE, "fleet", "spread")
 ALL_PAIRS = [
     "BTC/USD", "ETH/USD", "SOL/USD", "XRP/USD", "DOGE/USD",
     "AVAX/USD", "LINK/USD", "UNI/USD", "AAVE/USD", "NEAR/USD",
-    "APT/USD", "SUI/USD", "ARB/USD", "OP/USD", "WIF/USD",
+    "APT/USD", "SUI/USD", "ARB/USD", "OP/USD", "ADA/USD", "POL/USD",
 ]
 
 

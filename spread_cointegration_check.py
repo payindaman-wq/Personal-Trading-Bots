@@ -44,7 +44,7 @@ ACTIVE_PAIRS = {
 
 # All assets available in price_history
 ALL_ASSETS = ["BTC", "ETH", "SOL", "AVAX", "LINK", "AAVE", "DOGE", "XRP",
-              "NEAR", "APT", "ARB", "OP", "SUI", "WIF"]
+              "NEAR", "APT", "ARB", "OP", "SUI", "ADA", "POL"]
 
 THRESHOLDS = {
     "min_corr":         0.65,

@@ -11,6 +11,9 @@ After any file change: git commit + push to origin/master.
 """
 import json, os, subprocess, urllib.request, time, glob
 from datetime import datetime, timezone, timedelta
+from zoneinfo import ZoneInfo
+
+PST = ZoneInfo("America/Los_Angeles")
 
 WORKSPACE  = "/root/.openclaw/workspace"
 STATE_FILE = f"{WORKSPACE}/competition/heartbeat_state.json"
@@ -402,8 +405,10 @@ def check_disk_space():
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 def main():
-    now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    now_str = datetime.now(PST).strftime("%Y-%m-%d %H:%M %Z")
     print(f"[sys_heartbeat] {now_str}")
+
+    autofix_queue = []
 
     if os.path.isfile(PAUSE_FLAG):
         print("  Paused — alerts suppressed. Delete heartbeat_paused to resume.")
@@ -544,6 +549,25 @@ def main():
         tg_send("\n".join(lines))
     else:
         print("  All systems nominal.")
+
+    # ── Auto-fix digest (queue items, send compiled once per 24h) ────────
+    # -- Auto-fix digest (queue items, send compiled once per 24h) --------
+    if autofix_queue:
+        state.setdefault("autofix_queue", []).extend(autofix_queue)
+    queued = state.get("autofix_queue", [])
+    last_digest = state.get("last_autofix_digest")
+    digest_due = (not last_digest or
+                  datetime.now(timezone.utc) - datetime.fromisoformat(last_digest)
+                  > timedelta(hours=24))
+    if queued and digest_due:
+        digest_str = datetime.now(PST).strftime("%Y-%m-%d %H:%M %Z")
+        msg_lines = ["<b>SYN AUTO-FIX DIGEST</b> -- " + digest_str, ""]
+        for item in queued:
+            msg_lines.append("* " + item)
+        tg_send(chr(10).join(msg_lines))
+        state["autofix_queue"] = []
+        state["last_autofix_digest"] = datetime.now(timezone.utc).isoformat()
+        print(f"  Auto-fix digest sent ({len(queued)} item(s))")
 
     save_state(state)
 

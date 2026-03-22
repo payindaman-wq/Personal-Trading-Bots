@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-21T22:38:01.114173+00:00",
+  "generated_at": "2026-03-21T23:38:01.382892+00:00",
   "league": "arb",
   "total_sprints": 1,
   "archived": 0,
@@ -10,20 +10,20 @@
   "cycle_status": "active",
   "rankings": [
     {
-      "bot": "skoll",
+      "bot": "fafnir",
       "points": 0,
       "sprints_entered": 1,
       "sprint_wins": 0,
       "podiums": 0,
-      "cumulative_pnl_usd": 0.0,
-      "total_trades": 0,
-      "total_wins": 0,
-      "overall_win_rate": 0.0,
-      "avg_pnl_pct_per_sprint": 0.0,
+      "cumulative_pnl_usd": 2.1,
+      "total_trades": 1,
+      "total_wins": 1,
+      "overall_win_rate": 100.0,
+      "avg_pnl_pct_per_sprint": 0.21,
       "style": "stat arb"
     },
     {
-      "bot": "fafnir",
+      "bot": "skoll",
       "points": 0,
       "sprints_entered": 1,
       "sprint_wins": 0,

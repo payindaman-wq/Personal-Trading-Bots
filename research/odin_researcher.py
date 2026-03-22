@@ -31,6 +31,13 @@ GEMINI_BASE   = "https://generativelanguage.googleapis.com/v1beta/models"
 # Look-ahead bias guard
 SUSPICIOUS_SHARPE = 3.5
 
+ALL_PAIRS = [
+    "BTC/USD",  "ETH/USD",  "SOL/USD",  "XRP/USD",
+    "DOGE/USD", "AVAX/USD", "LINK/USD", "UNI/USD",
+    "AAVE/USD", "NEAR/USD", "APT/USD",  "SUI/USD",
+    "ARB/USD",  "OP/USD",   "ADA/USD",  "POL/USD",
+]
+
 
 def load_gemini_key(league):
     with open(GEMINI_SECRET) as f:
@@ -209,7 +216,7 @@ def main():
     state = {"consec_429": 0}
 
     print(f"[odin/{league}] Establishing baseline Sharpe for seed strategy...")
-    baseline = run_backtest(best_strategy, league, ["BTC/USD", "ETH/USD", "SOL/USD"])
+    baseline = run_backtest(best_strategy, league, ALL_PAIRS)
     if "error" in baseline:
         print(f"  ERROR: {baseline['error']}")
         sys.exit(1)
@@ -267,7 +274,7 @@ def main():
 
         # 4. Backtest
         try:
-            result = run_backtest(strategy, league, ["BTC/USD", "ETH/USD", "SOL/USD"])
+            result = run_backtest(strategy, league, ALL_PAIRS)
         except Exception as e:
             print(f"| BACKTEST_ERROR: {e}")
             log_result(league, gen, {}, "backtest_error", str(e)[:80])

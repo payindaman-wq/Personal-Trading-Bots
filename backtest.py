@@ -258,8 +258,8 @@ KRAKEN_TO_HL = {
     "SUI/USD": "SUI",
     "ARB/USD": "ARB",
     "OP/USD": "OP",
-    "WIF/USD": "WIF",
-    "PEPE/USD": "PEPE",
+    "ADA/USD": "ADA",
+    "POL/USD": "POL",
 }
 
 

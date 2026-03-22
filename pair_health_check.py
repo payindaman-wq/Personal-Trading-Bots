@@ -35,7 +35,7 @@ THRESHOLDS = {
 LOOKBACK = 720   # 30 days of hourly candles
 
 ALL_ASSETS = ["BTC", "ETH", "SOL", "AVAX", "LINK", "AAVE", "DOGE", "XRP",
-              "NEAR", "APT", "ARB", "OP", "SUI", "WIF"]
+              "NEAR", "APT", "ARB", "OP", "SUI", "ADA", "POL"]
 
 
 # ── League config ─────────────────────────────────────────────────────────────
