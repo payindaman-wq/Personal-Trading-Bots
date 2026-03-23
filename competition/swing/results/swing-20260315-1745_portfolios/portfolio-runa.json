@@ -1,0 +1,60 @@
+{
+  "bot": "runa",
+  "competition_id": "swing-20260315-1745",
+  "league": "swing",
+  "duration_hours": 168.0,
+  "started_at": "2026-03-15T17:45:09.141909+00:00",
+  "pairs": [
+    "BTC/USD",
+    "ETH/USD",
+    "SOL/USD",
+    "XRP/USD",
+    "AVAX/USD",
+    "LINK/USD",
+    "AAVE/USD"
+  ],
+  "starting_capital": 1000.0,
+  "fee_rate": 0.001,
+  "equity": 1012.28,
+  "peak_equity": 1016.27,
+  "positions": [],
+  "stats": {
+    "total_trades": 3,
+    "wins": 1,
+    "losses": 1,
+    "win_rate": 50.0,
+    "total_pnl_usd": 13.34,
+    "total_pnl_pct": 5.1332,
+    "total_fees": 1.7481,
+    "max_drawdown_pct": 1.082,
+    "current_equity": 1015.91,
+    "sum_losses_usd": -10.47,
+    "sum_wins_usd": 27.44
+  },
+  "closed_trades": [
+    {
+      "pair": "ETH/USD",
+      "direction": "short",
+      "entry_price": 2248.2,
+      "exit_price": 2313.2,
+      "size_usd": 350.0,
+      "pnl_pct": -2.89,
+      "net_pnl": -10.47,
+      "reason": "SL",
+      "opened_at": "2026-03-16T04:30:05.437357+00:00",
+      "closed_at": "2026-03-16T18:00:04.800828+00:00"
+    },
+    {
+      "pair": "BTC/USD",
+      "direction": "short",
+      "entry_price": 75295.0,
+      "exit_price": 69253.0,
+      "size_usd": 346.21,
+      "pnl_pct": 8.02,
+      "net_pnl": 27.44,
+      "reason": "TP",
+      "opened_at": "2026-03-17T01:00:05.857537+00:00",
+      "closed_at": "2026-03-19T13:00:08.573382+00:00"
+    }
+  ]
+}

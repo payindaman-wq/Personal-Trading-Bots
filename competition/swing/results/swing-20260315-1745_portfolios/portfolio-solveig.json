@@ -1,0 +1,119 @@
+{
+  "bot": "solveig",
+  "competition_id": "swing-20260315-1745",
+  "league": "swing",
+  "duration_hours": 168.0,
+  "started_at": "2026-03-15T17:45:09.141909+00:00",
+  "pairs": [
+    "BTC/USD",
+    "ETH/USD",
+    "SOL/USD",
+    "XRP/USD",
+    "AVAX/USD",
+    "LINK/USD",
+    "AAVE/USD"
+  ],
+  "starting_capital": 1000.0,
+  "fee_rate": 0.001,
+  "equity": 957.76,
+  "peak_equity": 1000.0,
+  "positions": [],
+  "stats": {
+    "total_trades": 7,
+    "wins": 0,
+    "losses": 7,
+    "win_rate": 0.0,
+    "total_pnl_usd": -40.53,
+    "total_pnl_pct": -15.7441,
+    "total_fees": 3.4408,
+    "max_drawdown_pct": 4.224,
+    "current_equity": 957.76,
+    "sum_losses_usd": -40.53
+  },
+  "closed_trades": [
+    {
+      "pair": "AVAX/USD",
+      "direction": "long",
+      "entry_price": 10.138,
+      "exit_price": 9.881,
+      "size_usd": 250.0,
+      "pnl_pct": -2.54,
+      "net_pnl": -6.59,
+      "reason": "SL",
+      "opened_at": "2026-03-18T11:30:05.168267+00:00",
+      "closed_at": "2026-03-18T12:30:03.875934+00:00"
+    },
+    {
+      "pair": "SOL/USD",
+      "direction": "long",
+      "entry_price": 93.266,
+      "exit_price": 90.367,
+      "size_usd": 250.0,
+      "pnl_pct": -3.11,
+      "net_pnl": -8.02,
+      "reason": "SL",
+      "opened_at": "2026-03-18T11:30:05.054905+00:00",
+      "closed_at": "2026-03-18T13:00:04.667763+00:00"
+    },
+    {
+      "pair": "BTC/USD",
+      "direction": "long",
+      "entry_price": 72774.0,
+      "exit_price": 71146.0,
+      "size_usd": 248.23,
+      "pnl_pct": -2.24,
+      "net_pnl": -5.8,
+      "reason": "SL",
+      "opened_at": "2026-03-18T12:30:03.987676+00:00",
+      "closed_at": "2026-03-18T15:00:06.213223+00:00"
+    },
+    {
+      "pair": "BTC/USD",
+      "direction": "long",
+      "entry_price": 71146.0,
+      "exit_price": 69559.0,
+      "size_usd": 244.71,
+      "pnl_pct": -2.23,
+      "net_pnl": -5.7,
+      "reason": "SL",
+      "opened_at": "2026-03-18T15:00:06.326686+00:00",
+      "closed_at": "2026-03-19T12:30:07.476266+00:00"
+    },
+    {
+      "pair": "ETH/USD",
+      "direction": "long",
+      "entry_price": 2189.8,
+      "exit_price": 2130.2,
+      "size_usd": 244.71,
+      "pnl_pct": -2.72,
+      "net_pnl": -6.91,
+      "reason": "SL",
+      "opened_at": "2026-03-18T15:00:06.438345+00:00",
+      "closed_at": "2026-03-19T13:00:08.628735+00:00"
+    },
+    {
+      "pair": "ETH/USD",
+      "direction": "long",
+      "entry_price": 2130.2,
+      "exit_price": 2083.1,
+      "size_usd": 241.44,
+      "pnl_pct": -2.21,
+      "net_pnl": -5.58,
+      "reason": "SL",
+      "opened_at": "2026-03-19T13:00:08.858740+00:00",
+      "closed_at": "2026-03-22T00:00:06.164950+00:00"
+    },
+    {
+      "pair": "BTC/USD",
+      "direction": "long",
+      "entry_price": 69253.0,
+      "exit_price": 68768.0,
+      "size_usd": 241.44,
+      "pnl_pct": -0.7,
+      "net_pnl": -1.93,
+      "reason": "TIMEOUT",
+      "opened_at": "2026-03-19T13:00:08.743609+00:00",
+      "closed_at": "2026-03-22T13:30:05.171675+00:00"
+    }
+  ]
+}

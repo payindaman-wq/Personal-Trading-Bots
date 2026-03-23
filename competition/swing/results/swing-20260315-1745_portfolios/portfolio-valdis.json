@@ -1,0 +1,60 @@
+{
+  "bot": "valdis",
+  "competition_id": "swing-20260315-1745",
+  "league": "swing",
+  "duration_hours": 168.0,
+  "started_at": "2026-03-15T17:45:09.141909+00:00",
+  "pairs": [
+    "BTC/USD",
+    "ETH/USD",
+    "SOL/USD",
+    "XRP/USD",
+    "AVAX/USD",
+    "LINK/USD",
+    "AAVE/USD"
+  ],
+  "starting_capital": 1000.0,
+  "fee_rate": 0.001,
+  "equity": 1020.31,
+  "peak_equity": 1034.4,
+  "positions": [],
+  "stats": {
+    "total_trades": 2,
+    "wins": 1,
+    "losses": 1,
+    "win_rate": 50.0,
+    "total_pnl_usd": 21.02,
+    "total_pnl_pct": 6.335,
+    "total_fees": 1.424,
+    "max_drawdown_pct": 1.3621,
+    "current_equity": 1020.31,
+    "sum_wins_usd": 34.75,
+    "sum_losses_usd": -13.73
+  },
+  "closed_trades": [
+    {
+      "pair": "ETH/USD",
+      "direction": "long",
+      "entry_price": 2129.2,
+      "exit_price": 2342.7,
+      "size_usd": 350.0,
+      "pnl_pct": 10.03,
+      "net_pnl": 34.75,
+      "reason": "TP",
+      "opened_at": "2026-03-15T20:48:06.611809+00:00",
+      "closed_at": "2026-03-16T21:00:06.591704+00:00"
+    },
+    {
+      "pair": "BTC/USD",
+      "direction": "long",
+      "entry_price": 75104.0,
+      "exit_price": 72331.0,
+      "size_usd": 362.04,
+      "pnl_pct": -3.69,
+      "net_pnl": -13.73,
+      "reason": "SL",
+      "opened_at": "2026-03-17T00:30:06.815856+00:00",
+      "closed_at": "2026-03-18T13:00:04.678927+00:00"
+    }
+  ]
+}

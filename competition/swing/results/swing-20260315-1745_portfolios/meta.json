@@ -1,0 +1,31 @@
+{
+  "comp_id": "swing-20260315-1745",
+  "league": "swing",
+  "duration_hours": 168.0,
+  "started_at": "2026-03-15T17:45:09.141909+00:00",
+  "pairs": [
+    "BTC/USD",
+    "ETH/USD",
+    "SOL/USD",
+    "XRP/USD",
+    "AVAX/USD",
+    "LINK/USD",
+    "AAVE/USD"
+  ],
+  "bots": [
+    "egil",
+    "gudrid",
+    "halfdan",
+    "ivar",
+    "orm",
+    "runa",
+    "solveig",
+    "thyra",
+    "valdis"
+  ],
+  "starting_capital": 1000.0,
+  "fee_rate": 0.001,
+  "status": "active",
+  "cycle": 1,
+  "sprint_in_cycle": 2
+}

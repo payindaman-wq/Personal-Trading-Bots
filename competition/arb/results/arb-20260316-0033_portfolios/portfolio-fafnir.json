@@ -1,0 +1,44 @@
+{
+  "bot": "fafnir",
+  "competition_id": "arb-20260316-0033",
+  "league": "arb",
+  "duration_hours": 168,
+  "started_at": "2026-03-16T00:33:19.588963+00:00",
+  "pair_a": "SOL/USD",
+  "pair_b": "BTC/USD",
+  "spread_name": "SOL/BTC",
+  "starting_capital": 1000.0,
+  "fee_rate": 0.001,
+  "equity": 1001.75,
+  "peak_equity": 1001.75,
+  "positions": [],
+  "stats": {
+    "total_trades": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "total_pnl_usd": 2.1,
+    "total_pnl_pct": 0.21,
+    "total_fees": 0.7,
+    "max_drawdown_pct": 0.0,
+    "current_equity": 1001.75
+  },
+  "closed_trades": [
+    {
+      "pair": "SOL/USD/BTC/USD",
+      "pair_a": "SOL/USD",
+      "pair_b": "BTC/USD",
+      "direction": "short",
+      "entry_price_a": 96.736,
+      "entry_price_b": 74639.0,
+      "entry_z": 2.228,
+      "exit_z": 1.238,
+      "size_usd": 350.0,
+      "pnl_pct": 1.403,
+      "net_pnl": 2.1,
+      "reason": "TIMEOUT",
+      "opened_at": "2026-03-16T22:30:01.501004+00:00",
+      "closed_at": "2026-03-21T23:00:01.477739+00:00"
+    }
+  ]
+}

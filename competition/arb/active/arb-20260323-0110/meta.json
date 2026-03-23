@@ -1,0 +1,37 @@
+{
+  "comp_id": "arb-20260323-0110",
+  "league": "arb",
+  "duration_hours": 168,
+  "started_at": "2026-03-23T01:10:01.198736+00:00",
+  "pairs": [
+    "AAVE/ETH",
+    "AVAX/SOL",
+    "SOL/BTC",
+    "ETH/BTC",
+    "XRP/BTC",
+    "SOL/ETH",
+    "LINK/ETH",
+    "LINK/BTC",
+    "AVAX/ETH"
+  ],
+  "bots": [
+    "asgard",
+    "bifrost",
+    "fafnir",
+    "fenrir",
+    "garm",
+    "hati",
+    "jormungandr",
+    "muspell",
+    "nidhogg",
+    "niflheim",
+    "ratatoskr",
+    "skoll",
+    "surt",
+    "utgard",
+    "ymir"
+  ],
+  "starting_capital": 1000.0,
+  "fee_rate": 0.001,
+  "status": "active"
+}

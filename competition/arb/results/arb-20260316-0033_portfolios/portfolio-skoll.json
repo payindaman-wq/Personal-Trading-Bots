@@ -1,0 +1,44 @@
+{
+  "bot": "skoll",
+  "competition_id": "arb-20260316-0033",
+  "league": "arb",
+  "duration_hours": 168,
+  "started_at": "2026-03-16T00:33:19.588963+00:00",
+  "pair_a": "SOL/USD",
+  "pair_b": "ETH/USD",
+  "spread_name": "SOL/ETH",
+  "starting_capital": 1000.0,
+  "fee_rate": 0.001,
+  "equity": 1003.85,
+  "peak_equity": 1003.85,
+  "positions": [],
+  "stats": {
+    "total_trades": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "total_pnl_usd": 4.2,
+    "total_pnl_pct": 0.42,
+    "total_fees": 0.7,
+    "max_drawdown_pct": 0.0,
+    "current_equity": 1003.85
+  },
+  "closed_trades": [
+    {
+      "pair": "SOL/USD/ETH/USD",
+      "pair_a": "SOL/USD",
+      "pair_b": "ETH/USD",
+      "direction": "long",
+      "entry_price_a": 93.927,
+      "entry_price_b": 2293.3,
+      "entry_z": -2.592,
+      "exit_z": -0.648,
+      "size_usd": 350.0,
+      "pnl_pct": 2.598,
+      "net_pnl": 4.2,
+      "reason": "REVERT",
+      "opened_at": "2026-03-16T14:30:02.072593+00:00",
+      "closed_at": "2026-03-22T00:30:01.208357+00:00"
+    }
+  ]
+}

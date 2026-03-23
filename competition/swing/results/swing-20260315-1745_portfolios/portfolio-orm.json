@@ -1,0 +1,47 @@
+{
+  "bot": "orm",
+  "competition_id": "swing-20260315-1745",
+  "league": "swing",
+  "duration_hours": 168.0,
+  "started_at": "2026-03-15T17:45:09.141909+00:00",
+  "pairs": [
+    "BTC/USD",
+    "ETH/USD",
+    "SOL/USD",
+    "XRP/USD",
+    "AVAX/USD",
+    "LINK/USD",
+    "AAVE/USD"
+  ],
+  "starting_capital": 1000.0,
+  "fee_rate": 0.001,
+  "equity": 992.72,
+  "peak_equity": 1000.0,
+  "positions": [],
+  "stats": {
+    "total_trades": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "total_pnl_usd": -7.06,
+    "total_pnl_pct": -3.1104,
+    "total_fees": 0.44,
+    "max_drawdown_pct": 0.728,
+    "current_equity": 992.72,
+    "sum_losses_usd": -7.06
+  },
+  "closed_trades": [
+    {
+      "pair": "BTC/USD",
+      "direction": "long",
+      "entry_price": 73913.0,
+      "exit_price": 71614.0,
+      "size_usd": 220.0,
+      "pnl_pct": -3.11,
+      "net_pnl": -7.06,
+      "reason": "SL",
+      "opened_at": "2026-03-18T07:00:04.441953+00:00",
+      "closed_at": "2026-03-18T14:30:04.627486+00:00"
+    }
+  ]
+}
