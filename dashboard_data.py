@@ -539,20 +539,6 @@ def get_sprint_archive():
 
     # Sort newest first by comp_id (lexicographic on timestamp-based IDs)
     archive.sort(key=lambda x: x["comp_id"], reverse=True)
-
-    # Append Sprint #1 cleared placeholders at the end (oldest) for all four leagues.
-    # Sprint #1 data was removed during the historical data reset; these entries ensure
-    # the archive numbering is correct without altering sprint counts elsewhere.
-    archive.extend([
-        {"comp_id": "day-sprint1-cleared",    "league": "day",    "winner": "", "duration_hours": 24,
-         "started_at": "", "scored_at": "", "pairs": [], "rankings": [], "is_complete": True, "cleared": True},
-        {"comp_id": "swing-sprint1-cleared",  "league": "swing",  "winner": "", "duration_hours": 168,
-         "started_at": "", "scored_at": "", "pairs": [], "rankings": [], "is_complete": True, "cleared": True},
-        {"comp_id": "arb-sprint1-cleared",    "league": "arb",    "winner": "", "duration_hours": 168,
-         "started_at": "", "scored_at": "", "pairs": [], "rankings": [], "is_complete": True, "cleared": True},
-        {"comp_id": "spread-sprint1-cleared", "league": "spread", "winner": "", "duration_hours": 168,
-         "started_at": "", "scored_at": "", "pairs": [], "rankings": [], "is_complete": True, "cleared": True},
-    ])
     return archive
 
 
