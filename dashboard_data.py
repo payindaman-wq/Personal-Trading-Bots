@@ -539,6 +539,20 @@ def get_sprint_archive():
 
     # Sort newest first by comp_id (lexicographic on timestamp-based IDs)
     archive.sort(key=lambda x: x["comp_id"], reverse=True)
+
+    # Append Sprint #1 cleared placeholders at the end (oldest) for all four leagues.
+    # Sprint #1 data was removed during the historical data reset; these entries ensure
+    # the archive numbering is correct without altering sprint counts elsewhere.
+    archive.extend([
+        {"comp_id": "day-sprint1-cleared",    "league": "day",    "winner": "", "duration_hours": 24,
+         "started_at": "", "scored_at": "", "pairs": [], "rankings": [], "is_complete": True, "cleared": True},
+        {"comp_id": "swing-sprint1-cleared",  "league": "swing",  "winner": "", "duration_hours": 168,
+         "started_at": "", "scored_at": "", "pairs": [], "rankings": [], "is_complete": True, "cleared": True},
+        {"comp_id": "arb-sprint1-cleared",    "league": "arb",    "winner": "", "duration_hours": 168,
+         "started_at": "", "scored_at": "", "pairs": [], "rankings": [], "is_complete": True, "cleared": True},
+        {"comp_id": "spread-sprint1-cleared", "league": "spread", "winner": "", "duration_hours": 168,
+         "started_at": "", "scored_at": "", "pairs": [], "rankings": [], "is_complete": True, "cleared": True},
+    ])
     return archive
 
 
@@ -808,43 +822,6 @@ def build():
         "sprint_archive": get_sprint_archive(),
     }
 
-    # Inject active sprints into archive so current standings appear at top
-    active_entries = []
-    for _league, _active_id in [
-        ("day",    day_active_id),
-        ("swing",  swing_active_id),
-        ("arb",    arb_active_id),
-        ("spread", spread_active_id),
-    ]:
-        if not _active_id:
-            continue
-        _live = get_live_sprint(_league, _active_id)
-        if not _live or not _live.get("bots"):
-            continue
-        _bots = _live["bots"]
-        _rankings = [{
-            "rank":          b["rank"],
-            "bot":           b["bot"],
-            "final_equity":  b["equity"],
-            "total_pnl_usd": b["pnl_usd"],
-            "total_pnl_pct": b["pnl_pct"],
-            "total_trades":  b["trades"],
-            "win_rate":      b["win_rate"],
-        } for b in _bots]
-        active_entries.append({
-            "comp_id":        _active_id,
-            "league":         _league,
-            "winner":         _bots[0]["bot"] if _bots else "",
-            "duration_hours": _live.get("duration_hours", 0),
-            "started_at":     _live.get("started_at", ""),
-            "scored_at":      None,
-            "pairs":          _live.get("pairs", []),
-            "rankings":       _rankings,
-            "is_complete":    False,
-        })
-    # Prepend active sprints (newest first) before archived ones
-    active_entries.sort(key=lambda x: x["comp_id"], reverse=True)
-    dashboard["sprint_archive"] = active_entries + dashboard["sprint_archive"]
 
     if day_lb:
         dashboard["leagues"]["day"] = {
