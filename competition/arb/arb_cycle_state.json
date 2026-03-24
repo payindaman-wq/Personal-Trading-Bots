@@ -1,1 +1,11 @@
-{"cycle":1,"sprint_in_cycle":0,"sprints_per_cycle":4,"status":"active","sprints":[]}
+{
+  "cycle": 1,
+  "sprint_in_cycle": 2,
+  "sprints_per_cycle": 4,
+  "status": "active",
+  "sprints": [
+    "arb-sprint-1-cleared",
+    "arb-20260316-0033"
+  ],
+  "last_archived": "arb-20260316-0033"
+}
