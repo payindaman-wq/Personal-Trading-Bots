@@ -254,6 +254,52 @@ def check_gemini_quota(state):
 
 
 
+RESEARCH_MIN_TRADES  = {"day": 50, "swing": 20}
+RESEARCH_STALL_HOURS = 24   # alert if no new_best found in this many hours
+
+def check_odin_research_quality(league):
+    """Return problem string if research is stalled or best strategy is overfitted."""
+    results_path = f"{WORKSPACE}/research/{league}/results.tsv"
+    if not os.path.exists(results_path):
+        return None
+
+    min_t = RESEARCH_MIN_TRADES.get(league, 30)
+    last_best_ts     = None
+    last_best_trades = None
+
+    try:
+        with open(results_path) as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("gen"):
+                    continue
+                parts = line.split("\t")
+                if len(parts) >= 8 and parts[5] == "new_best":
+                    last_best_ts = parts[7]
+                    try:
+                        last_best_trades = int(parts[4])
+                    except Exception:
+                        pass
+    except Exception:
+        return None
+
+    issues = []
+
+    if last_best_ts:
+        try:
+            last_dt = datetime.fromisoformat(last_best_ts).replace(tzinfo=timezone.utc)
+            age_h   = (datetime.now(timezone.utc) - last_dt).total_seconds() / 3600
+            if age_h > RESEARCH_STALL_HOURS:
+                issues.append(f"no new best in {age_h:.0f}h — research stalled")
+        except Exception:
+            pass
+
+    if last_best_trades is not None and last_best_trades < min_t:
+        issues.append(f"best strategy only {last_best_trades} trades (&lt;{min_t} min) — overfitted")
+
+    return " + ".join(issues) if issues else None
+
+
 def check_odin_health(league):
     """Return problem string if Odin has had no successful generation in >6h."""
     results_path = f"{WORKSPACE}/research/{league}/results.tsv"
@@ -489,6 +535,18 @@ def main():
             else:
                 if should_alert(state, key):
                     problems.append((key, f"[ODIN/{vleague.upper()}] {problem} — address with Claude Code"))
+        else:
+            if key in state["last_alerted"]:
+                resolved.append(key)
+            clear_alert(state, key)
+
+    # ── Odin research quality (stall + overfitting) ───────────────────────
+    for vleague in ["day", "swing"]:
+        key     = f"odin_{vleague}_research"
+        problem = check_odin_research_quality(vleague)
+        if problem:
+            if should_alert(state, key):
+                problems.append((key, f"[ODIN/{vleague.upper()}] {problem} — address with Claude Code"))
         else:
             if key in state["last_alerted"]:
                 resolved.append(key)

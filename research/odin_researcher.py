@@ -34,12 +34,31 @@ SUSPICIOUS_SHARPE = 3.5
 # Minimum trade count to accept a strategy as new best (prevents overfitting on noise)
 MIN_TRADES = {"day": 50, "swing": 20}
 
+# Stall alert — Telegram ping every N consecutive gens without a new_best
+STALL_ALERT_GENS = 300
+TG_BOT_TOKEN     = "8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
+TG_CHAT_ID       = "8154505910"
+
 ALL_PAIRS = [
     "BTC/USD",  "ETH/USD",  "SOL/USD",  "XRP/USD",
     "DOGE/USD", "AVAX/USD", "LINK/USD", "UNI/USD",
     "AAVE/USD", "NEAR/USD", "APT/USD",  "SUI/USD",
     "ARB/USD",  "OP/USD",   "ADA/USD",  "POL/USD",
 ]
+
+
+def tg_send(msg):
+    try:
+        payload = json.dumps({
+            "chat_id": TG_CHAT_ID, "text": msg, "parse_mode": "HTML",
+        }).encode()
+        req = urllib.request.Request(
+            f"https://api.telegram.org/bot{TG_BOT_TOKEN}/sendMessage",
+            data=payload, headers={"Content-Type": "application/json"},
+        )
+        urllib.request.urlopen(req, timeout=10)
+    except Exception as e:
+        print(f"  [tg] alert failed: {e}")
 
 
 def load_gemini_key(league):
@@ -217,6 +236,7 @@ def main():
     else:
         gen = len(results_history) + 1
     state = {"consec_429": 0}
+    gens_since_best = 0
 
     print(f"[odin/{league}] Establishing baseline Sharpe for seed strategy...")
     baseline = run_backtest(best_strategy, league, ALL_PAIRS)
@@ -229,6 +249,12 @@ def main():
         print(f"  WARNING: seed has only {baseline['total_trades']} trades (< {min_t} minimum) — "
               f"likely overfitted. Resetting baseline to 0.0 for fresh search.")
         best_sharpe = 0.0
+        tg_send(
+            f"<b>ODIN RESET [{league.upper()}]</b>\n\n"
+            f"Saved best strategy has only {baseline['total_trades']} trades (&lt;{min_t} min) — overfitted.\n"
+            f"Baseline reset to 0.0 for fresh search.\n"
+            f"Address with Claude Code."
+        )
     print(f"  Baseline Sharpe={best_sharpe:.4f}  pnl={baseline['total_pnl_pct']:+.2f}%  "
           f"trades={baseline['total_trades']}  win_rate={baseline['win_rate_pct']}%")
     print(f"\n[odin/{league}] Starting research loop (Gemini/{GEMINI_MODEL}, {args.sleep}s sleep).\n")
@@ -336,8 +362,18 @@ def main():
             best_sharpe        = sharpe
             best_strategy      = strategy
             best_strategy_yaml = strategy_yaml
+            gens_since_best    = 0
         else:
             status = "discarded"
+            gens_since_best += 1
+            if gens_since_best % STALL_ALERT_GENS == 0:
+                tg_send(
+                    f"<b>ODIN STALL [{league.upper()}]</b>\n\n"
+                    f"No improvement in {gens_since_best} consecutive generations.\n"
+                    f"Current best Sharpe: {best_sharpe:.4f}\n"
+                    f"Address with Claude Code."
+                )
+                print(f"  [tg] Stall alert sent ({gens_since_best} gens since last improvement)")
 
         print(f"| sharpe={sharpe:.4f}  win={win_rate}%  pnl={pnl_pct:+.2f}%  "
               f"trades={trades}  [{status}]")
