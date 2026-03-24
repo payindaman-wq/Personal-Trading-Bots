@@ -31,6 +31,9 @@ GEMINI_BASE   = "https://generativelanguage.googleapis.com/v1beta/models"
 # Look-ahead bias guard
 SUSPICIOUS_SHARPE = 3.5
 
+# Minimum trade count to accept a strategy as new best (prevents overfitting on noise)
+MIN_TRADES = {"day": 50, "swing": 20}
+
 ALL_PAIRS = [
     "BTC/USD",  "ETH/USD",  "SOL/USD",  "XRP/USD",
     "DOGE/USD", "AVAX/USD", "LINK/USD", "UNI/USD",
@@ -221,6 +224,11 @@ def main():
         print(f"  ERROR: {baseline['error']}")
         sys.exit(1)
     best_sharpe = baseline["sharpe"]
+    min_t = MIN_TRADES.get(league, 30)
+    if baseline["total_trades"] < min_t:
+        print(f"  WARNING: seed has only {baseline['total_trades']} trades (< {min_t} minimum) — "
+              f"likely overfitted. Resetting baseline to 0.0 for fresh search.")
+        best_sharpe = 0.0
     print(f"  Baseline Sharpe={best_sharpe:.4f}  pnl={baseline['total_pnl_pct']:+.2f}%  "
           f"trades={baseline['total_trades']}  win_rate={baseline['win_rate_pct']}%")
     print(f"\n[odin/{league}] Starting research loop (Gemini/{GEMINI_MODEL}, {args.sleep}s sleep).\n")
@@ -306,6 +314,21 @@ def main():
             time.sleep(args.sleep)
             continue
 
+        # 5b. Minimum trade count guard — prevents overfitting on low-sample noise
+        min_t = MIN_TRADES.get(league, 30)
+        if trades < min_t:
+            print(f"| sharpe={sharpe:.4f}  win={win_rate}%  trades={trades}  "
+                  f"[low_trades < {min_t}]")
+            log_result(league, gen, result, "low_trades", f"trades={trades} < {min_t}")
+            results_history.append({"gen": str(gen), "sharpe": f"{sharpe:.4f}",
+                                     "win_rate": f"{win_rate:.1f}", "pnl_pct": f"{pnl_pct:.2f}",
+                                     "trades": str(trades), "status": "low_trades"})
+            gen += 1
+            with open(state_path, "w") as _f:
+                json.dump({"gen": gen}, _f)
+            time.sleep(args.sleep)
+            continue
+
         # 6. Compare to best
         if sharpe > best_sharpe:
             status = "new_best"
@@ -323,6 +346,9 @@ def main():
         results_history.append({"gen": str(gen), "sharpe": f"{sharpe:.4f}",
                                  "win_rate": f"{win_rate:.1f}", "pnl_pct": f"{pnl_pct:.2f}",
                                  "trades": str(trades), "status": status})
+        # Cap in-memory history to prevent unbounded growth
+        if len(results_history) > 200:
+            results_history = results_history[-200:]
 
         # Mimir milestone: deep analysis every 100 generations
         if gen % 100 == 0:

@@ -22,10 +22,14 @@ SUSPICIOUS_WINRATE  = 85.0
 
 
 # ---------------------------------------------------------------------------
-# CSV loader
+# CSV loader (cached — data files don't change during a research run)
 # ---------------------------------------------------------------------------
 
+_csv_cache: dict = {}
+
 def load_csv(path):
+    if path in _csv_cache:
+        return _csv_cache[path]
     rows = []
     with open(path) as f:
         reader = csv.DictReader(f)
@@ -38,6 +42,7 @@ def load_csv(path):
                 "close":  float(row["close"]),
                 "volume": float(row["volume"]),
             })
+    _csv_cache[path] = rows
     return rows
 
 
