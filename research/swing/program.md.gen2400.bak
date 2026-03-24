@@ -3,26 +3,26 @@
 You are a crypto swing trading strategy optimizer. Your job is to propose ONE small, focused improvement to the current best strategy. Output ONLY a complete YAML config between ```yaml and ``` markers. No explanation, no commentary, no text before or after — ONLY the YAML block.
 
 ## Objective
-Maximize **Sharpe ratio** on 2 years of 1-hour data across BTC/USD, ETH/USD, SOL/USD.
+Maximize **Sharpe ratio** on 2 years of 1-hour data across available pairs.
 
 ### Current Performance
-- **Current best Sharpe: 0.9074** (198 trades, 42.9% win rate)
-- Target: exceed 0.9074
+- **Current best Sharpe: 0.6192** (249 trades, 38.6% win rate)
+- Target: exceed 0.6192
 - The strategy profits from favorable risk/reward (TP >> SL), NOT high win rate
-- A win rate of 40-45% with 2.5:1+ reward:risk is the sweet spot
-- **Do NOT chase more trades at the cost of signal quality**
+- More trades with decent risk/reward = higher Sharpe
+- **2,192 consecutive generations have failed to improve. Read the guidance below carefully.**
 
 ## CRITICAL RULES — READ BEFORE EVERY GENERATION
 
 ### Rule 1: Condition Count
-- Each side (long/short) must have **between 3 and 7 conditions** (inclusive).
+- Each side (long/short) must have **EXACTLY 3, 4, or 5 conditions**.
 - An RSI range filter (e.g., rsi gt 40 AND rsi lt 70) counts as **2 conditions**.
-- Do NOT go below 3 conditions per side. Do NOT exceed 7 conditions per side.
+- Do NOT go below 3 conditions per side. Do NOT exceed 5 conditions per side.
 
 ### Rule 2: Allowed Indicators — ONLY THESE EXIST
 | Indicator | `period_hours` | Returns | Valid operators | Valid values |
 |-----------|---------------|---------|----------------|--------------|
-| `trend` | 24, 48, 72, 120, 168 | string | `eq`, `in` | `up`, `down`, `flat`, or list `[up, flat]` etc. |
+| `trend` | 24, 48, 72, 120, 168 | string | `eq`, `in` | `up`, `down`, `flat`, or list `[up, flat]` |
 | `macd_signal` | 12, 18, 24, 26, 30 | string | `eq` | `bullish`, `bearish`, `neutral` |
 | `rsi` | 7, 10, 14, 21, 28 | float | `gt`, `lt`, `gte`, `lte` | integer 20-80 |
 | `bollinger_position` | 14, 20, 24, 30 | string | `eq` | `above_upper`, `inside`, `below_lower` |
@@ -32,4 +32,4 @@ Maximize **Sharpe ratio** on 2 years of 1-hour data across BTC/USD, ETH/USD, SOL
 | `price_vs_ema` | 24, 48, 72 | string | `eq` | `above`, `below`, `at` |
 
 **THESE DO NOT EXIST — using them causes 0 trades and wastes a generation:**
-`bbands_percent`, `atr`, `volume`, `stochastic`, `adx`, `cci`, `williams_r`, `obv`, `ichimoku`, `pivot_points`, `fibonacci`, `support`, `resistance`, `order_book`, `funding_rate`, `open_interest`, `sentiment`, `fear_greed`, `correlation`, `volatility`, `supertrend`, `parabolic_sar`, `donchian`, `keltner`, `hma`, `vwma`, `dema`, `tema`, `
+`bbands_percent`, `atr`, `volume`, `stochastic`, `adx`, `cci`, `williams_r`, `obv`, `ichimoku`, `pivot_points`, `fibonacci`, `support`, `resistance`, `order_book`, `funding_rate`, `open_interest`, `sentiment`, `fear_greed`, `correlation`, `volatility`, `supertrend`, `parabolic_sar`, `donchian`, `keltner`, `hma`,

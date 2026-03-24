@@ -1,6 +1,8 @@
 {
   "last_alerted": {
-    "gemini_quota": "2026-03-17T01:00:02.022434+00:00"
+    "gemini_quota": "2026-03-17T01:00:02.022434+00:00",
+    "odin_swing_research": "2026-03-24T09:00:01.590805+00:00",
+    "polysyn_stale": "2026-03-24T09:00:01.590810+00:00"
   },
   "error_consecutive": {
     "day_errors": 0,

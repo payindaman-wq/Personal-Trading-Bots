@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-24T08:41:01.613025+00:00",
+  "generated_at": "2026-03-24T11:41:02.056351+00:00",
   "league": "swing",
   "total_sprints": 2,
   "archived": 1,
@@ -20,7 +20,7 @@
       "total_trades": 2,
       "total_wins": 1,
       "total_losses": 0,
-      "total_fees_usd": 0.0755,
+      "total_fees_usd": 0.3255,
       "worst_drawdown_pct": 0.0,
       "best_sprint_pnl_pct": 8.232,
       "worst_sprint_pnl_pct": 0.0,
@@ -36,7 +36,7 @@
         },
         {
           "comp_id": "spread-20260323-0040",
-          "rank": 3,
+          "rank": 11,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
           "trades": 0,
@@ -79,7 +79,7 @@
         },
         {
           "comp_id": "spread-20260323-0040",
-          "rank": 7,
+          "rank": 4,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
           "trades": 0,
@@ -122,7 +122,7 @@
         },
         {
           "comp_id": "spread-20260323-0040",
-          "rank": 8,
+          "rank": 5,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
           "trades": 0,
@@ -137,49 +137,6 @@
       "pair_half_life": 22.8,
       "pair_corr": 0.915,
       "pair_hurst": 0.444
-    },
-    {
-      "bot": "brynja",
-      "sprints_entered": 2,
-      "sprint_wins": 0,
-      "podiums": 0,
-      "points": 1,
-      "cumulative_pnl_usd": 0.0,
-      "cumulative_pnl_pct": 0.0,
-      "total_trades": 0,
-      "total_wins": 0,
-      "total_losses": 0,
-      "total_fees_usd": 0.3,
-      "worst_drawdown_pct": 0.0,
-      "best_sprint_pnl_pct": 0.0,
-      "worst_sprint_pnl_pct": 0.0,
-      "sprint_log": [
-        {
-          "comp_id": "spread-20260316-0009",
-          "rank": 4,
-          "pnl_usd": 0.0,
-          "pnl_pct": 0.0,
-          "trades": 0,
-          "win_rate": 0.0,
-          "in_progress": false
-        },
-        {
-          "comp_id": "spread-20260323-0040",
-          "rank": 12,
-          "pnl_usd": 0.0,
-          "pnl_pct": 0.0,
-          "trades": 0,
-          "win_rate": 0.0,
-          "in_progress": true
-        }
-      ],
-      "pair": "AAVE/LINK",
-      "pair_health": "WEAK",
-      "overall_win_rate": 0.0,
-      "avg_pnl_pct_per_sprint": 0.0,
-      "pair_half_life": 152.1,
-      "pair_corr": 0.787,
-      "pair_hurst": 0.516
     },
     {
       "bot": "ingrid",
@@ -208,7 +165,7 @@
         },
         {
           "comp_id": "spread-20260323-0040",
-          "rank": 5,
+          "rank": 2,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
           "trades": 0,
@@ -251,7 +208,7 @@
         },
         {
           "comp_id": "spread-20260323-0040",
-          "rank": 6,
+          "rank": 3,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
           "trades": 0,
@@ -266,49 +223,6 @@
       "pair_half_life": 32.7,
       "pair_corr": 0.936,
       "pair_hurst": 0.431
-    },
-    {
-      "bot": "solrun",
-      "sprints_entered": 2,
-      "sprint_wins": 0,
-      "podiums": 0,
-      "points": 1,
-      "cumulative_pnl_usd": 0.0,
-      "cumulative_pnl_pct": 0.0,
-      "total_trades": 0,
-      "total_wins": 0,
-      "total_losses": 0,
-      "total_fees_usd": 0.3,
-      "worst_drawdown_pct": 0.0,
-      "best_sprint_pnl_pct": 0.0,
-      "worst_sprint_pnl_pct": 0.0,
-      "sprint_log": [
-        {
-          "comp_id": "spread-20260316-0009",
-          "rank": 8,
-          "pnl_usd": 0.0,
-          "pnl_pct": 0.0,
-          "trades": 0,
-          "win_rate": 0.0,
-          "in_progress": false
-        },
-        {
-          "comp_id": "spread-20260323-0040",
-          "rank": 13,
-          "pnl_usd": 0.0,
-          "pnl_pct": 0.0,
-          "trades": 0,
-          "win_rate": 0.0,
-          "in_progress": true
-        }
-      ],
-      "pair": "AAVE/LINK",
-      "pair_health": "WEAK",
-      "overall_win_rate": 0.0,
-      "avg_pnl_pct_per_sprint": 0.0,
-      "pair_half_life": 152.1,
-      "pair_corr": 0.787,
-      "pair_hurst": 0.516
     },
     {
       "bot": "sunniva",
@@ -337,7 +251,7 @@
         },
         {
           "comp_id": "spread-20260323-0040",
-          "rank": 9,
+          "rank": 6,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
           "trades": 0,
@@ -380,7 +294,7 @@
         },
         {
           "comp_id": "spread-20260323-0040",
-          "rank": 10,
+          "rank": 7,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
           "trades": 0,
@@ -423,7 +337,7 @@
         },
         {
           "comp_id": "spread-20260323-0040",
-          "rank": 11,
+          "rank": 8,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
           "trades": 0,
@@ -450,7 +364,7 @@
       "total_trades": 3,
       "total_wins": 1,
       "total_losses": 1,
-      "total_fees_usd": 0.1254,
+      "total_fees_usd": 0.3754,
       "worst_drawdown_pct": 0.8299,
       "best_sprint_pnl_pct": 0.4794,
       "worst_sprint_pnl_pct": 0.0,
@@ -466,7 +380,7 @@
         },
         {
           "comp_id": "spread-20260323-0040",
-          "rank": 2,
+          "rank": 10,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
           "trades": 0,
@@ -509,7 +423,7 @@
         },
         {
           "comp_id": "spread-20260323-0040",
-          "rank": 4,
+          "rank": 1,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
           "trades": 0,
@@ -536,7 +450,7 @@
       "total_trades": 1,
       "total_wins": 0,
       "total_losses": 1,
-      "total_fees_usd": 0.05,
+      "total_fees_usd": 0.3,
       "worst_drawdown_pct": 0.841,
       "best_sprint_pnl_pct": 0.0,
       "worst_sprint_pnl_pct": -3.1644,
@@ -552,7 +466,7 @@
         },
         {
           "comp_id": "spread-20260323-0040",
-          "rank": 1,
+          "rank": 9,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
           "trades": 0,
@@ -595,7 +509,7 @@
         },
         {
           "comp_id": "spread-20260323-0040",
-          "rank": 14,
+          "rank": 12,
           "pnl_usd": -8.47,
           "pnl_pct": -3.2893,
           "trades": 1,
@@ -610,6 +524,92 @@
       "pair_half_life": 22.8,
       "pair_corr": 0.915,
       "pair_hurst": 0.444
+    },
+    {
+      "bot": "brynja",
+      "sprints_entered": 2,
+      "sprint_wins": 0,
+      "podiums": 0,
+      "points": 1,
+      "cumulative_pnl_usd": -9.39,
+      "cumulative_pnl_pct": -3.0289,
+      "total_trades": 1,
+      "total_wins": 0,
+      "total_losses": 1,
+      "total_fees_usd": 0.6,
+      "worst_drawdown_pct": 0.969,
+      "best_sprint_pnl_pct": 0.0,
+      "worst_sprint_pnl_pct": -3.0289,
+      "sprint_log": [
+        {
+          "comp_id": "spread-20260316-0009",
+          "rank": 4,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "spread-20260323-0040",
+          "rank": 13,
+          "pnl_usd": -9.39,
+          "pnl_pct": -3.0289,
+          "trades": 1,
+          "win_rate": 0.0,
+          "in_progress": true
+        }
+      ],
+      "pair": "AAVE/LINK",
+      "pair_health": "WEAK",
+      "overall_win_rate": 0.0,
+      "avg_pnl_pct_per_sprint": -1.5145,
+      "pair_half_life": 152.1,
+      "pair_corr": 0.787,
+      "pair_hurst": 0.516
+    },
+    {
+      "bot": "solrun",
+      "sprints_entered": 2,
+      "sprint_wins": 0,
+      "podiums": 0,
+      "points": 1,
+      "cumulative_pnl_usd": -9.39,
+      "cumulative_pnl_pct": -3.0289,
+      "total_trades": 1,
+      "total_wins": 0,
+      "total_losses": 1,
+      "total_fees_usd": 0.6,
+      "worst_drawdown_pct": 0.969,
+      "best_sprint_pnl_pct": 0.0,
+      "worst_sprint_pnl_pct": -3.0289,
+      "sprint_log": [
+        {
+          "comp_id": "spread-20260316-0009",
+          "rank": 8,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "spread-20260323-0040",
+          "rank": 14,
+          "pnl_usd": -9.39,
+          "pnl_pct": -3.0289,
+          "trades": 1,
+          "win_rate": 0.0,
+          "in_progress": true
+        }
+      ],
+      "pair": "AAVE/LINK",
+      "pair_health": "WEAK",
+      "overall_win_rate": 0.0,
+      "avg_pnl_pct_per_sprint": -1.5145,
+      "pair_half_life": 152.1,
+      "pair_corr": 0.787,
+      "pair_hurst": 0.516
     }
   ],
   "pair_health_summary": {
@@ -634,13 +634,6 @@
       "corr": 0.915,
       "hurst": 0.444
     },
-    "brynja": {
-      "pair": "AAVE/LINK",
-      "health": "WEAK",
-      "half_life": 152.1,
-      "corr": 0.787,
-      "hurst": 0.516
-    },
     "ingrid": {
       "pair": "LINK/ETH",
       "health": "STRONG",
@@ -654,13 +647,6 @@
       "half_life": 32.7,
       "corr": 0.936,
       "hurst": 0.431
-    },
-    "solrun": {
-      "pair": "AAVE/LINK",
-      "health": "WEAK",
-      "half_life": 152.1,
-      "corr": 0.787,
-      "hurst": 0.516
     },
     "sunniva": {
       "pair": "AAVE/ETH",
@@ -710,6 +696,20 @@
       "half_life": 22.8,
       "corr": 0.915,
       "hurst": 0.444
+    },
+    "brynja": {
+      "pair": "AAVE/LINK",
+      "health": "WEAK",
+      "half_life": 152.1,
+      "corr": 0.787,
+      "hurst": 0.516
+    },
+    "solrun": {
+      "pair": "AAVE/LINK",
+      "health": "WEAK",
+      "half_life": 152.1,
+      "corr": 0.787,
+      "hurst": 0.516
     }
   }
 }

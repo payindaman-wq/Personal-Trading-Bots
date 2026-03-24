@@ -1,5 +1,5 @@
-name: skadi
-style: multi_tf_trend_macd_rsi — weekly trend with MACD confirmation and RSI range filter
+name: skadi_v2_v2200_optimized
+style: multi_tf_trend_macd_rsi_vwap_filter
 pairs:
   - BTC/USD
   - ETH/USD
@@ -31,6 +31,14 @@ entry:
         period_hours: 14
         operator: lt
         value: 70
+      - indicator: price_vs_vwap
+        period_hours: 24
+        operator: eq
+        value: above
+      - indicator: momentum_accelerating
+        period_hours: 24
+        operator: eq
+        value: true
   short:
     conditions:
       - indicator: trend
@@ -53,6 +61,14 @@ entry:
         period_hours: 14
         operator: gt
         value: 30
+      - indicator: price_vs_vwap
+        period_hours: 24
+        operator: eq
+        value: below
+      - indicator: price_change_pct
+        period_hours: 48
+        operator: gt
+        value: -2.0
 exit:
   take_profit_pct: 8.0
   stop_loss_pct: 3.0

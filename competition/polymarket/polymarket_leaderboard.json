@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-24T08:40:01.081125+00:00",
+  "generated_at": "2026-03-24T12:00:01.812126+00:00",
   "total_sprints": 2,
   "cycle": 1,
   "sprint_in_cycle": 3,
@@ -545,8 +545,8 @@
       "type": "arb",
       "username": "",
       "sprint_id": "poly-auto-20260324-0610",
-      "sprint_pnl_usd": 5.2071,
-      "sprint_pnl_pct": 0.52,
+      "sprint_pnl_usd": 8.0457,
+      "sprint_pnl_pct": 0.8,
       "sprint_trades": 8,
       "sprint_wins": 0,
       "win_rate": 0.0,
@@ -555,26 +555,26 @@
       "points": 8
     },
     {
-      "bot": "rind",
-      "type": "world_economics",
+      "bot": "huginn",
+      "type": "arb",
       "username": "",
       "sprint_id": "poly-auto-20260324-0610",
-      "sprint_pnl_usd": 0.9365,
-      "sprint_pnl_pct": 0.09,
-      "sprint_trades": 1,
+      "sprint_pnl_usd": 4.6229,
+      "sprint_pnl_pct": 0.46,
+      "sprint_trades": 4,
       "sprint_wins": 0,
       "win_rate": 0.0,
-      "active_positions": 1,
+      "active_positions": 4,
       "rank": 2,
       "points": 5
     },
     {
-      "bot": "jord",
+      "bot": "rind",
       "type": "world_economics",
       "username": "",
       "sprint_id": "poly-auto-20260324-0610",
-      "sprint_pnl_usd": 0.9365,
-      "sprint_pnl_pct": 0.09,
+      "sprint_pnl_usd": 1.9771,
+      "sprint_pnl_pct": 0.2,
       "sprint_trades": 1,
       "sprint_wins": 0,
       "win_rate": 0.0,
@@ -583,31 +583,73 @@
       "points": 3
     },
     {
-      "bot": "urd",
-      "type": "world_events",
+      "bot": "jord",
+      "type": "world_economics",
       "username": "",
       "sprint_id": "poly-auto-20260324-0610",
-      "sprint_pnl_usd": 0.6145,
-      "sprint_pnl_pct": 0.06,
-      "sprint_trades": 5,
+      "sprint_pnl_usd": 1.9771,
+      "sprint_pnl_pct": 0.2,
+      "sprint_trades": 1,
       "sprint_wins": 0,
       "win_rate": 0.0,
-      "active_positions": 5,
+      "active_positions": 1,
       "rank": 4,
       "points": 1
     },
     {
-      "bot": "hallvard",
-      "type": "copy",
-      "username": "Countryside",
-      "sprint_id": "poly-20260324-0558",
-      "sprint_pnl_usd": 0.2268,
-      "sprint_pnl_pct": 0.02,
-      "sprint_trades": 0,
+      "bot": "hlin",
+      "type": "sports",
+      "username": "",
+      "sprint_id": "poly-auto-20260324-0610",
+      "sprint_pnl_usd": 1.6389,
+      "sprint_pnl_pct": 0.16,
+      "sprint_trades": 4,
+      "sprint_wins": 0,
+      "win_rate": 0.0,
+      "active_positions": 4,
+      "rank": 5,
+      "points": 1
+    },
+    {
+      "bot": "freya",
+      "type": "politics",
+      "username": "",
+      "sprint_id": "poly-auto-20260324-0610",
+      "sprint_pnl_usd": 1.4276,
+      "sprint_pnl_pct": 0.14,
+      "sprint_trades": 5,
       "sprint_wins": 0,
       "win_rate": 0.0,
       "active_positions": 5,
-      "rank": 5,
+      "rank": 6,
+      "points": 1
+    },
+    {
+      "bot": "saga",
+      "type": "politics",
+      "username": "",
+      "sprint_id": "poly-auto-20260324-0610",
+      "sprint_pnl_usd": 1.4276,
+      "sprint_pnl_pct": 0.14,
+      "sprint_trades": 5,
+      "sprint_wins": 0,
+      "win_rate": 0.0,
+      "active_positions": 5,
+      "rank": 7,
+      "points": 1
+    },
+    {
+      "bot": "urd",
+      "type": "world_events",
+      "username": "",
+      "sprint_id": "poly-auto-20260324-0610",
+      "sprint_pnl_usd": 0.8231,
+      "sprint_pnl_pct": 0.08,
+      "sprint_trades": 5,
+      "sprint_wins": 0,
+      "win_rate": 0.0,
+      "active_positions": 5,
+      "rank": 8,
       "points": 1
     },
     {
@@ -621,7 +663,7 @@
       "sprint_wins": 0,
       "win_rate": 0.0,
       "active_positions": 0,
-      "rank": 6,
+      "rank": 9,
       "points": 1
     },
     {
@@ -635,7 +677,7 @@
       "sprint_wins": 0,
       "win_rate": 0.0,
       "active_positions": 0,
-      "rank": 7,
+      "rank": 10,
       "points": 1
     },
     {
@@ -649,7 +691,7 @@
       "sprint_wins": 0,
       "win_rate": 0.0,
       "active_positions": 0,
-      "rank": 8,
+      "rank": 11,
       "points": 1
     },
     {
@@ -663,7 +705,7 @@
       "sprint_wins": 0,
       "win_rate": 0.0,
       "active_positions": 0,
-      "rank": 9,
+      "rank": 12,
       "points": 1
     },
     {
@@ -677,7 +719,7 @@
       "sprint_wins": 0,
       "win_rate": 0.0,
       "active_positions": 0,
-      "rank": 10,
+      "rank": 13,
       "points": 1
     },
     {
@@ -691,7 +733,7 @@
       "sprint_wins": 0,
       "win_rate": 0.0,
       "active_positions": 0,
-      "rank": 11,
+      "rank": 14,
       "points": 1
     },
     {
@@ -705,7 +747,7 @@
       "sprint_wins": 0,
       "win_rate": 0.0,
       "active_positions": 0,
-      "rank": 12,
+      "rank": 15,
       "points": 1
     },
     {
@@ -719,7 +761,7 @@
       "sprint_wins": 0,
       "win_rate": 0.0,
       "active_positions": 0,
-      "rank": 13,
+      "rank": 16,
       "points": 1
     },
     {
@@ -729,11 +771,11 @@
       "sprint_id": "poly-auto-20260324-0610",
       "sprint_pnl_usd": 0.0,
       "sprint_pnl_pct": 0.0,
-      "sprint_trades": 0,
+      "sprint_trades": 1,
       "sprint_wins": 0,
       "win_rate": 0.0,
-      "active_positions": 0,
-      "rank": 14,
+      "active_positions": 1,
+      "rank": 17,
       "points": 1
     },
     {
@@ -747,35 +789,7 @@
       "sprint_wins": 0,
       "win_rate": 0.0,
       "active_positions": 0,
-      "rank": 15,
-      "points": 1
-    },
-    {
-      "bot": "hlin",
-      "type": "sports",
-      "username": "",
-      "sprint_id": "poly-auto-20260324-0610",
-      "sprint_pnl_usd": 0.0,
-      "sprint_pnl_pct": 0.0,
-      "sprint_trades": 4,
-      "sprint_wins": 0,
-      "win_rate": 0.0,
-      "active_positions": 4,
-      "rank": 16,
-      "points": 1
-    },
-    {
-      "bot": "freya",
-      "type": "politics",
-      "username": "",
-      "sprint_id": "poly-auto-20260324-0610",
-      "sprint_pnl_usd": 0.0,
-      "sprint_pnl_pct": 0.0,
-      "sprint_trades": 5,
-      "sprint_wins": 0,
-      "win_rate": 0.0,
-      "active_positions": 5,
-      "rank": 17,
+      "rank": 18,
       "points": 1
     },
     {
@@ -789,20 +803,6 @@
       "sprint_wins": 0,
       "win_rate": 0.0,
       "active_positions": 0,
-      "rank": 18,
-      "points": 1
-    },
-    {
-      "bot": "saga",
-      "type": "politics",
-      "username": "",
-      "sprint_id": "poly-auto-20260324-0610",
-      "sprint_pnl_usd": 0.0,
-      "sprint_pnl_pct": 0.0,
-      "sprint_trades": 5,
-      "sprint_wins": 0,
-      "win_rate": 0.0,
-      "active_positions": 5,
       "rank": 19,
       "points": 1
     },
@@ -855,25 +855,11 @@
       "sprint_id": "poly-auto-20260324-0610",
       "sprint_pnl_usd": 0.0,
       "sprint_pnl_pct": 0.0,
-      "sprint_trades": 2,
+      "sprint_trades": 4,
       "sprint_wins": 0,
       "win_rate": 0.0,
-      "active_positions": 2,
+      "active_positions": 4,
       "rank": 23,
-      "points": 1
-    },
-    {
-      "bot": "huginn",
-      "type": "arb",
-      "username": "",
-      "sprint_id": "poly-auto-20260324-0610",
-      "sprint_pnl_usd": 0.0,
-      "sprint_pnl_pct": 0.0,
-      "sprint_trades": 3,
-      "sprint_wins": 0,
-      "win_rate": 0.0,
-      "active_positions": 3,
-      "rank": 24,
       "points": 1
     },
     {
@@ -887,7 +873,7 @@
       "sprint_wins": 0,
       "win_rate": 0.0,
       "active_positions": 0,
-      "rank": 25,
+      "rank": 24,
       "points": 1
     },
     {
@@ -901,21 +887,7 @@
       "sprint_wins": 0,
       "win_rate": 0.0,
       "active_positions": 0,
-      "rank": 26,
-      "points": 1
-    },
-    {
-      "bot": "skoll",
-      "type": "sports",
-      "username": "",
-      "sprint_id": "poly-auto-20260324-0610",
-      "sprint_pnl_usd": 0.0,
-      "sprint_pnl_pct": 0.0,
-      "sprint_trades": 5,
-      "sprint_wins": 0,
-      "win_rate": 0.0,
-      "active_positions": 5,
-      "rank": 27,
+      "rank": 25,
       "points": 1
     },
     {
@@ -929,7 +901,7 @@
       "sprint_wins": 0,
       "win_rate": 0.0,
       "active_positions": 1,
-      "rank": 28,
+      "rank": 26,
       "points": 1
     },
     {
@@ -943,7 +915,7 @@
       "sprint_wins": 0,
       "win_rate": 0.0,
       "active_positions": 0,
-      "rank": 29,
+      "rank": 27,
       "points": 1
     },
     {
@@ -957,7 +929,7 @@
       "sprint_wins": 0,
       "win_rate": 0.0,
       "active_positions": 0,
-      "rank": 30,
+      "rank": 28,
       "points": 1
     },
     {
@@ -971,7 +943,7 @@
       "sprint_wins": 0,
       "win_rate": 0.0,
       "active_positions": 0,
-      "rank": 31,
+      "rank": 29,
       "points": 1
     },
     {
@@ -985,7 +957,7 @@
       "sprint_wins": 0,
       "win_rate": 0.0,
       "active_positions": 1,
-      "rank": 32,
+      "rank": 30,
       "points": 1
     },
     {
@@ -999,7 +971,7 @@
       "sprint_wins": 0,
       "win_rate": 0.0,
       "active_positions": 0,
-      "rank": 33,
+      "rank": 31,
       "points": 1
     },
     {
@@ -1013,6 +985,34 @@
       "sprint_wins": 0,
       "win_rate": 0.0,
       "active_positions": 0,
+      "rank": 32,
+      "points": 1
+    },
+    {
+      "bot": "skoll",
+      "type": "sports",
+      "username": "",
+      "sprint_id": "poly-auto-20260324-0610",
+      "sprint_pnl_usd": -0.4741,
+      "sprint_pnl_pct": -0.05,
+      "sprint_trades": 5,
+      "sprint_wins": 0,
+      "win_rate": 0.0,
+      "active_positions": 5,
+      "rank": 33,
+      "points": 1
+    },
+    {
+      "bot": "hallvard",
+      "type": "copy",
+      "username": "Countryside",
+      "sprint_id": "poly-20260324-0558",
+      "sprint_pnl_usd": -2.6144,
+      "sprint_pnl_pct": -0.26,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0,
+      "active_positions": 5,
       "rank": 34,
       "points": 1
     },
@@ -1035,12 +1035,12 @@
       "type": "crypto",
       "username": "",
       "sprint_id": "poly-auto-20260324-0610",
-      "sprint_pnl_usd": -6.8362,
-      "sprint_pnl_pct": -0.68,
-      "sprint_trades": 3,
+      "sprint_pnl_usd": -15.9996,
+      "sprint_pnl_pct": -1.6,
+      "sprint_trades": 4,
       "sprint_wins": 0,
       "win_rate": 0.0,
-      "active_positions": 3,
+      "active_positions": 4,
       "rank": 36,
       "points": 1
     },
@@ -1049,12 +1049,12 @@
       "type": "crypto",
       "username": "",
       "sprint_id": "poly-auto-20260324-0610",
-      "sprint_pnl_usd": -8.6364,
-      "sprint_pnl_pct": -0.86,
-      "sprint_trades": 2,
+      "sprint_pnl_usd": -19.9741,
+      "sprint_pnl_pct": -2.0,
+      "sprint_trades": 3,
       "sprint_wins": 0,
       "win_rate": 0.0,
-      "active_positions": 2,
+      "active_positions": 3,
       "rank": 37,
       "points": 1
     },
@@ -1063,12 +1063,12 @@
       "type": "world_economics",
       "username": "",
       "sprint_id": "poly-auto-20260324-0610",
-      "sprint_pnl_usd": -8.6364,
-      "sprint_pnl_pct": -0.86,
-      "sprint_trades": 2,
+      "sprint_pnl_usd": -19.9741,
+      "sprint_pnl_pct": -2.0,
+      "sprint_trades": 3,
       "sprint_wins": 0,
       "win_rate": 0.0,
-      "active_positions": 2,
+      "active_positions": 3,
       "rank": 38,
       "points": 1
     }

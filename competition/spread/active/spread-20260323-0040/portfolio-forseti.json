@@ -15,9 +15,17 @@
   ],
   "starting_capital": 1000.0,
   "fee_rate": 0.001,
-  "equity": 1000.0,
+  "equity": 999.75,
   "peak_equity": 1000.0,
-  "positions": [],
+  "positions": [
+    {
+      "pair": "SOL/USD",
+      "direction": "long",
+      "entry_price": 91.561,
+      "size_usd": 250.0,
+      "opened_at": "2026-03-24T09:00:04.616664+00:00"
+    }
+  ],
   "stats": {
     "total_trades": 0,
     "wins": 0,
@@ -25,8 +33,8 @@
     "win_rate": 0.0,
     "total_pnl_usd": 0.0,
     "total_pnl_pct": 0.0,
-    "total_fees": 0.0,
+    "total_fees": 0.25,
     "max_drawdown_pct": 0.0,
-    "current_equity": 1000.0
+    "current_equity": 999.75
   }
 }
