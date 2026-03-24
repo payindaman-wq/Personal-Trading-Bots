@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-03-21T23:41:01.962612+00:00",
+  "generated_at": "2026-03-24T06:11:01.296241+00:00",
   "league": "swing",
-  "total_sprints": 0,
-  "archived": 0,
-  "active_sprint": "spread-20260316-0009",
+  "total_sprints": 1,
+  "archived": 1,
+  "active_sprint": "spread-20260323-0040",
   "cycle": 1,
   "sprint_in_cycle": 0,
   "sprints_per_cycle": 4,
@@ -11,118 +11,145 @@
   "rankings": [
     {
       "bot": "gunhild",
-      "sprints_entered": 1,
-      "sprint_wins": 0,
-      "podiums": 0,
-      "points": 0,
-      "cumulative_pnl_usd": 20.33,
+      "sprints_entered": 2,
+      "sprint_wins": 1,
+      "podiums": 1,
+      "points": 8,
+      "cumulative_pnl_usd": 2.66,
       "cumulative_pnl_pct": 8.232,
-      "total_trades": 1,
+      "total_trades": 2,
       "total_wins": 1,
       "total_losses": 0,
-      "total_fees_usd": 0.5,
+      "total_fees_usd": 0.0755,
       "worst_drawdown_pct": 0.0,
       "best_sprint_pnl_pct": 8.232,
-      "worst_sprint_pnl_pct": 8.232,
+      "worst_sprint_pnl_pct": 0.0,
       "sprint_log": [
         {
           "comp_id": "spread-20260316-0009",
           "rank": 1,
-          "pnl_usd": 20.33,
+          "pnl_usd": 2.66,
           "pnl_pct": 8.232,
-          "trades": 1,
+          "trades": 2,
           "win_rate": 100.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "spread-20260323-0040",
+          "rank": 3,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
           "in_progress": true
         }
       ],
       "pair": "AVAX/ETH",
       "pair_health": "STRONG",
-      "overall_win_rate": 100.0,
-      "avg_pnl_pct_per_sprint": 8.232,
+      "overall_win_rate": 50.0,
+      "avg_pnl_pct_per_sprint": 4.116,
       "pair_half_life": 21.9,
       "pair_corr": 0.857,
       "pair_hurst": 0.411
     },
     {
       "bot": "sigrid",
-      "sprints_entered": 1,
+      "sprints_entered": 2,
       "sprint_wins": 0,
-      "podiums": 0,
-      "points": 0,
-      "cumulative_pnl_usd": 18.61,
+      "podiums": 1,
+      "points": 5,
+      "cumulative_pnl_usd": 1.86,
       "cumulative_pnl_pct": 6.3033,
       "total_trades": 1,
       "total_wins": 1,
       "total_losses": 0,
-      "total_fees_usd": 0.6,
+      "total_fees_usd": 0.06,
       "worst_drawdown_pct": 0.0,
       "best_sprint_pnl_pct": 6.3033,
-      "worst_sprint_pnl_pct": 6.3033,
+      "worst_sprint_pnl_pct": 0.0,
       "sprint_log": [
         {
           "comp_id": "spread-20260316-0009",
           "rank": 2,
-          "pnl_usd": 18.61,
+          "pnl_usd": 1.86,
           "pnl_pct": 6.3033,
           "trades": 1,
           "win_rate": 100.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "spread-20260323-0040",
+          "rank": 7,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
           "in_progress": true
         }
       ],
       "pair": "SOL/BTC",
       "pair_health": "STRONG",
       "overall_win_rate": 100.0,
-      "avg_pnl_pct_per_sprint": 6.3033,
+      "avg_pnl_pct_per_sprint": 3.1517,
       "pair_half_life": 32.3,
       "pair_corr": 0.886,
       "pair_hurst": 0.462
     },
     {
-      "bot": "forseti",
-      "sprints_entered": 1,
+      "bot": "skadi",
+      "sprints_entered": 2,
       "sprint_wins": 0,
-      "podiums": 0,
-      "points": 0,
-      "cumulative_pnl_usd": 8.75,
-      "cumulative_pnl_pct": 3.6,
-      "total_trades": 1,
-      "total_wins": 1,
-      "total_losses": 0,
-      "total_fees_usd": 0.7521,
-      "worst_drawdown_pct": 0.0,
-      "best_sprint_pnl_pct": 3.6,
-      "worst_sprint_pnl_pct": 3.6,
+      "podiums": 1,
+      "points": 3,
+      "cumulative_pnl_usd": 0.55,
+      "cumulative_pnl_pct": -2.5904,
+      "total_trades": 2,
+      "total_wins": 0,
+      "total_losses": 1,
+      "total_fees_usd": 0.0897,
+      "worst_drawdown_pct": 0.837,
+      "best_sprint_pnl_pct": 0.0,
+      "worst_sprint_pnl_pct": -2.5904,
       "sprint_log": [
         {
           "comp_id": "spread-20260316-0009",
           "rank": 3,
-          "pnl_usd": 8.75,
-          "pnl_pct": 3.6,
-          "trades": 1,
-          "win_rate": 100.0,
+          "pnl_usd": 0.55,
+          "pnl_pct": -2.5904,
+          "trades": 2,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "spread-20260323-0040",
+          "rank": 8,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
           "in_progress": true
         }
       ],
-      "pair": "SOL/ETH",
+      "pair": "ETH/BTC",
       "pair_health": "STRONG",
-      "overall_win_rate": 100.0,
-      "avg_pnl_pct_per_sprint": 3.6,
-      "pair_half_life": 29.2,
-      "pair_corr": 0.897,
-      "pair_hurst": 0.461
+      "overall_win_rate": 0.0,
+      "avg_pnl_pct_per_sprint": -1.2952,
+      "pair_half_life": 22.8,
+      "pair_corr": 0.915,
+      "pair_hurst": 0.444
     },
     {
       "bot": "brynja",
-      "sprints_entered": 1,
+      "sprints_entered": 2,
       "sprint_wins": 0,
       "podiums": 0,
-      "points": 0,
+      "points": 1,
       "cumulative_pnl_usd": 0.0,
       "cumulative_pnl_pct": 0.0,
       "total_trades": 0,
       "total_wins": 0,
       "total_losses": 0,
-      "total_fees_usd": 0.0,
+      "total_fees_usd": 0.3,
       "worst_drawdown_pct": 0.0,
       "best_sprint_pnl_pct": 0.0,
       "worst_sprint_pnl_pct": 0.0,
@@ -130,6 +157,15 @@
         {
           "comp_id": "spread-20260316-0009",
           "rank": 4,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "spread-20260323-0040",
+          "rank": 12,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
           "trades": 0,
@@ -146,11 +182,11 @@
       "pair_hurst": 0.516
     },
     {
-      "bot": "estrid",
-      "sprints_entered": 1,
+      "bot": "ingrid",
+      "sprints_entered": 2,
       "sprint_wins": 0,
       "podiums": 0,
-      "points": 0,
+      "points": 1,
       "cumulative_pnl_usd": 0.0,
       "cumulative_pnl_pct": 0.0,
       "total_trades": 0,
@@ -168,70 +204,11 @@
           "pnl_pct": 0.0,
           "trades": 0,
           "win_rate": 0.0,
-          "in_progress": true
-        }
-      ],
-      "pair": "SOL/ETH",
-      "pair_health": "STRONG",
-      "overall_win_rate": 0.0,
-      "avg_pnl_pct_per_sprint": 0.0,
-      "pair_half_life": 29.2,
-      "pair_corr": 0.897,
-      "pair_hurst": 0.461
-    },
-    {
-      "bot": "herdis",
-      "sprints_entered": 1,
-      "sprint_wins": 0,
-      "podiums": 0,
-      "points": 0,
-      "cumulative_pnl_usd": 0.0,
-      "cumulative_pnl_pct": 0.0,
-      "total_trades": 0,
-      "total_wins": 0,
-      "total_losses": 0,
-      "total_fees_usd": 0.0,
-      "worst_drawdown_pct": 0.0,
-      "best_sprint_pnl_pct": 0.0,
-      "worst_sprint_pnl_pct": 0.0,
-      "sprint_log": [
+          "in_progress": false
+        },
         {
-          "comp_id": "spread-20260316-0009",
-          "rank": 6,
-          "pnl_usd": 0.0,
-          "pnl_pct": 0.0,
-          "trades": 0,
-          "win_rate": 0.0,
-          "in_progress": true
-        }
-      ],
-      "pair": "AVAX/SOL",
-      "pair_health": "STRONG",
-      "overall_win_rate": 0.0,
-      "avg_pnl_pct_per_sprint": 0.0,
-      "pair_half_life": 22.8,
-      "pair_corr": 0.841,
-      "pair_hurst": 0.338
-    },
-    {
-      "bot": "ingrid",
-      "sprints_entered": 1,
-      "sprint_wins": 0,
-      "podiums": 0,
-      "points": 0,
-      "cumulative_pnl_usd": 0.0,
-      "cumulative_pnl_pct": 0.0,
-      "total_trades": 0,
-      "total_wins": 0,
-      "total_losses": 0,
-      "total_fees_usd": 0.0,
-      "worst_drawdown_pct": 0.0,
-      "best_sprint_pnl_pct": 0.0,
-      "worst_sprint_pnl_pct": 0.0,
-      "sprint_log": [
-        {
-          "comp_id": "spread-20260316-0009",
-          "rank": 7,
+          "comp_id": "spread-20260323-0040",
+          "rank": 5,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
           "trades": 0,
@@ -249,10 +226,10 @@
     },
     {
       "bot": "magni",
-      "sprints_entered": 1,
+      "sprints_entered": 2,
       "sprint_wins": 0,
       "podiums": 0,
-      "points": 0,
+      "points": 1,
       "cumulative_pnl_usd": 0.0,
       "cumulative_pnl_pct": 0.0,
       "total_trades": 0,
@@ -265,7 +242,16 @@
       "sprint_log": [
         {
           "comp_id": "spread-20260316-0009",
-          "rank": 8,
+          "rank": 6,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "spread-20260323-0040",
+          "rank": 6,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
           "trades": 0,
@@ -282,58 +268,33 @@
       "pair_hurst": 0.431
     },
     {
-      "bot": "ragnhild",
-      "sprints_entered": 1,
+      "bot": "solrun",
+      "sprints_entered": 2,
       "sprint_wins": 0,
       "podiums": 0,
-      "points": 0,
+      "points": 1,
       "cumulative_pnl_usd": 0.0,
       "cumulative_pnl_pct": 0.0,
       "total_trades": 0,
       "total_wins": 0,
       "total_losses": 0,
-      "total_fees_usd": 0.0,
+      "total_fees_usd": 0.3,
       "worst_drawdown_pct": 0.0,
       "best_sprint_pnl_pct": 0.0,
       "worst_sprint_pnl_pct": 0.0,
       "sprint_log": [
         {
           "comp_id": "spread-20260316-0009",
-          "rank": 9,
+          "rank": 8,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
           "trades": 0,
           "win_rate": 0.0,
-          "in_progress": true
-        }
-      ],
-      "pair": "ETH/BTC",
-      "pair_health": "STRONG",
-      "overall_win_rate": 0.0,
-      "avg_pnl_pct_per_sprint": 0.0,
-      "pair_half_life": 22.8,
-      "pair_corr": 0.915,
-      "pair_hurst": 0.444
-    },
-    {
-      "bot": "solrun",
-      "sprints_entered": 1,
-      "sprint_wins": 0,
-      "podiums": 0,
-      "points": 0,
-      "cumulative_pnl_usd": 0.0,
-      "cumulative_pnl_pct": 0.0,
-      "total_trades": 0,
-      "total_wins": 0,
-      "total_losses": 0,
-      "total_fees_usd": 0.0,
-      "worst_drawdown_pct": 0.0,
-      "best_sprint_pnl_pct": 0.0,
-      "worst_sprint_pnl_pct": 0.0,
-      "sprint_log": [
+          "in_progress": false
+        },
         {
-          "comp_id": "spread-20260316-0009",
-          "rank": 10,
+          "comp_id": "spread-20260323-0040",
+          "rank": 13,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
           "trades": 0,
@@ -351,10 +312,10 @@
     },
     {
       "bot": "sunniva",
-      "sprints_entered": 1,
+      "sprints_entered": 2,
       "sprint_wins": 0,
       "podiums": 0,
-      "points": 0,
+      "points": 1,
       "cumulative_pnl_usd": 0.0,
       "cumulative_pnl_pct": 0.0,
       "total_trades": 0,
@@ -367,7 +328,16 @@
       "sprint_log": [
         {
           "comp_id": "spread-20260316-0009",
-          "rank": 11,
+          "rank": 9,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "spread-20260323-0040",
+          "rank": 9,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
           "trades": 0,
@@ -385,10 +355,10 @@
     },
     {
       "bot": "thordis",
-      "sprints_entered": 1,
+      "sprints_entered": 2,
       "sprint_wins": 0,
       "podiums": 0,
-      "points": 0,
+      "points": 1,
       "cumulative_pnl_usd": 0.0,
       "cumulative_pnl_pct": 0.0,
       "total_trades": 0,
@@ -401,7 +371,16 @@
       "sprint_log": [
         {
           "comp_id": "spread-20260316-0009",
-          "rank": 12,
+          "rank": 10,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "spread-20260323-0040",
+          "rank": 10,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
           "trades": 0,
@@ -419,10 +398,10 @@
     },
     {
       "bot": "tofa",
-      "sprints_entered": 1,
+      "sprints_entered": 2,
       "sprint_wins": 0,
       "podiums": 0,
-      "points": 0,
+      "points": 1,
       "cumulative_pnl_usd": 0.0,
       "cumulative_pnl_pct": 0.0,
       "total_trades": 0,
@@ -435,7 +414,16 @@
       "sprint_log": [
         {
           "comp_id": "spread-20260316-0009",
-          "rank": 13,
+          "rank": 11,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "spread-20260323-0040",
+          "rank": 11,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
           "trades": 0,
@@ -452,26 +440,164 @@
       "pair_hurst": 0.444
     },
     {
-      "bot": "skadi",
-      "sprints_entered": 1,
+      "bot": "forseti",
+      "sprints_entered": 2,
       "sprint_wins": 0,
       "podiums": 0,
-      "points": 0,
-      "cumulative_pnl_usd": -8.07,
-      "cumulative_pnl_pct": -2.5904,
+      "points": 1,
+      "cumulative_pnl_usd": -0.34,
+      "cumulative_pnl_pct": 0.4794,
+      "total_trades": 3,
+      "total_wins": 1,
+      "total_losses": 1,
+      "total_fees_usd": 0.1254,
+      "worst_drawdown_pct": 0.8299,
+      "best_sprint_pnl_pct": 0.4794,
+      "worst_sprint_pnl_pct": 0.0,
+      "sprint_log": [
+        {
+          "comp_id": "spread-20260316-0009",
+          "rank": 12,
+          "pnl_usd": -0.34,
+          "pnl_pct": 0.4794,
+          "trades": 3,
+          "win_rate": 50.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "spread-20260323-0040",
+          "rank": 2,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": true
+        }
+      ],
+      "pair": "SOL/ETH",
+      "pair_health": "STRONG",
+      "overall_win_rate": 33.3,
+      "avg_pnl_pct_per_sprint": 0.2397,
+      "pair_half_life": 29.2,
+      "pair_corr": 0.897,
+      "pair_hurst": 0.461
+    },
+    {
+      "bot": "herdis",
+      "sprints_entered": 2,
+      "sprint_wins": 0,
+      "podiums": 0,
+      "points": 1,
+      "cumulative_pnl_usd": -0.79,
+      "cumulative_pnl_pct": -2.5314,
       "total_trades": 1,
       "total_wins": 0,
       "total_losses": 1,
-      "total_fees_usd": 0.8975,
-      "worst_drawdown_pct": 0.837,
-      "best_sprint_pnl_pct": -2.5904,
-      "worst_sprint_pnl_pct": -2.5904,
+      "total_fees_usd": 0.06,
+      "worst_drawdown_pct": 0.819,
+      "best_sprint_pnl_pct": 0.0,
+      "worst_sprint_pnl_pct": -2.5314,
+      "sprint_log": [
+        {
+          "comp_id": "spread-20260316-0009",
+          "rank": 13,
+          "pnl_usd": -0.79,
+          "pnl_pct": -2.5314,
+          "trades": 1,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "spread-20260323-0040",
+          "rank": 4,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": true
+        }
+      ],
+      "pair": "AVAX/SOL",
+      "pair_health": "STRONG",
+      "overall_win_rate": 0.0,
+      "avg_pnl_pct_per_sprint": -1.2657,
+      "pair_half_life": 22.8,
+      "pair_corr": 0.841,
+      "pair_hurst": 0.338
+    },
+    {
+      "bot": "estrid",
+      "sprints_entered": 2,
+      "sprint_wins": 0,
+      "podiums": 0,
+      "points": 1,
+      "cumulative_pnl_usd": -0.82,
+      "cumulative_pnl_pct": -3.1644,
+      "total_trades": 1,
+      "total_wins": 0,
+      "total_losses": 1,
+      "total_fees_usd": 0.05,
+      "worst_drawdown_pct": 0.841,
+      "best_sprint_pnl_pct": 0.0,
+      "worst_sprint_pnl_pct": -3.1644,
       "sprint_log": [
         {
           "comp_id": "spread-20260316-0009",
           "rank": 14,
-          "pnl_usd": -8.07,
-          "pnl_pct": -2.5904,
+          "pnl_usd": -0.82,
+          "pnl_pct": -3.1644,
+          "trades": 1,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "spread-20260323-0040",
+          "rank": 1,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": true
+        }
+      ],
+      "pair": "SOL/ETH",
+      "pair_health": "STRONG",
+      "overall_win_rate": 0.0,
+      "avg_pnl_pct_per_sprint": -1.5822,
+      "pair_half_life": 29.2,
+      "pair_corr": 0.897,
+      "pair_hurst": 0.461
+    },
+    {
+      "bot": "ragnhild",
+      "sprints_entered": 2,
+      "sprint_wins": 0,
+      "podiums": 0,
+      "points": 1,
+      "cumulative_pnl_usd": -8.47,
+      "cumulative_pnl_pct": -3.2893,
+      "total_trades": 1,
+      "total_wins": 0,
+      "total_losses": 1,
+      "total_fees_usd": 0.5,
+      "worst_drawdown_pct": 0.872,
+      "best_sprint_pnl_pct": 0.0,
+      "worst_sprint_pnl_pct": -3.2893,
+      "sprint_log": [
+        {
+          "comp_id": "spread-20260316-0009",
+          "rank": 7,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "spread-20260323-0040",
+          "rank": 14,
+          "pnl_usd": -8.47,
+          "pnl_pct": -3.2893,
           "trades": 1,
           "win_rate": 0.0,
           "in_progress": true
@@ -480,7 +606,7 @@
       "pair": "ETH/BTC",
       "pair_health": "STRONG",
       "overall_win_rate": 0.0,
-      "avg_pnl_pct_per_sprint": -2.5904,
+      "avg_pnl_pct_per_sprint": -1.6446,
       "pair_half_life": 22.8,
       "pair_corr": 0.915,
       "pair_hurst": 0.444
@@ -501,12 +627,12 @@
       "corr": 0.886,
       "hurst": 0.462
     },
-    "forseti": {
-      "pair": "SOL/ETH",
+    "skadi": {
+      "pair": "ETH/BTC",
       "health": "STRONG",
-      "half_life": 29.2,
-      "corr": 0.897,
-      "hurst": 0.461
+      "half_life": 22.8,
+      "corr": 0.915,
+      "hurst": 0.444
     },
     "brynja": {
       "pair": "AAVE/LINK",
@@ -514,20 +640,6 @@
       "half_life": 152.1,
       "corr": 0.787,
       "hurst": 0.516
-    },
-    "estrid": {
-      "pair": "SOL/ETH",
-      "health": "STRONG",
-      "half_life": 29.2,
-      "corr": 0.897,
-      "hurst": 0.461
-    },
-    "herdis": {
-      "pair": "AVAX/SOL",
-      "health": "STRONG",
-      "half_life": 22.8,
-      "corr": 0.841,
-      "hurst": 0.338
     },
     "ingrid": {
       "pair": "LINK/ETH",
@@ -542,13 +654,6 @@
       "half_life": 32.7,
       "corr": 0.936,
       "hurst": 0.431
-    },
-    "ragnhild": {
-      "pair": "ETH/BTC",
-      "health": "STRONG",
-      "half_life": 22.8,
-      "corr": 0.915,
-      "hurst": 0.444
     },
     "solrun": {
       "pair": "AAVE/LINK",
@@ -578,7 +683,28 @@
       "corr": 0.915,
       "hurst": 0.444
     },
-    "skadi": {
+    "forseti": {
+      "pair": "SOL/ETH",
+      "health": "STRONG",
+      "half_life": 29.2,
+      "corr": 0.897,
+      "hurst": 0.461
+    },
+    "herdis": {
+      "pair": "AVAX/SOL",
+      "health": "STRONG",
+      "half_life": 22.8,
+      "corr": 0.841,
+      "hurst": 0.338
+    },
+    "estrid": {
+      "pair": "SOL/ETH",
+      "health": "STRONG",
+      "half_life": 29.2,
+      "corr": 0.897,
+      "hurst": 0.461
+    },
+    "ragnhild": {
       "pair": "ETH/BTC",
       "health": "STRONG",
       "half_life": 22.8,
