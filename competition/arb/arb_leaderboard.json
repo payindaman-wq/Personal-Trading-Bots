@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-03-24T06:08:01.758907+00:00",
+  "generated_at": "2026-03-24T08:38:02.020262+00:00",
   "league": "arb",
   "total_sprints": 2,
   "archived": 1,
   "active_sprint": "arb-20260323-0110",
   "cycle": 1,
-  "sprint_in_cycle": 0,
+  "sprint_in_cycle": 2,
   "sprints_per_cycle": 4,
   "cycle_status": "active",
   "rankings": [

@@ -1,0 +1,33 @@
+{
+  "bot": "orm",
+  "competition_id": "swing-20260308-0854",
+  "league": "swing",
+  "duration_hours": 168,
+  "started_at": "2026-03-08T08:54:52.897715+00:00",
+  "pairs": [
+    "BTC/USD",
+    "ETH/USD",
+    "SOL/USD",
+    "XRP/USD",
+    "AVAX/USD",
+    "LINK/USD",
+    "AAVE/USD"
+  ],
+  "starting_capital": 1000.0,
+  "fee_rate": 0.001,
+  "equity": 1020.0,
+  "peak_equity": 1020.0,
+  "positions": [],
+  "stats": {
+    "total_trades": 3,
+    "wins": 2,
+    "losses": 1,
+    "win_rate": 66.7,
+    "total_pnl_usd": 20.75,
+    "total_pnl_pct": 8.7131,
+    "total_fees": 1.4905,
+    "max_drawdown_pct": 0.9403,
+    "current_equity": 1020.0
+  },
+  "cash": -396.29
+}
