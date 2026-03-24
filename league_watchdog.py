@@ -50,7 +50,7 @@ def find_active(active_dir):
     If multiple entries exist, logs a warning and picks the newest."""
     if not os.path.isdir(active_dir):
         return None, False
-    entries = sorted(os.listdir(active_dir))
+    entries = sorted([e for e in os.listdir(active_dir) if not e.startswith('.')])
     if not entries:
         return None, False
     has_multiple = len(entries) > 1
@@ -112,9 +112,10 @@ def main():
         if meta:
             print(f"  [{league['name']}] OK — {meta['comp_id']}")
         else:
-            # Guard: if active/ has any entries (even orphaned), skip restart
+            # Guard: if active/ has any real (non-dotfile) entries, skip restart to avoid stacking
             active_dir = league["active_dir"]
-            if os.path.isdir(active_dir) and os.listdir(active_dir):
+            real_files = [f for f in os.listdir(active_dir) if not f.startswith('.')] if os.path.isdir(active_dir) else []
+            if real_files:
                 print(f"  [{league['name']}] WARNING: no active sprint but active/ is non-empty — skipping restart to avoid stacking")
             else:
                 print(f"  [{league['name']}] IDLE — restarting...")

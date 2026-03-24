@@ -14,7 +14,7 @@ market_filter:
 edge:
   min_edge_pts: 0.08
   min_confidence: medium
-  max_positions: 5
+  max_positions: 8
   max_position_pct: 0.1
 risk:
   stop_if_down_pct: 20
