@@ -576,3 +576,25 @@ gen	sharpe	win_rate	pnl_pct	trades	status	description	ts
 243	1.0477	46.2	32.57	171	discarded	perturb cond_long_3: 40->48	2026-03-25T11:56
 244	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T11:58
 245	-0.1693	39.5	-4.97	129	discarded	perturb cond_short_4: 30->52	2026-03-25T11:59
+246	-0.5005	40.0	-11.21	125	discarded	perturb cond_short_6: -2.0->0.1	2026-03-25T12:01
+247	-1.7338	45.9	-18.71	294	discarded	random(2conds,7pairs)	2026-03-25T12:02
+248	0.0000	0.0	0.00	0	gemini_error	HTTP Error 503: Service Unavailable	2026-03-25T12:03
+249	-0.2310	45.2	-6.48	600	discarded	random(4conds,8pairs)	2026-03-25T12:05
+250	0.5160	42.7	13.85	164	discarded	perturb tp: 8.0->10.36	2026-03-25T12:06
+251	-2.6477	27.9	-18.95	61	discarded	random(4conds,6pairs)	2026-03-25T12:07
+252	1.2254	47.9	39.56	167	discarded	crossover(A_entry+B_exit)	2026-03-25T12:08
+253	0.1938	40.3	3.56	159	discarded	perturb to: 120->142	2026-03-25T12:10
+254	-1.2192	29.7	-18.88	111	discarded	random(4conds,6pairs)	2026-03-25T12:11
+255	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T12:13
+256	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T12:14
+257	-0.7195	38.2	-19.14	173	discarded	random(4conds,5pairs)	2026-03-25T12:16
+258	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T12:18
+259	0.7243	43.3	19.71	141	discarded	perturb cond_long_4: 70->48	2026-03-25T12:19
+260	1.2254	47.9	39.56	167	discarded	perturb sz: 30->30	2026-03-25T12:20
+261	-3.2709	31.3	-18.49	134	discarded	random(2conds,8pairs)	2026-03-25T12:21
+262	-3.2635	21.8	-18.59	55	discarded	random(4conds,4pairs)	2026-03-25T12:23
+263	0.7486	44.0	23.18	193	discarded	llm	2026-03-25T12:24
+264	-1.0247	36.8	-18.40	106	discarded	llm	2026-03-25T12:25
+265	0.7243	43.3	19.71	141	discarded	perturb cond_long_4: 70->48	2026-03-25T12:27
+266	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T12:28
+267	-1.1397	29.7	-19.32	185	discarded	random(2conds,5pairs)	2026-03-25T12:30
