@@ -30,11 +30,11 @@ entry:
     - indicator: price_change_pct
       period_minutes: 15
       operator: lt
-      value: -1.0
+      value: -1.08
     - indicator: rsi
       period_minutes: 14
       operator: lt
-      value: 32.79
+      value: 35
   short:
     conditions:
     - indicator: trend

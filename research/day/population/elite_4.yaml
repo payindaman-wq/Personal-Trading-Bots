@@ -48,7 +48,7 @@ entry:
     - indicator: price_change_pct
       period_minutes: 15
       operator: gt
-      value: 1.0
+      value: 1.02
     - indicator: rsi
       period_minutes: 14
       operator: gt
@@ -61,4 +61,4 @@ risk:
   pause_if_down_pct: 4
   pause_minutes: 60
   stop_if_down_pct: 10
-_sharpe: 0.461
+_sharpe: 0.5296
