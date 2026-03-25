@@ -1,4 +1,4 @@
-name: crossover
+name: autobotday_v2_improved_pairs
 style: Pure momentum strategy focusing on 8 pairs with tight entry conditions and
   a high TP/SL ratio to capture strong trends. Increased position size and max open
   trades to leverage conviction. Removed momentum_accelerating for increased trade
@@ -13,7 +13,7 @@ pairs:
 - XRP/USD
 - ADA/USD
 position:
-  size_pct: 25
+  size_pct: 24.22
   max_open: 2
   fee_rate: 0.001
 entry:
@@ -61,4 +61,4 @@ risk:
   pause_if_down_pct: 4
   pause_minutes: 60
   stop_if_down_pct: 10
-_sharpe: 0.3722
+_sharpe: 0.3753

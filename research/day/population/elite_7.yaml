@@ -1,4 +1,4 @@
-name: crossover
+name: autobotday_v2_improved_pairs
 style: Pure momentum strategy focusing on 8 pairs with tight entry conditions and
   a high TP/SL ratio to capture strong trends. Increased position size and max open
   trades to leverage conviction. Removed momentum_accelerating for increased trade

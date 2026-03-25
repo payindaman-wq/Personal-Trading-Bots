@@ -422,3 +422,90 @@ gen	sharpe	win_rate	pnl_pct	trades	status	description	ts
 89	0.1819	42.7	3.23	164	discarded	llm	2026-03-25T08:26
 90	0.4118	35.5	8.72	214	discarded	perturb sl: 3.03->2.14	2026-03-25T08:27
 91	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T08:29
+92	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T08:30
+93	1.2252	47.9	32.39	167	discarded	crossover(A_entry+B_exit)	2026-03-25T08:32
+94	-6.3318	26.7	-17.16	45	discarded	random(2conds,5pairs)	2026-03-25T08:33
+95	-5.2239	34.1	-16.71	44	discarded	random(2conds,5pairs)	2026-03-25T08:34
+96	1.2252	47.9	32.39	167	discarded	crossover(A_entry+B_exit)	2026-03-25T08:35
+97	1.2252	47.9	32.39	167	discarded	crossover(A_entry+B_exit)	2026-03-25T08:36
+98	-0.5005	40.0	-11.21	125	discarded	perturb cond_short_6: -2.0->0.1	2026-03-25T08:37
+99	1.2252	47.9	32.39	167	discarded	crossover(A_entry+B_exit)	2026-03-25T08:39
+100	1.2252	47.9	32.39	167	discarded	crossover(A_entry+B_exit)	2026-03-25T08:40
+101	0.7243	43.3	19.71	141	discarded	perturb cond_long_4: 70->48	2026-03-25T08:41
+102	-1.5401	37.3	-18.01	67	discarded	random(2conds,3pairs)	2026-03-25T08:42
+103	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T08:44
+104	0.9006	30.5	37.38	742	discarded	random(2conds,4pairs)	2026-03-25T08:45
+105	0.2822	42.2	6.23	166	discarded	perturb tp: 8.0->9.61	2026-03-25T08:46
+106	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T08:48
+107	-0.5005	40.0	-11.21	125	discarded	perturb cond_short_6: -2.0->0.1	2026-03-25T08:49
+108	-0.0847	44.2	-1.90	86	discarded	llm	2026-03-25T08:51
+109	0.0785	41.1	0.28	158	discarded	llm	2026-03-25T08:52
+110	-0.5750	38.3	-18.61	470	discarded	random(2conds,8pairs)	2026-03-25T08:53
+111	0.6353	44.6	14.96	168	discarded	llm	2026-03-25T08:54
+112	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T08:56
+113	-0.9303	35.8	-18.54	120	discarded	llm	2026-03-25T08:57
+114	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T08:59
+115	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T09:01
+116	0.2337	41.2	5.00	549	discarded	random(4conds,5pairs)	2026-03-25T09:03
+117	1.2254	47.9	39.56	167	new_elite	crossover(A_entry+B_exit)	2026-03-25T09:04
+118	0.0000	0.0	0.00	0	gemini_error	HTTP Error 503: Service Unavailable	2026-03-25T09:05
+119	1.2254	47.9	39.56	167	new_elite	perturb cond_long_3: 28.16->27.08	2026-03-25T09:07
+120	-0.5018	40.0	-11.24	125	discarded	perturb cond_short_6: -2.0->0.1	2026-03-25T09:08
+121	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T09:10
+122	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T09:11
+123	0.7486	44.0	23.18	193	discarded	llm	2026-03-25T09:13
+124	-0.4141	49.2	-16.30	590	discarded	random(2conds,7pairs)	2026-03-25T09:14
+125	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T09:16
+126	0.7626	48.6	20.03	177	discarded	perturb tp: 8.0->6.01	2026-03-25T09:17
+127	0.2940	45.7	6.57	162	discarded	perturb sl: 3.03->3.5	2026-03-25T09:18
+128	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T09:20
+129	0.7326	44.7	22.93	190	discarded	llm	2026-03-25T09:21
+130	1.2252	47.9	32.39	167	discarded	crossover(A_entry+B_exit)	2026-03-25T09:22
+131	1.2252	47.9	32.39	167	discarded	crossover(A_entry+B_exit)	2026-03-25T09:24
+132	1.2252	47.9	32.39	167	discarded	crossover(A_entry+B_exit)	2026-03-25T09:25
+133	1.2252	47.9	32.39	167	discarded	crossover(A_entry+B_exit)	2026-03-25T09:26
+134	-0.5005	40.0	-11.21	125	discarded	perturb cond_short_6: -2.0->0.1	2026-03-25T09:27
+135	1.2254	47.9	39.56	167	new_elite	crossover(A_entry+B_exit)	2026-03-25T09:29
+136	1.2252	47.9	32.39	167	discarded	crossover(A_entry+B_exit)	2026-03-25T09:30
+137	1.2252	47.9	32.39	167	discarded	crossover(A_entry+B_exit)	2026-03-25T09:31
+138	-0.2996	39.6	-9.53	164	discarded	llm	2026-03-25T09:32
+139	-1.1360	33.0	-18.65	97	discarded	llm	2026-03-25T09:34
+140	0.0000	0.0	0.00	0	gemini_error	HTTP Error 503: Service Unavailable	2026-03-25T09:35
+141	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T09:36
+142	0.3264	41.0	7.75	183	discarded	llm	2026-03-25T09:38
+143	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T09:39
+144	1.2254	47.9	39.56	167	new_elite	perturb mo: 1->1	2026-03-25T09:41
+145	1.2254	47.9	39.56	167	new_elite	crossover(A_entry+B_exit)	2026-03-25T09:42
+146	1.1959	47.9	38.30	167	discarded	perturb cond_short_3: 70->52.22	2026-03-25T09:43
+147	1.2254	47.9	39.56	167	new_elite	crossover(A_entry+B_exit)	2026-03-25T09:44
+148	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T09:46
+149	1.2254	47.9	39.56	167	new_elite	crossover(A_entry+B_exit)	2026-03-25T09:47
+150	1.2254	47.9	39.56	167	new_elite	crossover(A_entry+B_exit)	2026-03-25T09:48
+151	1.2254	47.9	39.56	167	discarded	crossover(A_entry+B_exit)	2026-03-25T09:50
+152	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T09:51
+153	-1.9316	36.9	-19.01	241	discarded	random(2conds,4pairs)	2026-03-25T09:53
+154	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T09:54
+155	1.2254	47.9	39.56	167	discarded	perturb sz: 30->30	2026-03-25T09:56
+156	-0.2001	35.4	-6.67	144	discarded	llm	2026-03-25T09:57
+157	-2.7530	41.0	-19.78	78	discarded	random(3conds,7pairs)	2026-03-25T09:59
+158	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T10:01
+159	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T10:02
+160	-1.7019	22.1	-17.06	104	discarded	random(2conds,3pairs)	2026-03-25T10:04
+161	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T10:05
+162	1.2254	47.9	39.56	167	discarded	crossover(A_entry+B_exit)	2026-03-25T10:07
+163	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T10:08
+164	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T10:10
+165	1.1072	44.9	33.94	147	discarded	perturb cond_long_6: 3.0->-0.1	2026-03-25T10:11
+166	1.2251	47.9	28.73	167	discarded	perturb sz: 30->22.38	2026-03-25T10:12
+167	0.2027	42.0	3.45	138	discarded	llm	2026-03-25T10:14
+168	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T10:15
+169	0.5518	46.9	14.33	162	discarded	llm	2026-03-25T10:16
+170	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T10:18
+171	-2.8663	35.3	-19.42	51	discarded	random(3conds,3pairs)	2026-03-25T10:19
+172	-0.1693	39.5	-4.97	129	discarded	perturb cond_short_4: 30->52	2026-03-25T10:20
+173	1.2254	47.9	39.56	167	discarded	crossover(A_entry+B_exit)	2026-03-25T10:22
+174	1.2254	47.9	39.56	167	discarded	crossover(A_entry+B_exit)	2026-03-25T10:23
+175	-0.7756	40.0	-18.04	285	discarded	random(3conds,3pairs)	2026-03-25T10:24
+176	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T10:26
+177	-0.3237	37.2	-9.05	121	discarded	llm	2026-03-25T10:27
+178	-3.0394	32.0	-18.59	50	discarded	llm	2026-03-25T10:28

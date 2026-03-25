@@ -1,12 +1,17 @@
-name: autobotday
-style: Pure momentum strategy focusing on 6 pairs with tight entry conditions and a high TP/SL ratio to capture strong trends. Increased position size and max open trades to leverage conviction.
+name: autobotday_v2_improved_pairs
+style: Pure momentum strategy focusing on 8 pairs with tight entry conditions and
+  a high TP/SL ratio to capture strong trends. Increased position size and max open
+  trades to leverage conviction. Removed momentum_accelerating for increased trade
+  frequency.
 pairs:
-  - BTC/USD
-  - ETH/USD
-  - SOL/USD
-  - AVAX/USD
-  - LINK/USD
-  - UNI/USD
+- BTC/USD
+- ETH/USD
+- SOL/USD
+- AVAX/USD
+- LINK/USD
+- UNI/USD
+- XRP/USD
+- ADA/USD
 position:
   size_pct: 25
   max_open: 2
@@ -14,40 +19,40 @@ position:
 entry:
   long:
     conditions:
-      - indicator: trend
-        period_minutes: 240
-        operator: eq
-        value: up
-      - indicator: momentum_accelerating
-        period_minutes: 15
-        operator: eq
-        value: true
-      - indicator: macd_signal
-        period_minutes: 60
-        operator: eq
-        value: bullish
-      - indicator: price_change_pct
-        period_minutes: 15
-        operator: lt
-        value: -1.0
+    - indicator: trend
+      period_minutes: 240
+      operator: eq
+      value: up
+    - indicator: macd_signal
+      period_minutes: 60
+      operator: eq
+      value: bullish
+    - indicator: price_change_pct
+      period_minutes: 15
+      operator: lt
+      value: -1.0
+    - indicator: rsi
+      period_minutes: 14
+      operator: lt
+      value: 32.79
   short:
     conditions:
-      - indicator: trend
-        period_minutes: 240
-        operator: eq
-        value: down
-      - indicator: momentum_accelerating
-        period_minutes: 15
-        operator: eq
-        value: true
-      - indicator: macd_signal
-        period_minutes: 60
-        operator: eq
-        value: bearish
-      - indicator: price_change_pct
-        period_minutes: 15
-        operator: gt
-        value: 1.0
+    - indicator: trend
+      period_minutes: 240
+      operator: eq
+      value: down
+    - indicator: macd_signal
+      period_minutes: 60
+      operator: eq
+      value: bearish
+    - indicator: price_change_pct
+      period_minutes: 15
+      operator: gt
+      value: 1.02
+    - indicator: rsi
+      period_minutes: 14
+      operator: gt
+      value: 65
 exit:
   take_profit_pct: 6.0
   stop_loss_pct: 0.5

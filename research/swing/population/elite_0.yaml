@@ -5,7 +5,7 @@ pairs:
 - ETH/USD
 - SOL/USD
 position:
-  size_pct: 25
+  size_pct: 30
   max_open: 1
   fee_rate: 0.001
 entry:
@@ -81,4 +81,4 @@ risk:
   pause_if_down_pct: 8
   pause_hours: 48
   stop_if_down_pct: 18
-_sharpe: 1.2252
+_sharpe: 1.2254
