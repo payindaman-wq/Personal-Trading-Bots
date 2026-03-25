@@ -41,7 +41,7 @@ entry:
 exit:
   take_profit_pct: 6.63
   stop_loss_pct: 3.9
-  timeout_hours: 225
+  timeout_hours: 220
 risk:
   pause_if_down_pct: 8
   stop_if_down_pct: 18
