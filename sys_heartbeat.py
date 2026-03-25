@@ -503,7 +503,7 @@ def main():
             print(f"  [{svc['name']}] {problem} — attempting auto-restart...")
             restarted = attempt_auto_restart(svc["unit"])
             if restarted:
-                tg_send(f"<b>SYN AUTO-FIX</b> — {now_str}\n\n• {svc['unit']} was down — auto-restarted successfully")
+                autofix_queue.append(f"{svc['unit']} was down — auto-restarted successfully")
                 git_commit_push(f"heartbeat auto-restarted {svc['unit']}")
                 clear_alert(state, key)
                 print(f"  [{svc['name']}] auto-restarted successfully")
@@ -525,7 +525,7 @@ def main():
                 print(f"  [odin_{vleague}] Ollama stuck — force-restarting {unit}...")
                 restarted = attempt_auto_restart(unit)
                 if restarted:
-                    tg_send(f"<b>SYN AUTO-FIX</b> — {now_str}\n\n• odin_{vleague}: Ollama was stuck — service restarted")
+                    autofix_queue.append(f"odin_{vleague}: Ollama was stuck — service restarted")
                     git_commit_push(f"heartbeat force-restarted {unit} (Ollama stuck)")
                     clear_alert(state, key)
                     print(f"  [odin_{vleague}] restarted successfully")
