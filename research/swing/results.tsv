@@ -414,3 +414,11 @@ gen	sharpe	win_rate	pnl_pct	trades	status	description	ts
 27	0.4566	26.7	16.10	569	discarded	random(3conds,8pairs)	2026-03-25T06:59
 69	0.5374	46.1	13.67	152	discarded	llm	2026-03-25T07:57
 70	0.1069	40.0	0.76	15	low_trades	trades=15	2026-03-25T07:59
+84	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T08:18
+85	1.2252	47.9	32.39	167	discarded	crossover(A_entry+B_exit)	2026-03-25T08:20
+86	0.5857	47.2	7.96	36	discarded	llm	2026-03-25T08:21
+87	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T08:23
+88	0.6365	42.9	16.72	140	discarded	perturb cond_long_4: 70->48	2026-03-25T08:24
+89	0.1819	42.7	3.23	164	discarded	llm	2026-03-25T08:26
+90	0.4118	35.5	8.72	214	discarded	perturb sl: 3.03->2.14	2026-03-25T08:27
+91	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T08:29
