@@ -386,3 +386,7 @@ gen	sharpe	win_rate	pnl_pct	trades	status	description	ts
 1872	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T21:16
 1873	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T21:22
 1874	0.5550	21.8	10.31	432	discarded	perturb cond_long_2: -1.08->-0.93	2026-03-25T21:29
+1875	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T21:36
+1876	0.9957	21.7	18.81	318	new_elite	perturb mo: 2->2	2026-03-25T21:43
+1877	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T21:50
+1878	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T21:57
