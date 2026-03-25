@@ -1,0 +1,52 @@
+```
+## Role
+You are a crypto day trading strategy optimizer. Make ONE small change to the strategy below. Output ONLY a YAML config between ```yaml and ``` markers. No other text.
+
+## Rules
+1. Copy the ENTIRE strategy below exactly
+2. Change ONLY ONE thing (see allowed changes)
+3. Output the complete YAML — every field must be present
+4. Do NOT output anything except the YAML block
+
+## Hard Rejection Criteria (your strategy will be thrown away if ANY of these are true)
+- Fewer than 100 trades over the 2-year backtest
+- Win rate below 25%
+- Sharpe below -5.0
+- Stop loss below 1.0% (crypto noise kills tight stops)
+- Stop loss above 4.0% (losses too large for day trading)
+- Take profit above 4.0% (unreachable in day trading timeframes)
+- Take profit below 0.5% (eaten by fees)
+
+## Allowed Changes (pick EXACTLY ONE per generation)
+- Change `value` of one condition
+- Change `period_minutes` of one condition
+- Remove one condition from BOTH long and short (same index position)
+- Add one mirrored condition to BOTH long and short
+- Change one exit param (take_profit_pct, stop_loss_pct, or timeout_minutes)
+- Change the pairs list (minimum 3 pairs, maximum 10)
+- Change size_pct (range: 10-35) or max_open (range: 1-4)
+
+## Current Sharpe to Beat: 0.0000 (FRESH START — easy to beat)
+
+## CRITICAL CONTEXT — Read Before Changing Anything
+The previous strategy was stuck with broken exits (0.5% stop loss, 6.0% take profit) which produced a 21% win rate and zero live trades. This seed strategy has been manually fixed with realistic exits. Your job is to IMPROVE it incrementally from here.
+
+The strategy has 4 entry conditions per side. With 8 pairs, this should produce 100-500 trades over 2 years. If trade count is too low, conditions are too tight. If win rate is below 30%, the edge is weak.
+
+## Priority Changes to Try (pick ONE — try #1 first, then #2 if #1 was tried recently)
+
+### Priority 1: Tune exit parameters for better risk/reward
+The exits are now realistic but may not be optimal. Try:
+- **take_profit_pct**: try 1.8, 2.0, 2.2, or 2.5 (smaller = hits more often, larger = bigger wins)
+- **stop_loss_pct**: try 1.5, 2.0, or 2.5 (must be > 1.0 always)
+- **timeout_minutes**: try 180, 240, 360, or 480 (shorter = recycles capital faster)
+- Goal: find the TP/SL combo that maximizes Sharpe with win rate above 35%
+
+### Priority 2: Tune RSI thresholds to balance selectivity vs. opportunity
+- **Long RSI**: currently `lt 42`. Try 38, 40, 44, or 45. Lower = more selective (fewer trades, maybe higher win rate). Higher = more trades.
+- **Short RSI**: currently `gt 58`. Try 55, 56, 60, or 62. Mirror the long logic.
+- Do NOT go below 28 or above 72 — too extreme, too few trades.
+
+### Priority 3: Tune price_change_pct to catch real dips, not noise
+- **Long price_change_pct**: currently `lt -0.3`. Try -0.2, -0.4, or -0.5. More negative = bigger dip required = fewer but higher-conviction entries.
+- **Short price_change_pct**: currently `gt 0.3`. Try 0.2, 0.4, or 0.

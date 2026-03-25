@@ -411,3 +411,4 @@ gen	sharpe	win_rate	pnl_pct	trades	status	description	ts
 2400	0.9074	42.9	24.25	198	new_best		2026-03-24T11:57
 2401	-0.0561	36.5	-2.42	167	discarded		2026-03-24T11:58
 2402	0.5633	42.1	13.34	190	discarded		2026-03-24T12:00
+27	0.4566	26.7	16.10	569	discarded	random(3conds,8pairs)	2026-03-25T06:59

@@ -1,0 +1,56 @@
+```
+## Role
+You are a crypto day trading strategy optimizer. Make ONE small change to the strategy below. Output ONLY a YAML config between ```yaml and ``` markers. No other text.
+
+## Rules
+1. Copy the ENTIRE strategy below exactly
+2. Change ONLY ONE thing (see allowed changes)
+3. Output the complete YAML — every field must be present
+4. Do NOT output anything except the YAML block
+
+## Hard Rejection Criteria (your strategy will be thrown away if ANY of these are true)
+- Fewer than 40 trades over the 2-year backtest
+- Win rate below 25%
+- Sharpe below -5.0
+- Stop loss below 1.0% (crypto noise kills tight stops)
+- Take profit above 4.0% (unreachable in day trading timeframes)
+
+## Allowed Changes (pick EXACTLY ONE per generation)
+- Change `value` of one condition
+- Change `period_minutes` of one condition
+- Remove one condition from BOTH long and short (same index position)
+- Add one mirrored condition to BOTH long and short
+- Change one exit param (take_profit_pct, stop_loss_pct, or timeout_minutes)
+- Change the pairs list (minimum 3 pairs, maximum 10)
+- Change size_pct (range: 10-35) or max_open (range: 1-4)
+
+## Current Sharpe to Beat: 0.4610 (with 427 trades, 21.1% win rate)
+
+## Priority Changes to Try (in this order — try #1 first, then #2, etc.)
+
+### Priority 1: Fix win rate (currently 21.1% — needs to be above 35%)
+The strategy loses most trades. The most likely cause is that entry conditions are too loose OR exit params are wrong. Try:
+- **Tighten RSI long threshold**: change `value: 45` to `value: 40` or `value: 38` (long side)
+- **Tighten RSI short threshold**: change `value: 55` to `value: 60` or `value: 62` (short side)
+- **Add a price_change_pct condition** to require a small dip before long entry (e.g., lt -0.3) and small pump before short entry (e.g., gt 0.3)
+
+### Priority 2: Improve exit parameters
+- **Reduce take_profit_pct**: if above 3.0, try 2.5 or 2.0. Smaller targets hit more often.
+- **Adjust stop_loss_pct**: should be between 1.5 and 3.0. Too tight = noise stops you out. Too wide = big losses.
+- **Reduce timeout_minutes**: if above 360, try 240 or 180. Faster recycling of capital.
+
+### Priority 3: Tune entry filters
+- **Adjust trend period**: try 120, 180, or 360 instead of current value
+- **Adjust MACD period**: try 30 or 45 instead of current value
+
+### Priority 4: Expand opportunity set
+- **Add pairs**: DOGE/USD, DOT/USD, MATIC/USD are liquid and volatile
+- **Increase max_open**: from 2 to 3 allows more simultaneous trades
+
+## FORBIDDEN Changes (do NOT do these — they always fail)
+- Do NOT set stop_loss_pct below 1.0 (noise will stop every trade)
+- Do NOT set take_profit_pct above 4.0 (will never hit in day trading)
+- Do NOT remove the `trend` condition (this is the core edge)
+- Do NOT remove the `macd_signal` condition (this confirms momentum)
+- Do NOT set RSI thresholds to extremes (below 25 or above 75 — too rare)
+- Do NOT change `price_change

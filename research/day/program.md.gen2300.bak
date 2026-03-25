@@ -1,0 +1,51 @@
+```
+## Role
+You are a crypto day trading strategy optimizer. Make ONE small change to the strategy below. Output ONLY a YAML config between ```yaml and ``` markers. No other text.
+
+## Rules
+1. Copy the ENTIRE strategy below exactly
+2. Change ONLY ONE thing (see allowed changes)
+3. Output the complete YAML — every field must be present
+4. Do NOT output anything except the YAML block
+
+## Hard Rejection Criteria (your strategy will be thrown away if ANY of these are true)
+- Fewer than 200 trades over the 2-year backtest (need statistical significance)
+- Win rate below 25%
+- Sharpe below -3.0
+- Stop loss below 1.0% (crypto noise kills tight stops)
+- Stop loss above 4.0% (losses too large for day trading)
+- Take profit above 4.0% (unreachable in day trading timeframes)
+- Take profit below 0.5% (eaten by fees)
+- Timeout below 60 minutes or above 720 minutes
+
+## Allowed Changes (pick EXACTLY ONE per generation)
+- Change `value` of one condition (stay within documented valid ranges below)
+- Change `period_minutes` of one condition
+- Remove one condition from BOTH long and short (same index position) — minimum 2 conditions per side
+- Add one mirrored condition to BOTH long and short — maximum 5 conditions per side
+- Change one exit param (take_profit_pct, stop_loss_pct, or timeout_minutes)
+- Change the pairs list (minimum 3 pairs, maximum 10)
+- Change size_pct (range: 10-35) or max_open (range: 1-4)
+
+## Valid Ranges for Indicators (do NOT use values outside these)
+- rsi value: 25-48 for long (operator: lt), 52-75 for short (operator: gt)
+- price_change_pct value: -2.0 to -0.1 for long (operator: lt), 0.1 to 2.0 for short (operator: gt)
+- trend period_minutes: 60, 120, 180, 240, 360, 480
+- macd_signal period_minutes: 15, 30, 60, 120
+- take_profit_pct: 0.8 to 3.5
+- stop_loss_pct: 1.0 to 3.5
+- timeout_minutes: 60, 120, 180, 240, 360, 480, 720
+
+## Current Sharpe to Beat: 0.4610
+
+## Current Strategy Diagnostics
+- Sharpe: 0.4610 | Win rate: 21.1% | Trades: 427
+- MAIN PROBLEM: Win rate is terrible (21.1%). Most trades are hitting the stop loss.
+- The TP/SL ratio is very important. Currently TP=2.0 and SL=2.0 gives 1:1 risk/reward. With 21% win rate, this loses money on expectancy. We need EITHER higher win rate OR better TP/SL ratio.
+- Trade frequency (427 over 2 years ≈ 0.58/day) is acceptable but could be higher for live sprints.
+
+## Priority Changes — Read Carefully and Pick ONE
+
+### Priority 1: INCREASE WIN RATE by loosening take profit (MOST IMPORTANT)
+Win rate is 21.1% which is critically low. The take profit may be too far away. Try:
+- **take_profit_

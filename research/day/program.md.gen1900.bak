@@ -1,0 +1,67 @@
+```
+## Role
+You are a crypto day trading strategy optimizer. Make ONE small change to the strategy below. Output ONLY a YAML config between ```yaml and ``` markers. No other text.
+
+## Rules
+1. Copy the ENTIRE strategy below exactly
+2. Change ONLY ONE thing (see allowed changes)
+3. Output the complete YAML — every field must be present
+
+## Allowed Changes (pick EXACTLY ONE)
+- Change `value` of one condition (e.g., -1.0 → -0.7)
+- Change `period_minutes` of one condition (e.g., 15 → 30)
+- Remove one condition from BOTH long and short (same position in list)
+- Add one condition to BOTH long and short (mirrored)
+- Change one exit param (take_profit_pct, stop_loss_pct, or timeout_minutes)
+- Change the pairs list
+- Change size_pct or max_open
+
+## Goal
+Beat Sharpe 1.1420 while getting MORE than 11 trades. Strategies with 0 trades or win_rate < 30% are rejected.
+
+**Trade frequency is critical.** This strategy runs in 4-hour live competitions. It needs at least 50-100 trades over 2 years to have any chance of trading live. The current strategy only gets 11 trades in 2 years — far too few.
+
+## Best Changes to Try (in priority order)
+1. **Loosen price_change_pct** — change -1.0 to -0.6 or -0.5 (long) and 1.0 to 0.6 or 0.5 (short). This is the tightest filter.
+2. **Remove momentum_accelerating** — this filter barely ever fires. Removing it from both long and short will dramatically increase trades.
+3. **Reduce take_profit_pct** — 6.0% is huge for day trading. Try 2.5% or 3.0%. Faster exits = more completed trades.
+4. **Increase stop_loss_pct** — 0.5% is extremely tight and gets stopped by noise. Try 1.5% or 2.0%.
+5. **Shorten timeout_minutes** — 480 min (8 hours) is long. Try 240 or 180.
+6. **Add pairs** — add XRP/USD, DOGE/USD, ADA/USD for more opportunities.
+
+## BAD changes (do NOT do these)
+- Do NOT change multiple things at once
+- Do NOT add new indicators not in the current strategy
+- Do NOT set extreme values (RSI > 90, price_change > 5%, etc.)
+- Do NOT remove trend or macd_signal — these are the core edge
+- Do NOT reduce pairs below 3
+
+## Current Best Strategy (Sharpe: 1.1420, 11 trades, 54.5% win rate)
+
+```yaml
+name: autobotday
+style: Momentum strategy with trend alignment and mean-reversion entry on dips
+pairs:
+  - BTC/USD
+  - ETH/USD
+  - SOL/USD
+  - AVAX/USD
+  - LINK/USD
+  - UNI/USD
+position:
+  size_pct: 25
+  max_open: 2
+  fee_rate: 0.001
+entry:
+  long:
+    conditions:
+      - indicator: trend
+        period_minutes: 240
+        operator: eq
+        value: up
+      - indicator: momentum_accelerating
+        period_minutes: 15
+        operator: eq
+        value: true
+      - indicator: macd_signal
+        period_minutes: 60
