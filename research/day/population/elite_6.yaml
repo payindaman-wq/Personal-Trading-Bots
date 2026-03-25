@@ -1,8 +1,9 @@
-name: crossover_rsi_tweaked
+name: crossover_modified_rsi_range
 style: Pure momentum strategy focusing on 8 pairs with tight entry conditions and
   a high TP/SL ratio to capture strong trends. Increased position size and max open
   trades to leverage conviction. Removed momentum_accelerating for increased trade
-  frequency. RSI thresholds adjusted for potentially more selective entries.
+  frequency. This modification adjusts the RSI threshold for long entries to a lower
+  value to potentially capture more oversold opportunities and improve trade frequency.
 pairs:
 - BTC/USD
 - ETH/USD
@@ -34,7 +35,7 @@ entry:
     - indicator: rsi
       period_minutes: 14
       operator: lt
-      value: 30
+      value: 28
   short:
     conditions:
     - indicator: trend
@@ -52,7 +53,7 @@ entry:
     - indicator: rsi
       period_minutes: 14
       operator: gt
-      value: 70
+      value: 65
 exit:
   take_profit_pct: 6.0
   stop_loss_pct: 0.5
@@ -61,4 +62,4 @@ risk:
   pause_if_down_pct: 4
   pause_minutes: 60
   stop_if_down_pct: 10
-_sharpe: 0.927
+_sharpe: 0.9672

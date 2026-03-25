@@ -1,0 +1,652 @@
+[
+  {
+    "exit": {
+      "take_profit_pct": 2.5,
+      "stop_loss_pct": 3.0,
+      "timeout_minutes": 180
+    },
+    "sharpe": 0.8501,
+    "win_rate": 60.8,
+    "pnl_pct": 10.5011,
+    "trades": 153,
+    "max_dd": 4.4321,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 2.5,
+      "stop_loss_pct": 3.5,
+      "timeout_minutes": 180
+    },
+    "sharpe": 0.7799,
+    "win_rate": 60.8,
+    "pnl_pct": 9.6691,
+    "trades": 153,
+    "max_dd": 5.509,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 3.0,
+      "stop_loss_pct": 3.0,
+      "timeout_minutes": 720
+    },
+    "sharpe": 0.7092,
+    "win_rate": 57.0,
+    "pnl_pct": 11.1868,
+    "trades": 149,
+    "max_dd": 11.5953,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 2.5,
+      "stop_loss_pct": 1.0,
+      "timeout_minutes": 180
+    },
+    "sharpe": 0.7036,
+    "win_rate": 46.0,
+    "pnl_pct": 7.2165,
+    "trades": 163,
+    "max_dd": 6.299,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 3.0,
+      "stop_loss_pct": 2.5,
+      "timeout_minutes": 720
+    },
+    "sharpe": 0.7012,
+    "win_rate": 54.0,
+    "pnl_pct": 11.0007,
+    "trades": 150,
+    "max_dd": 9.8203,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 2.5,
+      "stop_loss_pct": 2.5,
+      "timeout_minutes": 180
+    },
+    "sharpe": 0.693,
+    "win_rate": 58.8,
+    "pnl_pct": 8.3843,
+    "trades": 153,
+    "max_dd": 4.4362,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 5.0,
+      "stop_loss_pct": 0.8,
+      "timeout_minutes": 480
+    },
+    "sharpe": 0.6854,
+    "win_rate": 29.9,
+    "pnl_pct": 10.221,
+    "trades": 157,
+    "max_dd": 9.2089,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 3.0,
+      "stop_loss_pct": 3.0,
+      "timeout_minutes": 180
+    },
+    "sharpe": 0.6651,
+    "win_rate": 60.3,
+    "pnl_pct": 9.5731,
+    "trades": 151,
+    "max_dd": 7.0347,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 2.5,
+      "stop_loss_pct": 0.8,
+      "timeout_minutes": 180
+    },
+    "sharpe": 0.6558,
+    "win_rate": 43.3,
+    "pnl_pct": 6.6481,
+    "trades": 164,
+    "max_dd": 6.2059,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 3.0,
+      "stop_loss_pct": 3.5,
+      "timeout_minutes": 720
+    },
+    "sharpe": 0.6439,
+    "win_rate": 58.4,
+    "pnl_pct": 10.0721,
+    "trades": 149,
+    "max_dd": 10.6264,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 3.0,
+      "stop_loss_pct": 2.5,
+      "timeout_minutes": 480
+    },
+    "sharpe": 0.6338,
+    "win_rate": 54.7,
+    "pnl_pct": 9.6984,
+    "trades": 150,
+    "max_dd": 10.0339,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 3.0,
+      "stop_loss_pct": 2.0,
+      "timeout_minutes": 720
+    },
+    "sharpe": 0.6335,
+    "win_rate": 49.0,
+    "pnl_pct": 9.3798,
+    "trades": 155,
+    "max_dd": 8.7347,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 3.0,
+      "stop_loss_pct": 3.5,
+      "timeout_minutes": 180
+    },
+    "sharpe": 0.6138,
+    "win_rate": 60.3,
+    "pnl_pct": 8.7902,
+    "trades": 151,
+    "max_dd": 6.4804,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 3.0,
+      "stop_loss_pct": 3.0,
+      "timeout_minutes": 480
+    },
+    "sharpe": 0.6034,
+    "win_rate": 57.3,
+    "pnl_pct": 9.2084,
+    "trades": 150,
+    "max_dd": 11.7349,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 2.5,
+      "stop_loss_pct": 2.0,
+      "timeout_minutes": 180
+    },
+    "sharpe": 0.6013,
+    "win_rate": 55.1,
+    "pnl_pct": 6.9899,
+    "trades": 158,
+    "max_dd": 4.8988,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 2.5,
+      "stop_loss_pct": 3.0,
+      "timeout_minutes": 720
+    },
+    "sharpe": 0.5974,
+    "win_rate": 58.9,
+    "pnl_pct": 7.9014,
+    "trades": 151,
+    "max_dd": 8.4987,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 5.0,
+      "stop_loss_pct": 1.0,
+      "timeout_minutes": 480
+    },
+    "sharpe": 0.5811,
+    "win_rate": 32.3,
+    "pnl_pct": 8.5916,
+    "trades": 155,
+    "max_dd": 9.9894,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 5.0,
+      "stop_loss_pct": 0.8,
+      "timeout_minutes": 720
+    },
+    "sharpe": 0.5788,
+    "win_rate": 29.3,
+    "pnl_pct": 8.5,
+    "trades": 157,
+    "max_dd": 10.1896,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 2.5,
+      "stop_loss_pct": 2.5,
+      "timeout_minutes": 720
+    },
+    "sharpe": 0.5749,
+    "win_rate": 56.2,
+    "pnl_pct": 7.4929,
+    "trades": 153,
+    "max_dd": 7.1504,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 2.5,
+      "stop_loss_pct": 2.0,
+      "timeout_minutes": 720
+    },
+    "sharpe": 0.5605,
+    "win_rate": 51.3,
+    "pnl_pct": 7.006,
+    "trades": 158,
+    "max_dd": 5.9222,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 2.5,
+      "stop_loss_pct": 3.0,
+      "timeout_minutes": 240
+    },
+    "sharpe": 0.5557,
+    "win_rate": 57.2,
+    "pnl_pct": 6.8791,
+    "trades": 152,
+    "max_dd": 6.3248,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 3.0,
+      "stop_loss_pct": 2.5,
+      "timeout_minutes": 180
+    },
+    "sharpe": 0.5513,
+    "win_rate": 58.3,
+    "pnl_pct": 7.7502,
+    "trades": 151,
+    "max_dd": 6.7788,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 3.0,
+      "stop_loss_pct": 0.8,
+      "timeout_minutes": 720
+    },
+    "sharpe": 0.5479,
+    "win_rate": 35.8,
+    "pnl_pct": 7.1556,
+    "trades": 162,
+    "max_dd": 8.4191,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 3.0,
+      "stop_loss_pct": 2.0,
+      "timeout_minutes": 480
+    },
+    "sharpe": 0.547,
+    "win_rate": 50.3,
+    "pnl_pct": 7.8652,
+    "trades": 155,
+    "max_dd": 9.4398,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 2.5,
+      "stop_loss_pct": 1.0,
+      "timeout_minutes": 240
+    },
+    "sharpe": 0.5468,
+    "win_rate": 44.8,
+    "pnl_pct": 5.6188,
+    "trades": 163,
+    "max_dd": 6.4442,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 2.5,
+      "stop_loss_pct": 0.8,
+      "timeout_minutes": 720
+    },
+    "sharpe": 0.5412,
+    "win_rate": 37.8,
+    "pnl_pct": 5.7722,
+    "trades": 164,
+    "max_dd": 5.2839,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 5.0,
+      "stop_loss_pct": 1.0,
+      "timeout_minutes": 720
+    },
+    "sharpe": 0.5409,
+    "win_rate": 31.0,
+    "pnl_pct": 7.9782,
+    "trades": 155,
+    "max_dd": 10.853,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 3.0,
+      "stop_loss_pct": 1.0,
+      "timeout_minutes": 720
+    },
+    "sharpe": 0.5373,
+    "win_rate": 37.9,
+    "pnl_pct": 7.0248,
+    "trades": 161,
+    "max_dd": 8.8562,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 3.0,
+      "stop_loss_pct": 3.5,
+      "timeout_minutes": 480
+    },
+    "sharpe": 0.5342,
+    "win_rate": 58.0,
+    "pnl_pct": 8.0189,
+    "trades": 150,
+    "max_dd": 11.6003,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 2.5,
+      "stop_loss_pct": 2.5,
+      "timeout_minutes": 480
+    },
+    "sharpe": 0.5313,
+    "win_rate": 56.2,
+    "pnl_pct": 6.7687,
+    "trades": 153,
+    "max_dd": 7.8333,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 4.0,
+      "stop_loss_pct": 2.5,
+      "timeout_minutes": 720
+    },
+    "sharpe": 0.5292,
+    "win_rate": 47.6,
+    "pnl_pct": 8.6011,
+    "trades": 147,
+    "max_dd": 10.8078,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 2.5,
+      "stop_loss_pct": 0.5,
+      "timeout_minutes": 180
+    },
+    "sharpe": 0.5205,
+    "win_rate": 37.1,
+    "pnl_pct": 5.1132,
+    "trades": 170,
+    "max_dd": 4.982,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 4.0,
+      "stop_loss_pct": 3.0,
+      "timeout_minutes": 720
+    },
+    "sharpe": 0.518,
+    "win_rate": 50.7,
+    "pnl_pct": 8.7756,
+    "trades": 146,
+    "max_dd": 12.6601,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 2.5,
+      "stop_loss_pct": 0.8,
+      "timeout_minutes": 240
+    },
+    "sharpe": 0.5169,
+    "win_rate": 41.5,
+    "pnl_pct": 5.2696,
+    "trades": 164,
+    "max_dd": 6.286,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 2.5,
+      "stop_loss_pct": 3.0,
+      "timeout_minutes": 480
+    },
+    "sharpe": 0.5152,
+    "win_rate": 58.6,
+    "pnl_pct": 6.5919,
+    "trades": 152,
+    "max_dd": 9.3719,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 2.5,
+      "stop_loss_pct": 3.0,
+      "timeout_minutes": 360
+    },
+    "sharpe": 0.5143,
+    "win_rate": 57.9,
+    "pnl_pct": 6.4843,
+    "trades": 152,
+    "max_dd": 8.422,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 3.0,
+      "stop_loss_pct": 0.8,
+      "timeout_minutes": 480
+    },
+    "sharpe": 0.5138,
+    "win_rate": 36.4,
+    "pnl_pct": 6.608,
+    "trades": 162,
+    "max_dd": 8.5004,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 2.5,
+      "stop_loss_pct": 2.5,
+      "timeout_minutes": 360
+    },
+    "sharpe": 0.5133,
+    "win_rate": 56.2,
+    "pnl_pct": 6.4789,
+    "trades": 153,
+    "max_dd": 7.8345,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 2.5,
+      "stop_loss_pct": 3.5,
+      "timeout_minutes": 720
+    },
+    "sharpe": 0.5132,
+    "win_rate": 60.3,
+    "pnl_pct": 6.7934,
+    "trades": 151,
+    "max_dd": 7.4958,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 2.5,
+      "stop_loss_pct": 0.8,
+      "timeout_minutes": 480
+    },
+    "sharpe": 0.5084,
+    "win_rate": 37.8,
+    "pnl_pct": 5.3468,
+    "trades": 164,
+    "max_dd": 5.8919,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 2.5,
+      "stop_loss_pct": 0.8,
+      "timeout_minutes": 360
+    },
+    "sharpe": 0.5078,
+    "win_rate": 38.4,
+    "pnl_pct": 5.303,
+    "trades": 164,
+    "max_dd": 6.1011,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 2.5,
+      "stop_loss_pct": 1.0,
+      "timeout_minutes": 720
+    },
+    "sharpe": 0.5078,
+    "win_rate": 39.9,
+    "pnl_pct": 5.4192,
+    "trades": 163,
+    "max_dd": 5.7022,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 2.5,
+      "stop_loss_pct": 2.0,
+      "timeout_minutes": 360
+    },
+    "sharpe": 0.5074,
+    "win_rate": 51.9,
+    "pnl_pct": 6.1412,
+    "trades": 158,
+    "max_dd": 6.7985,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 3.0,
+      "stop_loss_pct": 1.0,
+      "timeout_minutes": 480
+    },
+    "sharpe": 0.5047,
+    "win_rate": 39.1,
+    "pnl_pct": 6.4978,
+    "trades": 161,
+    "max_dd": 9.107,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 2.5,
+      "stop_loss_pct": 1.0,
+      "timeout_minutes": 360
+    },
+    "sharpe": 0.4978,
+    "win_rate": 41.1,
+    "pnl_pct": 5.2138,
+    "trades": 163,
+    "max_dd": 6.5782,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 2.5,
+      "stop_loss_pct": 2.0,
+      "timeout_minutes": 480
+    },
+    "sharpe": 0.4972,
+    "win_rate": 51.9,
+    "pnl_pct": 6.0572,
+    "trades": 158,
+    "max_dd": 6.8199,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 5.0,
+      "stop_loss_pct": 0.8,
+      "timeout_minutes": 360
+    },
+    "sharpe": 0.494,
+    "win_rate": 31.2,
+    "pnl_pct": 6.9226,
+    "trades": 157,
+    "max_dd": 9.0157,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 3.0,
+      "stop_loss_pct": 1.0,
+      "timeout_minutes": 180
+    },
+    "sharpe": 0.484,
+    "win_rate": 44.4,
+    "pnl_pct": 5.9821,
+    "trades": 162,
+    "max_dd": 8.6517,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 2.5,
+      "stop_loss_pct": 1.0,
+      "timeout_minutes": 480
+    },
+    "sharpe": 0.4737,
+    "win_rate": 40.5,
+    "pnl_pct": 4.9775,
+    "trades": 163,
+    "max_dd": 6.4552,
+    "suspicious": false
+  },
+  {
+    "exit": {
+      "take_profit_pct": 4.0,
+      "stop_loss_pct": 3.5,
+      "timeout_minutes": 720
+    },
+    "sharpe": 0.4702,
+    "win_rate": 52.4,
+    "pnl_pct": 8.1144,
+    "trades": 145,
+    "max_dd": 11.7941,
+    "suspicious": false
+  }
+]

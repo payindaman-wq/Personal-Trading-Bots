@@ -1,8 +1,5 @@
-name: crossover
-style: Pure momentum strategy focusing on 8 pairs with tight entry conditions and
-  a high TP/SL ratio to capture strong trends. Increased position size and max open
-  trades to leverage conviction. Removed momentum_accelerating for increased trade
-  frequency.
+name: grid_best_day
+style: 'Grid-optimized: TP=2.5% SL=3.0%'
 pairs:
 - BTC/USD
 - ETH/USD
@@ -30,7 +27,7 @@ entry:
     - indicator: price_change_pct
       period_minutes: 15
       operator: lt
-      value: -1.08
+      value: -1.0
     - indicator: rsi
       period_minutes: 14
       operator: lt
@@ -48,17 +45,16 @@ entry:
     - indicator: price_change_pct
       period_minutes: 15
       operator: gt
-      value: 1.09
+      value: 1.0
     - indicator: rsi
       period_minutes: 14
       operator: gt
       value: 65
 exit:
-  take_profit_pct: 6.0
-  stop_loss_pct: 0.5
-  timeout_minutes: 480
+  take_profit_pct: 2.5
+  stop_loss_pct: 3.0
+  timeout_minutes: 180
 risk:
   pause_if_down_pct: 4
   pause_minutes: 60
   stop_if_down_pct: 10
-_sharpe: 0.9888
