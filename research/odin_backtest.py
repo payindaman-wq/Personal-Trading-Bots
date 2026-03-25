@@ -185,29 +185,38 @@ def evaluate_entry(conditions, history, sim_now_iso, interval_minutes):
         name     = cond["indicator"]
         # Support both period_minutes (day) and period_hours (swing)
         if "period_hours" in cond:
-            period_m = cond["period_hours"] * 60
+            period_m = int(float(cond["period_hours"])) * 60
         else:
-            period_m = cond.get("period_minutes", 5)
+            period_m = int(float(cond.get("period_minutes", 5)))
         operator = cond["operator"]
         expected = cond["value"]
         if isinstance(expected, str) and expected.lower() in ("true", "false"):
             expected = expected.lower() == "true"
+        # Coerce string numbers to float for numeric operators
+        if isinstance(expected, str) and operator in ("lt", "gt", "lte", "gte"):
+            try:
+                expected = float(expected)
+            except (ValueError, TypeError):
+                return None
         actual = compute_indicator(name, history, period_m, history[-1]["ts"], interval_minutes)
         if actual is None:
             return None
-        if operator == "eq":
-            ok = actual == expected
-        elif operator == "in":
-            ok = actual in expected
-        elif operator == "lt":
-            ok = actual < expected
-        elif operator == "gt":
-            ok = actual > expected
-        elif operator == "lte":
-            ok = actual <= expected
-        elif operator == "gte":
-            ok = actual >= expected
-        else:
+        try:
+            if operator == "eq":
+                ok = actual == expected
+            elif operator == "in":
+                ok = actual in expected
+            elif operator == "lt":
+                ok = float(actual) < float(expected)
+            elif operator == "gt":
+                ok = float(actual) > float(expected)
+            elif operator == "lte":
+                ok = float(actual) <= float(expected)
+            elif operator == "gte":
+                ok = float(actual) >= float(expected)
+            else:
+                return None
+        except (TypeError, ValueError):
             return None
         if not ok:
             return False
@@ -339,18 +348,18 @@ def run_backtest(strategy, league, pairs=None):
                for pair, rows in candle_data.items()}
     vwap_calcs = {pair: make_vwap_calc(vwap_window) for pair in test_pairs}
 
-    # Strategy params
+    # Strategy params (with type coercion for LLM-generated YAML)
     exit_cfg = strategy.get("exit", {})
     pos_cfg  = strategy.get("position", {})
-    tp_pct   = exit_cfg.get("take_profit_pct", 1.0) / 100
-    sl_pct   = exit_cfg.get("stop_loss_pct",   0.5) / 100
+    tp_pct   = float(exit_cfg.get("take_profit_pct", 1.0)) / 100
+    sl_pct   = float(exit_cfg.get("stop_loss_pct",   0.5)) / 100
     if "timeout_hours" in exit_cfg:
-        timeout_min = exit_cfg["timeout_hours"] * 60
+        timeout_min = float(exit_cfg["timeout_hours"]) * 60
     else:
-        timeout_min = exit_cfg.get("timeout_minutes", 120)
-    size_pct  = pos_cfg.get("size_pct", 20)
-    max_open  = pos_cfg.get("max_open", 1)
-    stop_pct  = strategy.get("risk", {}).get("stop_if_down_pct", 15)
+        timeout_min = float(exit_cfg.get("timeout_minutes", 120))
+    size_pct  = float(pos_cfg.get("size_pct", 20))
+    max_open  = int(float(pos_cfg.get("max_open", 1)))
+    stop_pct  = float(strategy.get("risk", {}).get("stop_if_down_pct", 15))
     entry_rules = strategy.get("entry", {})
 
     portfolio = make_portfolio()
