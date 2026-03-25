@@ -315,3 +315,23 @@ gen	sharpe	win_rate	pnl_pct	trades	status	description	ts
 1786	0.5380	21.3	8.71	417	new_elite	perturb sz: 25->22.51	2026-03-25T12:12
 1787	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T12:19
 1788	0.5296	21.3	9.39	417	new_elite	perturb cond_long_3: 35->34.98	2026-03-25T12:26
+1789	0.5296	21.3	9.39	417	discarded	crossover(A_entry+B_exit)	2026-03-25T12:35
+1790	0.5296	21.3	9.39	417	discarded	crossover(A_entry+B_exit)	2026-03-25T12:42
+1791	0.5296	21.3	9.39	417	discarded	crossover(A_entry+B_exit)	2026-03-25T12:49
+1792	0.4016	21.6	6.64	417	discarded	perturb to: 480->436	2026-03-25T12:56
+1793	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T13:02
+1794	0.6469	21.5	11.70	353	new_elite	llm	2026-03-25T13:09
+1795	-5.4077	58.3	-10.22	391	discarded	random(3conds,3pairs)	2026-03-25T13:10
+1796	0.5296	21.3	9.39	417	discarded	perturb sl: 0.5->0.5	2026-03-25T13:17
+1797	-8.0533	35.2	-10.52	108	discarded	random(3conds,3pairs)	2026-03-25T13:18
+1798	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T13:25
+1799	0.7270	21.8	13.46	363	new_elite	perturb sl: 0.5->0.5	2026-03-25T13:32
+1800	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T13:39
+1801	0.5296	21.3	9.39	417	discarded	crossover(A_entry+B_exit)	2026-03-25T13:45
+1802	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T13:52
+1803	-17.6999	39.0	-11.07	77	discarded	random(3conds,5pairs)	2026-03-25T13:53
+1804	0.7120	22.0	13.66	363	new_elite	perturb tp: 6.0->5.68	2026-03-25T14:00
+1805	0.7270	21.8	13.46	363	new_elite	crossover(A_entry+B_exit)	2026-03-25T14:07
+1806	0.5380	21.3	8.71	417	new_elite	crossover(A_entry+B_exit)	2026-03-25T14:14
+1807	0.7270	21.8	13.46	363	new_elite	crossover(A_entry+B_exit)	2026-03-25T14:21
+1808	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T14:28

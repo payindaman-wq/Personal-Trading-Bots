@@ -1,79 +1,48 @@
-name: skadi_v2_v2200_optimized
-style: multi_tf_trend_macd_rsi_vwap_filter
+name: random_restart
+style: randomly generated
 pairs:
-  - BTC/USD
-  - ETH/USD
-  - SOL/USD
+- LINK/USD
+- ADA/USD
+- BTC/USD
+- OP/USD
 position:
-  size_pct: 25
+  size_pct: 15.97
   max_open: 1
   fee_rate: 0.001
 entry:
   long:
     conditions:
-      - indicator: trend
-        period_hours: 168
-        operator: eq
-        value: up
-      - indicator: trend
-        period_hours: 48
-        operator: in
-        value: [up, flat]
-      - indicator: macd_signal
-        period_hours: 26
-        operator: eq
-        value: bullish
-      - indicator: rsi
-        period_hours: 14
-        operator: gt
-        value: 40
-      - indicator: rsi
-        period_hours: 14
-        operator: lt
-        value: 70
-      - indicator: price_vs_vwap
-        period_hours: 24
-        operator: eq
-        value: above
-      - indicator: momentum_accelerating
-        period_hours: 24
-        operator: eq
-        value: true
+    - indicator: rsi
+      period_hours: 21
+      operator: lt
+      value: 35.9
+    - indicator: price_vs_ema
+      period_hours: 48
+      operator: eq
+      value: above
+    - indicator: macd_signal
+      period_hours: 26
+      operator: eq
+      value: bullish
   short:
     conditions:
-      - indicator: trend
-        period_hours: 168
-        operator: eq
-        value: down
-      - indicator: trend
-        period_hours: 48
-        operator: in
-        value: [down, flat]
-      - indicator: macd_signal
-        period_hours: 26
-        operator: eq
-        value: bearish
-      - indicator: rsi
-        period_hours: 14
-        operator: lt
-        value: 70
-      - indicator: rsi
-        period_hours: 14
-        operator: gt
-        value: 30
-      - indicator: price_vs_vwap
-        period_hours: 24
-        operator: eq
-        value: below
-      - indicator: price_change_pct
-        period_hours: 48
-        operator: gt
-        value: -2.0
+    - indicator: rsi
+      period_hours: 21
+      operator: gt
+      value: 66.35
+    - indicator: price_vs_ema
+      period_hours: 48
+      operator: eq
+      value: below
+    - indicator: macd_signal
+      period_hours: 48
+      operator: eq
+      value: bearish
 exit:
-  take_profit_pct: 8.0
-  stop_loss_pct: 3.0
-  timeout_hours: 120
+  take_profit_pct: 6.63
+  stop_loss_pct: 3.9
+  timeout_hours: 225
 risk:
   pause_if_down_pct: 8
-  pause_hours: 48
   stop_if_down_pct: 18
+  pause_hours: 48
