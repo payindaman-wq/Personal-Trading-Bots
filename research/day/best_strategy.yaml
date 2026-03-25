@@ -1,4 +1,4 @@
-name: autobotday_v2_improved_pairs
+name: crossover
 style: Pure momentum strategy focusing on 8 pairs with tight entry conditions and
   a high TP/SL ratio to capture strong trends. Increased position size and max open
   trades to leverage conviction. Removed momentum_accelerating for increased trade
@@ -48,7 +48,7 @@ entry:
     - indicator: price_change_pct
       period_minutes: 15
       operator: gt
-      value: 1.02
+      value: 1.09
     - indicator: rsi
       period_minutes: 14
       operator: gt
@@ -56,7 +56,7 @@ entry:
 exit:
   take_profit_pct: 6.0
   stop_loss_pct: 0.5
-  timeout_minutes: 480
+  timeout_minutes: 499
 risk:
   pause_if_down_pct: 4
   pause_minutes: 60

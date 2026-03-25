@@ -358,3 +358,31 @@ gen	sharpe	win_rate	pnl_pct	trades	status	description	ts
 1843	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T18:08
 1844	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T18:15
 1845	0.9888	23.0	18.50	318	new_elite	perturb sl: 0.5->0.5	2026-03-25T18:22
+1847	0.9889	23.0	18.06	318	new_best	perturb sz: 25->24.39	2026-03-25T18:37
+1848	0.9888	23.0	18.50	318	new_elite	crossover(A_entry+B_exit)	2026-03-25T18:45
+1849	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T18:53
+1850	0.8536	22.2	15.99	329	discarded	perturb cond_short_3: 65->54.75	2026-03-25T19:01
+1851	-3.2209	44.9	-10.59	107	discarded	random(4conds,5pairs)	2026-03-25T19:02
+1852	-0.9680	52.6	-11.10	827	discarded	random(4conds,6pairs)	2026-03-25T19:04
+1853	0.9794	23.2	18.92	323	new_elite	perturb tp: 6.0->5.42	2026-03-25T19:11
+1854	0.9995	22.0	19.13	318	new_best	perturb to: 480->499	2026-03-25T19:19
+1855	0.9957	21.7	18.81	318	new_elite	perturb to: 480->547	2026-03-25T19:26
+1856	0.9390	22.1	17.60	308	discarded	llm	2026-03-25T19:33
+1857	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T19:41
+1858	0.3666	21.1	6.81	530	discarded	perturb cond_long_2: -1.08->-0.84	2026-03-25T19:48
+1859	0.9957	21.7	18.81	318	new_elite	perturb mo: 2->2	2026-03-25T19:56
+1860	0.9957	21.7	18.81	318	new_elite	crossover(A_entry+B_exit)	2026-03-25T20:03
+1861	0.9888	23.0	18.50	318	discarded	perturb mo: 2->2	2026-03-25T20:10
+1862	0.9310	22.6	17.78	314	discarded	perturb sl: 0.5->0.57	2026-03-25T20:18
+1863	0.8675	21.8	14.84	294	discarded	perturb cond_short_2: 1.09->1.15	2026-03-25T20:25
+1864	0.9888	23.0	18.50	318	discarded	crossover(A_entry+B_exit)	2026-03-25T20:32
+1865	-1.0932	49.2	-10.27	433	discarded	random(2conds,3pairs)	2026-03-25T20:34
+1866	0.7076	21.4	12.10	295	discarded	llm	2026-03-25T20:41
+1867	0.9995	22.0	19.13	318	new_elite	perturb sl: 0.5->0.5	2026-03-25T20:48
+1868	0.8998	25.1	14.62	319	discarded	llm	2026-03-25T20:55
+1869	0.9390	22.1	17.60	308	discarded	llm	2026-03-25T21:02
+1870	0.3757	18.5	4.53	184	discarded	llm	2026-03-25T21:07
+1871	0.0000	0.0	0.00	0	gemini_error	The read operation timed out	2026-03-25T21:09
+1872	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T21:16
+1873	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T21:22
+1874	0.5550	21.8	10.31	432	discarded	perturb cond_long_2: -1.08->-0.93	2026-03-25T21:29

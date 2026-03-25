@@ -1,4 +1,4 @@
-name: crossover
+name: random_restart
 style: randomly generated
 pairs:
 - LINK/USD

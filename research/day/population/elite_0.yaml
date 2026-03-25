@@ -56,9 +56,9 @@ entry:
 exit:
   take_profit_pct: 6.0
   stop_loss_pct: 0.5
-  timeout_minutes: 480
+  timeout_minutes: 499
 risk:
   pause_if_down_pct: 4
   pause_minutes: 60
   stop_if_down_pct: 10
-_sharpe: 0.9888
+_sharpe: 0.9995
