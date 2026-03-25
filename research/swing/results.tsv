@@ -866,3 +866,52 @@ gen	sharpe	win_rate	pnl_pct	trades	status	description	ts
 575	2.3763	81.8	17.18	22	discarded	crossover(A_entry+B_exit)	2026-03-25T21:55
 576	1.9368	100.0	10.31	8	low_trades	trades=8	2026-03-25T21:57
 577	1.9368	100.0	10.31	8	low_trades	trades=8	2026-03-25T21:59
+578	-0.3292	47.5	-17.95	909	discarded	random(2conds,3pairs)	2026-03-25T22:00
+579	2.2918	78.3	16.67	23	discarded	perturb tp: 6.63->6.41	2026-03-25T22:02
+580	0.0000	0.0	0.00	0	gemini_error	HTTP Error 503: Service Unavailable	2026-03-25T22:03
+581	-1.0531	54.5	-22.54	433	discarded	random(3conds,6pairs)	2026-03-25T22:05
+582	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T22:07
+583	2.0571	100.0	11.64	9	low_trades	trades=9	2026-03-25T22:09
+584	0.1531	43.2	2.35	285	discarded	random(4conds,3pairs)	2026-03-25T22:11
+585	2.3763	81.8	20.03	22	discarded	perturb sz: 15.97->18.41	2026-03-25T22:13
+586	2.3763	81.8	17.18	22	discarded	crossover(A_entry+B_exit)	2026-03-25T22:15
+587	2.3763	81.8	17.18	22	discarded	crossover(A_entry+B_exit)	2026-03-25T22:17
+588	2.3763	81.8	17.18	22	discarded	crossover(A_entry+B_exit)	2026-03-25T22:19
+589	2.3763	81.8	17.18	22	discarded	perturb sl: 3.25->3.45	2026-03-25T22:21
+590	2.3763	81.8	17.18	22	discarded	perturb mo: 1->1	2026-03-25T22:22
+591	1.7925	78.6	10.22	14	low_trades	trades=14	2026-03-25T22:25
+592	-1.4007	47.3	-19.13	184	discarded	random(2conds,8pairs)	2026-03-25T22:26
+593	2.3763	81.8	17.18	22	discarded	crossover(A_entry+B_exit)	2026-03-25T22:28
+594	2.3763	81.8	17.18	22	discarded	crossover(A_entry+B_exit)	2026-03-25T22:30
+595	1.9667	91.7	10.88	12	rejected_suspicious		2026-03-25T22:32
+596	1.5358	100.0	5.97	5	low_trades	trades=5	2026-03-25T22:34
+597	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T22:36
+598	2.3763	81.8	17.18	22	discarded	crossover(A_entry+B_exit)	2026-03-25T22:38
+599	1.5280	78.6	7.89	14	low_trades	trades=14	2026-03-25T22:40
+600	2.3763	81.8	17.18	22	discarded	perturb mo: 1->1	2026-03-25T22:42
+601	-0.3353	52.0	-10.76	500	discarded	random(3conds,3pairs)	2026-03-25T22:43
+602	1.5075	77.8	7.00	9	low_trades	trades=9	2026-03-25T22:45
+603	1.6087	75.0	9.29	12	low_trades	trades=12	2026-03-25T22:47
+604	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T22:49
+605	2.3097	82.6	16.63	23	discarded	perturb to: 220->178	2026-03-25T22:51
+606	1.9667	91.7	10.88	12	rejected_suspicious		2026-03-25T22:53
+607	2.3176	77.3	16.75	22	discarded	perturb sl: 3.25->2.62	2026-03-25T22:55
+608	1.9572	85.7	10.81	14	rejected_suspicious		2026-03-25T22:57
+609	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T22:59
+610	1.7001	80.0	9.27	15	low_trades	trades=15	2026-03-25T23:01
+611	1.9695	55.6	25.05	63	discarded	perturb cond_short_0: 66.35->60.64	2026-03-25T23:03
+612	2.3763	81.8	17.18	22	discarded	perturb mo: 1->1	2026-03-25T23:05
+613	-3.5173	32.8	-19.83	67	discarded	random(2conds,7pairs)	2026-03-25T23:06
+614	1.9572	85.7	10.81	14	rejected_suspicious		2026-03-25T23:08
+615	-2.1598	48.5	-19.66	291	discarded	random(2conds,7pairs)	2026-03-25T23:09
+616	2.3763	81.8	17.18	22	discarded	crossover(A_entry+B_exit)	2026-03-25T23:11
+617	1.5185	75.0	7.80	12	low_trades	trades=12	2026-03-25T23:13
+618	2.3763	81.8	17.18	22	discarded	crossover(A_entry+B_exit)	2026-03-25T23:15
+619	1.9572	85.7	10.81	14	rejected_suspicious		2026-03-25T23:17
+620	2.3763	81.8	17.18	22	discarded	crossover(A_entry+B_exit)	2026-03-25T23:18
+621	2.0571	100.0	11.48	9	low_trades	trades=9	2026-03-25T23:20
+622	2.3763	81.8	17.18	22	discarded	crossover(A_entry+B_exit)	2026-03-25T23:22
+623	-2.7015	33.3	-17.88	114	discarded	random(2conds,7pairs)	2026-03-25T23:23
+624	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T23:26
+625	2.0571	100.0	11.48	9	low_trades	trades=9	2026-03-25T23:28
+626	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-25T23:29

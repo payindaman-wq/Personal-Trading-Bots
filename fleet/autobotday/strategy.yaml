@@ -34,7 +34,7 @@ entry:
     - indicator: rsi
       period_minutes: 14
       operator: lt
-      value: 35
+      value: 29.96
   short:
     conditions:
     - indicator: trend
