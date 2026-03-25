@@ -404,6 +404,15 @@ def filter_for_bot(markets, strategy, existing_cids):
     max_days= mf.get("max_days_to_resolve", 30)
     cutoff  = datetime.now(timezone.utc) + timedelta(days=max_days)
 
+    # Sprint-window guard: reject markets resolving after sprint ends
+    sprint_ends_at = strategy.get("_sprint_ends_at")
+    sprint_end_dt = None
+    if sprint_ends_at:
+        try:
+            sprint_end_dt = datetime.fromisoformat(sprint_ends_at.replace("Z", "+00:00"))
+        except Exception:
+            pass
+
     candidates = []
     for m in markets:
         cid = m["condition_id"]
@@ -426,6 +435,9 @@ def filter_for_bot(markets, strategy, existing_cids):
             try:
                 end_dt = datetime.fromisoformat(m["end_date"].replace("Z", "+00:00"))
                 if end_dt > cutoff or end_dt < datetime.now(timezone.utc):
+                    continue
+                # Sprint-window guard: market must resolve before sprint ends
+                if sprint_end_dt and end_dt > sprint_end_dt:
                     continue
             except Exception:
                 pass
@@ -779,6 +791,16 @@ def write_dashboard(state):
     total_gem  = sum(b.get("gemini_calls", 0) for b in bots)
     wr         = round(total_wins / total_tr * 100, 1) if total_tr > 0 else 0.0
 
+    # Separate closed vs unrealized P&L
+    sprint_start = state.get("sprint_started_at", "")
+    closed_pnl = round(sum(
+        sum(t.get("pnl_usd", 0) for t in b.get("closed_trades", [])
+            if not sprint_start or t.get("closed_at", "") >= sprint_start)
+        for b in bots), 2)
+    unrealized_pnl = round(sum(
+        sum(p.get("unrealized_pnl", 0) for p in b.get("positions", {}).values())
+        for b in bots), 2)
+
     norm_bots = []
     for b in bots:
         t = b.get("total_trades", 0)
@@ -837,12 +859,16 @@ def write_dashboard(state):
         "bot_type":     "autonomous",
         "sprint_id":    state.get("sprint_id"),
         "sprint_ends_at": state.get("sprint_ends_at"),
+        "cycle":          state.get("cycle", 1),
+        "sprint_in_cycle": state.get("sprint_in_cycle", 0),
         "stats": {
-            "total_pnl_usd":    total_pnl,
-            "overall_win_rate": wr,
-            "active_positions": total_pos,
-            "total_trades":     total_tr,
-            "gemini_calls":     total_gem,
+            "total_pnl_usd":      total_pnl,
+            "closed_pnl_usd":     closed_pnl,
+            "unrealized_pnl_usd": unrealized_pnl,
+            "overall_win_rate":   wr,
+            "active_positions":   total_pos,
+            "total_trades":       total_tr,
+            "gemini_calls":       total_gem,
         },
         "bots":            norm_bots,
         "tracked_traders": [],
@@ -932,6 +958,7 @@ def run_tick(state, strategies, secrets, tick_count):
             continue
         existing_cids = set(bot["positions"].keys())
         bot_type      = strategy.get("type", "opinion")
+        strategy["_sprint_ends_at"] = state.get("sprint_ends_at", "")
 
         if bot_type == "arb":
             arb_sources = strategy.get("arb_sources", [])

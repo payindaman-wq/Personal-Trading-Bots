@@ -434,6 +434,7 @@ def get_sprint_archive():
                 continue
             bots_sorted = sorted(bots_list, key=lambda b: b.get("sprint_pnl_usd", 0), reverse=True)
             pm_type = "copy" if fname.endswith("_copy.json") else "auto"
+            pm_label = "Copy Traders" if pm_type == "copy" else "Auto Traders"
             rankings = []
             for rank_i, b in enumerate(bots_sorted, 1):
                 rankings.append({
@@ -446,8 +447,8 @@ def get_sprint_archive():
                     "win_rate":      b.get("win_rate", 0),
                 })
             archive.append({
-                "comp_id":        pm_data.get("sprint_id", fname.replace(".json", "")),
-                "league":         f"polymarket-{pm_type}",
+                "comp_id":        pm_data.get("sprint_id", fname.replace(".json", "")) + f" ({pm_label})",
+                "league":         "polymarket",
                 "winner":         rankings[0]["bot"] if rankings else "",
                 "duration_hours": 168,
                 "started_at":     pm_data.get("started_at", ""),
