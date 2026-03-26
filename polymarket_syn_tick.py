@@ -805,11 +805,16 @@ def write_dashboard(state):
     for b in bots:
         t = b.get("total_trades", 0)
         w = b.get("wins", 0)
+        bot_closed_pnl = round(sum(
+            tr.get("pnl_usd", 0) for tr in b.get("closed_trades", [])
+            if not sprint_start or tr.get("closed_at", "") >= sprint_start
+        ), 2)
         norm_bots.append({
             "bot":              b["name"],
             "category":         b.get("category", ""),
             "assigned_trader":  f"Gemini [{b.get('category','')}]" if b.get("type") == "opinion" else "Arb Engine",
             "pnl_usd":          round(b.get("pnl_usd", 0), 2),
+            "closed_pnl_usd":   bot_closed_pnl,
             "win_rate":         round(w / t * 100, 1) if t > 0 else 0.0,
             "trades":           t,
             "active_positions": len(b.get("positions", {})),
