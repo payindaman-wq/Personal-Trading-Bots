@@ -48,7 +48,7 @@ ALL_PAIRS = [
 
 DAY_RANGES = {
     "take_profit_pct": (0.8, 6.0),
-    "stop_loss_pct": (0.5, 4.0),
+    "stop_loss_pct": (0.8, 4.0),
     "timeout_minutes": (60, 720),
     "size_pct": (10, 35),
     "max_open": (1, 4),
@@ -437,12 +437,21 @@ def random_strategy(league):
 # LLM Mutation
 # ----------------------------------------------------------------
 
-def build_llm_prompt(league, parent_yaml, population, results_history):
+def build_llm_prompt(league, best_yaml, population):
     pop_summary = population.summary()
-
+    import yaml as _yaml
+    try:
+        best_strat = _yaml.safe_load(best_yaml)
+        long_conds = best_strat.get("entry", {}).get("long", {}).get("conditions", [])
+        n_conds = len(long_conds)
+        cond_names = [c.get("indicator", "?") for c in long_conds]
+    except Exception:
+        n_conds = 0
+        cond_names = []
+    cond_list = ", ".join(cond_names) if cond_names else "unknown"
     if league == "day":
         ranges_desc = (
-            "TP: 0.8-6.0%, SL: 0.5-4.0%, timeout: 60-720min\n"
+            "TP: 0.8-6.0%, SL: 0.8-4.0%, timeout: 60-720min, size_pct: 10-35%, max_open: 1-4\n"
             "RSI long: lt 25-48, RSI short: gt 52-75\n"
             "price_change_pct long: lt -2.0 to -0.1, short: gt 0.1 to 2.0\n"
             "trend periods: 60,120,180,240,360,480min\n"
@@ -450,37 +459,46 @@ def build_llm_prompt(league, parent_yaml, population, results_history):
         )
     else:
         ranges_desc = (
-            "TP: 3.0-12.0%, SL: 2.0-5.0%, timeout: 48-240h\n"
+            "TP: 3.0-12.0%, SL: 2.0-5.0%, timeout: 48-240h, size_pct: 15-30%, max_open: 1-3\n"
             "RSI long: lt 25-48, RSI short: gt 52-75\n"
             "price_change_pct long: lt -2.0 to -0.1, short: gt 0.1 to 2.0\n"
             "trend periods: 24,48,72,168h\n"
             "macd_signal periods: 12,24,26,48h"
         )
+    parts = [
+        f"You are a crypto {league} trading strategy optimizer."
+          " Iterate on what works - do not explore random alternatives.\n\n",
+        "## Current Best Strategy (ANCHOR - always start from this)\n",
+        f"```yaml\n{best_yaml}```\n",
+        f"This strategy has {n_conds} entry conditions: {cond_list}\n\n",
+        "## Elite Population (context only - avoid duplicating)\n",
+        f"{pop_summary}\n\n",
+        "## Constraints\n",
+        f"{ranges_desc}\n",
+        "Minimum 50 trades required - strategies below this are invalid.\n",
+        "stop_loss_pct minimum: 0.8%% (noise floor).\n\n",
+        "## Your Task\n",
+        "Make ONE small targeted modification to the current best strategy. Output a complete modified copy.\n\n",
+        "Allowed changes (pick exactly one):\n",
+        "- Loosen a threshold to increase trade frequency"
+          "  (e.g. RSI long from 30 to 40, or remove momentum_accelerating)\n",
+        "- Tighten a threshold to improve signal quality\n",
+        "- Adjust TP, SL (min 0.8%%), or timeout\n",
+        "- Change a condition lookback period\n",
+        "- Add or remove one pair\n\n",
+        "Rules:\n",
+        "- Do NOT restructure or replace the core framework - modify this strategy only\n",
+        f"- Do NOT exceed {n_conds + 1} total conditions\n",
+        "- If strategy has more than 5 conditions, prefer removing one over adding\n",
+        "- momentum_accelerating is often overfitting - consider removing it if present\n",
+        "- Prioritize changes that increase trade count while preserving Sharpe\n\n",
+        "Output ONLY the complete modified strategy YAML between ```yaml and ``` markers.",
+    ]
+    return "".join(parts)
 
-    return f"""You are a crypto {league} trading strategy optimizer.
 
-## Current Elite Population (top {len(population.elites)} by Sharpe)
-{pop_summary}
-
-## Valid Parameter Ranges
-{ranges_desc}
-
-Available indicators: trend, macd_signal, price_change_pct, rsi, price_vs_vwap, price_vs_ema, bollinger_position, momentum_accelerating
-
-## Parent Strategy to Modify
-```yaml
-{parent_yaml}
-```
-
-## Task
-Propose ONE modification that is DIFFERENT from other strategies in the population.
-Good changes: adjust thresholds, add/remove a condition, try different indicator combos, change pairs.
-Output ONLY the complete modified strategy YAML between ```yaml and ``` markers.
-"""
-
-
-def llm_mutate(parent_yaml, league, population, results_history, api_key):
-    prompt = build_llm_prompt(league, parent_yaml, population, results_history)
+def llm_mutate(best_yaml, league, population, api_key):
+    prompt = build_llm_prompt(league, best_yaml, population)
     response = call_gemini(prompt, api_key)
     yaml_str = extract_yaml(response)
     if not yaml_str:
@@ -609,13 +627,11 @@ def main():
 
         # Adaptive weights
         if gens_since_best < 100:
-            weights = {"llm": 0.40, "perturb": 0.30, "crossover": 0.20, "random": 0.10}
+            weights = {"llm": 0.50, "perturb": 0.35, "crossover": 0.10, "random": 0.05}
         elif gens_since_best < 300:
-            weights = {"llm": 0.30, "perturb": 0.25, "crossover": 0.15, "random": 0.30}
-        elif gens_since_best < 500:
-            weights = {"llm": 0.20, "perturb": 0.20, "crossover": 0.10, "random": 0.50}
+            weights = {"llm": 0.45, "perturb": 0.35, "crossover": 0.10, "random": 0.10}
         else:
-            weights = {"llm": 0.10, "perturb": 0.15, "crossover": 0.05, "random": 0.70}
+            weights = {"llm": 0.40, "perturb": 0.45, "crossover": 0.05, "random": 0.10}
 
         # Select mutation
         r = random.random()
@@ -635,13 +651,13 @@ def main():
         description = mutation_type
 
         if mutation_type == "llm":
-            _, parent_strat, _ = pop.pick_parent()
-            clean = copy.deepcopy(parent_strat)
+            _, best_strat, _ = pop.elites[0]
+            clean = copy.deepcopy(best_strat)
             clean.pop("_sharpe", None)
-            clean_yaml = yaml.dump(clean, default_flow_style=False, sort_keys=False)
+            best_yaml_str = yaml.dump(clean, default_flow_style=False, sort_keys=False)
             try:
                 candidate, candidate_yaml, err = llm_mutate(
-                    clean_yaml, league, pop, results_history, api_key
+                    best_yaml_str, league, pop, api_key
                 )
                 if err:
                     print(f"| {err}")
