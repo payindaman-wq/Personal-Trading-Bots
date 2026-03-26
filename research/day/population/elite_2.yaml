@@ -13,7 +13,7 @@ pairs:
 - XRP/USD
 - ADA/USD
 position:
-  size_pct: 20.68
+  size_pct: 25
   max_open: 2
   fee_rate: 0.001
 entry:
@@ -34,7 +34,7 @@ entry:
     - indicator: rsi
       period_minutes: 14
       operator: lt
-      value: 29.96
+      value: 35
   short:
     conditions:
     - indicator: trend
@@ -56,9 +56,9 @@ entry:
 exit:
   take_profit_pct: 6.0
   stop_loss_pct: 0.5
-  timeout_minutes: 499
+  timeout_minutes: 628
 risk:
   pause_if_down_pct: 4
   pause_minutes: 60
   stop_if_down_pct: 10
-_sharpe: 1.0281
+_sharpe: 1.0534
