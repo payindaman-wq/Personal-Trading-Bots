@@ -434,3 +434,4 @@ gen	sharpe	win_rate	pnl_pct	trades	status	description	ts
 1920	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-26T02:14
 1921	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-26T02:21
 1922	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-03-26T02:27
+1926	1.0269	22.2	19.71	316	new_elite	crossover(A_entry+B_exit)	2026-03-26T02:56
