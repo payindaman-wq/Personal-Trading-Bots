@@ -1508,7 +1508,7 @@ function render_polymarket(pm, cycle_state, cum_rankings, total_sprints) {
     type:             b.category || 'auto',
     username:         '',
     pnl_usd:          b.pnl_usd || 0,
-    sprint_pnl_usd:   b.pnl_usd || 0,
+    sprint_pnl_usd:   (typeof b.closed_pnl_usd === 'number' ? b.closed_pnl_usd : b.pnl_usd) || 0,
     win_rate:         b.win_rate || 0,
     sprint_win_rate:  b.win_rate || 0,
     trades:           b.trades || 0,
@@ -1576,7 +1576,7 @@ function render_polymarket(pm, cycle_state, cum_rankings, total_sprints) {
       const hdr = '<div style="margin-bottom:12px;"><div style="font-size:16px;font-weight:bold;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Leaderboard</div><div class="section-label" style="margin-bottom:0">' + label + '</div></div>';
       return '<div class="section">' + hdr + '<div class="idle-notice">Sprint 1 in progress &mdash; standings update when first sprint closes</div></div>';
     }
-    const rows = rankings.map(function(b, i) {
+    const rows = rankings.filter(b => (b.sprints_entered || 0) > 0).map(function(b, i) {
       const rank = b.rank || (i + 1);
       const wr   = b.overall_win_rate || 0;
       const wr_cell = wr > 0 ? '<span class="win-rate">' + wr.toFixed(0) + '%</span>' : '<span class="pnl-zero">—</span>';
@@ -1628,8 +1628,8 @@ function render_polymarket(pm, cycle_state, cum_rankings, total_sprints) {
   </div>`;
 
   // Open Positions
-  const copy_pos = pm.open_positions || [];
-  const auto_pos = pm_auto && pm_auto.open_positions ? pm_auto.open_positions : [];
+  const copy_pos = (pm.open_positions || []).map(p => ({...p, _src: 'copy'}));
+  const auto_pos = (pm_auto && pm_auto.open_positions ? pm_auto.open_positions : []).map(p => ({...p, _src: 'auto'}));
   const all_pos  = [...copy_pos, ...auto_pos];
 
   let pos_html;
@@ -1646,6 +1646,7 @@ function render_polymarket(pm, cycle_state, cum_rankings, total_sprints) {
       return `
       <tr>
         <td class="bot-name">${esc(p.bot || '&mdash;')}</td>
+        <td>${p._src === 'copy' ? '<span class="badge" style="background:rgba(88,166,255,0.15);color:#58a6ff;border:1px solid rgba(88,166,255,0.3);font-size:9px;padding:2px 5px">COPY</span>' : type_badge(p.trader && p.trader.startsWith('Arb') ? 'arb' : 'auto')}</td>
         <td style="max-width:300px;white-space:normal;line-height:1.4">${pm_market_link(p.market)}</td>
         <td><span class="pm-outcome-open">${esc(p.outcome || '&mdash;')}</span></td>
         <td><span style="color:var(--muted)">${entry_c}&cent;</span> &rarr; <span class="${price_cls}">${curr_c}&cent;</span></td>
@@ -1656,7 +1657,7 @@ function render_polymarket(pm, cycle_state, cum_rankings, total_sprints) {
     pos_html = `
     <table>
       <thead><tr>
-        <th>Bot</th><th>Market</th><th>Pick</th>
+        <th>Bot</th><th>Type</th><th>Market</th><th>Pick</th>
         <th>Entry &rarr; Now</th><th>Cost</th><th>Unreal P&amp;L</th>
       </tr></thead>
       <tbody>${pos_rows}</tbody>
@@ -1672,7 +1673,7 @@ function render_polymarket(pm, cycle_state, cum_rankings, total_sprints) {
   </div>`;
 
   // Closed Positions (current sprint)
-  const copy_closed = pm.closed_positions || [];
+  const copy_closed = pm.closed_positions || pm.recent_trades || [];
   const auto_closed = pm_auto && pm_auto.closed_positions ? pm_auto.closed_positions : [];
   const all_closed  = [...auto_closed, ...copy_closed]
     .sort((a, b) => (b.closed_at || '').localeCompare(a.closed_at || ''));
