@@ -450,6 +450,49 @@ def check_disk_space():
 
 # ── Main ─────────────────────────────────────────────────────────────────────
 
+
+def check_mimir_analysis(state):
+    """Alert if Mimir has produced new analysis since last alert."""
+    import json as _json
+    log_path = "/root/.openclaw/workspace/research/mimir_log.jsonl"
+    if not os.path.isfile(log_path):
+        return []
+
+    last_alerted_ts = state.get("mimir_last_alerted_ts", "")
+    alerts = []
+    latest_ts = last_alerted_ts
+
+    try:
+        with open(log_path) as f:
+            lines = [l.strip() for l in f if l.strip()]
+        for line in lines:
+            try:
+                entry = _json.loads(line)
+            except Exception:
+                continue
+            ts = entry.get("ts", "")
+            if ts <= last_alerted_ts:
+                continue
+            league = entry.get("league", "?").upper()
+            gen = entry.get("generation", "?")
+            # Extract first sentence of analysis for context
+            analysis = entry.get("analysis", "")
+            first_sentence = analysis.split(".")[0][:120] if analysis else ""
+            alerts.append(
+                f"[MIMIR/{league}] Gen {gen} analysis ready — {first_sentence}... "
+                f"— review and bring to Claude Code"
+            )
+            if ts > latest_ts:
+                latest_ts = ts
+    except Exception as e:
+        print(f"  [mimir check] error: {e}")
+
+    if latest_ts > last_alerted_ts:
+        state["mimir_last_alerted_ts"] = latest_ts
+
+    return alerts
+
+
 def main():
     now_str = datetime.now(PST).strftime("%Y-%m-%d %H:%M %Z")
     print(f"[sys_heartbeat] {now_str}")
@@ -593,6 +636,11 @@ def main():
         if not last or datetime.now(timezone.utc) - datetime.fromisoformat(last) > timedelta(minutes=GEMINI_COOLDOWN_MIN):
             problems.append((key, f"[GEMINI] {problem}"))
     # intentionally not clearing on resolve — quota flickers; let cooldown expire naturally
+
+    # -- Mimir analysis check ------------------------------------------
+    for mimir_alert in check_mimir_analysis(state):
+        key = "mimir_" + mimir_alert[8:30].replace(" ", "_")
+        problems.append((key, mimir_alert))
 
     # ── Send alerts ────────────────────────────────────────────────────────
     if problems:
