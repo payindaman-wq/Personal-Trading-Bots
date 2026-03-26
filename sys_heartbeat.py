@@ -21,7 +21,7 @@ BOT_TOKEN  = "8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
 CHAT_ID    = "8154505910"
 
 COOLDOWN_MIN        = 1440    # min gap between repeated alerts for the same problem (24h)
-SERVICE_COOLDOWN_MIN = 60
+SERVICE_COOLDOWN_MIN = 1440
 GEMINI_COOLDOWN_MIN = 1440   # Gemini quota alerts fire at most once per day
 PAUSE_FLAG          = f"{WORKSPACE}/competition/heartbeat_paused"
 
@@ -454,7 +454,6 @@ def main():
     now_str = datetime.now(PST).strftime("%Y-%m-%d %H:%M %Z")
     print(f"[sys_heartbeat] {now_str}")
 
-    autofix_queue = []
 
     if os.path.isfile(PAUSE_FLAG):
         print("  Paused — alerts suppressed. Delete heartbeat_paused to resume.")
@@ -503,7 +502,6 @@ def main():
             print(f"  [{svc['name']}] {problem} — attempting auto-restart...")
             restarted = attempt_auto_restart(svc["unit"])
             if restarted:
-                autofix_queue.append(f"{svc['unit']} was down — auto-restarted successfully")
                 git_commit_push(f"heartbeat auto-restarted {svc['unit']}")
                 clear_alert(state, key)
                 print(f"  [{svc['name']}] auto-restarted successfully")
@@ -525,7 +523,6 @@ def main():
                 print(f"  [odin_{vleague}] Ollama stuck — force-restarting {unit}...")
                 restarted = attempt_auto_restart(unit)
                 if restarted:
-                    autofix_queue.append(f"odin_{vleague}: Ollama was stuck — service restarted")
                     git_commit_push(f"heartbeat force-restarted {unit} (Ollama stuck)")
                     clear_alert(state, key)
                     print(f"  [odin_{vleague}] restarted successfully")
@@ -607,25 +604,6 @@ def main():
         tg_send("\n".join(lines))
     else:
         print("  All systems nominal.")
-
-    # ── Auto-fix digest (queue items, send compiled once per 24h) ────────
-    # -- Auto-fix digest (queue items, send compiled once per 24h) --------
-    if autofix_queue:
-        state.setdefault("autofix_queue", []).extend(autofix_queue)
-    queued = state.get("autofix_queue", [])
-    last_digest = state.get("last_autofix_digest")
-    digest_due = (not last_digest or
-                  datetime.now(timezone.utc) - datetime.fromisoformat(last_digest)
-                  > timedelta(hours=24))
-    if queued and digest_due:
-        digest_str = datetime.now(PST).strftime("%Y-%m-%d %H:%M %Z")
-        msg_lines = ["<b>SYN AUTO-FIX DIGEST</b> -- " + digest_str, ""]
-        for item in queued:
-            msg_lines.append("* " + item)
-        tg_send(chr(10).join(msg_lines))
-        state["autofix_queue"] = []
-        state["last_autofix_digest"] = datetime.now(timezone.utc).isoformat()
-        print(f"  Auto-fix digest sent ({len(queued)} item(s))")
 
     save_state(state)
 

@@ -735,13 +735,6 @@ def main():
             gens_since_best = 0
             print(f"| *** NEW BEST: sharpe={sharpe:.4f} win={win_rate}% "
                   f"pnl={pnl_pct:+.2f}% trades={trades} ***")
-            tg_send(
-                f"<b>ODIN NEW BEST [{league.upper()}]</b>\n\n"
-                f"Sharpe: {sharpe:.4f}\n"
-                f"Win: {win_rate}% | PnL: {pnl_pct:+.2f}%\n"
-                f"Trades: {trades} | Gen: {gen}\n"
-                f"Method: {description}"
-            )
         elif inserted:
             status = "new_elite"
             gens_since_best += 1
@@ -751,13 +744,6 @@ def main():
             gens_since_best += 1
             print(f"| sharpe={sharpe:.4f} win={win_rate}% trades={trades} [disc]")
 
-        if gens_since_best > 0 and gens_since_best % STALL_ALERT_GENS == 0:
-            tg_send(
-                f"<b>ODIN STALL [{league.upper()}]</b>\n\n"
-                f"No improvement in {gens_since_best} gens.\n"
-                f"Best Sharpe: {pop.best_sharpe():.4f}\n"
-                f"Random restart weight: {int(weights['random']*100)}%"
-            )
 
         log_result(league, gen, result, status, description[:80])
         results_history.append({
