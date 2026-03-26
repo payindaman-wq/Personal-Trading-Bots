@@ -1319,67 +1319,52 @@ function render_auto_research(mimir, odin) {
   if (!mimir || !mimir.analyses || mimir.analyses.length === 0) {
     return '<div style="padding:40px;text-align:center;color:var(--muted);font-size:11px;letter-spacing:.5px;">No Mimir analyses yet &mdash; analyses are generated every 100 ODIN generations</div>';
   }
-  const total        = mimir.total_analyses || mimir.analyses.length;
+
+  const day_latest   = mimir.analyses.find(a => a.league === 'day');
+  const swing_latest = mimir.analyses.find(a => a.league === 'swing');
   const day_gen      = odin && odin.day   ? odin.day.generations   : null;
   const swing_gen    = odin && odin.swing ? odin.swing.generations : null;
-  const day_count    = mimir.analyses.filter(a => a.league === 'day').length;
-  const swing_count  = mimir.analyses.filter(a => a.league === 'swing').length;
-  const update_count = mimir.analyses.filter(a => a.program_updated).length;
 
   function next_ms(g) { return g ? (Math.floor(g / 100) + 1) * 100 : null; }
 
-  let html = `
-  <div style="padding:24px 0 8px;">
-    <div style="font-size:20px;font-weight:bold;color:var(--gold);letter-spacing:3px;margin-bottom:8px;">AUTO RESEARCH</div>
-    <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:20px;max-width:720px;">
-      Mimir performs a deep analysis at every 100-generation ODIN milestone, reviewing research results and live sprint performance. It then rewrites the research program to guide the next 100 generations.
-    </div>
-    <div style="display:flex;gap:28px;flex-wrap:wrap;margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid var(--border);">
-      <div style="font-size:11px;color:var(--muted);">Total Analyses: <span style="color:var(--text);font-weight:bold;">${total}</span></div>
-      <div style="font-size:11px;color:var(--muted);">Day: <span style="color:var(--text);">${day_count}</span></div>
-      <div style="font-size:11px;color:var(--muted);">Swing: <span style="color:var(--text);">${swing_count}</span></div>
-      <div style="font-size:11px;color:var(--muted);">Program Updated: <span style="color:var(--green);font-weight:bold;">${update_count}/${total}</span></div>
-      ${day_gen   ? `<div style="font-size:11px;color:var(--muted);">Next Day Milestone: Gen <span style="color:var(--text);">${next_ms(day_gen).toLocaleString()}</span> (${next_ms(day_gen)-day_gen} away)</div>` : ""}
-      ${swing_gen ? `<div style="font-size:11px;color:var(--muted);">Next Swing Milestone: Gen <span style="color:var(--text);">${next_ms(swing_gen).toLocaleString()}</span> (${next_ms(swing_gen)-swing_gen} away)</div>` : ""}
-    </div>
-  </div>`;
-
-  mimir.analyses.forEach((entry, idx) => {
-    const lg = entry.league || 'unknown';
-    const badge_cls = lg === 'day' ? 'badge-day' : lg === 'swing' ? 'badge-swing' : '';
-    const updated_badge = entry.program_updated
-      ? '<span style="font-size:10px;background:var(--green);color:#000;padding:2px 7px;border-radius:3px;white-space:nowrap;">Program Updated</span>'
-      : '<span style="font-size:10px;background:var(--border);color:var(--muted);padding:2px 7px;border-radius:3px;white-space:nowrap;">No Change</span>';
+  function render_analysis_card(entry, gen) {
+    if (!entry) return '';
+    const lg        = entry.league || 'unknown';
+    const badge_cls = lg === 'day' ? 'badge-day' : 'badge-swing';
+    const next      = gen ? next_ms(gen) : null;
     const formatted = esc(entry.analysis || '')
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/\n\n/g, '</p><p style="margin:10px 0 0;">')
       .replace(/\n/g, '<br>');
-    html += `
-    <div class="archive-card" id="mir-${idx}">
-      <div class="archive-row" onclick="toggle_mimir(${idx})" style="gap:12px;align-items:center;">
+    return `
+    <div class="archive-card" style="margin-bottom:20px;">
+      <div style="display:flex;gap:12px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border);">
         <span class="badge ${badge_cls}" style="min-width:52px;text-align:center;">${lg.toUpperCase()}</span>
-        <span style="display:flex;flex-direction:column;gap:2px;min-width:160px;">
+        <span style="display:flex;flex-direction:column;gap:2px;">
           <span style="font-size:12px;font-weight:bold;color:var(--text);">Gen ${entry.generation.toLocaleString()} Milestone</span>
           <span style="font-size:10px;color:var(--muted);">${to_pst(entry.ts || '')}</span>
         </span>
-        ${updated_badge}
-        <span style="flex:1;font-size:11px;color:var(--muted);font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" class="hide-mobile">${esc(entry.snippet || '')}</span>
-        <span class="archive-expand-icon"></span>
+        ${next ? `<span style="margin-left:auto;font-size:11px;color:var(--muted);">Next milestone: Gen <span style="color:var(--text);">${next.toLocaleString()}</span> &mdash; ${next - gen} gens away</span>` : ''}
       </div>
-      <div class="archive-detail">
-        <div style="font-size:13px;color:var(--text);line-height:1.8;">
-          <p style="margin:0;">${formatted}</p>
-        </div>
+      <div style="padding:16px;font-size:13px;color:var(--text);line-height:1.8;">
+        <p style="margin:0;">${formatted}</p>
       </div>
     </div>`;
-  });
+  }
 
-  return `<div style="display:flex;flex-direction:column;gap:0;">${html}</div>`;
-}
+  const header = `
+  <div style="padding:24px 0 20px;">
+    <div style="font-size:20px;font-weight:bold;color:var(--gold);letter-spacing:3px;margin-bottom:8px;">AUTO RESEARCH</div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.7;max-width:720px;">
+      Latest Mimir analysis per league. Mimir runs at every 100-generation ODIN milestone and rewrites the research program to guide the next 100 generations.
+    </div>
+  </div>`;
 
-function toggle_mimir(idx) {
-  const card = document.getElementById('mir-' + idx);
-  if (card) card.classList.toggle('expanded');
+  return `<div style="display:flex;flex-direction:column;gap:0;">
+    ${header}
+    ${render_analysis_card(day_latest, day_gen)}
+    ${render_analysis_card(swing_latest, swing_gen)}
+  </div>`;
 }
 
 
