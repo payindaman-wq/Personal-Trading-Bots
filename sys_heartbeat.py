@@ -307,7 +307,6 @@ def check_odin_health(league):
         return None  # not started yet — service check covers this
     successful_statuses = {"new_best", "discarded", "rejected_lookahead"}
     last_success_ts = None
-    consecutive_errors = 0
     with open(results_path) as f:
         lines = [l.strip() for l in f if l.strip() and not l.startswith("gen")]
     if not lines:
@@ -319,11 +318,6 @@ def check_odin_health(league):
             ts_str = parts[7]
             if status in successful_statuses:
                 last_success_ts = ts_str
-                consecutive_errors = 0
-            else:
-                consecutive_errors += 1
-    if consecutive_errors >= 3:
-        return f"last 3 generations all errors — Ollama may be stuck"
     if last_success_ts:
         try:
             from datetime import timezone
@@ -556,25 +550,13 @@ def main():
                 resolved.append(key)
             clear_alert(state, key)
 
-    # ── Odin researcher health — force-restart if Ollama stuck ───────────
+    # ── Odin researcher health — alert if no successful generation in >6h ─────────
     for vleague in ["day", "swing"]:
         key     = f"odin_{vleague}_health"
         problem = check_odin_health(vleague)
         if problem:
-            if "Ollama may be stuck" in problem:
-                unit = f"odin_{vleague}.service"
-                print(f"  [odin_{vleague}] Ollama stuck — force-restarting {unit}...")
-                restarted = attempt_auto_restart(unit)
-                if restarted:
-                    git_commit_push(f"heartbeat force-restarted {unit} (Ollama stuck)")
-                    clear_alert(state, key)
-                    print(f"  [odin_{vleague}] restarted successfully")
-                else:
-                    if should_alert(state, key):
-                        problems.append((key, f"[ODIN/{vleague.upper()}] {problem} — auto-restart failed — address with Claude Code"))
-            else:
-                if should_alert(state, key):
-                    problems.append((key, f"[ODIN/{vleague.upper()}] {problem} — address with Claude Code"))
+            if should_alert(state, key):
+                problems.append((key, f"[ODIN/{vleague.upper()}] {problem} — address with Claude Code"))
         else:
             if key in state["last_alerted"]:
                 resolved.append(key)
