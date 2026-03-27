@@ -1,64 +1,57 @@
-name: crossover
-style: Pure momentum strategy focusing on 8 pairs with tight entry conditions and
-  a high TP/SL ratio to capture strong trends. Increased position size and max open
-  trades to leverage conviction. Removed momentum_accelerating for increased trade
-  frequency.
+name: random_restart
+style: randomly generated
 pairs:
-- BTC/USD
-- ETH/USD
-- SOL/USD
-- AVAX/USD
-- LINK/USD
 - UNI/USD
+- AAVE/USD
 - XRP/USD
-- ADA/USD
+- SOL/USD
 position:
-  size_pct: 35.0
+  size_pct: 13
   max_open: 2
   fee_rate: 0.001
 entry:
   long:
     conditions:
-    - indicator: trend
-      period_minutes: 240
-      operator: eq
-      value: up
-    - indicator: macd_signal
+    - indicator: momentum_accelerating
       period_minutes: 60
+      operator: eq
+      value: true
+    - indicator: price_change_pct
+      period_minutes: 5
+      operator: lt
+      value: -0.78
+    - indicator: macd_signal
+      period_minutes: 30
       operator: eq
       value: bullish
-    - indicator: price_change_pct
-      period_minutes: 15
-      operator: lt
-      value: -1.06
-    - indicator: rsi
-      period_minutes: 14
-      operator: lt
-      value: 29.06
-  short:
-    conditions:
-    - indicator: trend
-      period_minutes: 240
-      operator: eq
-      value: down
-    - indicator: macd_signal
+    - indicator: price_vs_ema
       period_minutes: 60
       operator: eq
-      value: bearish
+      value: above
+  short:
+    conditions:
+    - indicator: momentum_accelerating
+      period_minutes: 60
+      operator: eq
+      value: true
     - indicator: price_change_pct
-      period_minutes: 15
+      period_minutes: 30
       operator: gt
-      value: 1.09
-    - indicator: rsi
-      period_minutes: 14
-      operator: gt
-      value: 65
+      value: 1.33
+    - indicator: macd_signal
+      period_minutes: 30
+      operator: eq
+      value: bearish
+    - indicator: price_vs_ema
+      period_minutes: 120
+      operator: eq
+      value: below
 exit:
-  take_profit_pct: 5.66
-  stop_loss_pct: 0.5
-  timeout_minutes: 628
+  take_profit_pct: 3.0
+  stop_loss_pct: 0.9
+  timeout_minutes: 720
 risk:
   pause_if_down_pct: 4
-  pause_minutes: 60
   stop_if_down_pct: 10
-_sharpe: 1.1646
+  pause_minutes: 60
+_sharpe: 1.3456

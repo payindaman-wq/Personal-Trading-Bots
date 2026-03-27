@@ -38,7 +38,7 @@ POPULATION_SIZE     = 10
 STALL_ALERT_GENS    = 300
 TG_BOT_TOKEN = "8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
 TG_CHAT_ID   = "8154505910"
-MIN_TRADES = {"day": 50, "swing": 20}
+MIN_TRADES = {"day": 50, "swing": 45}
 
 ALL_PAIRS = [
     "BTC/USD",  "ETH/USD",  "SOL/USD",  "XRP/USD",
@@ -183,6 +183,11 @@ def get_ranges(league):
     return DAY_RANGES if league == "day" else SWING_RANGES
 
 
+def adj_score(sharpe, trades, target=50):
+    """Adjusted score: sharpe * sqrt(trades/target). Penalizes low trade counts."""
+    return sharpe * math.sqrt(max(trades, 1) / target)
+
+
 # ----------------------------------------------------------------
 # Population management
 # ----------------------------------------------------------------
@@ -190,7 +195,7 @@ def get_ranges(league):
 class Population:
     def __init__(self, league):
         self.league = league
-        self.elites = []  # list of (sharpe, strategy_dict, yaml_str)
+        self.elites = []  # list of (adj_score, strategy_dict, yaml_str)
 
     def load(self):
         d = pop_dir(self.league)
@@ -202,28 +207,32 @@ class Population:
                     text = f.read()
                 strat = yaml.safe_load(text)
                 sharpe = strat.get("_sharpe", 0.0)
-                self.elites.append((sharpe, strat, text))
+                trades = strat.get("_trades", 30)  # default 30 for legacy files
+                score = adj_score(sharpe, trades)
+                self.elites.append((score, strat, text))
         self.elites.sort(key=lambda x: x[0], reverse=True)
 
     def save(self):
         d = pop_dir(self.league)
-        for i, (sharpe, strat, _) in enumerate(self.elites):
-            strat["_sharpe"] = sharpe
+        for i, (score, strat, _) in enumerate(self.elites):
+            # _sharpe and _trades already stored in strat by try_insert/seed_from
             path = os.path.join(d, f"elite_{i}.yaml")
             text = yaml.dump(strat, default_flow_style=False, sort_keys=False)
             with open(path, "w") as f:
                 f.write(text)
             # Update tuple with fresh text
-            self.elites[i] = (sharpe, strat, text)
+            self.elites[i] = (score, strat, text)
         # Remove any stale files beyond current population
         for i in range(len(self.elites), POPULATION_SIZE):
             path = os.path.join(d, f"elite_{i}.yaml")
             if os.path.exists(path):
                 os.remove(path)
 
-    def seed_from(self, strategy_dict, strategy_yaml, sharpe):
+    def seed_from(self, strategy_dict, strategy_yaml, sharpe, trades=0):
         strategy_dict["_sharpe"] = sharpe
-        self.elites = [(sharpe, strategy_dict, strategy_yaml)]
+        strategy_dict["_trades"] = trades
+        score = adj_score(sharpe, trades)
+        self.elites = [(score, strategy_dict, strategy_yaml)]
         self.save()
 
     def best_sharpe(self):
@@ -232,11 +241,13 @@ class Population:
     def worst_sharpe(self):
         return self.elites[-1][0] if self.elites else -999.0
 
-    def try_insert(self, strategy_dict, strategy_yaml, sharpe):
-        """Returns (inserted, is_new_best)."""
+    def try_insert(self, strategy_dict, strategy_yaml, sharpe, trades):
+        """Returns (inserted, is_new_best). Compares on adj_score, not raw sharpe."""
         strategy_dict["_sharpe"] = sharpe
-        entry = (sharpe, strategy_dict, strategy_yaml)
-        is_new_best = sharpe > self.best_sharpe() if self.elites else True
+        strategy_dict["_trades"] = trades
+        score = adj_score(sharpe, trades)
+        entry = (score, strategy_dict, strategy_yaml)
+        is_new_best = score > self.best_sharpe() if self.elites else True
 
         if len(self.elites) < POPULATION_SIZE:
             self.elites.append(entry)
@@ -246,7 +257,7 @@ class Population:
                 self._save_fleet(strategy_yaml)
             return True, is_new_best
 
-        if sharpe > self.worst_sharpe():
+        if score > self.worst_sharpe():
             self.elites[-1] = entry
             self.elites.sort(key=lambda x: x[0], reverse=True)
             self.save()
@@ -259,6 +270,7 @@ class Population:
     def _save_fleet(self, yaml_text):
         strat = yaml.safe_load(yaml_text)
         strat.pop("_sharpe", None)
+        strat.pop("_trades", None)
         clean = yaml.dump(strat, default_flow_style=False, sort_keys=False)
         fleet = get_fleet_path(self.league)
         if fleet:
@@ -281,7 +293,7 @@ class Population:
 
     def summary(self):
         lines = []
-        for i, (sharpe, strat, _) in enumerate(self.elites):
+        for i, (score, strat, _) in enumerate(self.elites):
             ex = strat.get("exit", {})
             ps = strat.get("position", {})
             tp = ex.get("take_profit_pct", "?")
@@ -291,10 +303,13 @@ class Population:
             nl = len(strat.get("entry", {}).get("long", {}).get("conditions", []))
             ns = len(strat.get("entry", {}).get("short", {}).get("conditions", []))
             np_ = len(strat.get("pairs", []))
+            raw_sharpe = strat.get("_sharpe", 0.0)
+            raw_trades = strat.get("_trades", 0)
             lines.append(
-                f"  {i+1}. Sharpe={sharpe:.4f} | TP={tp}% SL={sl}% "
-                f"TO={to}{to_u} | size={ps.get('size_pct','?')}% "
-                f"max_open={ps.get('max_open','?')} | {nl}L/{ns}S conds | {np_}p"
+                f"  {i+1}. adj={score:.4f} sharpe={raw_sharpe:.4f} trades={raw_trades} | "
+                f"TP={tp}% SL={sl}% TO={to}{to_u} | "
+                f"size={ps.get('size_pct','?')}% max_open={ps.get('max_open','?')} | "
+                f"{nl}L/{ns}S conds | {np_}p"
             )
         return "\n".join(lines)
 
@@ -306,6 +321,7 @@ def perturb(strategy, league):
     """Randomly tweak one numeric parameter."""
     s = copy.deepcopy(strategy)
     s.pop("_sharpe", None)
+    s.pop("_trades", None)
     r = get_ranges(league)
     ex = s.setdefault("exit", {})
     ps = s.setdefault("position", {})
@@ -354,6 +370,7 @@ def crossover(parent_a, parent_b, league):
     """Entry from A, exit+position from B."""
     s = copy.deepcopy(parent_a)
     s.pop("_sharpe", None)
+    s.pop("_trades", None)
     s["exit"] = copy.deepcopy(parent_b.get("exit", {}))
     s["position"] = copy.deepcopy(parent_b.get("position", {}))
     s["name"] = "crossover"
@@ -612,8 +629,9 @@ def main():
             print(f"  ERROR: {baseline['error']}")
             sys.exit(1)
         seed_sharpe = baseline["sharpe"]
-        print(f"  Seed Sharpe={seed_sharpe:.4f} trades={baseline['total_trades']}")
-        pop.seed_from(seed_strat, seed_yaml, seed_sharpe)
+        seed_trades = baseline["total_trades"]
+        print(f"  Seed Sharpe={seed_sharpe:.4f} trades={seed_trades}")
+        pop.seed_from(seed_strat, seed_yaml, seed_sharpe, seed_trades)
 
     # Load state
     results_history = load_results(league)
@@ -629,7 +647,7 @@ def main():
 
     min_t = MIN_TRADES.get(league, 30)
 
-    print(f"[odin-v2/{league}] Pop: {len(pop.elites)} elites, best={pop.best_sharpe():.4f}")
+    print(f"[odin-v2/{league}] Pop: {len(pop.elites)} elites, best_adj={pop.best_sharpe():.4f}")
     print(f"  Gen {gen}, stall={gens_since_best}, sleep={args.sleep}s")
     print()
 
@@ -668,6 +686,7 @@ def main():
             _, best_strat, _ = pop.elites[0]
             clean = copy.deepcopy(best_strat)
             clean.pop("_sharpe", None)
+            clean.pop("_trades", None)
             best_yaml_str = yaml.dump(clean, default_flow_style=False, sort_keys=False)
             try:
                 candidate, candidate_yaml, err = llm_mutate(
@@ -758,12 +777,13 @@ def main():
             continue
 
         # Population insertion
-        inserted, is_new_best = pop.try_insert(candidate, candidate_yaml, sharpe)
+        inserted, is_new_best = pop.try_insert(candidate, candidate_yaml, sharpe, trades)
 
         if is_new_best:
             status = "new_best"
             gens_since_best = 0
-            print(f"| *** NEW BEST: sharpe={sharpe:.4f} win={win_rate}% "
+            score = adj_score(sharpe, trades)
+            print(f"| *** NEW BEST: adj={score:.4f} sharpe={sharpe:.4f} win={win_rate}% "
                   f"pnl={pnl_pct:+.2f}% trades={trades} ***")
         elif inserted:
             status = "new_elite"
