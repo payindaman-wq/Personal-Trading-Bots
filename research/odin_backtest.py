@@ -18,7 +18,7 @@ STARTING_CAP   = 10_000.0
 FEE_RATE       = 0.001
 FLAT_THRESHOLD = 0.15
 SUSPICIOUS_SHARPE   = 3.5
-SUSPICIOUS_WINRATE  = 85.0
+SUSPICIOUS_WINRATE  = 90.0
 
 
 # ---------------------------------------------------------------------------

@@ -438,6 +438,15 @@ def random_strategy(league):
 # LLM Mutation
 # ----------------------------------------------------------------
 
+
+def load_program_md(league):
+    path = os.path.join(league_dir(league), "program.md")
+    if not os.path.exists(path):
+        return ""
+    with open(path) as f:
+        return f.read().strip()
+
+
 def build_llm_prompt(league, best_yaml, population):
     pop_summary = population.summary()
     import yaml as _yaml
@@ -478,6 +487,10 @@ def build_llm_prompt(league, best_yaml, population):
         f"{ranges_desc}\n",
         "Minimum 50 trades required - strategies below this are invalid.\n",
         "stop_loss_pct minimum: 0.8%% (noise floor).\n\n",
+        # MIMIR guidance (program.md, updated every 100 gens by MIMIR)
+        *(['## MIMIR Research Guidance\n',
+          load_program_md(league) + '\n\n']
+         if load_program_md(league) else []),
         "## Your Task\n",
         "Make ONE small targeted modification to the current best strategy. Output a complete modified copy.\n\n",
         "Allowed changes (pick exactly one):\n",
