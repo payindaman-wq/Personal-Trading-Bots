@@ -15,26 +15,33 @@
   ],
   "starting_capital": 1000.0,
   "fee_rate": 0.001,
-  "equity": 999.75,
+  "equity": 986.05,
   "peak_equity": 1000.0,
-  "positions": [
+  "positions": [],
+  "stats": {
+    "total_trades": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "total_pnl_usd": -13.7,
+    "total_pnl_pct": -5.3792,
+    "total_fees": 0.5,
+    "max_drawdown_pct": 1.395,
+    "current_equity": 986.05,
+    "sum_losses_usd": -13.7
+  },
+  "closed_trades": [
     {
       "pair": "AVAX/USD",
       "direction": "long",
       "entry_price": 9.6,
+      "exit_price": 9.0836,
       "size_usd": 250.0,
-      "opened_at": "2026-03-24T10:00:04.681261+00:00"
+      "pnl_pct": -5.38,
+      "net_pnl": -13.7,
+      "reason": "SL",
+      "opened_at": "2026-03-24T10:00:04.681261+00:00",
+      "closed_at": "2026-03-27T03:30:05.153988+00:00"
     }
-  ],
-  "stats": {
-    "total_trades": 0,
-    "wins": 0,
-    "losses": 0,
-    "win_rate": 0.0,
-    "total_pnl_usd": 0.0,
-    "total_pnl_pct": 0.0,
-    "total_fees": 0.25,
-    "max_drawdown_pct": 0.0,
-    "current_equity": 999.75
-  }
+  ]
 }

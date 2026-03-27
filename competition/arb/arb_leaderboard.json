@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-26T02:08:01.274622+00:00",
+  "generated_at": "2026-03-27T05:08:01.410787+00:00",
   "league": "arb",
   "total_sprints": 2,
   "archived": 1,
@@ -9,6 +9,19 @@
   "sprints_per_cycle": 4,
   "cycle_status": "active",
   "rankings": [
+    {
+      "bot": "fafnir",
+      "points": 3,
+      "sprints_entered": 2,
+      "sprint_wins": 0,
+      "podiums": 1,
+      "cumulative_pnl_usd": 7.4,
+      "total_trades": 2,
+      "total_wins": 2,
+      "overall_win_rate": 100.0,
+      "avg_pnl_pct_per_sprint": 0.37,
+      "style": "stat arb"
+    },
     {
       "bot": "skoll",
       "points": 8,
@@ -23,6 +36,19 @@
       "style": "stat arb"
     },
     {
+      "bot": "utgard",
+      "points": 1,
+      "sprints_entered": 2,
+      "sprint_wins": 0,
+      "podiums": 0,
+      "cumulative_pnl_usd": 3.3,
+      "total_trades": 1,
+      "total_wins": 1,
+      "overall_win_rate": 100.0,
+      "avg_pnl_pct_per_sprint": 0.165,
+      "style": "stat arb"
+    },
+    {
       "bot": "jormungandr",
       "points": 5,
       "sprints_entered": 2,
@@ -33,19 +59,6 @@
       "total_wins": 1,
       "overall_win_rate": 50.0,
       "avg_pnl_pct_per_sprint": 0.1325,
-      "style": "stat arb"
-    },
-    {
-      "bot": "fafnir",
-      "points": 3,
-      "sprints_entered": 2,
-      "sprint_wins": 0,
-      "podiums": 1,
-      "cumulative_pnl_usd": 2.1,
-      "total_trades": 1,
-      "total_wins": 1,
-      "overall_win_rate": 100.0,
-      "avg_pnl_pct_per_sprint": 0.105,
       "style": "stat arb"
     },
     {
@@ -127,19 +140,6 @@
       "style": "stat arb"
     },
     {
-      "bot": "utgard",
-      "points": 1,
-      "sprints_entered": 2,
-      "sprint_wins": 0,
-      "podiums": 0,
-      "cumulative_pnl_usd": 0.0,
-      "total_trades": 0,
-      "total_wins": 0,
-      "overall_win_rate": 0.0,
-      "avg_pnl_pct_per_sprint": 0.0,
-      "style": "stat arb"
-    },
-    {
       "bot": "surt",
       "points": 1,
       "sprints_entered": 2,
@@ -171,11 +171,11 @@
       "sprints_entered": 2,
       "sprint_wins": 0,
       "podiums": 0,
-      "cumulative_pnl_usd": -7.9,
-      "total_trades": 24,
-      "total_wins": 4,
-      "overall_win_rate": 16.7,
-      "avg_pnl_pct_per_sprint": -0.395,
+      "cumulative_pnl_usd": -5.88,
+      "total_trades": 25,
+      "total_wins": 5,
+      "overall_win_rate": 20.0,
+      "avg_pnl_pct_per_sprint": -0.294,
       "style": "stat arb"
     },
     {
