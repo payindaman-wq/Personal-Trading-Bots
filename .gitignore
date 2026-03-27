@@ -72,3 +72,7 @@ research/swing/results.tsv
 
 # --- Prediction market research data (large, VPS-only) ---------------------
 research/polymarket/resolved_markets.jsonl
+research/day/results_btconly.tsv
+research/day/results_v1_archive.tsv
+research/swing/results_btconly.tsv
+research/swing/results_v1_archive.tsv
