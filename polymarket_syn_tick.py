@@ -849,7 +849,7 @@ def write_dashboard(state):
                 "bot":          b["name"],
                 "market_title": t.get("title", ""),
                 "direction":    t.get("outcome", ""),
-                "outcome":      "win" if t.get("pnl_usd", 0) >= 0 else "loss",
+                "outcome":      "win" if t.get("pnl_usd", 0) > 0 else "loss",
                 "pnl_usd":      t.get("pnl_usd"),
                 "pnl_pct":      t.get("pnl_pct"),
                 "closed_at":    t.get("closed_at", ""),
@@ -944,7 +944,9 @@ def run_tick(state, strategies, secrets, tick_count):
         if dd >= strategy.get("risk", {}).get("stop_if_down_pct", 20):
             log.warning(f"  [{bot['name']}] Stop-loss: {dd:.1f}% down — closing all")
             for cid in list(bot["positions"].keys()):
-                p = fetch_market_price(cid) or bot["positions"][cid]["current_price"]
+                p = fetch_market_price(cid)
+                if p is None:
+                    p = bot["positions"][cid]["current_price"]
                 close_position(bot, cid, "stop_loss", p)
         update_equity(bot)
 
