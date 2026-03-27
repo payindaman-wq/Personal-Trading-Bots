@@ -169,6 +169,9 @@ def aggregate(completed_sprints, live_bots):
         return tally[name]
 
     for sprint in completed_sprints:
+        # Skip dead sprints (unrecoverable or aborted) — zero activity = no points awarded
+        if sum(b.get("sprint_trades", 0) for b in sprint["bots"]) == 0:
+            continue
         ranked = score_sprint(sprint["bots"])
         for b in ranked:
             name = b.get("bot", "")
