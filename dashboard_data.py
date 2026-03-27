@@ -760,7 +760,16 @@ def get_odin_research():
                     improvements += 1
                     best_row = rows[-1]
 
-        result["generations"]  = len(rows)
+        # Read true gen count from gen_state.json (results.tsv has gaps from restarts)
+        league_name = "day" if "day" in tsv_path else "swing"
+        gen_state_path = f"/root/.openclaw/workspace/research/{league_name}/gen_state.json"
+        try:
+            import json as _json
+            with open(gen_state_path) as _f:
+                _gs = _json.load(_f)
+            result["generations"] = _gs.get("gen", len(rows))
+        except Exception:
+            result["generations"] = len(rows)
         result["improvements"] = improvements
         # If the kept best has 0 trades (0-trade baseline artifact),
         # find the most recent row with actual trades for display.

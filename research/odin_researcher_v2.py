@@ -20,6 +20,7 @@ import os
 import random
 import re
 import sys
+import subprocess
 import time
 import urllib.request
 from datetime import datetime, timezone
@@ -769,6 +770,19 @@ def main():
         })
         if len(results_history) > 300:
             results_history = results_history[-300:]
+
+        # Mimir milestone: deep analysis every 100 generations
+        if gen % 100 == 0:
+            print(f"  [mimir] Gen {gen} milestone — launching deep analysis...")
+            try:
+                subprocess.Popen(
+                    ["python3", os.path.join(RESEARCH, "mimir.py"),
+                     "--league", league, "--generation", str(gen)],
+                    stdout=open(os.path.join(league_dir(league), "mimir.log"), "a"),
+                    stderr=subprocess.STDOUT,
+                )
+            except Exception as e:
+                print(f"  [mimir] Failed to launch: {e}")
 
         gen += 1
         with open(state_path, "w") as f:
