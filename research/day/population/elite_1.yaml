@@ -1,12 +1,18 @@
-name: random_restart
-style: randomly generated
+name: autobotday
+style: momentum_price_change_macd_ema_trend_filter
 pairs:
 - UNI/USD
 - AAVE/USD
 - XRP/USD
 - SOL/USD
+- DOGE/USD
+- NEAR/USD
+- BTC/USD
+- ETH/USD
+- AVAX/USD
+- LINK/USD
 position:
-  size_pct: 13
+  size_pct: 10.2
   max_open: 2
   fee_rate: 0.001
 entry:
@@ -19,7 +25,7 @@ entry:
     - indicator: price_change_pct
       period_minutes: 5
       operator: lt
-      value: -0.84
+      value: -1.5
     - indicator: macd_signal
       period_minutes: 30
       operator: eq
@@ -28,6 +34,10 @@ entry:
       period_minutes: 60
       operator: eq
       value: above
+    - indicator: trend
+      period_minutes: 240
+      operator: eq
+      value: up
   short:
     conditions:
     - indicator: momentum_accelerating
@@ -37,7 +47,7 @@ entry:
     - indicator: price_change_pct
       period_minutes: 30
       operator: gt
-      value: 1.33
+      value: 1.5
     - indicator: macd_signal
       period_minutes: 30
       operator: eq
@@ -46,12 +56,16 @@ entry:
       period_minutes: 120
       operator: eq
       value: below
+    - indicator: trend
+      period_minutes: 240
+      operator: eq
+      value: down
 exit:
-  take_profit_pct: 3.0
-  stop_loss_pct: 0.9
+  take_profit_pct: 3.46
+  stop_loss_pct: 0.4
   timeout_minutes: 720
 risk:
   pause_if_down_pct: 4
   stop_if_down_pct: 10
   pause_minutes: 60
-_sharpe: 1.3453
+_sharpe: 1.1596
