@@ -646,6 +646,7 @@ def main():
         gens_since_best = 0
 
     min_t = MIN_TRADES.get(league, 30)
+    last_mimir_gen = 0  # track last gen Mimir was launched to avoid spam
 
     print(f"[odin-v2/{league}] Pop: {len(pop.elites)} elites, best_adj={pop.best_sharpe():.4f}")
     print(f"  Gen {gen}, stall={gens_since_best}, sleep={args.sleep}s")
@@ -804,9 +805,13 @@ def main():
         if len(results_history) > 300:
             results_history = results_history[-300:]
 
-        # Mimir milestone: deep analysis every 100 generations
-        if gen % 100 == 0:
-            print(f"  [mimir] Gen {gen} milestone — launching deep analysis...")
+        # Mimir milestone: deep analysis every 200 gens (baseline cadence)
+        # or immediately after a breakthrough (min 50 gens since last Mimir)
+        trigger_mimir = (gen % 200 == 0) or (is_new_best and (gen - last_mimir_gen) >= 50)
+        if trigger_mimir:
+            last_mimir_gen = gen
+            reason = "milestone" if gen % 200 == 0 else "breakthrough"
+            print(f"  [mimir] Gen {gen} {reason} — launching deep analysis...")
             try:
                 subprocess.Popen(
                     ["python3", os.path.join(RESEARCH, "mimir.py"),
