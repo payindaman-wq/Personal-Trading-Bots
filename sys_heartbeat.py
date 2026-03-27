@@ -290,7 +290,18 @@ def check_odin_research_quality(league):
             last_dt = datetime.fromisoformat(last_best_ts).replace(tzinfo=timezone.utc)
             age_h   = (datetime.now(timezone.utc) - last_dt).total_seconds() / 3600
             if age_h > RESEARCH_STALL_HOURS:
-                issues.append(f"no new best in {age_h:.0f}h — research stalled")
+                # Cross-check gen_state.json — results.tsv can have gaps from restarts
+                gen_state_age_h = None
+                try:
+                    gs_path = f"{WORKSPACE}/research/{league}/gen_state.json"
+                    with open(gs_path) as _f:
+                        gs = json.load(_f)
+                    gsb = gs.get("gens_since_best", 0)
+                    gen_state_age_h = (gsb * 60) / 3600  # 60s per gen
+                except Exception:
+                    pass
+                if gen_state_age_h is None or gen_state_age_h > RESEARCH_STALL_HOURS:
+                    issues.append(f"no new best in {age_h:.0f}h — research stalled")
         except Exception:
             pass
 
