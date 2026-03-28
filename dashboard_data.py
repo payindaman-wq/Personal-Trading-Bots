@@ -411,8 +411,17 @@ def get_sprint_archive():
     """Load completed sprint results from both leagues, normalized to $1k base."""
     archive = []
 
-    sources = [
-        ("day",    DAY_RESULTS_DIR),
+    # Build day sources: archived cycle dirs (oldest first), then active results/
+    day_sources = []
+    archive_root = os.path.join(WORKSPACE, "competition", "archive")
+    if os.path.isdir(archive_root):
+        for cycle_dir in sorted(os.listdir(archive_root)):
+            full = os.path.join(archive_root, cycle_dir)
+            if os.path.isdir(full):
+                day_sources.append(("day", full))
+    day_sources.append(("day", DAY_RESULTS_DIR))
+
+    sources = day_sources + [
         ("swing",  SWING_RESULTS_DIR),
         ("arb",    ARB_RESULTS_DIR),
         ("spread", SPREAD_RESULTS_DIR),
@@ -544,13 +553,6 @@ def get_sprint_archive():
 
 
 
-def get_cycle_state():
-    try:
-        with open(CYCLE_STATE_PATH) as f:
-            return json.load(f)
-    except Exception:
-        return {"cycle": 1, "sprint_in_cycle": 0, "sprints_per_cycle": 7, "status": "active"}
-
 
 def get_swing_cycle_state():
     try:
@@ -585,6 +587,14 @@ def get_arb_cycle_state():
         return {"cycle": 1, "sprint_in_cycle": 0, "sprints_per_cycle": 4, "status": "active"}
 
 
+def get_cycle_state():
+    try:
+        with open(CYCLE_STATE_PATH) as f:
+            return json.load(f)
+    except Exception:
+        return {"cycle": 1, "sprint_in_cycle": 0, "sprints_per_cycle": 7, "status": "active"}
+
+
 def get_spread_score():
     """Import and run the spread strategy scoring script."""
     try:
@@ -605,28 +615,7 @@ def get_spread_score():
 
 
 
-def get_cycle_state():
-    try:
-        with open(CYCLE_STATE_PATH) as f:
-            return json.load(f)
-    except Exception:
-        return {"cycle": 1, "sprint_in_cycle": 0, "sprints_per_cycle": 7, "status": "active"}
 
-
-def get_cycle_state():
-    try:
-        with open(CYCLE_STATE_PATH) as f:
-            return json.load(f)
-    except Exception:
-        return {"cycle": 1, "sprint_in_cycle": 0, "sprints_per_cycle": 7, "status": "active"}
-
-
-def get_cycle_state():
-    try:
-        with open(CYCLE_STATE_PATH) as f:
-            return json.load(f)
-    except Exception:
-        return {"cycle": 1, "sprint_in_cycle": 0, "sprints_per_cycle": 7, "status": "active"}
 
 
 ODIN_DAY_RESULTS   = "/root/.openclaw/workspace/research/day/results.tsv"
@@ -921,11 +910,7 @@ def build():
         dashboard["poly_total_sprints"]       = 0
     dashboard["arb_cycle_state"]   = get_arb_cycle_state()
 
-    dashboard["cycle_state"] = get_cycle_state()
 
-    dashboard["cycle_state"] = get_cycle_state()
-
-    dashboard["cycle_state"] = get_cycle_state()
 
     os.makedirs(os.path.dirname(OUT_FILE), exist_ok=True)
     with open(OUT_FILE, "w") as f:

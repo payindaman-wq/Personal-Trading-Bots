@@ -71,8 +71,37 @@ def inject_odin_strategy():
         print(f"  [odin] Injection failed: {e} — AutoBotDay keeps current strategy.")
 
 
+def advance_cycle_if_needed(cycle_state):
+    """If current cycle has completed sprints_per_cycle sprints, archive and advance."""
+    sprint_in_cycle   = cycle_state.get("sprint_in_cycle", 0)
+    sprints_per_cycle = cycle_state.get("sprints_per_cycle", 7)
+    if sprint_in_cycle < sprints_per_cycle:
+        return cycle_state  # still within cycle
+
+    import shutil
+    old_cycle   = cycle_state.get("cycle", 1)
+    new_cycle   = old_cycle + 1
+    results_dir = os.path.join(WORKSPACE, "competition", "results")
+    archive_dir = os.path.join(WORKSPACE, "competition", "archive", f"cycle-{old_cycle}")
+
+    if os.path.isdir(results_dir) and os.listdir(results_dir):
+        os.makedirs(archive_dir, exist_ok=True)
+        for entry in os.listdir(results_dir):
+            shutil.move(os.path.join(results_dir, entry), os.path.join(archive_dir, entry))
+        print(f"  [cycle] Archived Cycle {old_cycle} results -> {archive_dir}")
+
+    cycle_state["cycle"]            = new_cycle
+    cycle_state["sprint_in_cycle"]  = 0
+    cycle_state["cycle_started_at"] = None
+    cycle_state["status"]           = "active"
+    cycle_state["sprints"]          = []
+    print(f"  [cycle] Cycle {old_cycle} complete ({sprints_per_cycle} sprints) — advanced to Cycle {new_cycle}")
+    return cycle_state
+
+
 def start_new():
     cycle_state = load_cycle_state()
+    cycle_state = advance_cycle_if_needed(cycle_state)
     new_sprint_n = cycle_state.get("sprint_in_cycle", 0) + 1
     result = subprocess.run(
         ["python3", START_SCRIPT, "24"],
@@ -88,6 +117,8 @@ def start_new():
             sprints.append(comp_id)
         cycle_state["sprint_in_cycle"] = new_sprint_n
         cycle_state["sprints"] = sprints
+        if not cycle_state.get("cycle_started_at"):
+            cycle_state["cycle_started_at"] = datetime.now(timezone.utc).isoformat()
         save_cycle_state(cycle_state)
         print(f"  Cycle {cycle_state['cycle']}, Sprint {new_sprint_n} started")
     else:
