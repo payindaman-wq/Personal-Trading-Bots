@@ -123,11 +123,12 @@ def load_processed():
     return processed
 
 
-def write_loki_log(mimir_ts, league, actions):
+def write_loki_log(mimir_ts, league, gen, actions):
     entry = {
         "ts":       datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
         "mimir_ts": mimir_ts,
         "league":   league,
+        "gen":      gen,
         "actions":  actions,
         "dry_run":  DRY_RUN,
     }
@@ -337,11 +338,7 @@ def process_entry(entry):
     else:
         print(f"  [loki] No code change keywords — program.md only")
 
-    # Step 3: Summary report via Telegram (constant changes and program.md commits only)
-    summary = "; ".join(actions) if actions else "no actions taken"
-    tg_send(f"<b>[LOKI/{league_up}]</b> Gen {gen} — {summary}")
-
-    write_loki_log(ts, league, actions)
+    write_loki_log(ts, league, gen, actions)
 
 
 def main():
@@ -382,9 +379,8 @@ def main():
             league = entry.get("league", "?").upper()
             gen    = entry.get("generation", "?")
             print(f"  [loki] ERROR on MIMIR/{league} Gen {gen}: {e}")
-            tg_send(f"<b>[LOKI ERROR]</b> MIMIR/{league} Gen {gen}: {e}")
             # Still mark processed to prevent infinite error loop
-            write_loki_log(entry.get("ts", ""), entry.get("league", ""), [f"ERROR: {e}"])
+            write_loki_log(entry.get("ts", ""), entry.get("league", ""), entry.get("generation", "?"), [f"ERROR: {e}"])
 
 
 if __name__ == "__main__":
