@@ -20,7 +20,7 @@ from datetime import datetime, timezone
 WORKSPACE         = "/root/.openclaw/workspace"
 RESEARCH          = os.path.join(WORKSPACE, "research")
 ANTHROPIC_SECRET  = "/root/.openclaw/secrets/anthropic.json"
-ANTHROPIC_MODEL   = "claude-opus-4-6"
+ANTHROPIC_MODEL   = "claude-sonnet-4-6"
 ANTHROPIC_URL     = "https://api.anthropic.com/v1/messages"
 MIMIR_LOG         = os.path.join(RESEARCH, "mimir_log.jsonl")
 
@@ -36,7 +36,7 @@ def load_anthropic_key():
 def call_claude(prompt, api_key):
     payload = json.dumps({
         "model":      ANTHROPIC_MODEL,
-        "max_tokens": 2000,
+        "max_tokens": 4000,
         "messages":   [{"role": "user", "content": prompt}],
     }).encode()
     req = urllib.request.Request(
