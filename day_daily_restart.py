@@ -13,6 +13,7 @@ Logic:
 import os
 import json
 import subprocess
+import sys
 from datetime import datetime, timezone
 
 WORKSPACE           = os.environ.get("WORKSPACE", "/root/.openclaw/workspace")
@@ -101,6 +102,7 @@ def main():
 
     if meta is None:
         print("  No active sprint — starting new 24h sprint.")
+        subprocess.run([sys.executable, "promotion_check.py"], cwd=WORKSPACE)
         inject_odin_strategy()
         start_new()
         return
@@ -110,6 +112,7 @@ def main():
 
     if elapsed >= 20.0:
         print(f"  Sprint >= 20h — patching to expire now. Tick will archive; watchdog restarts.")
+        subprocess.run([sys.executable, "promotion_check.py"], cwd=WORKSPACE)
         inject_odin_strategy()
         meta["duration_hours"] = round(elapsed - 0.01, 4)
         with open(os.path.join(comp_dir, "meta.json"), "w") as f:

@@ -10,6 +10,7 @@ Timeouts are in HOURS (timeout_hours). TP/SL percentages are wider than
 day trading (typically 3-15% TP, 1-3% SL).
 """
 import os
+import subprocess
 import urllib.request
 import sys
 import json
@@ -400,6 +401,7 @@ def main():
     if datetime.now(timezone.utc) >= expires_at:
         print(f"  Competition expired — archiving...")
         archive_competition(comp_dir, meta, bots, prices)
+        subprocess.run([sys.executable, "swing_promotion_check.py"], cwd=WORKSPACE)
         return
 
     hours_left = (expires_at - datetime.now(timezone.utc)).total_seconds() / 3600
