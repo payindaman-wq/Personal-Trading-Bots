@@ -76,3 +76,5 @@ research/day/results_btconly.tsv
 research/day/results_v1_archive.tsv
 research/swing/results_btconly.tsv
 research/swing/results_v1_archive.tsv
+research/mimir_log.jsonl
+research/loki_log.jsonl
