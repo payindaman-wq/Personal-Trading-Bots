@@ -8,7 +8,7 @@ Maximize the **adjusted score** on 2 years of 1-hour data across BTC/USD, ETH/US
 **Adjusted score = Sharpe × sqrt(num_trades / 50)**
 
 ### Current Performance
-- **Current best adjusted score: 6.52** (Sharpe 2.0906, 486 trades, 50.2% win rate)
+- **Current best adjusted score: 6.53** (Sharpe 2.0950, 486 trades, 50.2% win rate)
 - This is the number to beat.
 
 ### Score Math (build intuition)
@@ -21,21 +21,26 @@ Maximize the **adjusted score** on 2 years of 1-hour data across BTC/USD, ETH/US
 - 600 trades with Sharpe 1.50 → score = 1.50 × sqrt(12.0) = 5.20 ❌ Sharpe collapsed
 - 150 trades with Sharpe 3.50 → score = 3.50 × sqrt(3.0) = 6.06 ❌ not enough trades
 
-**Key insight: The current strategy has 486 trades but a barely-positive 50.2% win rate and mediocre Sharpe (2.09). The path forward is IMPROVING per-trade quality (win rate, Sharpe) while keeping trade count in the 350-500 range. Even losing 50-100 trades is fine if Sharpe rises by 0.3-0.5.**
+**Key insight: The current strategy has 486 trades but a barely-positive 50.2% win rate and mediocre Sharpe (2.09). The path forward is IMPROVING per-trade quality (win rate, Sharpe) while keeping trade count in the 350-600 range. Even losing 50-100 trades is fine if Sharpe rises by 0.3-0.5. Alternatively, increasing trade count to 600-800 while maintaining Sharpe above 2.0 would also improve the score.**
 
-## ⚠️ MANDATORY PAIRS — DO NOT CHANGE ⚠️
-The backtester ONLY runs on BTC/USD, ETH/USD, and SOL/USD. The pairs field in your YAML output **MUST** be exactly:
+## ⚠️⚠️⚠️ ABSOLUTE RULE: DO NOT CHANGE THE PAIRS FIELD ⚠️⚠️⚠️
+The pairs field MUST be EXACTLY as shown below. Do NOT add, remove, or change any pair.
+The backtester ONLY supports BTC/USD, ETH/USD, and SOL/USD. Any other pair (LINK, ADA, OP, DOGE, AVAX, etc.) is **SILENTLY IGNORED** — meaning your strategy will trade FEWER markets and get FEWER trades.
+
+The current best strategy has a KNOWN BUG: it lists LINK/USD, ADA/USD, and OP/USD which are all ignored. It actually only trades BTC/USD. You MUST fix this by using the correct pairs list below.
+
 ```
 pairs:
 - BTC/USD
 - ETH/USD
 - SOL/USD
 ```
-Any other pairs (LINK, ADA, OP, DOGE, etc.) are SILENTLY IGNORED by the backtester. Using wrong pairs means your strategy only trades on whichever of the three valid pairs happen to be listed. **Do NOT change the pairs list. Copy it exactly as shown above.**
+
+**Copy the pairs block above character-for-character. Do not modify it. This is non-negotiable.**
 
 ## WHAT TO CHANGE (pick exactly ONE)
-You must change exactly ONE of the following. Do NOT change multiple things at once.
+You must change exactly ONE parameter from the list below. Do NOT change multiple things at once. Do NOT change the pairs field (it must always be the three pairs above).
 
 ### Option A: Adjust a numeric parameter by a SMALL amount
 Pick ONE of these and adjust by the amount shown:
--
+- `entry.long.conditions[0].value` (RSI threshold): adjust by ±1.0 to ±3.0 (currently 36
