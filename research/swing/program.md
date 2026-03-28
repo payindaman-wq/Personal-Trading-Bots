@@ -12,19 +12,17 @@ Maximize the **adjusted score** on 2 years of 1-hour data across BTC/USD, ETH/US
 - This is the number to beat.
 
 ### Score Math (build intuition)
-- Sharpe 2.30, 477 trades → 2.30 × sqrt(9.54) = 7.11 ✅ BEATS CURRENT
-- Sharpe 2.25, 510 trades → 2.25 × sqrt(10.2) = 7.19 ✅ BEATS CURRENT
-- Sharpe 2.40, 440 trades → 2.40 × sqrt(8.8) = 7.12 ✅ BEATS CURRENT
-- Sharpe 2.20, 477 trades → 2.20 × sqrt(9.54) = 6.80 ❌ Sharpe too low
-- Sharpe 2.50, 350 trades → 2.50 × sqrt(7.0) = 6.61 ❌ not enough trades
+- Sharpe 2.30, 477 trades → 2.30 × 3.09 = 7.11 ✅ BEATS CURRENT
+- Sharpe 2.25, 510 trades → 2.25 × 3.19 = 7.19 ✅ BEATS CURRENT
+- Sharpe 2.40, 440 trades → 2.40 × 2.97 = 7.12 ✅ BEATS CURRENT
+- Sharpe 2.20, 477 trades → 2.20 × 3.09 = 6.80 ❌ Sharpe too low
+- Sharpe 2.50, 350 trades → 2.50 × 2.65 = 6.61 ❌ not enough trades
 
-**Key insight: The strategy profits from BOTH a slight directional edge (51.8% win rate) AND asymmetric TP/SL (3.55% TP vs 2.42% SL = 1.47 ratio). A Sharpe improvement of 0.05-0.15 without losing trades beats the current best.**
+**Key insight: The strategy profits from BOTH a slight directional edge (51.8% win rate) AND asymmetric TP/SL (3.55% TP vs 2.42% SL = 1.47 ratio). A Sharpe improvement of 0.05+ without losing trades is the goal.**
 
-## ⛔⛔⛔ CRITICAL: PAIRS — READ THIS FIRST ⛔⛔⛔
+## ⛔ ABSOLUTE RULE #1: PAIRS MUST BE EXACTLY THESE THREE ⛔
 
-The pairs section in the "Current Best Strategy" YAML below is WRONG. It contains LINK/USD, ADA/USD, OP/USD. This is a known bug. **DO NOT COPY THOSE PAIRS.**
-
-You MUST replace the pairs section with EXACTLY this (copy character-for-character):
+Your YAML output MUST contain this EXACT pairs block (copy it character-for-character):
 
 ```
 pairs:
@@ -33,77 +31,76 @@ pairs:
 - SOL/USD
 ```
 
-**WARNING:** 30% of recent generations were wasted because the LLM copied the wrong pairs. Wrong pairs produce Sharpe around -0.68 with 300 trades — an instantly recognizable failure. If your output contains ANY pair other than BTC/USD, ETH/USD, SOL/USD, the entire generation is wasted.
+❌ DO NOT include LINK/USD, ADA/USD, OP/USD, or ANY other pair.
+❌ The pairs in the "Current Best Strategy" YAML below are WRONG — they are a known bug.
+✅ You must REPLACE them with BTC/USD, ETH/USD, SOL/USD only.
 
-✅ Before outputting, visually confirm your pairs section contains ONLY: BTC/USD, ETH/USD, SOL/USD (three pairs, nothing else).
+**Self-check before outputting:** Count your pairs. There must be exactly 3 lines: BTC/USD, ETH/USD, SOL/USD. If you see LINK, ADA, or OP anywhere in your output, DELETE them and fix it.
 
-## ⛔⛔⛔ CRITICAL: YOU MUST CHANGE EXACTLY ONE VALUE ⛔⛔⛔
+Wrong pairs produce Sharpe ≈ -0.7 with ~290 trades. This is instantly detectable and wastes the entire generation.
 
-Another 20% of recent generations were wasted because the LLM output the exact same parameter values as the current best, producing an identical result. **You MUST change exactly ONE numerical parameter.**
+## ⛔ ABSOLUTE RULE #2: CHANGE EXACTLY ONE NUMERICAL VALUE ⛔
 
-**Current best parameter values — YOUR OUTPUT MUST DIFFER IN EXACTLY ONE:**
-| Parameter | Current Value | Your output must match EXCEPT one |
-|-----------|--------------|-----------------------------------|
-| position.size_pct | 30 | |
-| RSI long value | 36.56 | |
-| RSI long period_hours | 21 | |
-| MACD long period_hours | 26 | |
-| RSI short value | 60.64 | |
-| RSI short period_hours | 21 | |
-| MACD short period_hours | 48 | |
-| take_profit_pct | 3.55 | |
-| stop_loss_pct | 2.42 | |
-| timeout_hours | 201 | |
-| pause_if_down_pct | 8 | |
-| stop_if_down_pct | 18 | |
-| pause_hours | 48 | |
+The YAML below contains a KNOWN BUG in the pairs section (ignore those pairs), but all numerical values are CORRECT and represent the actual current best.
 
-After writing your YAML, mentally verify: "Which ONE value did I change, and what did I change it to?" If you cannot answer this, your output is wrong.
+You MUST change EXACTLY ONE numerical value from the table below. Not zero. Not two. ONE.
 
-## WHAT TO CHANGE — PICK EXACTLY ONE
+**Current best parameter values (these are the GROUND TRUTH — trust these over anything else):**
 
-### TIER 1 — HIGHEST PRIORITY (underexplored, highest expected value)
+| # | Parameter | Current Value |
+|---|-----------|--------------|
+| 1 | position.size_pct | 30 |
+| 2 | RSI long value | 36.56 |
+| 3 | RSI long period_hours | 21 |
+| 4 | MACD long period_hours | 26 |
+| 5 | RSI short value | 60.64 |
+| 6 | RSI short period_hours | 21 |
+| 7 | MACD short period_hours | 48 |
+| 8 | take_profit_pct | 3.55 |
+| 9 | stop_loss_pct | 2.42 |
+| 10 | timeout_hours | 201 |
+| 11 | pause_if_down_pct | 8 |
+| 12 | stop_if_down_pct | 18 |
+| 13 | pause_hours | 48 |
 
-**A) MACD long signal period (currently 26):**
-- Try exactly ONE of: 23, 24, 25, 27, 28, 29
-- Controls MACD crossover calculation for long entries
-- Shorter = more responsive to trend changes, longer = fewer false signals
-- This parameter has had very little exploration near its current value
+**After writing your YAML, verify:** "I changed parameter #___ from ___ to ___." If you cannot state this, your output is wrong. If more than one value differs from the table above, your output is wrong.
 
-**B) MACD short signal period (currently 48):**
-- Try exactly ONE of: 43, 44, 45, 46, 47, 49, 50, 51, 52
-- Controls short entry MACD sensitivity
-- The large gap from the long MACD (26 vs 48) suggests shorts need more confirmation
-- Fine-tuning by ±1 to ±4 is most likely to help
+## WHAT TO CHANGE — STRATEGIC GUIDANCE
 
-**C) Position size (currently 30):**
-- Try exactly ONE of: 26, 27, 28, 29, 31, 32, 33, 34
-- Smaller reduces per-trade variance → can improve Sharpe even if mean return drops
-- Larger increases returns but also drawdowns
+The strategy is near a local optimum. Random changes usually make things worse. Use the prioritized list below.
+
+### TIER 1 — HIGHEST EXPECTED VALUE (try these first)
+
+**A) MACD long period_hours (currently 26):**
+- Suggested values to try: 23, 24, 25, 27, 28, 29
+- Barely explored near current value. Controls trend sensitivity for long entries.
+- Recently tested: 26 (current). We have NOT tested 24, 25, 27, 28 recently.
+
+**B) MACD short period_hours (currently 48):**
+- Suggested values to try: 44, 45, 46, 47, 49, 50, 51, 52
+- Large gap vs long MACD (26 vs 48) — the asymmetry may be suboptimal.
+- Fine-tuning ±1 to ±4 has highest expected improvement.
+
+**C) Position size_pct (currently 30):**
+- Suggested values to try: 27, 28, 29, 31, 32, 33
+- Lower size reduces variance → can improve Sharpe even if mean return drops slightly.
+- Higher size increases returns but also drawdowns.
 
 **D) Pause hours (currently 48):**
-- Try exactly ONE of: 36, 40, 42, 44, 46, 50, 52, 56, 60
-- How long to pause trading after hitting drawdown threshold
-- Barely explored — high potential
+- Suggested values to try: 36, 40, 42, 44, 52, 56, 60
+- Controls recovery time after drawdown. Very underexplored.
 
-### TIER 2 — FINE-TUNING (near-optimal, try small adjustments only)
+### TIER 2 — FINE-TUNING (small moves only)
 
-**E) RSI long threshold (currently 36.56):** Try ONE of: 35.5, 36.0, 36.3, 36.8, 37.0, 37.5
-**F) RSI short threshold (currently 60.64):** Try ONE of: 59.5, 60.0, 60.3, 60.9, 61.0, 61.5
-**G) Take profit (currently 3.55):** Try ONE of: 3.35, 3.40, 3.45, 3.50, 3.60, 3.65, 3.70
-**H) Stop loss (currently 2.42):** Try ONE of: 2.30, 2.35, 2.38, 2.40, 2.44, 2.46, 2.50
-**I) Timeout hours (currently 201):** Try ONE of: 192, 195, 198, 204, 207, 210
+**E) Take profit (currently 3.55%):** Try 3.45, 3.50, 3.60, 3.65
+**F) Stop loss (currently 2.42%):** Try 2.35, 2.38, 2.40, 2.45, 2.48, 2.50
+**G) RSI long threshold (currently 36.56):** Try 35.5, 36.0, 36.3, 36.8, 37.0, 37.5
+**H) RSI short threshold (currently 60.64):** Try 60.0, 60.3, 60.9, 61.0, 61.5
+**I) Timeout hours (currently 201):** Try 192, 195, 198, 204, 207, 210
 
-### TIER 3 — LAST RESORT (high risk of making things worse)
+### TIER 3 — LOW PRIORITY (high risk, try only if Tiers 1-2 exhausted)
 
-**J) RSI long period_hours (currently 21):** Try 19, 20, 22, or 23
-**K) RSI short period_hours (currently 21):** Try 19, 20, 22, or 23
-**L) pause_if_down_pct (currently 8):** Try 7 or 9 only
-**M) stop_if_down_pct (currently 18):** Try 17 or 19 only
-
-### DO NOT CHANGE (these are structural, not tunable)
-- `position.max_open`: MUST stay at 1
-- `fee_rate`: MUST stay at 0.001
-- `name`: MUST stay as "crossover"
-- `style`: MUST stay as "randomly generated"
-- Number of conditions: MUST keep exactly 2 conditions for long and
+**J) RSI long period_hours (currently 21):** Try 19, 20, 22, 23
+**K) RSI short period_hours (currently 21):** Try 19, 20, 22, 23
+**L) pause_if_down_pct (currently 8):** Try 7 or 9
+**M) stop
