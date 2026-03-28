@@ -254,62 +254,6 @@ def check_gemini_quota(state):
 
 
 
-RESEARCH_MIN_TRADES  = {"day": 50, "swing": 20}
-RESEARCH_STALL_HOURS = 24   # alert if no new_best found in this many hours
-
-def check_odin_research_quality(league):
-    """Return problem string if research is stalled or best strategy is overfitted."""
-    results_path = f"{WORKSPACE}/research/{league}/results.tsv"
-    if not os.path.exists(results_path):
-        return None
-
-    min_t = RESEARCH_MIN_TRADES.get(league, 30)
-    last_best_ts     = None
-    last_best_trades = None
-
-    try:
-        with open(results_path) as f:
-            for line in f:
-                line = line.strip()
-                if not line or line.startswith("gen"):
-                    continue
-                parts = line.split("\t")
-                if len(parts) >= 8 and parts[5] == "new_best":
-                    last_best_ts = parts[7]
-                    try:
-                        last_best_trades = int(parts[4])
-                    except Exception:
-                        pass
-    except Exception:
-        return None
-
-    issues = []
-
-    if last_best_ts:
-        try:
-            last_dt = datetime.fromisoformat(last_best_ts).replace(tzinfo=timezone.utc)
-            age_h   = (datetime.now(timezone.utc) - last_dt).total_seconds() / 3600
-            if age_h > RESEARCH_STALL_HOURS:
-                # Cross-check gen_state.json — results.tsv can have gaps from restarts
-                gen_state_age_h = None
-                try:
-                    gs_path = f"{WORKSPACE}/research/{league}/gen_state.json"
-                    with open(gs_path) as _f:
-                        gs = json.load(_f)
-                    gsb = gs.get("gens_since_best", 0)
-                    gen_state_age_h = (gsb * 60) / 3600  # 60s per gen
-                except Exception:
-                    pass
-                if gen_state_age_h is None or gen_state_age_h > RESEARCH_STALL_HOURS:
-                    issues.append(f"no new best in {age_h:.0f}h — research stalled")
-        except Exception:
-            pass
-
-    if last_best_trades is not None and last_best_trades < min_t:
-        issues.append(f"best strategy only {last_best_trades} trades (&lt;{min_t} min) — overfitted")
-
-    return " + ".join(issues) if issues else None
-
 
 def check_odin_health(league):
     """Return problem string if Odin has had no successful generation in >6h."""
@@ -340,77 +284,6 @@ def check_odin_health(league):
             pass
     return None
 
-def check_polymarket_bot_activity():
-    """Return alert string if opinion bots show suspicious position patterns, else None."""
-    try:
-        import yaml
-        state_path = f"{WORKSPACE}/competition/polymarket/auto_state.json"
-        if not os.path.isfile(state_path):
-            return None
-        with open(state_path) as f:
-            s = json.load(f)
-
-        # Skip if sprint is < 24h old
-        sprint_started_at = s.get("sprint_started_at")
-        if sprint_started_at:
-            try:
-                started_dt = datetime.fromisoformat(sprint_started_at)
-                if started_dt.tzinfo is None:
-                    started_dt = started_dt.replace(tzinfo=timezone.utc)
-                age_h = (datetime.now(timezone.utc) - started_dt).total_seconds() / 3600
-                if age_h < 24:
-                    return None
-            except Exception:
-                pass
-
-        # Load strategy yamls for opinion bots
-        strategy_files = glob.glob(f"{WORKSPACE}/fleet/polymarket/*/strategy.yaml")
-        opinion_bot_names = set()
-        max_positions_by_bot = {}
-        for sf in strategy_files:
-            try:
-                with open(sf) as f:
-                    strat = yaml.safe_load(f)
-                if strat and strat.get("type") == "opinion":
-                    bot_name = os.path.basename(os.path.dirname(sf))
-                    opinion_bot_names.add(bot_name)
-                    edge = strat.get("edge", {})
-                    max_pos = edge.get("max_positions", 5)
-                    max_positions_by_bot[bot_name] = max_pos
-            except Exception:
-                pass
-
-        if not opinion_bot_names:
-            return None
-
-        # Get bot states from auto_state.json
-        bots = s.get("bots", [])
-        if isinstance(bots, dict):
-            bots = list(bots.values())
-
-        opinion_bots = [b for b in bots if b.get("name") in opinion_bot_names]
-        if not opinion_bots:
-            return None
-
-        total = len(opinion_bots)
-        zero_pos = sum(1 for b in opinion_bots if len(b.get("positions", {})) == 0)
-        at_cap = sum(
-            1 for b in opinion_bots
-            if len(b.get("positions", {})) >= max_positions_by_bot.get(b.get("name", ""), 5)
-        )
-
-        alerts = []
-        if zero_pos / total >= 0.5:
-            alerts.append(f"{zero_pos}/{total} opinion bots have 0 positions — address with Claude Code")
-        if at_cap / total >= 0.3:
-            alerts.append(f"{at_cap}/{total} opinion bots at max_positions cap — address with Claude Code")
-
-        if alerts:
-            return "PM opinion bot activity: " + "; ".join(alerts)
-    except Exception:
-        pass
-    return None
-
 def check_polymarket_syn_freshness():
     """Check syn_tick.log freshness — service being 'active' doesn't mean it's ticking."""
     log = f"{WORKSPACE}/competition/polymarket/syn_tick.log"
@@ -422,22 +295,6 @@ def check_polymarket_syn_freshness():
     return None
 
 
-
-def check_price_data_freshness():
-    """Alert if swing price store or arb pair_stats haven't updated in >90 minutes."""
-    problems = []
-    now = time.time()
-    swing_btc = os.path.join(WORKSPACE, "competition", "swing", "price_history", "BTC-USD.json")
-    arb_stats  = os.path.join(WORKSPACE, "competition", "arb", "pair_stats.json")
-    if os.path.isfile(swing_btc):
-        age_min = (now - os.path.getmtime(swing_btc)) / 60
-        if age_min > 90:
-            problems.append(f"swing price data stale ({int(age_min)}m old, expected hourly) — address with Claude Code")
-    if os.path.isfile(arb_stats):
-        age_min = (now - os.path.getmtime(arb_stats)) / 60
-        if age_min > 90:
-            problems.append(f"arb pair_stats stale ({int(age_min)}m old, expected hourly) — address with Claude Code")
-    return problems
 
 
 def check_disk_space():
@@ -456,46 +313,7 @@ def check_disk_space():
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 
-def check_mimir_analysis(state):
-    """Alert if Mimir has produced new analysis since last alert."""
-    import json as _json
-    log_path = "/root/.openclaw/workspace/research/mimir_log.jsonl"
-    if not os.path.isfile(log_path):
-        return []
 
-    last_alerted_ts = state.get("mimir_last_alerted_ts", "")
-    alerts = []
-    latest_ts = last_alerted_ts
-
-    try:
-        with open(log_path) as f:
-            lines = [l.strip() for l in f if l.strip()]
-        for line in lines:
-            try:
-                entry = _json.loads(line)
-            except Exception:
-                continue
-            ts = entry.get("ts", "")
-            if ts <= last_alerted_ts:
-                continue
-            league = entry.get("league", "?").upper()
-            gen = entry.get("generation", "?")
-            # Extract first sentence of analysis for context
-            analysis = entry.get("analysis", "")
-            first_sentence = analysis.split(".")[0][:120] if analysis else ""
-            alerts.append(
-                f"[MIMIR/{league}] Gen {gen} analysis ready — {first_sentence}... "
-                f"— review and bring to Claude Code"
-            )
-            if ts > latest_ts:
-                latest_ts = ts
-    except Exception as e:
-        print(f"  [mimir check] error: {e}")
-
-    if latest_ts > last_alerted_ts:
-        state["mimir_last_alerted_ts"] = latest_ts
-
-    return alerts
 
 
 def main():
@@ -573,18 +391,6 @@ def main():
                 resolved.append(key)
             clear_alert(state, key)
 
-    # ── Odin research quality (stall + overfitting) ───────────────────────
-    for vleague in ["day", "swing"]:
-        key     = f"odin_{vleague}_research"
-        problem = check_odin_research_quality(vleague)
-        if problem:
-            if should_alert(state, key):
-                problems.append((key, f"[ODIN/{vleague.upper()}] {problem} — address with Claude Code"))
-        else:
-            if key in state["last_alerted"]:
-                resolved.append(key)
-            clear_alert(state, key)
-
     # ── Polymarket SYN tick freshness ──────────────────────────────────────
     key     = "polysyn_stale"
     problem = check_polymarket_syn_freshness()
@@ -593,24 +399,6 @@ def main():
             problems.append((key, f"[POLYMARKET_SYN] {problem}"))
     else:
         clear_alert(state, key)
-
-    # ── Polymarket bot activity ────────────────────────────────────────────────
-    key     = "poly_bot_activity"
-    problem = check_polymarket_bot_activity()
-    if problem:
-        if should_alert(state, key):
-            problems.append((key, f"[POLYMARKET] {problem}"))
-    else:
-        if key in state["last_alerted"]:
-            resolved.append(key)
-        clear_alert(state, key)
-
-
-    # ── Price data freshness ───────────────────────────────────────────────
-    for price_problem in check_price_data_freshness():
-        pk = "price_data_" + ("swing" if "swing" in price_problem else "arb")
-        if should_alert(state, pk):
-            problems.append((pk, f"[DATA] {price_problem}"))
 
     # ── Disk space ────────────────────────────────────────────────────────
     key     = "disk_space"
@@ -629,11 +417,6 @@ def main():
         if not last or datetime.now(timezone.utc) - datetime.fromisoformat(last) > timedelta(minutes=GEMINI_COOLDOWN_MIN):
             problems.append((key, f"[GEMINI] {problem}"))
     # intentionally not clearing on resolve — quota flickers; let cooldown expire naturally
-
-    # -- Mimir analysis check ------------------------------------------
-    for mimir_alert in check_mimir_analysis(state):
-        key = "mimir_" + mimir_alert[8:30].replace(" ", "_")
-        problems.append((key, mimir_alert))
 
     # ── Send alerts ────────────────────────────────────────────────────────
     if problems:
