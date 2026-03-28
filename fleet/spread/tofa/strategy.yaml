@@ -1,6 +1,6 @@
 name: tofa
 style: eth_btc_dual_confirmation
-inspiration: Refined skadi -- only long ETH when ratio is oversold AND ETH absolute price is above its EMA (not a dead cat bounce). Per-condition pair override used for abs price check.
+inspiration: Refined skadi -- only long ETH when ratio is oversold AND ETH absolute price stabilizing
 pairs:
   - ETH/USD
 spread:
@@ -8,7 +8,7 @@ spread:
   quote: BTC/USD
   analysis_pair: ETH_BTC_RATIO
 position:
-  size_pct: 30
+  size_pct: 28
   max_open: 1
   fee_rate: 0.001
 entry:
@@ -43,7 +43,7 @@ entry:
         operator: eq
         value: below
 exit:
-  take_profit_pct: 6.0
+  take_profit_pct: 7.0
   stop_loss_pct: 2.5
   timeout_hours: 96
 risk:

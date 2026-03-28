@@ -26,16 +26,24 @@ SKILLS_DIR = os.environ.get("SKILLS_DIR", "/root/.openclaw/skills")
 TRADE_EXECUTE = os.path.join(SKILLS_DIR, "trade-execute", "scripts", "trade_execute.py")
 
 KRAKEN_PAIR_MAP = {
-    "BTC/USD": "XBTUSD",
-    "ETH/USD": "ETHUSD",
-    "SOL/USD": "SOLUSD",
-    "XRP/USD": "XRPUSD",
+    "BTC/USD": "XBTUSD", "ETH/USD": "ETHUSD",
+    "SOL/USD": "SOLUSD", "XRP/USD": "XRPUSD",
+    "DOGE/USD": "DOGEUSD", "AVAX/USD": "AVAXUSD",
+    "LINK/USD": "LINKUSD", "UNI/USD": "UNIUSD",
+    "AAVE/USD": "AAVEUSD", "NEAR/USD": "NEARUSD",
+    "APT/USD": "APTUSD", "SUI/USD": "SUIUSD",
+    "ARB/USD": "ARBUSD", "OP/USD": "OPUSD",
+    "WIF/USD": "WIFUSD", "PEPE/USD": "PEPEUSD",
 }
-KRAKEN_KEY_LABELS = {
-    "XBT": "BTC/USD",
-    "ETH": "ETH/USD",
-    "SOL": "SOL/USD",
-    "XRP": "XRP/USD",
+KRAKEN_KEY_MAP = {
+    "XXBTZUSD": "BTC/USD", "XETHZUSD": "ETH/USD",
+    "SOLUSD": "SOL/USD", "XXRPZUSD": "XRP/USD",
+    "XDGUSD": "DOGE/USD", "AVAXUSD": "AVAX/USD",
+    "LINKUSD": "LINK/USD", "UNIUSD": "UNI/USD",
+    "AAVEUSD": "AAVE/USD", "NEARUSD": "NEAR/USD",
+    "APTUSD": "APT/USD", "SUIUSD": "SUI/USD",
+    "ARBUSD": "ARB/USD", "OPUSD": "OP/USD",
+    "WIFUSD": "WIF/USD", "PEPEUSD": "PEPE/USD",
 }
 
 
@@ -76,10 +84,7 @@ def fetch_kraken_prices(pairs):
         raise RuntimeError(f"Kraken API error: {data['error']}")
     prices = {}
     for kraken_key, info in data["result"].items():
-        label = next(
-            (lbl for frag, lbl in KRAKEN_KEY_LABELS.items() if frag in kraken_key),
-            kraken_key,
-        )
+        label = KRAKEN_KEY_MAP.get(kraken_key, kraken_key)
         prices[label] = {
             "last": float(info["c"][0]),
             "bid": float(info["b"][0]),

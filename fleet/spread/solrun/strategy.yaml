@@ -1,14 +1,14 @@
 name: solrun
-style: aave_link_dual_confirmation
-inspiration: Refined brynja -- only enter when AAVE/LINK ratio is extreme AND AAVE absolute price trend agrees, filtering dead cat bounces within the DeFi sector
+style: link_eth_mean_reversion
+inspiration: LINK lags ETH in DeFi rallies then catches up -- buy the lag, sell the overshoot
 pairs:
-  - AAVE/USD
+  - LINK/USD
 spread:
-  base: AAVE/USD
-  quote: LINK/USD
-  analysis_pair: AAVE_LINK_RATIO
+  base: LINK/USD
+  quote: ETH/USD
+  analysis_pair: LINK_ETH_RATIO
 position:
-  size_pct: 30
+  size_pct: 28
   max_open: 1
   fee_rate: 0.001
 entry:
@@ -22,11 +22,10 @@ entry:
         period_hours: 20
         operator: eq
         value: below_lower
-      - indicator: price_vs_ema
-        period_hours: 48
-        pair: AAVE/USD
-        operator: eq
-        value: above
+      - indicator: trend
+        period_hours: 72
+        operator: in
+        value: [flat, down]
   short:
     conditions:
       - indicator: rsi
@@ -37,15 +36,14 @@ entry:
         period_hours: 20
         operator: eq
         value: above_upper
-      - indicator: price_vs_ema
-        period_hours: 48
-        pair: AAVE/USD
-        operator: eq
-        value: below
+      - indicator: trend
+        period_hours: 72
+        operator: in
+        value: [flat, up]
 exit:
-  take_profit_pct: 6.0
-  stop_loss_pct: 2.5
-  timeout_hours: 96
+  take_profit_pct: 8.0
+  stop_loss_pct: 3.0
+  timeout_hours: 120
 risk:
   pause_if_down_pct: 8
   pause_hours: 48

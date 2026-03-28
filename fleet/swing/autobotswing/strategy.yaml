@@ -6,7 +6,7 @@ pairs:
 - BTC/USD
 - OP/USD
 position:
-  size_pct: 15
+  size_pct: 28.0
   max_open: 1
   fee_rate: 0.001
 entry:
@@ -32,7 +32,7 @@ entry:
       value: bearish
 exit:
   take_profit_pct: 3.55
-  stop_loss_pct: 2.72
+  stop_loss_pct: 2.22
   timeout_hours: 196
 risk:
   pause_if_down_pct: 8

@@ -1,52 +1,50 @@
 name: ingrid
-style: link_eth_dual_confirmation
-inspiration: Refined magni -- only long LINK when ratio lagged AND LINK absolute price is stabilizing. Filters entries where LINK is in a genuine downtrend not just temporarily lagging.
+style: xrp_btc_spread_mean_reversion
+inspiration: XRP/BTC ratio mean reverts on payment vs store-of-value cycles
 pairs:
-  - LINK/USD
+  - XRP/USD
 spread:
-  base: LINK/USD
-  quote: ETH/USD
-  analysis_pair: LINK_ETH_RATIO
+  base: XRP/USD
+  quote: BTC/USD
+  analysis_pair: XRP_BTC_RATIO
 position:
-  size_pct: 25
+  size_pct: 28
   max_open: 1
   fee_rate: 0.001
 entry:
   long:
     conditions:
-      - indicator: price_change_pct
-        period_hours: 168
-        operator: lt
-        value: -7.0
       - indicator: rsi
         period_hours: 14
         operator: lt
-        value: 38
+        value: 32
+      - indicator: bollinger_position
+        period_hours: 20
+        operator: eq
+        value: below_lower
       - indicator: trend
-        period_hours: 24
-        pair: LINK/USD
-        operator: in
-        value: [flat, up]
-  short:
-    conditions:
-      - indicator: price_change_pct
         period_hours: 168
-        operator: gt
-        value: 7.0
-      - indicator: rsi
-        period_hours: 14
-        operator: gt
-        value: 62
-      - indicator: trend
-        period_hours: 24
-        pair: LINK/USD
         operator: in
         value: [flat, down]
+  short:
+    conditions:
+      - indicator: rsi
+        period_hours: 14
+        operator: gt
+        value: 68
+      - indicator: bollinger_position
+        period_hours: 20
+        operator: eq
+        value: above_upper
+      - indicator: trend
+        period_hours: 168
+        operator: in
+        value: [flat, up]
 exit:
-  take_profit_pct: 10.0
-  stop_loss_pct: 4.0
-  timeout_hours: 144
+  take_profit_pct: 8.0
+  stop_loss_pct: 3.0
+  timeout_hours: 96
 risk:
-  pause_if_down_pct: 10
+  pause_if_down_pct: 8
   pause_hours: 48
-  stop_if_down_pct: 22
+  stop_if_down_pct: 18

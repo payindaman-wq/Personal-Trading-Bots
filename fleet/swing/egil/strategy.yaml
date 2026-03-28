@@ -1,12 +1,22 @@
 name: egil
 style: weekly_trend_follower
-inspiration: Benjamin Cowen -- only trades with macro direction, extremely patient, waits for weekly structure to confirm before entering
+inspiration: Benjamin Cowen -- only trades with macro direction, extremely patient, waits for structure to confirm
 pairs:
   - BTC/USD
   - ETH/USD
+  - SOL/USD
+  - XRP/USD
+  - DOGE/USD
+  - AVAX/USD
+  - LINK/USD
+  - AAVE/USD
+  - NEAR/USD
+  - APT/USD
+  - SUI/USD
+  - UNI/USD
 position:
-  size_pct: 30
-  max_open: 1
+  size_pct: 25
+  max_open: 2
   fee_rate: 0.001
 entry:
   long:
@@ -19,18 +29,10 @@ entry:
         period_hours: 72
         operator: eq
         value: up
-      - indicator: trend
-        period_hours: 24
-        operator: in
-        value: [up, flat]
       - indicator: macd_signal
         period_hours: 26
         operator: eq
         value: bullish
-      - indicator: rsi
-        period_hours: 14
-        operator: gt
-        value: 40
       - indicator: rsi
         period_hours: 14
         operator: lt
@@ -45,25 +47,17 @@ entry:
         period_hours: 72
         operator: eq
         value: down
-      - indicator: trend
-        period_hours: 24
-        operator: in
-        value: [down, flat]
       - indicator: macd_signal
         period_hours: 26
         operator: eq
         value: bearish
       - indicator: rsi
         period_hours: 14
-        operator: lt
-        value: 60
-      - indicator: rsi
-        period_hours: 14
         operator: gt
         value: 35
 exit:
-  take_profit_pct: 10.0
-  stop_loss_pct: 3.5
+  take_profit_pct: 12.0
+  stop_loss_pct: 4.0
   timeout_hours: 144
 risk:
   pause_if_down_pct: 8

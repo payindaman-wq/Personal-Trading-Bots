@@ -1,12 +1,20 @@
 name: runa
 style: swing_contrarian_reversal
-inspiration: Tone Vays -- extreme patience, BTC-focused contrarian, only enters on deep multi-day capitulation or euphoria events
+inspiration: Tone Vays -- extreme patience, contrarian, only enters on deep multi-day capitulation or euphoria
 pairs:
   - BTC/USD
   - ETH/USD
+  - SOL/USD
+  - XRP/USD
+  - DOGE/USD
+  - AVAX/USD
+  - LINK/USD
+  - AAVE/USD
+  - NEAR/USD
+  - SUI/USD
 position:
-  size_pct: 35
-  max_open: 1
+  size_pct: 30
+  max_open: 2
   fee_rate: 0.001
 entry:
   long:
@@ -22,11 +30,7 @@ entry:
       - indicator: price_change_pct
         period_hours: 72
         operator: lt
-        value: -6.0
-      - indicator: trend
-        period_hours: 168
-        operator: in
-        value: [down, flat]
+        value: -5.0
   short:
     conditions:
       - indicator: rsi
@@ -40,14 +44,10 @@ entry:
       - indicator: price_change_pct
         period_hours: 72
         operator: gt
-        value: 6.0
-      - indicator: trend
-        period_hours: 168
-        operator: in
-        value: [up, flat]
+        value: 5.0
 exit:
-  take_profit_pct: 8.0
-  stop_loss_pct: 2.5
+  take_profit_pct: 10.0
+  stop_loss_pct: 3.0
   timeout_hours: 120
 risk:
   pause_if_down_pct: 7

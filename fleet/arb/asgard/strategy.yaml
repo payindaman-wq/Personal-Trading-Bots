@@ -1,5 +1,5 @@
 name: asgard
-description: "AAVE/ETH spread — DeFi blue chip vs ETH, mean reverts reliably within DeFi sector"
+description: "AAVE/ETH spread -- DeFi blue chip vs ETH"
 pair_a: AAVE/USD
 pair_b: ETH/USD
 lookback_hours: 480

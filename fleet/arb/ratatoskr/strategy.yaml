@@ -1,12 +1,12 @@
 name: ratatoskr
-description: "ETH/BTC patient holder — long lookback, wide z-threshold, slow exits on the most liquid pair"
-pair_a: ETH/USD
-pair_b: BTC/USD
-lookback_hours: 720
-z_entry: 2.5
-z_exit: 0.7
-z_stop: 5.0
-timeout_hours: 168
+description: "UNI/ETH DeFi DEX spread -- DEX token vs base layer"
+pair_a: UNI/USD
+pair_b: ETH/USD
+lookback_hours: 480
+z_entry: 2.0
+z_exit: 0.5
+z_stop: 4.0
+timeout_hours: 120
 max_positions: 1
 max_position_pct: 0.35
 stop_if_down_pct: 20

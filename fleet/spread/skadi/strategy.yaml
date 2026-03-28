@@ -17,7 +17,7 @@ entry:
       - indicator: rsi
         period_hours: 14
         operator: lt
-        value: 32
+        value: 35
       - indicator: bollinger_position
         period_hours: 20
         operator: eq
@@ -31,7 +31,7 @@ entry:
       - indicator: rsi
         period_hours: 14
         operator: gt
-        value: 68
+        value: 65
       - indicator: bollinger_position
         period_hours: 20
         operator: eq
@@ -41,7 +41,7 @@ entry:
         operator: in
         value: [flat, up]
 exit:
-  take_profit_pct: 6.0
+  take_profit_pct: 7.0
   stop_loss_pct: 2.5
   timeout_hours: 96
 risk:

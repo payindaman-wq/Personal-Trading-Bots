@@ -1,5 +1,5 @@
 name: fafnir
-description: "SOL/BTC spread — cross-L1 basis, measures SOL outperformance vs BTC store-of-value"
+description: "SOL/BTC spread -- cross-L1 basis, measures SOL outperformance vs BTC"
 pair_a: SOL/USD
 pair_b: BTC/USD
 lookback_hours: 480

@@ -1,13 +1,13 @@
 name: hati
-description: "SOL/ETH tight scalper — short lookback, low z-threshold, fast exits on volatile L1 pair"
-pair_a: SOL/USD
-pair_b: ETH/USD
+description: "DOGE/BTC meme vs store -- high beta divergence plays"
+pair_a: DOGE/USD
+pair_b: BTC/USD
 lookback_hours: 240
 z_entry: 1.5
 z_exit: 0.3
-z_stop: 3.0
+z_stop: 3.5
 timeout_hours: 72
 max_positions: 1
-max_position_pct: 0.35
-stop_if_down_pct: 20
+max_position_pct: 0.30
+stop_if_down_pct: 18
 starting_capital: 1000.0

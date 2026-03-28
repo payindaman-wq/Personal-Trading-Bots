@@ -1,71 +1,62 @@
 name: ragnar
-style: vwap_reclaim
-inspiration: VWAP reclaim -- price dips below VWAP then reclaims it, enter on the reclaim with VWAP as support
+style: vwap_pullback_buyer
+inspiration: VWAP reclaim -- buys dips to VWAP in uptrending markets with MACD confirmation
 pairs:
   - BTC/USD
   - ETH/USD
   - SOL/USD
+  - XRP/USD
+  - DOGE/USD
   - AVAX/USD
   - LINK/USD
+  - AAVE/USD
+  - NEAR/USD
+  - APT/USD
+  - SUI/USD
+  - UNI/USD
 position:
-  size_pct: 22
-  max_open: 1
+  size_pct: 20
+  max_open: 2
   fee_rate: 0.001
 entry:
   long:
     conditions:
       - indicator: price_vs_vwap
         operator: in
-        value: [above, at]
+        value: [below, at]
       - indicator: trend
-        period_minutes: 15
+        period_minutes: 240
         operator: in
         value: [up, flat]
       - indicator: rsi
         period_minutes: 35
-        operator: gt
-        value: 40
-      - indicator: rsi
-        period_minutes: 35
         operator: lt
-        value: 58
+        value: 45
       - indicator: macd_signal
         period_minutes: 130
         operator: eq
         value: bullish
-      - indicator: trend
-        period_minutes: 240
-        operator: in
-        value: [up, flat]
   short:
     conditions:
       - indicator: price_vs_vwap
         operator: in
-        value: [below, at]
-      - indicator: trend
-        period_minutes: 15
-        operator: in
-        value: [down, flat]
-      - indicator: rsi
-        period_minutes: 35
-        operator: lt
-        value: 60
-      - indicator: rsi
-        period_minutes: 35
-        operator: gt
-        value: 42
-      - indicator: macd_signal
-        period_minutes: 130
-        operator: eq
-        value: bearish
+        value: [above, at]
       - indicator: trend
         period_minutes: 240
         operator: in
         value: [down, flat]
+      - indicator: rsi
+        period_minutes: 35
+        operator: gt
+        value: 55
+      - indicator: macd_signal
+        period_minutes: 130
+        operator: eq
+        value: bearish
 exit:
   take_profit_pct: 2.0
   stop_loss_pct: 0.6
-  timeout_minutes: 120
+  timeout_minutes: 90
 risk:
   pause_if_down_pct: 4
   pause_minutes: 60

@@ -1,16 +1,26 @@
 name: gunnar
 style: aggressive_dip_buyer
-inspiration: Gainzy -- catches sharp dips with conviction sizing, enters extreme oversold conditions when macro trend still intact
+inspiration: Gainzy -- catches sharp dips with conviction, enters extreme oversold conditions when macro trend intact
 pairs:
   - BTC/USD
   - ETH/USD
   - SOL/USD
   - XRP/USD
+  - DOGE/USD
   - AVAX/USD
   - LINK/USD
+  - UNI/USD
+  - AAVE/USD
+  - NEAR/USD
+  - APT/USD
+  - SUI/USD
+  - ARB/USD
+  - OP/USD
+  - WIF/USD
+  - PEPE/USD
 position:
-  size_pct: 25
-  max_open: 1
+  size_pct: 18
+  max_open: 3
   fee_rate: 0.001
 entry:
   long:
@@ -18,11 +28,11 @@ entry:
       - indicator: price_change_pct
         period_minutes: 30
         operator: lt
-        value: -1.0
+        value: -0.8
       - indicator: rsi
         period_minutes: 25
         operator: lt
-        value: 28
+        value: 32
       - indicator: trend
         period_minutes: 240
         operator: in
@@ -32,20 +42,20 @@ entry:
       - indicator: price_change_pct
         period_minutes: 30
         operator: gt
-        value: 1.0
+        value: 0.8
       - indicator: rsi
         period_minutes: 25
         operator: gt
-        value: 72
+        value: 68
       - indicator: trend
         period_minutes: 240
         operator: in
         value: [down, flat]
 exit:
-  take_profit_pct: 3.0
-  stop_loss_pct: 1.0
-  timeout_minutes: 120
+  take_profit_pct: 2.5
+  stop_loss_pct: 0.8
+  timeout_minutes: 90
 risk:
   pause_if_down_pct: 5
   pause_minutes: 60
-  stop_if_down_pct: 12
+  stop_if_down_pct: 10

@@ -1,12 +1,12 @@
 name: bifrost
-description: "AVAX/SOL patient holder — long lookback on competing L1s, waits for large regime divergences"
+description: "AVAX/SOL patient -- competing L1s, regime divergences"
 pair_a: AVAX/USD
 pair_b: SOL/USD
-lookback_hours: 720
-z_entry: 2.5
-z_exit: 0.7
-z_stop: 5.0
-timeout_hours: 168
+lookback_hours: 480
+z_entry: 2.0
+z_exit: 0.5
+z_stop: 4.0
+timeout_hours: 120
 max_positions: 1
 max_position_pct: 0.35
 stop_if_down_pct: 20

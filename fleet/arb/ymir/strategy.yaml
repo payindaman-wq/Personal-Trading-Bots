@@ -1,5 +1,5 @@
 name: ymir
-description: "AVAX/ETH spread — EVM-compatible L1 vs ETH, risk-on/off divergence"
+description: "AVAX/ETH spread -- EVM-compatible L1 vs ETH"
 pair_a: AVAX/USD
 pair_b: ETH/USD
 lookback_hours: 480

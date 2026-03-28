@@ -1,82 +1,68 @@
 name: gudrid
 style: momentum_continuation
-inspiration: Coin Bureau -- rides established momentum when all timeframes align, diversified across strong pairs, conservative approach
+inspiration: Coin Bureau -- rides established momentum, diversified across strong pairs
 pairs:
   - BTC/USD
   - ETH/USD
   - SOL/USD
   - XRP/USD
+  - DOGE/USD
   - AVAX/USD
   - LINK/USD
+  - UNI/USD
+  - AAVE/USD
+  - NEAR/USD
+  - APT/USD
+  - SUI/USD
+  - ARB/USD
+  - OP/USD
+  - ADA/USD
+  - POL/USD
 position:
-  size_pct: 20
-  max_open: 2
+  size_pct: 18
+  max_open: 4
   fee_rate: 0.001
 entry:
   long:
     conditions:
       - indicator: trend
-        period_hours: 168
-        operator: eq
-        value: up
-      - indicator: trend
         period_hours: 72
         operator: eq
         value: up
-      - indicator: trend
-        period_hours: 24
-        operator: in
-        value: [up, flat]
       - indicator: price_vs_ema
         period_hours: 50
         operator: eq
         value: above
-      - indicator: rsi
-        period_hours: 14
-        operator: gt
-        value: 52
-      - indicator: rsi
-        period_hours: 14
-        operator: lt
-        value: 70
       - indicator: macd_signal
         period_hours: 26
         operator: eq
         value: bullish
+      - indicator: rsi
+        period_hours: 14
+        operator: lt
+        value: 68
   short:
     conditions:
-      - indicator: trend
-        period_hours: 168
-        operator: eq
-        value: down
       - indicator: trend
         period_hours: 72
         operator: eq
         value: down
-      - indicator: trend
-        period_hours: 24
-        operator: in
-        value: [down, flat]
       - indicator: price_vs_ema
         period_hours: 50
         operator: eq
         value: below
-      - indicator: rsi
-        period_hours: 14
-        operator: lt
-        value: 48
-      - indicator: rsi
-        period_hours: 14
-        operator: gt
-        value: 30
       - indicator: macd_signal
         period_hours: 26
         operator: eq
         value: bearish
+      - indicator: rsi
+        period_hours: 14
+        operator: gt
+        value: 32
 exit:
   take_profit_pct: 10.0
   stop_loss_pct: 3.0
-  timeout_hours: 96
+  timeout_hours: 120
 risk:
   pause_if_down_pct: 7
   pause_hours: 24

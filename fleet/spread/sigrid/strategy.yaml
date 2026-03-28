@@ -1,6 +1,6 @@
 name: sigrid
 style: sol_btc_spread_mean_reversion
-inspiration: Mirror of skadi -- same mean reversion logic on SOL/BTC ratio instead of ETH/BTC
+inspiration: SOL/BTC ratio mean reverts reliably -- buy dips in the ratio when oversold
 pairs:
   - SOL/USD
 spread:
@@ -17,7 +17,7 @@ entry:
       - indicator: rsi
         period_hours: 14
         operator: lt
-        value: 32
+        value: 35
       - indicator: bollinger_position
         period_hours: 20
         operator: eq
@@ -31,7 +31,7 @@ entry:
       - indicator: rsi
         period_hours: 14
         operator: gt
-        value: 68
+        value: 65
       - indicator: bollinger_position
         period_hours: 20
         operator: eq
@@ -41,7 +41,7 @@ entry:
         operator: in
         value: [flat, up]
 exit:
-  take_profit_pct: 6.0
+  take_profit_pct: 8.0
   stop_loss_pct: 2.5
   timeout_hours: 96
 risk:

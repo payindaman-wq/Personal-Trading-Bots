@@ -1,6 +1,6 @@
 name: estrid
 style: sol_eth_spread_breakout
-inspiration: Mirror of ragnhild -- same breakout logic on SOL/ETH ratio, directly contrasts forseti on same pair
+inspiration: SOL/ETH ratio breakout -- follow regime change when SOL outperforms or underperforms ETH
 pairs:
   - SOL/USD
 spread:
@@ -24,10 +24,6 @@ entry:
         value: up
       - indicator: rsi
         period_hours: 14
-        operator: gt
-        value: 52
-      - indicator: rsi
-        period_hours: 14
         operator: lt
         value: 72
   short:
@@ -40,10 +36,6 @@ entry:
         period_hours: 48
         operator: eq
         value: down
-      - indicator: rsi
-        period_hours: 14
-        operator: lt
-        value: 48
       - indicator: rsi
         period_hours: 14
         operator: gt

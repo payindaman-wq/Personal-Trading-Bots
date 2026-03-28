@@ -5,10 +5,18 @@ pairs:
   - BTC/USD
   - ETH/USD
   - SOL/USD
+  - XRP/USD
+  - DOGE/USD
   - AVAX/USD
+  - LINK/USD
+  - AAVE/USD
+  - NEAR/USD
+  - APT/USD
+  - SUI/USD
+  - UNI/USD
 position:
-  size_pct: 25
-  max_open: 1
+  size_pct: 22
+  max_open: 2
   fee_rate: 0.001
 entry:
   long:
@@ -22,12 +30,12 @@ entry:
         value: up
       - indicator: trend
         period_minutes: 60
-        operator: eq
-        value: up
+        operator: in
+        value: [up, flat]
       - indicator: rsi
         period_minutes: 35
         operator: lt
-        value: 40
+        value: 42
   short:
     conditions:
       - indicator: price_vs_vwap
@@ -39,12 +47,12 @@ entry:
         value: down
       - indicator: trend
         period_minutes: 60
-        operator: eq
-        value: down
+        operator: in
+        value: [down, flat]
       - indicator: rsi
         period_minutes: 35
         operator: gt
-        value: 60
+        value: 58
 exit:
   take_profit_pct: 2.8
   stop_loss_pct: 0.8

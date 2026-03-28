@@ -250,6 +250,12 @@ SPREAD_PAIRS = {
     "LINK_ETH_RATIO": ("LINK/USD", "ETH/USD"),
     "AAVE_ETH_RATIO": ("AAVE/USD", "ETH/USD"),
     "AAVE_LINK_RATIO": ("AAVE/USD", "LINK/USD"),
+    "DOGE_BTC_RATIO": ("DOGE/USD", "BTC/USD"),
+    "ARB_OP_RATIO":   ("ARB/USD",  "OP/USD"),
+    "NEAR_SOL_RATIO": ("NEAR/USD", "SOL/USD"),
+    "UNI_ETH_RATIO":  ("UNI/USD",  "ETH/USD"),
+    "XRP_BTC_RATIO":  ("XRP/USD",  "BTC/USD"),
+    "XRP_ETH_RATIO":  ("XRP/USD",  "ETH/USD"),
 }
 
 

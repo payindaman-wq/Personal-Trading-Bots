@@ -18,36 +18,28 @@ entry:
         period_hours: 48
         operator: eq
         value: up
-      - indicator: rsi
-        period_hours: 14
-        operator: gt
-        value: 42
-      - indicator: rsi
-        period_hours: 14
-        operator: lt
-        value: 62
       - indicator: momentum_accelerating
         period_hours: 48
         operator: eq
         value: true
+      - indicator: rsi
+        period_hours: 14
+        operator: lt
+        value: 65
   short:
     conditions:
       - indicator: trend
         period_hours: 48
         operator: eq
         value: down
-      - indicator: rsi
-        period_hours: 14
-        operator: lt
-        value: 58
-      - indicator: rsi
-        period_hours: 14
-        operator: gt
-        value: 38
       - indicator: momentum_accelerating
         period_hours: 48
         operator: eq
         value: true
+      - indicator: rsi
+        period_hours: 14
+        operator: gt
+        value: 35
 exit:
   take_profit_pct: 8.0
   stop_loss_pct: 3.0

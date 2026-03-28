@@ -1,63 +1,55 @@
 name: bjorn
-style: ema_macd_momentum
-inspiration: Crypto Tony -- EMA trend direction confirmed by MACD, buys pullbacks to EMA in the direction of momentum
+style: ema_trend_continuation
+inspiration: Crypto Tony -- EMA trend direction with MACD momentum, rides pullbacks to EMA support
 pairs:
   - BTC/USD
   - ETH/USD
   - SOL/USD
   - XRP/USD
+  - DOGE/USD
+  - AVAX/USD
+  - LINK/USD
+  - AAVE/USD
+  - NEAR/USD
+  - APT/USD
+  - SUI/USD
+  - UNI/USD
 position:
-  size_pct: 22
-  max_open: 1
+  size_pct: 20
+  max_open: 2
   fee_rate: 0.001
 entry:
   long:
     conditions:
       - indicator: price_vs_ema
         period_minutes: 50
-        operator: in
-        value: [below, at]
-      - indicator: macd_signal
-        period_minutes: 130
         operator: eq
-        value: bullish
-      - indicator: rsi
-        period_minutes: 35
-        operator: lt
-        value: 40
+        value: above
       - indicator: trend
         period_minutes: 240
         operator: eq
         value: up
-      - indicator: trend
-        period_minutes: 30
-        operator: in
-        value: [down, flat]
+      - indicator: macd_signal
+        period_minutes: 130
+        operator: eq
+        value: bullish
   short:
     conditions:
       - indicator: price_vs_ema
         period_minutes: 50
-        operator: in
-        value: [above, at]
-      - indicator: macd_signal
-        period_minutes: 130
         operator: eq
-        value: bearish
-      - indicator: rsi
-        period_minutes: 35
-        operator: gt
-        value: 60
+        value: below
       - indicator: trend
         period_minutes: 240
         operator: eq
         value: down
-      - indicator: trend
-        period_minutes: 30
-        operator: in
-        value: [up, flat]
+      - indicator: macd_signal
+        period_minutes: 130
+        operator: eq
+        value: bearish
 exit:
-  take_profit_pct: 2.2
-  stop_loss_pct: 0.6
+  take_profit_pct: 2.5
+  stop_loss_pct: 0.7
   timeout_minutes: 120
 risk:
   pause_if_down_pct: 4

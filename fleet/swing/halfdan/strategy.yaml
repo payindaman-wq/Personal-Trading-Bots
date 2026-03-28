@@ -1,11 +1,19 @@
 name: halfdan
-style: bollinger_squeeze_expansion
-inspiration: CryptoCred -- waits for volatility compression then trades the expansion breakout, requires momentum and trend confirmation
+style: bollinger_breakout_expansion
+inspiration: CryptoCred -- trades BB breakout expansion with momentum confirmation
 pairs:
   - BTC/USD
   - ETH/USD
   - SOL/USD
+  - XRP/USD
+  - DOGE/USD
   - AVAX/USD
+  - LINK/USD
+  - AAVE/USD
+  - NEAR/USD
+  - APT/USD
+  - SUI/USD
+  - UNI/USD
 position:
   size_pct: 25
   max_open: 2
@@ -21,22 +29,14 @@ entry:
         period_hours: 72
         operator: eq
         value: up
-      - indicator: macd_signal
-        period_hours: 26
-        operator: eq
-        value: bullish
       - indicator: momentum_accelerating
-        period_hours: 24
+        period_hours: 48
         operator: eq
         value: true
       - indicator: rsi
         period_hours: 14
         operator: gt
-        value: 55
-      - indicator: price_vs_ema
-        period_hours: 50
-        operator: eq
-        value: above
+        value: 52
   short:
     conditions:
       - indicator: bollinger_position
@@ -47,26 +47,18 @@ entry:
         period_hours: 72
         operator: eq
         value: down
-      - indicator: macd_signal
-        period_hours: 26
-        operator: eq
-        value: bearish
       - indicator: momentum_accelerating
-        period_hours: 24
+        period_hours: 48
         operator: eq
         value: true
       - indicator: rsi
         period_hours: 14
         operator: lt
-        value: 45
-      - indicator: price_vs_ema
-        period_hours: 50
-        operator: eq
-        value: below
+        value: 48
 exit:
   take_profit_pct: 12.0
   stop_loss_pct: 4.0
-  timeout_hours: 144
+  timeout_hours: 120
 risk:
   pause_if_down_pct: 8
   pause_hours: 48

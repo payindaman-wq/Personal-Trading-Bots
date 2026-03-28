@@ -1,46 +1,48 @@
 name: freydis
-style: contrarian_extreme_reversal
+style: extreme_reversal
 inspiration: GCRClassic -- bets against consensus at confirmed extremes, conviction-sized positions on deep capitulation or euphoria
 pairs:
   - BTC/USD
   - ETH/USD
   - SOL/USD
   - XRP/USD
+  - DOGE/USD
   - AVAX/USD
   - LINK/USD
+  - UNI/USD
+  - AAVE/USD
+  - NEAR/USD
+  - APT/USD
+  - SUI/USD
+  - ARB/USD
+  - OP/USD
+  - WIF/USD
+  - PEPE/USD
 position:
-  size_pct: 25
-  max_open: 1
+  size_pct: 22
+  max_open: 2
   fee_rate: 0.001
 entry:
   long:
     conditions:
       - indicator: rsi
-        period_minutes: 70
+        period_minutes: 35
         operator: lt
-        value: 25
+        value: 28
       - indicator: bollinger_position
         period_minutes: 100
         operator: eq
         value: below_lower
-      - indicator: price_change_pct
-        period_minutes: 30
-        operator: lt
-        value: -2.0
   short:
     conditions:
       - indicator: rsi
-        period_minutes: 70
+        period_minutes: 35
         operator: gt
-        value: 75
+        value: 72
       - indicator: bollinger_position
         period_minutes: 100
         operator: eq
         value: above_upper
-      - indicator: price_change_pct
-        period_minutes: 30
-        operator: gt
-        value: 2.0
 exit:
   take_profit_pct: 3.5
   stop_loss_pct: 1.0

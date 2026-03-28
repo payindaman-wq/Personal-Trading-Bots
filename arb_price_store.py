@@ -25,15 +25,21 @@ OUTPUT_PATH  = os.path.join(WORKSPACE, "competition", "arb", "pair_stats.json")
 
 # Spread pairs: (pair_a, pair_b) — trade ratio = price_a / price_b
 SPREAD_PAIRS = [
-    ("ETH/USD",  "BTC/USD"),   # fenrir, nidhogg, ratatoskr
-    ("SOL/USD",  "ETH/USD"),   # jormungandr, hati, skoll
+    ("ETH/USD",  "BTC/USD"),   # fenrir, nidhogg
+    ("SOL/USD",  "ETH/USD"),   # skoll
     ("AVAX/USD", "ETH/USD"),   # ymir
     ("LINK/USD", "ETH/USD"),   # surt
     ("SOL/USD",  "BTC/USD"),   # fafnir
-    ("XRP/USD",  "BTC/USD"),   # garm, niflheim
-    ("AVAX/USD", "SOL/USD"),   # muspell, bifrost
-    ("LINK/USD", "BTC/USD"),   # utgard
+    ("XRP/USD",  "BTC/USD"),   # garm
+    ("AVAX/USD", "SOL/USD"),   # bifrost
     ("AAVE/USD", "ETH/USD"),   # asgard
+    ("DOGE/USD", "BTC/USD"),   # hati
+    ("UNI/USD",  "ETH/USD"),   # ratatoskr
+    ("ARB/USD",  "OP/USD"),    # jormungandr
+    ("NEAR/USD", "SOL/USD"),   # muspell
+    ("SUI/USD",  "SOL/USD"),   # niflheim
+    ("LINK/USD", "AAVE/USD"),  # utgard
+    ("XRP/USD",  "ETH/USD"),   # (extra coverage)
 ]
 
 LOOKBACK_WINDOWS = [240, 480, 720]  # short (10d) / medium (20d) / long (30d)

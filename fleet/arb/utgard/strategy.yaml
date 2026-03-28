@@ -1,12 +1,12 @@
 name: utgard
-description: "LINK/BTC spread — oracle token vs BTC baseline, diverges on DeFi sentiment cycles"
+description: "LINK/AAVE DeFi peer spread -- oracle vs lending"
 pair_a: LINK/USD
-pair_b: BTC/USD
-lookback_hours: 480
-z_entry: 2.0
-z_exit: 0.5
-z_stop: 4.0
-timeout_hours: 120
+pair_b: AAVE/USD
+lookback_hours: 360
+z_entry: 1.8
+z_exit: 0.4
+z_stop: 3.5
+timeout_hours: 96
 max_positions: 1
 max_position_pct: 0.35
 stop_if_down_pct: 20

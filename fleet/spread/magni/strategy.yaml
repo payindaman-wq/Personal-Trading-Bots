@@ -1,12 +1,12 @@
 name: magni
-style: link_eth_defi_catchup
-inspiration: LINK lags ETH in DeFi rallies then violently catches up -- buy the lag, sell the overshoot
+style: near_sol_spread_momentum
+inspiration: NEAR/SOL ratio trends when ecosystem attention shifts -- ride momentum in alt L1 competition
 pairs:
-  - LINK/USD
+  - NEAR/USD
 spread:
-  base: LINK/USD
-  quote: ETH/USD
-  analysis_pair: LINK_ETH_RATIO
+  base: NEAR/USD
+  quote: SOL/USD
+  analysis_pair: NEAR_SOL_RATIO
 position:
   size_pct: 25
   max_open: 1
@@ -14,36 +14,36 @@ position:
 entry:
   long:
     conditions:
-      - indicator: price_change_pct
-        period_hours: 168
-        operator: lt
-        value: -7.0
+      - indicator: trend
+        period_hours: 48
+        operator: eq
+        value: up
+      - indicator: momentum_accelerating
+        period_hours: 48
+        operator: eq
+        value: true
       - indicator: rsi
         period_hours: 14
         operator: lt
-        value: 38
-      - indicator: trend
-        period_hours: 24
-        operator: in
-        value: [flat, up]
+        value: 65
   short:
     conditions:
-      - indicator: price_change_pct
-        period_hours: 168
-        operator: gt
-        value: 7.0
+      - indicator: trend
+        period_hours: 48
+        operator: eq
+        value: down
+      - indicator: momentum_accelerating
+        period_hours: 48
+        operator: eq
+        value: true
       - indicator: rsi
         period_hours: 14
         operator: gt
-        value: 62
-      - indicator: trend
-        period_hours: 24
-        operator: in
-        value: [flat, down]
+        value: 35
 exit:
   take_profit_pct: 10.0
   stop_loss_pct: 4.0
-  timeout_hours: 144
+  timeout_hours: 120
 risk:
   pause_if_down_pct: 10
   pause_hours: 48

@@ -5,10 +5,18 @@ pairs:
   - BTC/USD
   - ETH/USD
   - SOL/USD
+  - XRP/USD
+  - DOGE/USD
   - AVAX/USD
+  - LINK/USD
+  - UNI/USD
+  - AAVE/USD
+  - NEAR/USD
+  - APT/USD
+  - SUI/USD
 position:
-  size_pct: 25
-  max_open: 2
+  size_pct: 22
+  max_open: 3
   fee_rate: 0.001
 entry:
   long:
@@ -16,7 +24,7 @@ entry:
       - indicator: rsi
         period_hours: 14
         operator: lt
-        value: 32
+        value: 35
       - indicator: bollinger_position
         period_hours: 20
         operator: eq
@@ -25,16 +33,12 @@ entry:
         period_hours: 168
         operator: in
         value: [up, flat]
-      - indicator: price_vs_ema
-        period_hours: 50
-        operator: in
-        value: [below, at]
   short:
     conditions:
       - indicator: rsi
         period_hours: 14
         operator: gt
-        value: 68
+        value: 65
       - indicator: bollinger_position
         period_hours: 20
         operator: eq
@@ -43,14 +47,10 @@ entry:
         period_hours: 168
         operator: in
         value: [down, flat]
-      - indicator: price_vs_ema
-        period_hours: 50
-        operator: in
-        value: [above, at]
 exit:
-  take_profit_pct: 6.0
-  stop_loss_pct: 2.0
-  timeout_hours: 72
+  take_profit_pct: 8.0
+  stop_loss_pct: 2.5
+  timeout_hours: 96
 risk:
   pause_if_down_pct: 6
   pause_hours: 24

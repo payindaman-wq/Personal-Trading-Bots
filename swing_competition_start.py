@@ -15,7 +15,9 @@ ALL_BOTS = []  # populated from fleet/swing/ directory
 
 DEFAULT_PAIRS = [
     "BTC/USD", "ETH/USD", "SOL/USD", "XRP/USD",
-    "AVAX/USD", "LINK/USD", "AAVE/USD",
+    "DOGE/USD", "AVAX/USD", "LINK/USD", "UNI/USD",
+    "AAVE/USD", "NEAR/USD", "APT/USD", "SUI/USD",
+    "ARB/USD", "OP/USD", "ADA/USD", "POL/USD",
 ]
 
 

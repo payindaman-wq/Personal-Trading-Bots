@@ -1,5 +1,5 @@
 name: skoll
-description: "SOL/ETH patient holder — long lookback, wide z-threshold, slow exits on volatile L1 pair"
+description: "SOL/ETH patient holder -- long lookback on volatile L1 pair"
 pair_a: SOL/USD
 pair_b: ETH/USD
 lookback_hours: 720

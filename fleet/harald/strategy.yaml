@@ -1,14 +1,22 @@
 name: harald
-style: rsi_trend_composite
+style: rsi_mean_reversion
 inspiration: Scott Melker -- RSI pullback within confirmed trend, buys when short-term RSI oversold but macro direction intact
 pairs:
   - BTC/USD
   - ETH/USD
   - SOL/USD
   - XRP/USD
+  - DOGE/USD
+  - AVAX/USD
+  - LINK/USD
+  - AAVE/USD
+  - NEAR/USD
+  - APT/USD
+  - SUI/USD
+  - UNI/USD
 position:
   size_pct: 22
-  max_open: 1
+  max_open: 2
   fee_rate: 0.001
 entry:
   long:
@@ -16,43 +24,27 @@ entry:
       - indicator: rsi
         period_minutes: 35
         operator: lt
-        value: 38
+        value: 35
       - indicator: trend
-        period_minutes: 240
+        period_minutes: 60
         operator: in
         value: [up, flat]
-      - indicator: trend
-        period_minutes: 30
-        operator: in
-        value: [down, flat]
       - indicator: price_vs_vwap
         operator: in
         value: [below, at]
-      - indicator: macd_signal
-        period_minutes: 130
-        operator: eq
-        value: bullish
   short:
     conditions:
       - indicator: rsi
         period_minutes: 35
         operator: gt
-        value: 62
+        value: 65
       - indicator: trend
-        period_minutes: 240
+        period_minutes: 60
         operator: in
         value: [down, flat]
-      - indicator: trend
-        period_minutes: 30
-        operator: in
-        value: [up, flat]
       - indicator: price_vs_vwap
         operator: in
         value: [above, at]
-      - indicator: macd_signal
-        period_minutes: 130
-        operator: eq
-        value: bearish
 exit:
   take_profit_pct: 2.2
   stop_loss_pct: 0.7

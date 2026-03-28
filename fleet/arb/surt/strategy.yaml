@@ -1,5 +1,5 @@
 name: surt
-description: "LINK/ETH spread — oracle token vs ETH, protocol utility divergence"
+description: "LINK/ETH spread -- oracle token vs ETH"
 pair_a: LINK/USD
 pair_b: ETH/USD
 lookback_hours: 480

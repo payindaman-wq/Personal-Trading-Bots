@@ -1,14 +1,14 @@
 name: thordis
-style: avax_sol_dual_confirmation
-inspiration: Refined herdis -- only enter when AVAX/SOL ratio is extreme AND AVAX absolute price trend agrees, filtering entries where AVAX is genuinely losing ground to SOL rather than temporarily lagging
+style: doge_btc_spread_mean_reversion
+inspiration: DOGE/BTC ratio mean reverts after meme pumps -- buy when DOGE underperforms, sell when overextended
 pairs:
-  - AVAX/USD
+  - DOGE/USD
 spread:
-  base: AVAX/USD
-  quote: SOL/USD
-  analysis_pair: AVAX_SOL_RATIO
+  base: DOGE/USD
+  quote: BTC/USD
+  analysis_pair: DOGE_BTC_RATIO
 position:
-  size_pct: 30
+  size_pct: 25
   max_open: 1
   fee_rate: 0.001
 entry:
@@ -17,36 +17,26 @@ entry:
       - indicator: rsi
         period_hours: 14
         operator: lt
-        value: 35
+        value: 32
       - indicator: bollinger_position
         period_hours: 20
         operator: eq
         value: below_lower
-      - indicator: price_vs_ema
-        period_hours: 48
-        pair: AVAX/USD
-        operator: eq
-        value: above
   short:
     conditions:
       - indicator: rsi
         period_hours: 14
         operator: gt
-        value: 65
+        value: 68
       - indicator: bollinger_position
         period_hours: 20
         operator: eq
         value: above_upper
-      - indicator: price_vs_ema
-        period_hours: 48
-        pair: AVAX/USD
-        operator: eq
-        value: below
 exit:
-  take_profit_pct: 6.0
-  stop_loss_pct: 2.5
-  timeout_hours: 96
+  take_profit_pct: 10.0
+  stop_loss_pct: 4.0
+  timeout_hours: 120
 risk:
-  pause_if_down_pct: 8
+  pause_if_down_pct: 10
   pause_hours: 48
-  stop_if_down_pct: 18
+  stop_if_down_pct: 22

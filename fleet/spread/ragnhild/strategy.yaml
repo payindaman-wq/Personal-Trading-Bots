@@ -1,6 +1,6 @@
 name: ragnhild
 style: eth_btc_spread_breakout
-inspiration: Opposite thesis to skadi -- when ETH/BTC ratio breaks out of Bollinger range with trend, follow the regime change rather than fading it
+inspiration: When ETH/BTC ratio breaks out of BB range with trend, follow the regime change
 pairs:
   - ETH/USD
 spread:
@@ -24,10 +24,6 @@ entry:
         value: up
       - indicator: rsi
         period_hours: 14
-        operator: gt
-        value: 52
-      - indicator: rsi
-        period_hours: 14
         operator: lt
         value: 72
   short:
@@ -42,17 +38,13 @@ entry:
         value: down
       - indicator: rsi
         period_hours: 14
-        operator: lt
-        value: 48
-      - indicator: rsi
-        period_hours: 14
         operator: gt
         value: 28
 exit:
-  take_profit_pct: 7.0
-  stop_loss_pct: 2.5
-  timeout_hours: 96
+  take_profit_pct: 8.0
+  stop_loss_pct: 3.0
+  timeout_hours: 120
 risk:
-  pause_if_down_pct: 8
+  pause_if_down_pct: 9
   pause_hours: 48
-  stop_if_down_pct: 18
+  stop_if_down_pct: 20
