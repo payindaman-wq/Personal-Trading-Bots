@@ -14,6 +14,7 @@ import subprocess
 from datetime import datetime, timezone
 
 WORKSPACE = os.environ.get("WORKSPACE", "/root/.openclaw/workspace")
+CYCLE_STATE_PATH = os.path.join(WORKSPACE, "competition", "cycle_state.json")
 
 LEAGUES = [
     {
@@ -88,6 +89,23 @@ def find_polymarket_active():
     return state.get("sprint_id", "active")
 
 
+def _update_day_cycle_state(comp_id):
+    """Keep cycle_state.json in sync when watchdog starts a day sprint."""
+    try:
+        with open(CYCLE_STATE_PATH) as f:
+            cs = json.load(f)
+        if comp_id not in cs.get("sprints", []):
+            cs.setdefault("sprints", []).append(comp_id)
+            cs["sprint_in_cycle"] = len(cs["sprints"])
+            if not cs.get("cycle_started_at"):
+                cs["cycle_started_at"] = datetime.now(timezone.utc).isoformat()
+            with open(CYCLE_STATE_PATH, "w") as f:
+                json.dump(cs, f, indent=2)
+            print(f"  [day] cycle_state updated: cycle={cs['cycle']} sprint={cs['sprint_in_cycle']}")
+    except Exception as e:
+        print(f"  [day] WARNING: could not update cycle_state: {e}")
+
+
 def start_league(league):
     result = subprocess.run(
         league["start_cmd"],
@@ -96,7 +114,10 @@ def start_league(league):
     if result.returncode == 0:
         try:
             data = json.loads(result.stdout)
-            print(f"  [{league['name']}] started: {data.get('comp_id', data.get('sprint_id', '?'))}")
+            comp_id = data.get("comp_id", data.get("sprint_id", "?"))
+            print(f"  [{league['name']}] started: {comp_id}")
+            if league["name"] == "day" and comp_id != "?":
+                _update_day_cycle_state(comp_id)
         except Exception:
             print(f"  [{league['name']}] started OK")
     else:
