@@ -680,6 +680,44 @@ def get_mimir_state():
     state["total_analyses"] = len(entries)
     return state
 
+
+LOKI_LOG     = "/root/.openclaw/workspace/research/loki_log.jsonl"
+LOKI_ESC_LOG = "/root/.openclaw/workspace/research/loki_escalation_log.jsonl"
+
+
+def get_loki_state():
+    """Read LOKI activity and escalation logs for the Auto Research dashboard tab."""
+    state = {"recent_actions": [], "pending_escalations": [], "total_processed": 0}
+
+    if os.path.exists(LOKI_LOG):
+        entries = []
+        with open(LOKI_LOG) as f:
+            for line in f:
+                line = line.strip()
+                if line:
+                    try:
+                        entries.append(json.loads(line))
+                    except Exception:
+                        pass
+        real_entries = [e for e in entries if not e.get("dry_run")]
+        state["total_processed"] = len(real_entries)
+        state["recent_actions"] = list(reversed(real_entries[-10:]))
+
+    if os.path.exists(LOKI_ESC_LOG):
+        escalations = []
+        with open(LOKI_ESC_LOG) as f:
+            for line in f:
+                line = line.strip()
+                if line:
+                    try:
+                        escalations.append(json.loads(line))
+                    except Exception:
+                        pass
+        state["pending_escalations"] = list(reversed(escalations))
+
+    return state
+
+
 PM_COLLECTOR_STATE = "/root/.openclaw/workspace/research/polymarket/collector_state.json"
 PM_RESOLVED_FILE   = "/root/.openclaw/workspace/research/polymarket/resolved_markets.jsonl"
 
@@ -866,6 +904,7 @@ def build():
     dashboard["pm_research"]        = get_pm_research()
     dashboard["odin_research"]     = get_odin_research()
     dashboard["mimir_state"]       = get_mimir_state()
+    dashboard["loki_state"]        = get_loki_state()
     dashboard["cycle_state"]       = get_cycle_state()
     dashboard["spread_score"]      = get_spread_score()
     dashboard["spread_cycle_state"] = get_spread_cycle_state()

@@ -333,17 +333,13 @@ def process_entry(entry):
             desc = change.get("description", "see Mimir analysis")
             write_escalation_log(ts, league, gen, desc)
             actions.append(f"escalated(Phase2): {desc[:60]}")
-            tg_send(
-                f"<b>[LOKI/{league_up}]</b> Gen {gen} — structural change needed "
-                f"(Phase 2 scope). Logged for later.\n<i>{desc[:200]}</i>"
-            )
+            print(f"  [loki] Structural change logged to escalation log — visible in dashboard")
     else:
         print(f"  [loki] No code change keywords — program.md only")
 
-    # Step 3: Summary report (skip if escalation already sent its own message)
+    # Step 3: Summary report via Telegram (constant changes and program.md commits only)
     summary = "; ".join(actions) if actions else "no actions taken"
-    if not any("escalated" in a for a in actions):
-        tg_send(f"<b>[LOKI/{league_up}]</b> Gen {gen} — {summary}")
+    tg_send(f"<b>[LOKI/{league_up}]</b> Gen {gen} — {summary}")
 
     write_loki_log(ts, league, actions)
 
