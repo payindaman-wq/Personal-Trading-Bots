@@ -15,11 +15,7 @@ entry:
     - indicator: rsi
       period_hours: 21
       operator: lt
-      value: 35.9
-    - indicator: price_vs_ema
-      period_hours: 48
-      operator: eq
-      value: above
+      value: 36.56
     - indicator: macd_signal
       period_hours: 26
       operator: eq
@@ -30,20 +26,17 @@ entry:
       period_hours: 21
       operator: gt
       value: 64.29
-    - indicator: price_vs_ema
-      period_hours: 48
-      operator: eq
-      value: below
     - indicator: macd_signal
       period_hours: 48
       operator: eq
       value: bearish
 exit:
-  take_profit_pct: 6.13
+  take_profit_pct: 3.55
   stop_loss_pct: 3.25
-  timeout_hours: 238
+  timeout_hours: 196
 risk:
   pause_if_down_pct: 8
   stop_if_down_pct: 18
   pause_hours: 48
-_sharpe: 2.8166
+_sharpe: 1.248
+_trades: 357
