@@ -36,6 +36,7 @@ GEMINI_DAILY_LIMIT   = 1200   # per-key hard stop (1200 × 3 keys = 3600/day; ac
 GEMINI_CACHE_TTL_H   = 4      # reuse assessment if < 4h old and price unchanged
 GEMINI_CACHE_DELTA   = 0.02   # skip cache if PM price moved more than 2 cents
 SPRINT_HOURS         = 168    # 7-day sprints
+PM_FEE_PCT           = 0.02   # Polymarket taker fee: 2% of notional per side
 
 
 os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
@@ -420,10 +421,10 @@ def filter_for_bot(markets, strategy, existing_cids):
             continue
         title_lower = m["title"].lower()
 
-        # Keyword filters
-        if inc_kw and not any(k in title_lower for k in inc_kw):
+        # Keyword filters (word-boundary to avoid e.g. "war" matching "Delaware")
+        if inc_kw and not any(re.search(r"" + re.escape(k) + r"", title_lower) for k in inc_kw):
             continue
-        if any(k in title_lower for k in exc_kw):
+        if any(re.search(r"" + re.escape(k) + r"", title_lower) for k in exc_kw):
             continue
 
         # Liquidity
@@ -435,9 +436,6 @@ def filter_for_bot(markets, strategy, existing_cids):
             try:
                 end_dt = datetime.fromisoformat(m["end_date"].replace("Z", "+00:00"))
                 if end_dt > cutoff or end_dt < datetime.now(timezone.utc):
-                    continue
-                # Sprint-window guard: market must resolve before sprint ends
-                if sprint_end_dt and end_dt > sprint_end_dt:
                     continue
             except Exception:
                 pass
@@ -545,8 +543,10 @@ def open_position(bot, market, outcome, price, reasoning, strategy):
     if cid in bot["positions"]:
         return False
 
-    shares = round(size_usd / price, 4)
-    bot["cash"] = round(bot["cash"] - size_usd, 4)
+    shares   = round(size_usd / price, 4)
+    open_fee = round(size_usd * PM_FEE_PCT, 4)
+    bot["cash"] = round(bot["cash"] - size_usd - open_fee, 4)
+    bot["total_fees"] = round(bot.get("total_fees", 0) + open_fee, 4)
     bot["positions"][cid] = {
         "condition_id":   cid,
         "title":          market["title"],
@@ -555,6 +555,7 @@ def open_position(bot, market, outcome, price, reasoning, strategy):
         "entry_price":    price,
         "shares":         shares,
         "cost_usd":       size_usd,
+        "open_fee":       open_fee,
         "current_price":  price,
         "current_value":  size_usd,
         "unrealized_pnl": 0.0,
@@ -562,7 +563,7 @@ def open_position(bot, market, outcome, price, reasoning, strategy):
         "reasoning":      reasoning[:200] if reasoning else "",
     }
     bot["total_trades"] += 1
-    log.info(f"  [{bot['name']}] OPEN {outcome[:30]} @ {price:.3f} | ${size_usd:.0f} | {market['title'][:45]}")
+    log.info(f"  [{bot['name']}] OPEN {outcome[:30]} @ {price:.3f} | ${size_usd:.0f} (fee ${open_fee:.2f}) | {market['title'][:45]}")
     return True
 
 
@@ -570,25 +571,32 @@ def close_position(bot, cid, reason, final_price):
     pos = bot["positions"].get(cid)
     if not pos:
         return
-    proceeds = round(pos["shares"] * final_price, 4)
-    pnl      = round(proceeds - pos["cost_usd"], 4)
-    pnl_pct  = round((pnl / pos["cost_usd"]) * 100, 2) if pos["cost_usd"] else 0
-    bot["cash"] = round(bot["cash"] + proceeds, 4)
+    gross_proceeds = round(pos["shares"] * final_price, 4)
+    close_fee      = round(gross_proceeds * PM_FEE_PCT, 4)
+    proceeds       = round(gross_proceeds - close_fee, 4)
+    total_fees     = round(pos.get("open_fee", 0) + close_fee, 4)
+    pnl            = round(proceeds - pos["cost_usd"], 4)
+    pnl_pct        = round((pnl / pos["cost_usd"]) * 100, 2) if pos["cost_usd"] else 0
+    bot["cash"]       = round(bot["cash"] + proceeds, 4)
+    bot["total_fees"] = round(bot.get("total_fees", 0) + close_fee, 4)
     if pnl >= 0:
         bot["wins"] += 1
     else:
         bot["losses"] += 1
     bot["closed_trades"].append({
         **pos,
-        "closed_at":    datetime.now(timezone.utc).isoformat(),
-        "exit_price":   final_price,
-        "proceeds_usd": proceeds,
-        "pnl_usd":      pnl,
-        "pnl_pct":      pnl_pct,
-        "reason":       reason,
+        "closed_at":       datetime.now(timezone.utc).isoformat(),
+        "exit_price":      final_price,
+        "gross_proceeds":  gross_proceeds,
+        "close_fee":       close_fee,
+        "total_fees":      total_fees,
+        "proceeds_usd":    proceeds,
+        "pnl_usd":         pnl,
+        "pnl_pct":         pnl_pct,
+        "reason":          reason,
     })
     del bot["positions"][cid]
-    log.info(f"  [{bot['name']}] CLOSE {reason} @ {final_price:.3f} | PNL ${pnl:+.2f} ({pnl_pct:+.1f}%)")
+    log.info(f"  [{bot['name']}] CLOSE {reason} @ {final_price:.3f} | PNL ${pnl:+.2f} ({pnl_pct:+.1f}%) fees ${total_fees:.2f}")
 
 
 def fetch_market_price(condition_id):
@@ -771,11 +779,13 @@ def start_new_sprint(state):
         bot["total_trades"]  = 0
         bot["wins"]          = 0
         bot["losses"]        = 0
+        bot["total_fees"]    = 0.0
         bot["positions"]     = {}
         bot["closed_trades"] = []
         bot["scan_count"]    = 0
         bot["gemini_calls"]  = 0
         bot["last_scan_at"]  = None
+        bot["stopped"]       = False
     log.info(f"New sprint started: {sprint_id} — ends {state['sprint_ends_at']}")
 
 
@@ -818,6 +828,7 @@ def write_dashboard(state):
             "win_rate":         round(w / t * 100, 1) if t > 0 else 0.0,
             "trades":           t,
             "active_positions": len(b.get("positions", {})),
+            "total_fees":       round(b.get("total_fees", 0), 2),
             "status":           state.get("status", "active"),
         })
 
@@ -948,6 +959,8 @@ def run_tick(state, strategies, secrets, tick_count):
                 if p is None:
                     p = bot["positions"][cid]["current_price"]
                 close_position(bot, cid, "stop_loss", p)
+            bot["stopped"] = True  # halt: do not reopen positions this sprint
+            log.warning(f"  [{bot['name']}] Bot halted for remainder of sprint")
         update_equity(bot)
 
     if not do_scan:
@@ -973,9 +986,9 @@ def run_tick(state, strategies, secrets, tick_count):
             for market in candidates:
                 cid = market["condition_id"]
                 if cid not in arb_pool:
-                    meta_m   = find_best_external_match(market["title"], metaculus_markets, min_score=0.40, index=meta_index)   if "metaculus" in arb_sources else None
-                    manif_m  = find_best_external_match(market["title"], manifold_markets,  min_score=0.40, index=manif_index)  if "manifold"  in arb_sources else None
-                    kalshi_m = find_best_external_match(market["title"], kalshi_markets,    min_score=0.40, index=kalshi_index) if "kalshi"    in arb_sources else None
+                    meta_m   = find_best_external_match(market["title"], metaculus_markets, min_score=0.55, index=meta_index)   if "metaculus" in arb_sources else None
+                    manif_m  = find_best_external_match(market["title"], manifold_markets,  min_score=0.55, index=manif_index)  if "manifold"  in arb_sources else None
+                    kalshi_m = find_best_external_match(market["title"], kalshi_markets,    min_score=0.55, index=kalshi_index) if "kalshi"    in arb_sources else None
                     arb_pool[cid] = {
                         "market":       market,
                         "meta_match":   meta_m,
@@ -1146,6 +1159,8 @@ def run_tick(state, strategies, secrets, tick_count):
 
     # ── 5. Execute opinion bot trades ─────────────────────────────────────
     for bot in state["bots"]:
+        if bot.get("stopped"):
+            continue
         strategy = strategies.get(bot["name"], {})
         if not strategy or strategy.get("type") != "opinion":
             continue
@@ -1184,6 +1199,8 @@ def run_tick(state, strategies, secrets, tick_count):
 
     # ── 6. Execute arb bot trades ─────────────────────────────────────────
     for bot in state["bots"]:
+        if bot.get("stopped"):
+            continue
         strategy = strategies.get(bot["name"], {})
         if not strategy or strategy.get("type") != "arb":
             continue

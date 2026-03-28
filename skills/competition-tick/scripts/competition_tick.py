@@ -345,9 +345,33 @@ def main():
         for a in entry_actions:
             log(f"  [{bot_name}] OPEN {a['direction'].upper()} {a['pair']} | {a['result']}", comp_dir)
 
+        # Mark-to-market: reload portfolio then write live equity every tick
+        portfolio = load_portfolio(comp_dir, bot_name) or portfolio
+        starting_capital = meta.get("starting_capital", 1000.0)
+        positions = portfolio.get("positions", [])
+        base_equity = portfolio["stats"]["current_equity"]
+        cash = base_equity - sum(p.get("cost_basis", 0) for p in positions)
+        live_equity = cash
+        for pos in positions:
+            cp   = prices.get(pos["pair"], {}).get("last")
+            qty  = pos.get("quantity", 0)
+            ep   = pos.get("entry_price", 0)
+            cost = pos.get("cost_basis", 0)
+            if cp:
+                mv = qty * cp if pos.get("direction") == "long" else cost + (ep - cp) * qty
+            else:
+                mv = cost
+            live_equity += mv
+        portfolio["stats"]["live_equity_mtm"] = round(live_equity, 2)
+        portfolio["stats"]["live_pnl_usd"]    = round(live_equity - starting_capital, 2)
+        portfolio["stats"]["live_pnl_pct"]    = round((live_equity - starting_capital) / starting_capital * 100, 4)
+        pfile_path = os.path.join(comp_dir, f"portfolio-{bot_name}.json")
+        with open(pfile_path, "w") as f:
+            json.dump(portfolio, f, indent=2)
+
         if not exit_actions and not entry_actions:
-            equity = portfolio["stats"]["current_equity"]
-            pnl = portfolio["stats"]["total_pnl_pct"]
+            equity = portfolio["stats"]["live_equity_mtm"]
+            pnl = portfolio["stats"]["live_pnl_pct"]
             log(f"  [{bot_name}] no signal | equity=${equity:,.2f} | pnl={pnl:+.2f}%", comp_dir)
 
     save_risk_state(comp_dir, risk_state)

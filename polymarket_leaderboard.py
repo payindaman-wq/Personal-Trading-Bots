@@ -187,9 +187,12 @@ def aggregate(completed_sprints, live_bots):
             if rank <= 3:
                 t["podiums"] += 1
 
-    # Ensure every live bot has a tally entry (even if no completed sprints)
+    # Include live sprint P&L in cumulative totals (no points until sprint ends)
     for b in live_bots:
-        ensure(b["bot"], b.get("type", "auto"), b.get("username", ""))
+        t = ensure(b["bot"], b.get("type", "auto"), b.get("username", ""))
+        t["cumulative_pnl_usd"] = round(t["cumulative_pnl_usd"] + b.get("sprint_pnl_usd", 0.0), 2)
+        t["total_trades"] += b.get("sprint_trades", 0)
+        t["total_wins"]   += b.get("sprint_wins", 0)
 
     # Compute derived fields
     result = []
@@ -198,8 +201,8 @@ def aggregate(completed_sprints, live_bots):
         t["overall_win_rate"] = round(t["total_wins"] / tr * 100, 1) if tr > 0 else 0.0
         result.append(t)
 
-    # Sort by points desc, then cumulative_pnl_usd
-    result.sort(key=lambda x: (x["points"], x["cumulative_pnl_usd"]), reverse=True)
+    # Sort by cumulative_pnl_usd desc, then points as tiebreaker
+    result.sort(key=lambda x: (x["cumulative_pnl_usd"], x["points"]), reverse=True)
     for i, r in enumerate(result):
         r["rank"] = i + 1
 

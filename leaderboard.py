@@ -107,9 +107,9 @@ def load_active_sprint():
         s = p["stats"]
         rankings.append({
             "bot":              bot,
-            "final_equity":     round(s["current_equity"] * usd_scale, 2),
-            "total_pnl_usd":    round(s["total_pnl_usd"]  * usd_scale, 2),
-            "total_pnl_pct":    round(s["total_pnl_pct"],  4),
+            "final_equity":     round(s.get("live_equity_mtm", s["current_equity"]) * usd_scale, 2),
+            "total_pnl_usd":    round(s.get("live_pnl_usd",    s["total_pnl_usd"])  * usd_scale, 2),
+            "total_pnl_pct":    round(s.get("live_pnl_pct",    s["total_pnl_pct"]),  4),
             "total_trades":     s["total_trades"],
             "wins":             s["wins"],
             "losses":           s["losses"],
