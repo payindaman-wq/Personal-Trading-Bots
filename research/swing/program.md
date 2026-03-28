@@ -7,38 +7,41 @@ Maximize the **adjusted score** on 2 years of 1-hour data across BTC/USD, ETH/US
 
 **Adjusted score = Sharpe × sqrt(num_trades / 50)**
 
-This means:
-- 30 trades with Sharpe 2.88 → score = 2.88 × sqrt(0.6) = 2.23
-- 50 trades with Sharpe 2.20 → score = 2.20 × sqrt(1.0) = 2.20
-- 70 trades with Sharpe 1.85 → score = 1.85 × sqrt(1.4) = 2.19
-- 100 trades with Sharpe 1.60 → score = 1.60 × sqrt(2.0) = 2.26
+Examples of what beats the current score of 3.33:
+- 100 trades with Sharpe 2.40 → score = 2.40 × sqrt(2.0) = 3.39 ✅
+- 150 trades with Sharpe 2.00 → score = 2.00 × sqrt(3.0) = 3.46 ✅
+- 200 trades with Sharpe 1.80 → score = 1.80 × sqrt(4.0) = 3.60 ✅
+- 80 trades with Sharpe 2.70 → score = 2.70 × sqrt(1.6) = 3.42 ✅
+- 350 trades with Sharpe 1.30 → score = 1.30 × sqrt(7.0) = 3.44 ✅
+- 400 trades with Sharpe 0.65 → score = 0.65 × sqrt(8.0) = 1.84 ❌ (too low Sharpe)
+- 30 trades with Sharpe 2.90 → REJECTED (below 45 trade minimum)
 
-**More trades at good Sharpe beats fewer trades at great Sharpe.**
+**The ideal zone is 80-250 trades with Sharpe 1.5-2.5.**
 
 ### Current Performance
-- **Current best Sharpe: 2.8771** (30 trades, 86.7% win rate)
-- **Adjusted score: 2.23** — this is the number to beat
-- This strategy is OVERFITTED. 30 trades in 2 years is not deployable in live competitions.
-- Strategies with 50-80 trades and Sharpe 1.8-2.2 are MORE VALUABLE than the current best.
+- **Current best adjusted score: 3.33** (Sharpe 1.2480, 357 trades, 54.6% win rate)
+- This is the number to beat. You need EITHER higher Sharpe at similar trade count, OR similar Sharpe with more trades, OR the sweet spot of fewer trades (80-200) with significantly higher Sharpe.
 
-### HARD CONSTRAINT
-**Your proposed strategy MUST produce at least 45 trades.** If you are unsure whether a change will increase trade count, make the entry conditions LESS restrictive. Strategies with fewer than 45 trades will be automatically rejected regardless of Sharpe.
+### HARD CONSTRAINTS
+1. **Your proposed strategy MUST produce at least 45 trades.** Strategies under 45 trades are auto-rejected.
+2. **Sharpe MUST exceed 0.80.** Strategies with 400+ trades but Sharpe under 0.8 are wasteful — do not over-loosen conditions.
 
-### What Has Failed (DO NOT REPEAT)
-These micro-parameter changes have been tried 1000+ times and always produce ~30 trades:
-- ❌ RSI threshold changes between 34-40 (long) or 62-67 (short)
-- ❌ TP changes between 4.0-8.0%
-- ❌ SL changes between 2.5-4.5%
-- ❌ Timeout changes between 150-280 hours
-- ❌ MACD period tweaks (24, 26, 28, 30, 48)
-- ❌ price_vs_ema period tweaks (24, 48, 72)
-- ❌ Adding a 4th condition to either side
-- ❌ Changing only one side (long or short) while keeping the other identical
+### What Has Been Explored (context for your decisions)
+**Regime 1 — Overfitted (DO NOT TARGET):**
+- 30 trades, Sharpe 2.8-2.9, win rate 86-90%. This is curve-fit and auto-rejected for low trade count.
+- Achieved via tight RSI (36/64), MACD confirmation, and 3+ conditions per side.
 
-### MANDATORY: Pick Exactly ONE Change From This List
-You MUST implement one of the following. Do not combine multiple changes. Do not make parameter tweaks instead.
+**Regime 2 — Current Best (improve from here):**
+- 345-357 trades, Sharpe 0.88-1.25, win rate 53-55%.
+- Achieved via looser conditions, likely 2 conditions per side with wider thresholds.
 
-**ROUND A (if generation number is odd):**
-1. **Reduce to 2 entry conditions per side.** Remove price_vs_ema entirely from BOTH long and short. Keep RSI and MACD only. Widen RSI to lt 42 (long) and gt 58 (short). This WILL increase trade count significantly.
+**Regime 3 — Overshooting (avoid):**
+- 430+ trades, Sharpe 0.58-0.65, win rate 52%. This is TOO loose — adding more trades dilutes edge.
+- ❌ Do NOT simply widen all thresholds or remove conditions wholesale.
 
-2. **Replace ALL three conditions with two new ones.** Long: rsi lt 45 AND momentum_accelerating eq true. Short: rsi gt 55 AND momentum
+**The UNEXPLORED sweet spot is 80-250 trades.** Very few strategies have landed here. This is where Sharpe 1.5-2.5 likely lives.
+
+### Failed Micro-Changes (DO NOT REPEAT)
+These have been tried 1000+ times with no improvement:
+- ❌ RSI threshold changes in small increments (±1-3 points)
+-
