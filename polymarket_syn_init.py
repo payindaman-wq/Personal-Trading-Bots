@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-polymarket_syn_init.py — Initialize all 15 autonomous Polymarket bot states.
+polymarket_syn_init.py — Initialize 12 autonomous Polymarket bot states (Cycle 2+).
 Run once before starting polymarket_syn.service. Deletes and recreates auto_state.json.
 """
 import json, os
@@ -11,40 +11,25 @@ RESULTS_DIR      = "/root/.openclaw/workspace/competition/polymarket/auto_result
 SPRINT_HOURS     = 168  # 7 days
 
 BOT_ROSTER = [
-    # Sports (5)
-    {"name": "ullr",     "category": "sports",          "type": "opinion"},
-    {"name": "sigyn",    "category": "sports",          "type": "opinion"},
-    {"name": "hlin",     "category": "sports",          "type": "opinion"},
-    {"name": "tora",     "category": "sports",          "type": "opinion"},
-    {"name": "skoll",    "category": "sports",          "type": "opinion"},
-    # Politics (5)
-    {"name": "freya",    "category": "politics",        "type": "opinion"},
-    {"name": "var",      "category": "politics",        "type": "opinion"},
-    {"name": "saga",     "category": "politics",        "type": "opinion"},
-    {"name": "skuld",    "category": "politics",        "type": "opinion"},
-    {"name": "vor",      "category": "politics",        "type": "opinion"},
-    # Crypto (5)
-    {"name": "njal",    "category": "crypto",          "type": "opinion"},
-    {"name": "gerd",     "category": "crypto",          "type": "opinion"},
-    {"name": "skadi",    "category": "crypto",          "type": "opinion"},
-    {"name": "kvasir",   "category": "crypto",          "type": "opinion"},
-    {"name": "nidhogg",  "category": "crypto",          "type": "opinion"},
-    # World Economics (5)
-    {"name": "rind",     "category": "world_economics", "type": "opinion"},
-    {"name": "aegir",    "category": "world_economics", "type": "opinion"},
-    {"name": "jord",     "category": "world_economics", "type": "opinion"},
-    {"name": "hermod",   "category": "world_economics", "type": "opinion"},
-    {"name": "magni",    "category": "world_economics", "type": "opinion"},
-    # World Events (5)
-    {"name": "verdandi", "category": "world_events",    "type": "opinion"},
-    {"name": "urd",      "category": "world_events",    "type": "opinion"},
-    {"name": "ran",      "category": "world_events",    "type": "opinion"},
-    {"name": "forseti",  "category": "world_events",    "type": "opinion"},
-    {"name": "eir",      "category": "world_events",    "type": "opinion"},
-    # Arb (3)
-    {"name": "loki",     "category": "arb",             "type": "arb"},
-    {"name": "huginn",   "category": "arb",             "type": "arb"},
-    {"name": "muninn",   "category": "arb",             "type": "arb"},
+    # Sports (2)
+    {"name": "hlin",   "category": "sports",          "type": "opinion"},
+    {"name": "tora",   "category": "sports",          "type": "opinion"},
+    # Politics (1)
+    {"name": "var",    "category": "politics",        "type": "opinion"},
+    # Crypto (3)
+    {"name": "njal",   "category": "crypto",          "type": "opinion"},
+    {"name": "gerd",   "category": "crypto",          "type": "opinion"},
+    {"name": "skadi",  "category": "crypto",          "type": "opinion"},
+    # World Economics (1)
+    {"name": "hermod", "category": "world_economics", "type": "opinion"},
+    # Science (1)
+    {"name": "eir",    "category": "science",         "type": "opinion"},
+    # Arb (1)
+    {"name": "muninn", "category": "arb",             "type": "arb"},
+    # FREYA research slots — disabled until FREYA assigns strategies
+    {"name": "mist",   "category": "research",        "type": "disabled"},
+    {"name": "kara",   "category": "research",        "type": "disabled"},
+    {"name": "thrud",  "category": "research",        "type": "disabled"},
 ]
 
 def make_bot(meta):
@@ -60,11 +45,13 @@ def make_bot(meta):
         "total_trades":     0,
         "wins":             0,
         "losses":           0,
+        "total_fees":       0.0,
         "positions":        {},
         "closed_trades":    [],
         "scan_count":       0,
         "gemini_calls":     0,
         "last_scan_at":     None,
+        "stopped":          False,
     }
 
 def main():
@@ -73,14 +60,14 @@ def main():
     ends_at   = (now + timedelta(hours=SPRINT_HOURS)).isoformat()
 
     state = {
-        "generated_at":    now.isoformat(),
-        "mode":            "paper",
-        "status":          "active",
-        "sprint_id":       sprint_id,
+        "generated_at":      now.isoformat(),
+        "mode":              "paper",
+        "status":            "active",
+        "sprint_id":         sprint_id,
         "sprint_started_at": now.isoformat(),
-        "sprint_ends_at":  ends_at,
-        "sprint_hours":    SPRINT_HOURS,
-        "bots":            [make_bot(m) for m in BOT_ROSTER],
+        "sprint_ends_at":    ends_at,
+        "sprint_hours":      SPRINT_HOURS,
+        "bots":              [make_bot(m) for m in BOT_ROSTER],
     }
 
     os.makedirs(os.path.dirname(AUTO_STATE_FILE), exist_ok=True)
@@ -94,7 +81,7 @@ def main():
     print(f"Ends:   {ends_at}")
     print(f"Bots:   {len(BOT_ROSTER)}")
     for b in BOT_ROSTER:
-        print(f"  {b['name']:<12} [{b['category']:<12}] ${1000:.0f}")
+        print(f"  {b['name']:<12} [{b['category']:<12}] {b['type']}")
 
 if __name__ == "__main__":
     main()

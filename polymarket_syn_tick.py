@@ -770,23 +770,33 @@ def start_new_sprint(state):
     state["sprint_id"]         = sprint_id
     state["sprint_started_at"] = now.isoformat()
     state["sprint_ends_at"]    = (now + timedelta(hours=SPRINT_HOURS)).isoformat()
-    # Reset all bots
-    for bot in state["bots"]:
-        bot["cash"]          = 1000.0
-        bot["equity"]        = 1000.0
-        bot["pnl_usd"]       = 0.0
-        bot["pnl_pct"]       = 0.0
-        bot["total_trades"]  = 0
-        bot["wins"]          = 0
-        bot["losses"]        = 0
-        bot["total_fees"]    = 0.0
-        bot["positions"]     = {}
-        bot["closed_trades"] = []
-        bot["scan_count"]    = 0
-        bot["gemini_calls"]  = 0
-        bot["last_scan_at"]  = None
-        bot["stopped"]       = False
-    log.info(f"New sprint started: {sprint_id} — ends {state['sprint_ends_at']}")
+    # Rebuild bot list from fleet directory so roster changes take effect each sprint
+    fleet_strategies = load_all_strategies()
+    new_bots = []
+    for name in sorted(fleet_strategies.keys()):
+        s = fleet_strategies[name]
+        new_bots.append({
+            "name":             name,
+            "category":         s.get("category", ""),
+            "type":             s.get("type", "opinion"),
+            "starting_capital": 1000.0,
+            "cash":             1000.0,
+            "equity":           1000.0,
+            "pnl_usd":          0.0,
+            "pnl_pct":          0.0,
+            "total_trades":     0,
+            "wins":             0,
+            "losses":           0,
+            "total_fees":       0.0,
+            "positions":        {},
+            "closed_trades":    [],
+            "scan_count":       0,
+            "gemini_calls":     0,
+            "last_scan_at":     None,
+            "stopped":          False,
+        })
+    state["bots"] = new_bots
+    log.info(f"New sprint started: {sprint_id} ({len(new_bots)} bots) â ends {state['sprint_ends_at']}")
 
 
 # ── Dashboard output ───────────────────────────────────────────────────────
