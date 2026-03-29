@@ -10,6 +10,7 @@ Maximize the **adjusted score** on 2 years of 1-hour data across BTC/USD, ETH/US
 ### Current Performance
 - **Current best adjusted score: 6.97** (Sharpe 2.2544, 467 trades, 52.7% win rate)
 - This is the number to beat.
+- **The strategy has been STUCK at this score for 611 consecutive generations (Gen 3189 to Gen 3800). Micro-adjustments are not working. You MUST try one of the exact values listed in TIER 1 below.**
 
 ### Score Math (build intuition)
 - Sharpe 2.30, 467 trades → 2.30 × 3.06 = 7.03 ✅ BEATS CURRENT
@@ -21,8 +22,6 @@ Maximize the **adjusted score** on 2 years of 1-hour data across BTC/USD, ETH/US
 - Sharpe 2.55, 330 trades → 2.55 × 2.57 = 6.55 ❌ Not enough trades
 
 **Key insight: The score requires BOTH a directional edge (52.7% win rate) AND asymmetric TP/SL (3.55% TP vs 2.42% SL = 1.47 ratio). To beat 6.97, you need Sharpe improvement of 0.05+ without losing trades, OR trade count increase of 20+ without losing Sharpe. Do NOT reduce trades below 430.**
-
-**CRITICAL PLATEAU WARNING:** The strategy has improved by only 0.049 Sharpe over the last 700+ generations. Single-parameter micro-adjustments near the current values are yielding near-zero improvement. The most productive unexplored directions are: (A) TP increases to 3.60–3.75, and (B) MACD period shifts of ±1–2 hours. RSI threshold changes have repeatedly failed — deprioritize them.
 
 ---
 
@@ -40,13 +39,13 @@ pairs:
 ❌ DO NOT include LINK/USD, ADA/USD, OP/USD, or ANY other pair.
 ✅ Exactly 3 pairs. Exactly these 3. No exceptions.
 
-**Wrong pairs produce Sharpe ≈ -0.72 with ~302 trades. This wastes the entire generation.**
+**Wrong pairs = Sharpe ≈ -0.72 with ~302 trades. This wastes the entire generation.**
 
 ---
 
 ## ⛔ ABSOLUTE RULE #2: THE PARAMETER TABLE IS GROUND TRUTH ⛔
 
-The table below contains the EXACT current best parameter values. **Ignore ALL YAML you see anywhere else in this document** — the "Current Best Strategy" YAML block at the bottom contains WRONG/OUTDATED values for pairs, size_pct, stop_loss_pct, and timeout_hours. **The table below is the ONLY truth.**
+The table below contains the EXACT current best parameter values. **Ignore ALL YAML you see anywhere else in this document** — the "Current Best Strategy" YAML block at the bottom of this document contains WRONG/OUTDATED values. **The table below is the ONLY truth.**
 
 **Current best parameter values — GROUND TRUTH:**
 
@@ -70,10 +69,11 @@ You MUST change EXACTLY ONE value from this table. Not zero. Not two. ONE.
 
 **Verification checklist — complete this mentally before writing YAML:**
 1. Confirm pairs: BTC/USD, ETH/USD, SOL/USD ✓
-2. State: "I am changing parameter #___ from ___ to ___"
+2. State which parameter you are changing: "I am changing parameter #___ from ___ to ___"
 3. Confirm all other 12 parameters match the table exactly
 4. Confirm your changed value is NOT in the "Do Not Retry" list below
 5. Confirm your output does NOT reproduce the current best exactly
+6. Confirm you are choosing from TIER 1 options unless all are exhausted
 
 ---
 
@@ -84,7 +84,21 @@ The current best has ALL of these values simultaneously:
 
 If your output matches ALL of the above → you changed nothing → wasted generation.
 
-**In the last 20 generations, at least 3 were exact duplicates of the current best. DO NOT repeat this.**
+**In the last 20 generations, at least 3 were exact duplicates of the current best. This is a critical waste. You MUST change exactly one parameter.**
+
+---
+
+## 🚨 KNOWN FAILURE ATTRACTOR — AVOID AT ALL COSTS 🚨
+
+The following result has appeared **5 times in the last 20 generations**:
+`Sharpe = -0.1347, trades = 356, win_rate = 44.4%`
+
+This is a confirmed failure state. If you are about to produce a config that matches recent failed attempts, STOP and choose a TIER 1 parameter instead. **RSI threshold changes are the primary cause of this failure pattern. Do not change RSI values (parameters #2, #5) unless you have exhausted all TIER 1 options.**
+
+Additional confirmed failure signatures to avoid:
+- Sharpe ≈ -0.72, trades ≈ 302 → caused by wrong pairs
+- Sharpe ≈ -0.12 to -0.13, trades ≈ 344–356 → caused by RSI threshold changes
+- Sharpe ≈ -0.70, trades ≈ 293 → caused by specific MACD combinations
 
 ---
 
@@ -98,45 +112,67 @@ These values have been tested and failed. Do not try them again.
 | timeout_hours | 200, 196, 192 and below, 210 and above |
 | MACD short (param #7) | 45, 44 and below, 52 and above |
 | take_profit_pct | 3.45 and below, 3.80 and above |
-| RSI long value | 35.0 and below, 38.0 and above |
-| RSI short value | 59.5 and below, 62.0 and above |
+| RSI long value (param #2) | 35.0 and below, 38.0 and above |
+| RSI short value (param #5) | 59.5 and below, 62.0 and above |
 | position.size_pct | 15, 27 and below, 33 and above |
-
-### 🚨 KNOWN BAD PARAMETER COMBINATIONS 🚨
-The following parameter combinations have repeatedly produced Sharpe ≈ -0.1188 with ~344 trades and Sharpe ≈ -0.7051 with ~293 trades. These are confirmed failure signatures. If you are considering an RSI threshold change, be especially cautious — RSI modifications have produced these failure patterns multiple times in recent generations. Prefer TP, MACD, or size changes over RSI changes.
+| RSI long period_hours (param #3) | Any value other than 21 (repeatedly failed) |
+| RSI short period_hours (param #6) | Any value other than 21 (repeatedly failed) |
 
 ---
 
 ## WHAT TO CHANGE — STRATEGIC GUIDANCE
 
-Pick exactly ONE parameter. Pick exactly ONE new value from the suggested ranges.
+**The strategy has been stuck for 611 generations. Single-parameter micro-adjustments near current values are yielding near-zero improvement. You MUST pick from TIER 1. Do not default to RSI changes.**
 
-### ⭐ TIER 1 — HIGHEST PRIORITY (LEAST EXPLORED, HIGHEST EXPECTED VALUE)
-
-**A) Take profit pct — parameter #8 (currently 3.55) — TOP PRIORITY**
-- ✅ Try ONE of: **3.60, 3.65, 3.70, 3.75**
-- ❌ Do NOT try: 3.55 (current), 3.45 or below, 3.80 or above
-- Why this is #1 priority: This parameter has the LEAST exploration history of any Tier 1 parameter. Raising TP improves the TP/SL ratio (currently 1.47). At 3.65 TP / 2.42 SL → ratio = 1.51. At 3.75 → ratio = 1.55. Higher TP does NOT mechanically reduce trade count — it only requires price to move further on winning trades. With 52.7% win rate and 467 trades, improving expected value per trade compounds strongly into Sharpe. The risk: fewer trades hit TP, potentially reducing win rate. This is worth testing across the full range 3.60–3.75.
-- **Suggested pick if uncertain: 3.65**
-
-**B) MACD short period_hours — parameter #7 (currently 48) — HIGH PRIORITY**
-- ✅ Try ONE of: **46, 47, 49, 50**
-- ❌ Do NOT try: 48 (current), 45 (failed), 44 or below, 52 or above
-- Why: The long/short MACD asymmetry (26 vs 48) is the core directional filter. The short-side MACD period has barely been explored around the current optimum. Fine-tuning ±1–2 hours directly adjusts short signal sensitivity and timing. Values 46–50 represent a large unexplored surface with high probability of improvement.
-- Warning: Values ≤45 reduce trades below 430. Stay in range 46–50.
-- **Suggested pick if uncertain: 47**
-
-**C) MACD long period_hours — parameter #4 (currently 26) — HIGH PRIORITY**
-- ✅ Try ONE of: **24, 25, 27, 28**
-- ❌ Do NOT try: 26 (current), 23 or below, 29 or above
-- Why: Shorter (24–25) = faster long signals = more trades, boosting adjusted score. Longer (27–28) = fewer but higher-quality longs, boosting Sharpe. Both directions are worth exploring. This parameter has significant unexplored surface.
-- **Suggested pick if uncertain: 25**
+Pick exactly ONE parameter. Pick exactly ONE new value from the TIER 1 approved list.
 
 ---
 
-### TIER 2 — SECONDARY OPTIONS
+### ⭐⭐⭐ TIER 1 — MANDATORY FIRST CHOICES ⭐⭐⭐
 
-**D) Stop loss pct — parameter #9 (currently 2.42):**
-- ✅ Try ONE of: **2.38, 2.40, 2.45, 2.48**
-- ❌ Do NOT try: 2.42 (current), 2.46 (failed), 2.35 or below, 2.50 or above
-- Why: Tightening SL (2.38–2.40) improves TP/SL ratio. Widening (2.45–2.48) gives trades more room. At
+**These are the ONLY parameters you should change. Pick one. Pick a value from the approved list.**
+
+---
+
+**A) Take profit pct — parameter #8 (currently 3.55) — TOP PRIORITY**
+
+These values have NOT been tested yet and represent the highest expected value:
+
+| Try this value | TP/SL ratio | Expected effect |
+|----------------|-------------|-----------------|
+| **3.60** | 1.49 | Small improvement to expected value per trade |
+| **3.65** | 1.51 | Moderate improvement — SUGGESTED FIRST TRY |
+| **3.70** | 1.53 | Larger expected value, may reduce win rate slightly |
+| **3.75** | 1.55 | Aggressive — highest upside, most risk to win rate |
+
+- ❌ Do NOT try: 3.55 (current), 3.45 or below (failed), 3.80 or above (failed)
+- **Higher TP improves the reward-to-risk ratio. With 52.7% win rate, each additional 0.05% TP meaningfully compounds into Sharpe. Higher TP does NOT mechanically reduce trade count — it only requires price to move further on winning trades.**
+- **Default pick: 3.65**
+
+---
+
+**B) MACD short period_hours — parameter #7 (currently 48) — HIGH PRIORITY**
+
+These values are untested and directly control short-side signal sensitivity:
+
+| Try this value | Effect |
+|----------------|--------|
+| **46** | Faster short signals, likely more trades |
+| **47** | Small adjustment, minimal risk — SUGGESTED FIRST TRY |
+| **49** | Small adjustment in other direction |
+| **50** | Slower short signals, potentially higher quality |
+
+- ❌ Do NOT try: 48 (current), 45 (failed), 44 or below (failed), 52 or above (failed)
+- **Warning: Values ≤45 reduce trades below 430 (confirmed). Stay in range 46–50.**
+- **Default pick: 47**
+
+---
+
+**C) MACD long period_hours — parameter #4 (currently 26) — HIGH PRIORITY**
+
+These values adjust long-side signal timing:
+
+| Try this value | Effect |
+|----------------|--------|
+| **24** | Faster long signals → more trades → higher adjusted score potential |
+| **25** |
