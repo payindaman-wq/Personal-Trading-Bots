@@ -722,21 +722,24 @@ def score_and_archive_sprint(state):
     os.makedirs(unified_dir, exist_ok=True)
 
     bots_data = []
+    sprint_start = state.get("sprint_started_at", "")
     for bot in bots:
-        trades = bot.get("total_trades", 0)
-        wins   = bot.get("wins", 0)
-        pnl    = bot.get("pnl_usd", 0.0)
+        closed  = [t for t in bot.get("closed_trades", [])
+                   if not sprint_start or t.get("closed_at", "") >= sprint_start]
+        pnl     = round(sum(t.get("pnl_usd", 0.0) for t in closed), 2)
+        pnl_pct = round((pnl / 1000.0) * 100, 2)
+        trades  = len(closed)
+        wins    = sum(1 for t in closed if t.get("pnl_usd", 0.0) > 0)
         bots_data.append({
             "bot":            bot["name"],
             "type":           bot.get("category", "auto"),
             "username":       "",
-            "sprint_pnl_usd": round(pnl, 2),
-            "sprint_pnl_pct": round(bot.get("pnl_pct", 0.0), 2),
+            "sprint_pnl_usd": pnl,
+            "sprint_pnl_pct": pnl_pct,
             "sprint_trades":  trades,
             "sprint_wins":    wins,
             "win_rate":       round(wins / trades * 100, 1) if trades > 0 else 0.0,
         })
-
     result_file = os.path.join(unified_dir, f"{sprint_id}_auto.json")
     with open(result_file, "w") as f:
         json.dump({

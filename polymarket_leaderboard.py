@@ -80,46 +80,55 @@ def get_live_bots():
     """Read current sprint P&L directly from both state files."""
     bots = []
 
-    # Copy-trader bots
+    # Copy-trader bots — closed P&L only, filtered to current cycle start
     try:
         with open(STATE_FILE) as f:
             state = json.load(f)
-        sprint_id = state.get("sprint_id", "")
+        cs = load_cycle_state()
+        sprint_id    = state.get("sprint_id", "")
+        sprint_start = cs.get("cycle_started_at", "2026-01-01")
         for b in state.get("bots", []):
-            sp_pnl = b.get("sprint_pnl_usd", b.get("pnl_usd", 0.0))
-            sp_trades = b.get("sprint_trades", 0)
-            sp_wins = b.get("sprint_wins", 0)
+            closed  = [t for t in b.get("closed_trades", [])
+                       if t.get("closed_at", "") >= sprint_start]
+            pnl     = round(sum(t.get("pnl_usd", 0.0) for t in closed), 4)
+            pnl_pct = round((pnl / STARTING_CAPITAL) * 100, 2)
+            trades  = len(closed)
+            wins    = sum(1 for t in closed if t.get("pnl_usd", 0.0) > 0)
             bots.append({
                 "bot":             b["name"],
                 "type":            "copy",
                 "username":        b.get("trader", ""),
                 "sprint_id":       sprint_id,
-                "sprint_pnl_usd":  round(sp_pnl, 4),
-                "sprint_pnl_pct":  round((sp_pnl / STARTING_CAPITAL) * 100, 2),
-                "sprint_trades":   sp_trades,
-                "sprint_wins":     sp_wins,
-                "win_rate":        round(sp_wins / sp_trades * 100, 1) if sp_trades > 0 else 0.0,
+                "sprint_pnl_usd":  pnl,
+                "sprint_pnl_pct":  pnl_pct,
+                "sprint_trades":   trades,
+                "sprint_wins":     wins,
+                "win_rate":        round(wins / trades * 100, 1) if trades > 0 else 0.0,
                 "active_positions": len(b.get("positions", {})),
             })
     except Exception:
         pass
 
-    # Autonomous bots
+    # Autonomous bots — closed P&L only (open positions excluded)
     try:
         with open(AUTO_STATE) as f:
             state = json.load(f)
-        sprint_id = state.get("sprint_id", "")
+        sprint_id    = state.get("sprint_id", "")
+        sprint_start = state.get("sprint_started_at", "")
         for b in state.get("bots", []):
-            pnl = b.get("pnl_usd", 0.0)
-            trades = b.get("total_trades", 0)
-            wins = b.get("wins", 0)
+            closed  = [t for t in b.get("closed_trades", [])
+                       if not sprint_start or t.get("closed_at", "") >= sprint_start]
+            pnl     = round(sum(t.get("pnl_usd", 0.0) for t in closed), 4)
+            pnl_pct = round((pnl / STARTING_CAPITAL) * 100, 2)
+            trades  = len(closed)
+            wins    = sum(1 for t in closed if t.get("pnl_usd", 0.0) > 0)
             bots.append({
                 "bot":             b["name"],
                 "type":            b.get("category", "auto"),
                 "username":        "",
                 "sprint_id":       sprint_id,
-                "sprint_pnl_usd":  round(pnl, 4),
-                "sprint_pnl_pct":  round(b.get("pnl_pct", 0.0), 2),
+                "sprint_pnl_usd":  pnl,
+                "sprint_pnl_pct":  pnl_pct,
                 "sprint_trades":   trades,
                 "sprint_wins":     wins,
                 "win_rate":        round(wins / trades * 100, 1) if trades > 0 else 0.0,
@@ -201,8 +210,9 @@ def aggregate(completed_sprints, live_bots):
         t["overall_win_rate"] = round(t["total_wins"] / tr * 100, 1) if tr > 0 else 0.0
         result.append(t)
 
-    # Exclude ghost bots — retired bots with no trades across all sprints
-    result = [t for t in result if t["total_trades"] > 0]
+    # Exclude ghost bots — retired bots with no trades AND not in current live fleet
+    live_names = {b["bot"] for b in live_bots}
+    result = [t for t in result if t["total_trades"] > 0 or t["bot"] in live_names]
 
     # Sort by cumulative_pnl_usd desc, then points as tiebreaker
     result.sort(key=lambda x: (x["cumulative_pnl_usd"], x["points"]), reverse=True)
