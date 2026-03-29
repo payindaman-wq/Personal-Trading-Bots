@@ -1,16 +1,25 @@
 {
-  "comp_id": "spread-20260323-0040",
+  "comp_id": "spread-20260329-0842",
   "league": "swing",
   "duration_hours": 168,
-  "started_at": "2026-03-23T00:40:01.219064+00:00",
+  "started_at": "2026-03-29T09:00:00+00:00",
   "pairs": [
     "BTC/USD",
     "ETH/USD",
     "SOL/USD",
     "XRP/USD",
+    "DOGE/USD",
     "AVAX/USD",
     "LINK/USD",
-    "AAVE/USD"
+    "UNI/USD",
+    "AAVE/USD",
+    "NEAR/USD",
+    "APT/USD",
+    "SUI/USD",
+    "ARB/USD",
+    "OP/USD",
+    "ADA/USD",
+    "POL/USD"
   ],
   "bots": [
     "brynja",
@@ -32,5 +41,5 @@
   "fee_rate": 0.001,
   "status": "active",
   "cycle": 1,
-  "sprint_in_cycle": 2
+  "sprint_in_cycle": 3
 }

@@ -30,5 +30,7 @@
   ],
   "starting_capital": 1000.0,
   "fee_rate": 0.001,
-  "status": "active"
+  "status": "active",
+  "cycle": 1,
+  "sprint_in_cycle": 1
 }

@@ -1,0 +1,32 @@
+{
+  "bot": "ingrid",
+  "competition_id": "spread-20260323-0040",
+  "league": "spread",
+  "duration_hours": 168,
+  "started_at": "2026-03-23T00:40:01.219064+00:00",
+  "pairs": [
+    "BTC/USD",
+    "ETH/USD",
+    "SOL/USD",
+    "XRP/USD",
+    "AVAX/USD",
+    "LINK/USD",
+    "AAVE/USD"
+  ],
+  "starting_capital": 1000.0,
+  "fee_rate": 0.001,
+  "equity": 999.11,
+  "peak_equity": 1000.0,
+  "positions": [],
+  "stats": {
+    "total_trades": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "total_pnl_usd": -0.61,
+    "total_pnl_pct": 0.0,
+    "total_fees": 0.28,
+    "max_drawdown_pct": 0.0,
+    "current_equity": 999.72
+  }
+}

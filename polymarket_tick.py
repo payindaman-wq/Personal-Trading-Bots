@@ -266,6 +266,31 @@ def write_dashboard(state):
                 "opened_at":      pos.get("opened_at", ""),
             })
 
+    # Closed positions this sprint
+    sprint_started_at_local = state.get("sprint_started_at", "")
+    closed_positions = []
+    for b in raw_bots:
+        for ct in b.get("closed_trades", []):
+            closed_at = ct.get("closed_at", ct.get("opened_at", ""))
+            if sprint_started_at_local and closed_at and closed_at < sprint_started_at_local:
+                continue
+            closed_positions.append({
+                "bot":          b.get("name", ""),
+                "trader":       b.get("trader", ""),
+                "market":       ct.get("title", ""),
+                "outcome":      ct.get("outcome", ""),
+                "side":         ct.get("side", "BUY"),
+                "entry_price":  ct.get("entry_price", 0),
+                "exit_price":   ct.get("exit_price", 0),
+                "cost_usd":     ct.get("cost_usd", 0),
+                "proceeds_usd": ct.get("proceeds_usd", 0),
+                "pnl_usd":      ct.get("pnl_usd", 0),
+                "pnl_pct":      ct.get("pnl_pct", 0),
+                "reason":       ct.get("reason", ""),
+                "opened_at":    ct.get("opened_at", ""),
+                "closed_at":    closed_at,
+            })
+
     tracked = []
     for t in state.get("tracked_traders", []):
         tracked.append({
@@ -305,6 +330,7 @@ def write_dashboard(state):
         "bots":              normalized_bots,
         "tracked_traders":   tracked,
         "open_positions":    open_positions,
+        "closed_positions":  closed_positions,
         "recent_trades":     recent_trades,
     }
 

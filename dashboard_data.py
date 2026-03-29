@@ -876,6 +876,8 @@ def build():
             "sprint_duration_hours": 168,
             "active_sprint":         arb_active_id,
             "total_sprints":         arb_lb.get("total_sprints", 0),
+            "archived_sprints":      arb_lb.get("archived", 0),
+            "sprint_in_cycle":       arb_lb.get("sprint_in_cycle", 0),
             "cumulative_rankings":   arb_lb.get("rankings", []),
             "live_sprint":           get_live_sprint("arb", arb_active_id),
         }
@@ -886,6 +888,8 @@ def build():
             "sprint_duration_hours": 168,
             "active_sprint":         spread_active_id,
             "total_sprints":         spread_lb.get("total_sprints", 0),
+            "archived_sprints":      spread_lb.get("archived", 0),
+            "sprint_in_cycle":       spread_lb.get("sprint_in_cycle", 0),
             "cumulative_rankings":   spread_lb.get("rankings", []),
             "live_sprint":           get_live_sprint("spread", spread_active_id),
         }

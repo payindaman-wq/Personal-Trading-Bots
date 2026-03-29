@@ -1,12 +1,13 @@
 {
   "cycle": 1,
-  "sprint_in_cycle": 2,
+  "sprint_in_cycle": 3,
   "sprints_per_cycle": 4,
   "status": "active",
   "cycle_started_at": "2026-03-15T21:44:00+00:00",
   "sprints": [
-    "spread-sprint-1-cleared",
-    "spread-20260316-0009"
+    "spread-20260316-0009",
+    "spread-20260323-0040",
+    "spread-20260329-0842"
   ],
   "last_archived": "spread-20260316-0009"
 }

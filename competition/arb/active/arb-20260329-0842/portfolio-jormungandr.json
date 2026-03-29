@@ -1,0 +1,39 @@
+{
+  "bot": "jormungandr",
+  "competition_id": "arb-20260329-0842",
+  "league": "arb",
+  "duration_hours": 168,
+  "started_at": "2026-03-29T08:42:38.841809+00:00",
+  "pair_a": "ARB/USD",
+  "pair_b": "OP/USD",
+  "spread_name": "ARB/OP",
+  "starting_capital": 1000.0,
+  "fee_rate": 0.001,
+  "equity": 999.65,
+  "peak_equity": 1000.0,
+  "positions": [
+    {
+      "pair": "ARB/USD vs OP/USD",
+      "direction": "short",
+      "pair_a": "ARB/USD",
+      "pair_b": "OP/USD",
+      "entry_ratio": 0.87613736,
+      "entry_z": 1.9139,
+      "entry_price_a": 0.08955,
+      "entry_price_b": 0.10221,
+      "size_usd": 350.0,
+      "opened_at": "2026-03-29T09:00:02.129246+00:00"
+    }
+  ],
+  "stats": {
+    "total_trades": 0,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "total_pnl_usd": 0.0,
+    "total_pnl_pct": 0.0,
+    "total_fees": 0.35,
+    "max_drawdown_pct": 0.0,
+    "current_equity": 999.65
+  }
+}

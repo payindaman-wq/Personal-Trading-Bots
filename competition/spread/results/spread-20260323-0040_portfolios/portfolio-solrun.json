@@ -1,0 +1,47 @@
+{
+  "bot": "solrun",
+  "competition_id": "spread-20260323-0040",
+  "league": "spread",
+  "duration_hours": 168,
+  "started_at": "2026-03-23T00:40:01.219064+00:00",
+  "pairs": [
+    "BTC/USD",
+    "ETH/USD",
+    "SOL/USD",
+    "XRP/USD",
+    "AVAX/USD",
+    "LINK/USD",
+    "AAVE/USD"
+  ],
+  "starting_capital": 1000.0,
+  "fee_rate": 0.001,
+  "equity": 990.31,
+  "peak_equity": 1000.0,
+  "positions": [],
+  "stats": {
+    "total_trades": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "total_pnl_usd": -9.39,
+    "total_pnl_pct": -3.0289,
+    "total_fees": 0.6,
+    "max_drawdown_pct": 0.969,
+    "current_equity": 990.31,
+    "sum_losses_usd": -9.39
+  },
+  "closed_trades": [
+    {
+      "pair": "AAVE/USD",
+      "direction": "short",
+      "entry_price": 107.3,
+      "exit_price": 110.55,
+      "size_usd": 300.0,
+      "pnl_pct": -3.03,
+      "net_pnl": -9.39,
+      "reason": "SL",
+      "opened_at": "2026-03-23T03:30:05.772645+00:00",
+      "closed_at": "2026-03-24T09:00:05.821959+00:00"
+    }
+  ]
+}

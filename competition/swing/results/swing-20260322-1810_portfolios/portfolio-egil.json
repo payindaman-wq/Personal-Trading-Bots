@@ -1,0 +1,47 @@
+{
+  "bot": "egil",
+  "competition_id": "swing-20260322-1810",
+  "league": "swing",
+  "duration_hours": 168,
+  "started_at": "2026-03-22T18:10:01.626490+00:00",
+  "pairs": [
+    "BTC/USD",
+    "ETH/USD",
+    "SOL/USD",
+    "XRP/USD",
+    "AVAX/USD",
+    "LINK/USD",
+    "AAVE/USD"
+  ],
+  "starting_capital": 1000.0,
+  "fee_rate": 0.001,
+  "equity": 1001.28,
+  "peak_equity": 1000.0,
+  "positions": [],
+  "stats": {
+    "total_trades": 2,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "total_pnl_usd": 1.88,
+    "total_pnl_pct": -3.604,
+    "total_fees": 0.8966,
+    "max_drawdown_pct": 1.141,
+    "current_equity": 988.29,
+    "sum_losses_usd": -11.11
+  },
+  "closed_trades": [
+    {
+      "pair": "BTC/USD",
+      "direction": "short",
+      "entry_price": 68229.0,
+      "exit_price": 70688.0,
+      "size_usd": 300.0,
+      "pnl_pct": -3.6,
+      "net_pnl": -11.11,
+      "reason": "SL",
+      "opened_at": "2026-03-22T22:30:04.648877+00:00",
+      "closed_at": "2026-03-23T11:30:04.851741+00:00"
+    }
+  ]
+}

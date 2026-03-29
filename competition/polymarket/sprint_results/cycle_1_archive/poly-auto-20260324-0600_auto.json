@@ -1,0 +1,288 @@
+{
+  "sprint_id": "poly-auto-20260324-0600",
+  "started_at": "2026-03-24T06:00:00+00:00",
+  "ended_at": "2026-03-24T06:10:00+00:00",
+  "note": "Sprint lasted ~10 minutes due to service restart. All bots reset at $1000 with minimal activity.",
+  "bots": [
+    {
+      "bot": "ullr",
+      "type": "auto",
+      "username": "",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "sigyn",
+      "type": "auto",
+      "username": "",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "hlin",
+      "type": "auto",
+      "username": "",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "freya",
+      "type": "auto",
+      "username": "",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "saga",
+      "type": "auto",
+      "username": "",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "njal",
+      "type": "auto",
+      "username": "",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "skadi",
+      "type": "auto",
+      "username": "",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "rind",
+      "type": "auto",
+      "username": "",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "aegir",
+      "type": "auto",
+      "username": "",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "urd",
+      "type": "auto",
+      "username": "",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "ran",
+      "type": "auto",
+      "username": "",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "eir",
+      "type": "auto",
+      "username": "",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "huginn",
+      "type": "auto",
+      "username": "",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "muninn",
+      "type": "auto",
+      "username": "",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "loki",
+      "type": "auto",
+      "username": "",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "fenrir",
+      "type": "auto",
+      "username": "",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "nott",
+      "type": "auto",
+      "username": "",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "mani",
+      "type": "auto",
+      "username": "",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "var",
+      "type": "auto",
+      "username": "",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "vor",
+      "type": "auto",
+      "username": "",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "gna",
+      "type": "auto",
+      "username": "",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "fulla",
+      "type": "auto",
+      "username": "",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "sjofn",
+      "type": "auto",
+      "username": "",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "lofn",
+      "type": "auto",
+      "username": "",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "syn",
+      "type": "auto",
+      "username": "",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "snotra",
+      "type": "auto",
+      "username": "",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "grid",
+      "type": "auto",
+      "username": "",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "gerd",
+      "type": "auto",
+      "username": "",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    }
+  ]
+}

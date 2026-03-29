@@ -1,17 +1,22 @@
 {
-  "comp_id": "arb-20260323-0110",
+  "comp_id": "arb-20260329-0842",
   "league": "arb",
   "duration_hours": 168,
-  "started_at": "2026-03-23T01:10:01.198736+00:00",
+  "started_at": "2026-03-29T09:00:00+00:00",
   "pairs": [
     "AAVE/ETH",
     "AVAX/SOL",
     "SOL/BTC",
     "ETH/BTC",
     "XRP/BTC",
+    "DOGE/BTC",
+    "ARB/OP",
+    "NEAR/SOL",
+    "SUI/SOL",
+    "UNI/ETH",
     "SOL/ETH",
     "LINK/ETH",
-    "LINK/BTC",
+    "LINK/AAVE",
     "AVAX/ETH"
   ],
   "bots": [
@@ -35,5 +40,5 @@
   "fee_rate": 0.001,
   "status": "active",
   "cycle": 1,
-  "sprint_in_cycle": 2
+  "sprint_in_cycle": 3
 }
