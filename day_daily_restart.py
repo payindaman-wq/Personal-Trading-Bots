@@ -5,9 +5,9 @@ day_daily_restart.py - Daily 09:00 UTC (2:00am PDT) restart for Day Trading Leag
 Called by cron: 0 9 * * *
 
 Logic:
-  - If no active sprint: start new 24h sprint immediately.
-  - If active sprint >= 20h old: expire it by patching duration_hours so the
-    tick archives it on its next run; watchdog restarts within 10 min.
+  - If no active sprint: start new 24h sprint, patch started_at to 09:00:00 UTC.
+  - If active sprint >= 20h old: archive directly via competition_score.py,
+    start new sprint, patch started_at to 09:00:00 UTC.
   - If active sprint < 20h old: skip (sprint started recently today, keep it).
 """
 import os
@@ -20,7 +20,8 @@ WORKSPACE           = os.environ.get("WORKSPACE", "/root/.openclaw/workspace")
 ACTIVE_DIR          = os.path.join(WORKSPACE, "competition", "active")
 CYCLE_STATE_PATH    = os.path.join(WORKSPACE, "competition", "cycle_state.json")
 START_SCRIPT        = "/root/.openclaw/skills/competition-start/scripts/competition_start.py"
-ODIN_BEST_DAY      = os.path.join(WORKSPACE, "research", "day", "best_strategy.yaml")
+SCORE_SCRIPT        = "/root/.openclaw/skills/competition-score/scripts/competition_score.py"
+ODIN_BEST_DAY       = os.path.join(WORKSPACE, "research", "day", "best_strategy.yaml")
 AUTOBOTDAY_STRATEGY = os.path.join(WORKSPACE, "fleet", "autobotday", "strategy.yaml")
 
 
@@ -71,6 +72,37 @@ def inject_odin_strategy():
         print(f"  [odin] Injection failed: {e} — AutoBotDay keeps current strategy.")
 
 
+def archive_current(comp_id):
+    """Score and archive the current sprint directly (no watchdog wait)."""
+    result = subprocess.run(
+        ["python3", SCORE_SCRIPT, comp_id, "--archive"],
+        capture_output=True, text=True, cwd=WORKSPACE,
+    )
+    if result.returncode == 0:
+        print(f"  Archived: {comp_id}")
+        return True
+    else:
+        print(f"  ERROR archiving {comp_id}: {result.stderr[:300]}")
+        return False
+
+
+def patch_start_time(comp_id):
+    """Patch the new sprint's started_at to exactly 09:00:00 UTC today."""
+    target_ts = datetime.now(timezone.utc).replace(
+        hour=9, minute=0, second=0, microsecond=0
+    ).isoformat()
+    meta_path = os.path.join(ACTIVE_DIR, comp_id, "meta.json")
+    if not os.path.exists(meta_path):
+        print(f"  WARNING: meta.json not found for {comp_id} — cannot patch start time.")
+        return
+    with open(meta_path) as f:
+        meta = json.load(f)
+    meta["started_at"] = target_ts
+    with open(meta_path, "w") as f:
+        json.dump(meta, f, indent=2)
+    print(f"  Patched started_at -> {target_ts}")
+
+
 def advance_cycle_if_needed(cycle_state):
     """If current cycle has completed sprints_per_cycle sprints, archive and advance."""
     sprint_in_cycle   = cycle_state.get("sprint_in_cycle", 0)
@@ -100,29 +132,31 @@ def advance_cycle_if_needed(cycle_state):
 
 
 def start_new():
-    cycle_state = load_cycle_state()
-    cycle_state = advance_cycle_if_needed(cycle_state)
+    """Start a new 24h sprint. Returns new comp_id on success, None on failure."""
+    cycle_state  = load_cycle_state()
+    cycle_state  = advance_cycle_if_needed(cycle_state)
     new_sprint_n = cycle_state.get("sprint_in_cycle", 0) + 1
     result = subprocess.run(
         ["python3", START_SCRIPT, "24"],
         capture_output=True, text=True, cwd=WORKSPACE,
     )
     if result.returncode == 0:
-        data = json.loads(result.stdout)
+        data    = json.loads(result.stdout)
         comp_id = data["comp_id"]
         print(f"  Started: {comp_id}")
-        # Update cycle state
         sprints = cycle_state.get("sprints", [])
         if comp_id not in sprints:
             sprints.append(comp_id)
         cycle_state["sprint_in_cycle"] = new_sprint_n
-        cycle_state["sprints"] = sprints
+        cycle_state["sprints"]         = sprints
         if not cycle_state.get("cycle_started_at"):
             cycle_state["cycle_started_at"] = datetime.now(timezone.utc).isoformat()
         save_cycle_state(cycle_state)
         print(f"  Cycle {cycle_state['cycle']}, Sprint {new_sprint_n} started")
+        return comp_id
     else:
         print(f"  ERROR starting: {result.stderr[:300]}")
+        return None
 
 
 def main():
@@ -135,19 +169,22 @@ def main():
         print("  No active sprint — starting new 24h sprint.")
         subprocess.run([sys.executable, "promotion_check.py"], cwd=WORKSPACE)
         inject_odin_strategy()
-        start_new()
+        new_comp_id = start_new()
+        if new_comp_id:
+            patch_start_time(new_comp_id)
         return
 
     elapsed = hours_running(meta)
     print(f"  Active: {meta['comp_id']}  ({elapsed:.1f}h elapsed)")
 
     if elapsed >= 20.0:
-        print(f"  Sprint >= 20h — patching to expire now. Tick will archive; watchdog restarts.")
+        print(f"  Sprint >= 20h — archiving directly and starting new sprint.")
         subprocess.run([sys.executable, "promotion_check.py"], cwd=WORKSPACE)
         inject_odin_strategy()
-        meta["duration_hours"] = round(elapsed - 0.01, 4)
-        with open(os.path.join(comp_dir, "meta.json"), "w") as f:
-            json.dump(meta, f, indent=2)
+        if archive_current(meta["comp_id"]):
+            new_comp_id = start_new()
+            if new_comp_id:
+                patch_start_time(new_comp_id)
     else:
         print(f"  Sprint < 20h old — keeping current sprint.")
 

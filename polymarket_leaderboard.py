@@ -201,6 +201,9 @@ def aggregate(completed_sprints, live_bots):
         t["overall_win_rate"] = round(t["total_wins"] / tr * 100, 1) if tr > 0 else 0.0
         result.append(t)
 
+    # Exclude ghost bots — retired bots with no trades across all sprints
+    result = [t for t in result if t["total_trades"] > 0]
+
     # Sort by cumulative_pnl_usd desc, then points as tiebreaker
     result.sort(key=lambda x: (x["cumulative_pnl_usd"], x["points"]), reverse=True)
     for i, r in enumerate(result):
