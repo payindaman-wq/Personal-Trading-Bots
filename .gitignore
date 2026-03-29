@@ -19,8 +19,6 @@ competition/cron.log
 competition/backtest_results.json
 competition/swing/active/
 competition/swing/price_history/
-competition/swing/swing_leaderboard.json
-competition/swing/swing_cycle_state.json
 competition/swing/tick.log
 competition/swing/leaderboard.log
 competition/polymarket/state.json

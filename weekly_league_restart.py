@@ -38,6 +38,12 @@ LEAGUES = {
 
 POLYMARKET_AUTO_STATE = os.path.join(WORKSPACE, "competition", "polymarket", "auto_state.json")
 
+CYCLE_STATE_FILES = {
+    "swing":  os.path.join(WORKSPACE, "competition", "swing", "swing_cycle_state.json"),
+    "arb":    os.path.join(WORKSPACE, "competition", "arb",   "arb_cycle_state.json"),
+    "spread": os.path.join(WORKSPACE, "competition", "spread","spread_cycle_state.json"),
+}
+
 
 def inject_odin_swing_strategy(dry_run=False):
     if not os.path.exists(ODIN_SWING_BEST):
@@ -61,6 +67,43 @@ def find_active_meta(active_dir):
     with open(meta_path) as f:
         meta = json.load(f)
     return (comp_dir, meta) if meta.get("status") == "active" else (None, None)
+
+
+def register_new_sprint_in_cycle(league, comp_id, active_dir):
+    """Register a newly started sprint in the cycle state and stamp meta.json.
+
+    Called immediately after each new sprint starts so sprint_in_cycle is always
+    correct — including while the sprint is still live, not just after it ends.
+    """
+    cs_path = CYCLE_STATE_FILES.get(league)
+    if not cs_path:
+        return
+
+    try:
+        with open(cs_path) as f:
+            cs = json.load(f)
+    except Exception:
+        cs = {"cycle": 1, "sprint_in_cycle": 0, "sprints_per_cycle": 4,
+              "status": "active", "sprints": []}
+
+    if comp_id not in cs.get("sprints", []):
+        cs.setdefault("sprints", []).append(comp_id)
+    cs["sprint_in_cycle"] = len(cs["sprints"])
+
+    with open(cs_path, "w") as f:
+        json.dump(cs, f, indent=2)
+
+    # Stamp cycle + sprint_in_cycle into meta.json
+    meta_path = os.path.join(active_dir, comp_id, "meta.json")
+    if os.path.exists(meta_path):
+        with open(meta_path) as f:
+            meta = json.load(f)
+        meta["cycle"]          = cs.get("cycle", 1)
+        meta["sprint_in_cycle"] = cs["sprint_in_cycle"]
+        with open(meta_path, "w") as f:
+            json.dump(meta, f, indent=2)
+
+    print(f"  [{league.upper()}] Cycle {cs.get('cycle',1)}, Sprint {cs['sprint_in_cycle']}/{cs.get('sprints_per_cycle',4)} registered in cycle state.")
 
 
 def expire_and_archive(league, cfg, now, dry_run):
@@ -131,6 +174,8 @@ def start_new_sprint(league, cfg, target_ts, dry_run):
         with open(meta_path, "w") as f:
             json.dump(meta, f, indent=2)
         print(f"  [{league.upper()}] Patched started_at -> {target_ts}")
+
+    register_new_sprint_in_cycle(league, comp_id, cfg["active_dir"])
 
 
 parser = argparse.ArgumentParser()
