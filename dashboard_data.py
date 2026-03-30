@@ -620,6 +620,7 @@ def get_spread_score():
 
 ODIN_DAY_RESULTS   = "/root/.openclaw/workspace/research/day/results.tsv"
 ODIN_SWING_RESULTS = "/root/.openclaw/workspace/research/swing/results.tsv"
+FREYA_PM_RESULTS   = "/root/.openclaw/workspace/research/pm/results.tsv"
 
 
 
@@ -628,7 +629,7 @@ MIMIR_LOG = "/root/.openclaw/workspace/research/mimir_log.jsonl"
 
 def get_mimir_state():
     """Read Mimir analysis log and return dashboard state."""
-    state = {"analyses": [], "last_day": None, "last_swing": None, "total_analyses": 0}
+    state = {"analyses": [], "last_day": None, "last_swing": None, "last_pm": None, "total_analyses": 0}
     if not os.path.exists(MIMIR_LOG):
         return state
     entries = []
@@ -665,6 +666,8 @@ def get_mimir_state():
             state["last_day"] = {k: v for k, v in entry_full.items() if k != "analysis"}
         if lg == "swing" and state["last_swing"] is None:
             state["last_swing"] = {k: v for k, v in entry_full.items() if k != "analysis"}
+        if lg == "pm" and state["last_pm"] is None:
+            state["last_pm"] = {k: v for k, v in entry_full.items() if k != "analysis"}
     state["analyses"]       = analyses
     state["total_analyses"] = len(entries)
     return state
@@ -817,9 +820,68 @@ def get_odin_research():
         result["sparkline"] = [r["sharpe"] for r in rows[-30:]]
         return result
 
+    def parse_freya():
+        result = {
+            "generations": 0, "improvements": 0,
+            "best_adj_score": None, "best_sharpe": None,
+            "best_roi": None, "best_n_bets": None,
+            "last_activity": None, "service_running": False,
+        }
+        try:
+            rc = subprocess.run(["systemctl", "is-active", "freya.service"],
+                                capture_output=True, text=True, timeout=5)
+            result["service_running"] = rc.stdout.strip() == "active"
+        except Exception:
+            pass
+        if not os.path.exists(FREYA_PM_RESULTS):
+            return result
+        rows = []
+        best_row = None
+        improvements = 0
+        with open(FREYA_PM_RESULTS) as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("gen"):
+                    continue
+                parts = line.split("	")
+                if len(parts) < 7:
+                    continue
+                try:
+                    adj = float(parts[5])
+                except (ValueError, IndexError):
+                    continue
+                rows.append({
+                    "sharpe":    float(parts[1]) if parts[1] else 0,
+                    "roi":       float(parts[3]) if parts[3] else 0,
+                    "n_bets":    int(parts[4])   if parts[4] else 0,
+                    "adj_score": adj,
+                    "status":    parts[6],
+                    "ts":        parts[8] if len(parts) > 8 else "",
+                })
+                if parts[6] == "new_best":
+                    improvements += 1
+                    best_row = rows[-1]
+        import json as _json
+        try:
+            with open("/root/.openclaw/workspace/research/pm/gen_state.json") as _f:
+                _gs = _json.load(_f)
+            result["generations"] = _gs.get("gen", len(rows))
+        except Exception:
+            result["generations"] = len(rows)
+        result["improvements"] = improvements
+        if best_row:
+            result["best_adj_score"] = round(best_row["adj_score"], 4)
+            result["best_sharpe"]    = round(best_row["sharpe"], 4)
+            result["best_roi"]       = round(best_row["roi"], 2)
+            result["best_n_bets"]    = best_row["n_bets"]
+        if rows:
+            result["last_activity"] = rows[-1]["ts"]
+        return result
+
     return {
         "day":   parse_league(ODIN_DAY_RESULTS,   "odin_day.service"),
         "swing": parse_league(ODIN_SWING_RESULTS, "odin_swing.service"),
+        "pm":    parse_freya(),
     }
 
 
