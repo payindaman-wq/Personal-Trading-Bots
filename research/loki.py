@@ -15,6 +15,7 @@ import json
 import os
 import re
 import shutil
+import yaml
 import subprocess
 import sys
 import urllib.request
@@ -29,6 +30,15 @@ RESEARCHER       = os.path.join(RESEARCH, "odin_researcher_v2.py")
 FREYA_RESEARCHER = os.path.join(RESEARCH, "freya_researcher.py")
 PM_RESEARCH_DIR  = os.path.join(RESEARCH, "pm")
 PM_FLEET_DIR     = os.path.join(WORKSPACE, "fleet", "polymarket")
+
+FREYA_SLOTS = ["mist", "kara", "thrud"]
+PM_PERSONAS = {
+    "sports":       "You are a sports analytics expert specializing in predicting sporting event outcomes.",
+    "politics":     "You are a political analyst specializing in predicting electoral and policy outcomes.",
+    "crypto":       "You are a cryptocurrency analyst specializing in predicting crypto-related outcomes.",
+    "economics":    "You are an economic data analyst specializing in predicting macroeconomic outcomes.",
+    "world_events": "You are a global events analyst specializing in predicting world news outcomes.",
+}
 
 ANTHROPIC_SECRET = "/root/.openclaw/secrets/anthropic.json"
 ANTHROPIC_MODEL  = "claude-haiku-4-5-20251001"
@@ -336,6 +346,74 @@ def apply_freya_constant(constant, new_value):
     return True, f"Changed {constant} -> {new_value}"
 
 
+
+def loki_inject_freya_strategy(gen):
+    """Inject current FREYA best_strategy into mist/kara/thrud at every Mimir milestone."""
+    best_path = os.path.join(PM_RESEARCH_DIR, "best_strategy.yaml")
+    if not os.path.exists(best_path):
+        print("  [loki] inject: no best_strategy.yaml yet — skipping")
+        return []
+
+    with open(best_path) as f:
+        best = yaml.safe_load(f)
+
+    cat     = best.get("category", "world_events")
+    persona = PM_PERSONAS.get(cat, PM_PERSONAS["world_events"])
+    injected = []
+
+    for i, bot_name in enumerate(FREYA_SLOTS):
+        strat_path = os.path.join(PM_FLEET_DIR, bot_name, "strategy.yaml")
+        if not os.path.exists(os.path.dirname(strat_path)):
+            print("  [loki] inject: " + bot_name + " fleet dir missing — skipping")
+            continue
+
+        edge_base = best.get("min_edge_pts", 0.08)
+        if i == 1:
+            edge = round(min(0.25, edge_base + 0.03), 3)   # kara: conservative
+        elif i == 2:
+            edge = round(max(0.03, edge_base - 0.02), 3)   # thrud: aggressive
+        else:
+            edge = edge_base                                # mist: exact champion
+
+        strategy = {
+            "name":           bot_name,
+            "category":       cat,
+            "type":           "opinion",
+            "description":    "FREYA research slot — gen " + str(gen) + " evolved strategy",
+            "prompt_persona": persona,
+            "market_filter": {
+                "include_keywords":    list(best.get("include_keywords", [])),
+                "exclude_keywords":    list(best.get("exclude_keywords", [])),
+                "price_range":         list(best.get("price_range", [0.05, 0.90])),
+                "min_liquidity_usd":   best.get("min_liquidity_usd", 500),
+                "max_days_to_resolve": best.get("max_days_to_resolve", 30),
+            },
+            "edge": {
+                "min_edge_pts":     edge,
+                "min_confidence":   "medium",
+                "max_positions":    8,
+                "max_position_pct": best.get("max_position_pct", 0.10),
+            },
+            "risk": {
+                "stop_if_down_pct": 20,
+                "starting_capital": 1000.0,
+            },
+        }
+
+        if not DRY_RUN:
+            with open(strat_path, "w") as f:
+                yaml.dump(strategy, f, default_flow_style=False, allow_unicode=True)
+
+        print("  [loki] inject: " + bot_name + " <- gen " + str(gen) + " champion (cat=" + cat + ", edge=" + str(edge) + ")")
+        injected.append(bot_name)
+
+    if injected and not DRY_RUN:
+        rel_paths = [os.path.relpath(os.path.join(PM_FLEET_DIR, b, "strategy.yaml"), WORKSPACE)
+                     for b in injected]
+        git_commit(rel_paths, "[loki] MIMIR/PM Gen " + str(gen) + ": inject FREYA champion -> " + ", ".join(injected))
+
+    return injected
+
 def process_pm_entry(entry):
     """Handle PM league Mimir entries."""
     ts              = entry.get("ts", "")
@@ -393,6 +471,13 @@ def process_pm_entry(entry):
             actions.append(f"escalated(Phase2): {desc[:60]}")
     else:
         print(f"  [loki] No PM code change keywords — program.md only")
+
+    # Step 3: Inject current best strategy into mist/kara/thrud
+    injected = loki_inject_freya_strategy(gen)
+    if injected:
+        actions.append("freya_inject: " + ", ".join(injected))
+    else:
+        actions.append("freya_inject: skipped")
 
     write_loki_log(ts, "pm", gen, actions)
 
