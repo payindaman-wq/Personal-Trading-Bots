@@ -10,26 +10,23 @@ Maximize the **adjusted score** on 2 years of 1-hour data across BTC/USD, ETH/US
 ### Current Performance
 - **Current best adjusted score: 6.99** (Sharpe 2.2635, 471 trades, 52.7% win rate)
 - This is the number to beat.
-- **The strategy has been making only micro-gains. You MUST use the MANDATORY TEMPLATE below and change ONLY ONE value from the TIER 1 or TIER 2 list.**
 
 ### Score Math (build intuition)
 - Sharpe 2.30, 471 trades → 2.30 × 3.07 = 7.06 ✅ BEATS CURRENT
+- Sharpe 2.26, 800 trades → 2.26 × 4.00 = 9.04 ✅ MASSIVE WIN (max_open=2 target)
+- Sharpe 2.26, 600 trades → 2.26 × 3.46 = 7.82 ✅ BEATS CURRENT
 - Sharpe 2.35, 471 trades → 2.35 × 3.07 = 7.21 ✅ BEATS CURRENT
 - Sharpe 2.26, 510 trades → 2.26 × 3.19 = 7.21 ✅ BEATS CURRENT
-- Sharpe 2.40, 450 trades → 2.40 × 3.00 = 7.20 ✅ BEATS CURRENT
 - Sharpe 2.27, 471 trades → 2.27 × 3.07 = 6.97 ❌ Barely misses
 - Sharpe 2.55, 330 trades → 2.55 × 2.57 = 6.55 ❌ Not enough trades
 
-**Key insight: You need Sharpe improvement of 0.04+ without losing trades, OR trade count increase of 25+ without losing Sharpe. Do NOT reduce trades below 440.**
+**Key insight: max_open=2 is the highest-priority change. It could double trade count, pushing score to 9+. Do NOT reduce trades below 440.**
 
 ---
 
-## ⛔ ABSOLUTE RULE #1: START FROM THE MANDATORY TEMPLATE ⛔
+## ⛔ ABSOLUTE RULE #1: THE YAML BELOW IS THE ONE AND ONLY STARTING POINT ⛔
 
-**The block below labeled "MANDATORY TEMPLATE" is the ONLY correct starting point.**
-**IGNORE everything in the "Current Best Strategy" section at the bottom — it is WRONG, OUTDATED, and uses incorrect pairs. Using it will waste the generation.**
-
-**START FROM THIS EXACT TEMPLATE — THIS IS THE CORRECT CURRENT BEST:**
+**Copy this EXACT block. Change ONLY the ONE parameter you choose. Every other value must be byte-for-byte identical.**
 
 ```yaml
 name: crossover
@@ -73,13 +70,13 @@ risk:
   pause_hours: 48
 ```
 
-**Copy this template exactly. Change ONLY the ONE value specified by your TIER 1 or TIER 2 choice below. Every other value must be identical to the template.**
+There is no other correct starting point. Do not use any other configuration as your base.
 
 ---
 
 ## ⛔ ABSOLUTE RULE #2: PAIRS MUST BE EXACTLY THESE THREE ⛔
 
-Your YAML output MUST contain this EXACT pairs block:
+Your output MUST contain this exact pairs block — no more, no fewer:
 
 ```
 pairs:
@@ -88,166 +85,161 @@ pairs:
 - SOL/USD
 ```
 
-❌ DO NOT include LINK/USD, ADA/USD, OP/USD, or ANY other pair.
+❌ DO NOT use: LINK/USD, ADA/USD, OP/USD, or ANY other pair.
 ✅ Exactly 3 pairs. Exactly these 3. No exceptions.
 
-**Wrong pairs = Sharpe ≈ -0.72 with ~302 trades. This wastes the entire generation.**
+**Wrong pairs = automatic failure: Sharpe ≈ -0.69, trades ≈ 300. This wastes the entire generation.**
 
 ---
 
 ## ⛔ ABSOLUTE RULE #3: DO NOT REPRODUCE THE CURRENT BEST ⛔
 
 The current best has ALL of these values simultaneously:
-`stop_loss_pct=2.42, take_profit_pct=3.55, MACD long period=26, MACD short period=49, timeout=201, RSI long value=36.56, RSI short value=60.64, size_pct=30, RSI periods=21/21, pause_if_down=8, stop_if_down=18, pause_hours=48`
+`stop_loss_pct=2.42, take_profit_pct=3.55, MACD long period=26, MACD short period=49, timeout=201, RSI long value=36.56, RSI short value=60.64, size_pct=30, max_open=1, RSI periods=21/21, pause_if_down=8, stop_if_down=18, pause_hours=48`
 
-If your output matches ALL of the above → you changed nothing → wasted generation.
-
----
-
-## ⛔ ABSOLUTE RULE #4: DO NOT CHANGE RSI VALUES ⛔
-
-**RSI threshold changes reliably cause a catastrophic failure signature: Sharpe ≈ -0.13, trades ≈ 356, win_rate ≈ 44.4%. This has appeared 8+ times in recent generations.**
-
-**DO NOT change `value: 36.56` (long RSI threshold).**
-**DO NOT change `value: 60.64` (short RSI threshold).**
-**DO NOT change `period_hours: 21` for either RSI.**
-
-These parameters are PERMANENTLY OFF LIMITS. They will not improve the score. Choose from TIER 1 or TIER 2 only.
+If your output matches ALL of the above → you changed nothing → wasted generation. Exactly one value must differ.
 
 ---
 
-## 🚫 DO NOT RETRY — CONFIRMED FAILED VALUES 🚫
+## ⛔ ABSOLUTE RULE #4: NEVER CHANGE RSI VALUES OR PERIODS ⛔
 
-These specific values have been tested and failed. Do not use them.
+**RSI changes cause a catastrophic and irreversible failure: Sharpe ≈ -0.13, trades ≈ 356, win_rate ≈ 44.4%. This has been confirmed 8+ times.**
 
-| Parameter | Failed Values (do not use) |
-|-----------|---------------------------|
+**PERMANENTLY OFF LIMITS — DO NOT CHANGE:**
+- `value: 36.56` (RSI long threshold)
+- `value: 60.64` (RSI short threshold)
+- `period_hours: 21` (both RSI indicators)
+
+These will not improve the score under any circumstances.
+
+---
+
+## 🚨 KNOWN FAILURE SIGNATURES — IF YOUR OUTPUT WOULD CAUSE THESE, DISCARD IT 🚨
+
+| Failure Type | Symptom | Caused By |
+|---|---|---|
+| Wrong pairs | Sharpe ≈ -0.69, trades ≈ 300 | Any pairs other than BTC/USD, ETH/USD, SOL/USD |
+| RSI catastrophe | Sharpe ≈ -0.13, trades ≈ 356, win_rate ≈ 44.4% | Changing any RSI value or period |
+| Bad MACD short | Sharpe ≈ -1.18, trades ≈ 183 | MACD short period ≤ 44 or ≥ 52 (except 47-51) |
+| Reproducing current best | Score = 6.99, no improvement | All 13 parameters unchanged |
+
+---
+
+## 🚫 CONFIRMED FAILED VALUES — DO NOT USE 🚫
+
+| Parameter | Failed Values |
+|-----------|--------------|
 | stop_loss_pct | 2.46, 2.72, 2.50, 2.35 and below |
 | timeout_hours | 200, 196, 192 and below, 210 and above |
-| MACD short period_hours | 45, 44 and below, 52 and above |
+| MACD short period_hours | 48 (failed), 45, 44 and below, 52 and above |
 | take_profit_pct | 3.45 and below, 3.80 and above |
-| RSI long value | ALL VALUES — DO NOT CHANGE |
-| RSI short value | ALL VALUES — DO NOT CHANGE |
+| RSI long value | ALL VALUES — PERMANENTLY FORBIDDEN |
+| RSI short value | ALL VALUES — PERMANENTLY FORBIDDEN |
 | position.size_pct | 15, 27 and below, 33 and above |
-| RSI period_hours (both) | ALL VALUES — DO NOT CHANGE |
+| RSI period_hours | ALL VALUES — PERMANENTLY FORBIDDEN |
 
 ---
 
-## ✅ WHAT TO CHANGE — TIER 1 (PREFERRED) ✅
+## ✅ PRIORITY ORDER — CHOOSE EXACTLY ONE ✅
 
-**Choose exactly ONE parameter from TIER 1 first. If you believe all TIER 1 options have been exhausted, use TIER 2.**
+**Work through options in priority order. TIER 0 first, then TIER 1, then TIER 2.**
 
 ---
 
-### OPTION A — Take profit pct (HIGHEST PRIORITY)
+## 🔥 TIER 0 — STRUCTURAL CHANGE (HIGHEST PRIORITY) 🔥
+
+### OPTION G — max_open positions
+
+**Change `max_open` from `1` to `2`.**
+
+This is the single highest-expected-value change available. Allowing 2 simultaneous positions could increase trade count from ~471 to ~700-900, pushing adjusted score from 6.99 to potentially 9.0+, even if Sharpe drops slightly.
+
+| Value | Expected Effect |
+|-------|----------------|
+| **2** | ~2× trade count → adjusted score could reach 8-10 |
+
+Score projection: Sharpe 2.10, 850 trades → 2.10 × √(850/50) = 2.10 × 4.12 = 8.65 ✅
+
+**This is the DEFAULT CHOICE if you have no strong reason to pick something else.**
+
+Example: Change only `max_open: 2` — everything else matches the mandatory template exactly.
+
+---
+
+## ✅ TIER 1 — PARAMETER TUNING (USE IF TIER 0 HAS BEEN TRIED) ✅
+
+### OPTION A — Take profit pct
 
 **Change `take_profit_pct` from `3.55` to one of these values:**
 
-| Value | TP/SL ratio | Expected effect |
-|-------|-------------|-----------------|
-| **3.60** | 1.49 | Moderate increase to reward per winning trade |
-| **3.65** | 1.51 | Meaningful improvement to expected value — **DEFAULT CHOICE** |
-| **3.70** | 1.53 | Larger expected value per trade |
-| **3.75** | 1.55 | Aggressive upside, small risk to win rate |
+| Value | TP/SL Ratio | Priority |
+|-------|-------------|----------|
+| **3.65** | 1.51 | **DEFAULT CHOICE** |
+| **3.60** | 1.49 | Good alternative |
+| **3.70** | 1.53 | Aggressive upside |
+| **3.75** | 1.55 | Higher risk to win rate |
 
 ❌ Do NOT use: 3.55 (current), 3.45 or below (failed), 3.80 or above (failed)
 
-**Example output for Option A with 3.65:**
-Change only `take_profit_pct: 3.65` — everything else matches the mandatory template exactly.
+---
+
+### OPTION B — MACD short period_hours
+
+**Change `period_hours: 49` under the SHORT entry macd_signal to one of these values:**
+
+| Value | Priority |
+|-------|----------|
+| **47** | Try first — faster signals, more trades |
+| **50** | Slightly slower, higher quality |
+| **51** | More conservative |
+
+❌ Do NOT use: 49 (current), 48 (failed), 45 (failed), 44 and below (failed), 52 and above (failed)
+
+**Note: Change ONLY the short entry period_hours. Long entry macd_signal stays at 26.**
 
 ---
 
-### OPTION B — MACD short period_hours (HIGH PRIORITY)
+### OPTION C — MACD long period_hours
 
-**Change `period_hours: 49` under the short entry macd_signal condition to one of these values:**
+**Change `period_hours: 26` under the LONG entry macd_signal to one of these values:**
 
-| Value | Effect |
-|-------|--------|
-| **47** | Faster short signals, likely more trades |
-| **48** | Slightly faster short signals — **DEFAULT CHOICE** |
-| **50** | Slightly slower, potentially higher quality signals |
-| **51** | More conservative short signals |
-
-❌ Do NOT use: 49 (current), 45 (failed), 44 or below (failed), 52 or above (failed)
-
-**Example output for Option B with 48:**
-Change only `period_hours: 48` under short entry macd_signal — long entry macd_signal stays at 26.
-
----
-
-### OPTION C — MACD long period_hours (HIGH PRIORITY)
-
-**Change `period_hours: 26` under the long entry macd_signal condition to one of these values:**
-
-| Value | Effect |
-|-------|--------|
-| **24** | Faster long signals, likely more trades |
-| **25** | Small adjustment toward faster signals — **DEFAULT CHOICE** |
-| **27** | Slightly slower long signals |
-| **28** | More conservative long signals |
+| Value | Priority |
+|-------|----------|
+| **25** | **DEFAULT CHOICE** — slightly faster |
+| **24** | Faster signals, more trades |
+| **27** | More conservative |
+| **28** | Most conservative |
 
 ❌ Do NOT use: 26 (current)
 
-**Example output for Option C with 25:**
-Change only `period_hours: 25` under long entry macd_signal — short entry macd_signal stays at 49.
+**Note: Change ONLY the long entry period_hours. Short entry macd_signal stays at 49.**
 
 ---
 
-### OPTION D — Stop loss pct (MEDIUM PRIORITY)
+### OPTION D — Stop loss pct
 
 **Change `stop_loss_pct` from `2.42` to one of these values:**
 
-| Value | Effect |
-|-------|--------|
-| **2.38** | Tighter stop, may improve Sharpe if most losses are shallow |
-| **2.40** | Small tightening — **DEFAULT CHOICE** |
-| **2.44** | Slightly wider stop, more room to breathe |
+| Value | Priority |
+|-------|----------|
+| **2.40** | **DEFAULT CHOICE** |
+| **2.38** | Tighter stop |
+| **2.44** | Slightly wider |
 | **2.48** | Wider stop |
 
 ❌ Do NOT use: 2.42 (current), 2.46 (failed), 2.72 (failed), 2.50 (failed), 2.35 and below (failed)
 
 ---
 
-### OPTION E — Timeout hours (MEDIUM PRIORITY)
+### OPTION E — Timeout hours
 
 **Change `timeout_hours` from `201` to one of these values:**
 
-| Value | Effect |
-|-------|--------|
-| **202** | Slightly longer hold |
-| **203** | Moderate extension — **DEFAULT CHOICE** |
+| Value | Priority |
+|-------|----------|
+| **203** | **DEFAULT CHOICE** |
+| **202** | Small extension |
 | **205** | Larger extension |
 | **208** | Aggressive extension |
 
-❌ Do NOT use: 201 (current), 200 (failed), 196 (failed), 192 and below (failed), 210 and above (failed)
-
----
-
-### OPTION F — Position size pct (LOWER PRIORITY)
-
-**Change `size_pct` from `30` to one of these values:**
-
-| Value | Effect |
-|-------|--------|
-| **28** | Slightly smaller positions |
-| **29** | Small reduction — **DEFAULT CHOICE** |
-| **31** | Small increase |
-| **32** | Larger positions |
-
-❌ Do NOT use: 30 (current), 27 and below (failed), 33 and above (failed), 15 (failed)
-
----
-
-## ✅ WHAT TO CHANGE — TIER 2 (USE IF TIER 1 FEELS EXHAUSTED) ✅
-
-These are structural changes with larger potential upside but higher risk. Use exactly ONE if you believe TIER 1 options are saturated.
-
----
-
-### OPTION G — max_open positions (HIGH POTENTIAL)
-
-**Change `max_open` from `1` to `2`.**
-
-| Value | Effect |
-|-------|--------|
-| **2** | Allows 2 simultaneous positions — could nearly double trade count, boosting
+❌ Do NOT use: 201 (current), 200 (failed), 196
