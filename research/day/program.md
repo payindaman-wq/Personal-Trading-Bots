@@ -147,3 +147,29 @@ entry:
   long:
     conditions:
     - indicator: price_change_pct
+      period_minutes: 30
+      operator: lt
+      value: -0.5
+    - indicator: macd_signal
+      period_minutes: 30
+      operator: eq
+      value: bullish
+  short:
+    conditions:
+    - indicator: price_change_pct
+      period_minutes: 30
+      operator: gt
+      value: 0.5
+    - indicator: macd_signal
+      period_minutes: 30
+      operator: eq
+      value: bearish
+exit:
+  take_profit_pct: 2.5
+  stop_loss_pct: 1.2
+  timeout_minutes: 720
+risk:
+  pause_if_down_pct: 4
+  stop_if_down_pct: 10
+  pause_minutes: 60
+```

@@ -1,66 +1,50 @@
 name: crossover
-style: momentum_price_change_macd_ema_trend_filter
+style: momentum_optimized
 pairs:
-- UNI/USD
-- AAVE/USD
-- XRP/USD
-- SOL/USD
-- DOGE/USD
-- NEAR/USD
 - BTC/USD
 - ETH/USD
+- SOL/USD
+- XRP/USD
+- DOGE/USD
+- AVAX/USD
+- LINK/USD
+- UNI/USD
+- AAVE/USD
+- NEAR/USD
+- APT/USD
+- SUI/USD
+- ARB/USD
+- OP/USD
+- ADA/USD
+- POL/USD
 position:
-  size_pct: 10.2
-  max_open: 2
+  size_pct: 10
+  max_open: 3
   fee_rate: 0.001
 entry:
   long:
     conditions:
-    - indicator: momentum_accelerating
-      period_minutes: 60
-      operator: eq
-      value: true
     - indicator: price_change_pct
-      period_minutes: 5
+      period_minutes: 30
       operator: lt
-      value: -1.12
+      value: -0.5
     - indicator: macd_signal
       period_minutes: 30
       operator: eq
       value: bullish
-    - indicator: price_vs_ema
-      period_minutes: 60
-      operator: eq
-      value: above
-    - indicator: trend
-      period_minutes: 240
-      operator: eq
-      value: up
   short:
     conditions:
-    - indicator: momentum_accelerating
-      period_minutes: 60
-      operator: eq
-      value: true
     - indicator: price_change_pct
       period_minutes: 30
       operator: gt
-      value: 1.4
+      value: 0.5
     - indicator: macd_signal
       period_minutes: 30
       operator: eq
       value: bearish
-    - indicator: price_vs_ema
-      period_minutes: 120
-      operator: eq
-      value: below
-    - indicator: trend
-      period_minutes: 240
-      operator: eq
-      value: down
 exit:
-  take_profit_pct: 3.46
-  stop_loss_pct: 0.4
+  take_profit_pct: 2.5
+  stop_loss_pct: 1.2
   timeout_minutes: 720
 risk:
   pause_if_down_pct: 4

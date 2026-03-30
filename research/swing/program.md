@@ -8,7 +8,7 @@ Maximize the **adjusted score** on 2 years of 1-hour data across BTC/USD, ETH/US
 **Adjusted score = Sharpe × sqrt(num_trades / 50)**
 
 ### Current Performance
-- **Current best adjusted score: 6.99** (Sharpe 2.2635, 471 trades, 52.7% win rate)
+- **Current best adjusted score: 7.17** (Sharpe 2.3344, 471 trades, 52.9% win rate)
 - This is the number to beat.
 
 ### Score Math (build intuition)
@@ -29,73 +29,71 @@ Maximize the **adjusted score** on 2 years of 1-hour data across BTC/USD, ETH/US
 **Copy this EXACT block. Change ONLY the ONE parameter you choose. Every other value must be byte-for-byte identical.**
 
 ```yaml
-name: crossover
-style: optimized
-pairs:
-- BTC/USD
-- ETH/USD
-- SOL/USD
-position:
-  size_pct: 30
-  max_open: 1
-  fee_rate: 0.001
 entry:
   long:
     conditions:
     - indicator: rsi
-      period_hours: 21
       operator: lt
+      period_hours: 21
       value: 36.56
     - indicator: macd_signal
-      period_hours: 26
       operator: eq
+      period_hours: 26
       value: bullish
   short:
     conditions:
     - indicator: rsi
-      period_hours: 21
       operator: gt
+      period_hours: 21
       value: 60.64
     - indicator: macd_signal
-      period_hours: 49
       operator: eq
+      period_hours: 48
       value: bearish
 exit:
+  stop_loss_pct: 2.72
   take_profit_pct: 3.55
-  stop_loss_pct: 2.42
-  timeout_hours: 201
+  timeout_hours: 196
+name: crossover
+pairs:
+- LINK/USD
+- ADA/USD
+- BTC/USD
+- OP/USD
+position:
+  fee_rate: 0.001
+  max_open: 1
+  size_pct: 15
 risk:
+  pause_hours: 48
   pause_if_down_pct: 8
   stop_if_down_pct: 18
-  pause_hours: 48
+style: randomly generated
 ```
 
 There is no other correct starting point. Do not use any other configuration as your base.
 
 ---
 
-## ⛔ ABSOLUTE RULE #2: PAIRS MUST BE EXACTLY THESE THREE ⛔
+## ⛔ ABSOLUTE RULE #2: PAIRS MUST START FROM THE CURRENT BEST ⛔
 
-Your output MUST contain this exact pairs block — no more, no fewer:
+The current best uses 4 pairs: LINK/USD, ADA/USD, BTC/USD, OP/USD.
 
-```
-pairs:
-- BTC/USD
-- ETH/USD
-- SOL/USD
-```
+You may add OR remove ONE pair per generation to explore. The RSI+MACD signal
+works selectively — not all pairs respond equally.
 
-❌ DO NOT use: LINK/USD, ADA/USD, OP/USD, or ANY other pair.
-✅ Exactly 3 pairs. Exactly these 3. No exceptions.
+✅ Current working set: LINK/USD, ADA/USD, BTC/USD, OP/USD
+❌ Do NOT use ETH/USD or SOL/USD — confirmed failures with this signal.
+❌ Do NOT change more than one pair at a time.
 
-**Wrong pairs = automatic failure: Sharpe ≈ -0.69, trades ≈ 300. This wastes the entire generation.**
+**Adding many pairs at once = automatic failure: Sharpe ≈ -0.69. Change one pair, not the whole set.**
 
 ---
 
 ## ⛔ ABSOLUTE RULE #3: DO NOT REPRODUCE THE CURRENT BEST ⛔
 
 The current best has ALL of these values simultaneously:
-`stop_loss_pct=2.42, take_profit_pct=3.55, MACD long period=26, MACD short period=49, timeout=201, RSI long value=36.56, RSI short value=60.64, size_pct=30, max_open=1, RSI periods=21/21, pause_if_down=8, stop_if_down=18, pause_hours=48`
+`pairs=LINK/ADA/BTC/OP, stop_loss_pct=2.72, take_profit_pct=3.55, MACD long period=26, MACD short period=48, timeout=196, RSI long value=36.56, RSI short value=60.64, size_pct=30, max_open=1, RSI periods=21/21, pause_if_down=8, stop_if_down=18, pause_hours=48`
 
 If your output matches ALL of the above → you changed nothing → wasted generation. Exactly one value must differ.
 
