@@ -641,12 +641,12 @@ def main():
             gs = json.load(f)
         gen = gs.get("gen", len(results_history) + 1)
         gens_since_best = gs.get("gens_since_best", 0)
+        last_mimir_gen = gs.get("last_mimir_gen", 0)
     else:
         gen = len(results_history) + 1
         gens_since_best = 0
 
     min_t = MIN_TRADES.get(league, 30)
-    last_mimir_gen = 0  # track last gen Mimir was launched to avoid spam
 
     print(f"[odin-v2/{league}] Pop: {len(pop.elites)} elites, best_adj={pop.best_sharpe():.4f}")
     print(f"  Gen {gen}, stall={gens_since_best}, sleep={args.sleep}s")
@@ -773,7 +773,7 @@ def main():
             log_result(league, gen, result, "low_trades", f"trades={trades}")
             gen += 1
             with open(state_path, "w") as f:
-                json.dump({"gen": gen, "gens_since_best": gens_since_best}, f)
+                json.dump({"gen": gen, "gens_since_best": gens_since_best, "last_mimir_gen": last_mimir_gen}, f)
             time.sleep(args.sleep)
             continue
 
@@ -806,8 +806,8 @@ def main():
             results_history = results_history[-300:]
 
         # Mimir milestone: deep analysis every 200 gens (baseline cadence)
-        # or immediately after a breakthrough (min 50 gens since last Mimir)
-        trigger_mimir = (gen % 200 == 0) or (is_new_best and (gen - last_mimir_gen) >= 50)
+        # or immediately after a breakthrough (min 100 gens since last Mimir)
+        trigger_mimir = (gen % 200 == 0) or (is_new_best and (gen - last_mimir_gen) >= 100)
         if trigger_mimir:
             last_mimir_gen = gen
             reason = "milestone" if gen % 200 == 0 else "breakthrough"
@@ -824,7 +824,7 @@ def main():
 
         gen += 1
         with open(state_path, "w") as f:
-            json.dump({"gen": gen, "gens_since_best": gens_since_best}, f)
+            json.dump({"gen": gen, "gens_since_best": gens_since_best, "last_mimir_gen": last_mimir_gen}, f)
         time.sleep(args.sleep)
 
 
