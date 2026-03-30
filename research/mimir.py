@@ -20,7 +20,7 @@ from datetime import datetime, timezone
 WORKSPACE         = "/root/.openclaw/workspace"
 RESEARCH          = os.path.join(WORKSPACE, "research")
 ANTHROPIC_SECRET  = "/root/.openclaw/secrets/anthropic.json"
-ANTHROPIC_MODEL   = "claude-sonnet-4-6"
+ANTHROPIC_MODEL   = "claude-sonnet-4-6"  # overridden by --model flag
 ANTHROPIC_URL     = "https://api.anthropic.com/v1/messages"
 MIMIR_LOG         = os.path.join(RESEARCH, "mimir_log.jsonl")
 
@@ -394,10 +394,14 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--league",      choices=["day", "swing", "pm"], required=True)
     parser.add_argument("--generation",  type=int,                       required=True)
+    parser.add_argument("--model",       default=None, help="Override Claude model (e.g. claude-opus-4-6)")
     args = parser.parse_args()
 
     league     = args.league
     generation = args.generation
+    if args.model:
+        global ANTHROPIC_MODEL
+        ANTHROPIC_MODEL = args.model
 
     print(f"[mimir/{league}] Gen {generation} milestone — deep analysis starting...")
 
@@ -454,6 +458,7 @@ def main():
         "ts":              ts,
         "league":          league,
         "generation":      generation,
+        "model":           ANTHROPIC_MODEL,
         "analysis":        analysis,
         "program_updated": program_updated,
     }

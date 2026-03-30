@@ -1,11 +1,11 @@
-_adj_score: 0.5541
+_adj_score: 0.8924
 category: world_events
 exclude_keywords: []
 include_keywords: []
 max_days_to_resolve: 30
 max_position_pct: 0.1
-min_edge_pts: 0.186
-min_liquidity_usd: 500
+min_edge_pts: 0.216
+min_liquidity_usd: 200
 name: pm_research_best
 price_range:
 - 0.05
