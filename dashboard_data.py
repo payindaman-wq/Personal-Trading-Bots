@@ -826,6 +826,7 @@ def get_odin_research():
             "best_adj_score": None, "best_sharpe": None,
             "best_roi": None, "best_n_bets": None,
             "last_activity": None, "service_running": False,
+            "sparkline": [],
         }
         try:
             rc = subprocess.run(["systemctl", "is-active", "freya.service"],
@@ -869,11 +870,15 @@ def get_odin_research():
         except Exception:
             result["generations"] = len(rows)
         result["improvements"] = improvements
-        if best_row:
-            result["best_adj_score"] = round(best_row["adj_score"], 4)
-            result["best_sharpe"]    = round(best_row["sharpe"], 4)
-            result["best_roi"]       = round(best_row["roi"], 2)
-            result["best_n_bets"]    = best_row["n_bets"]
+        # All-time best by adj_score (not just new_best-labeled rows)
+        positive_rows = [r for r in rows if r["adj_score"] > 0]
+        display_row = max(positive_rows, key=lambda r: r["adj_score"]) if positive_rows else best_row
+        if display_row:
+            result["best_adj_score"] = round(display_row["adj_score"], 4)
+            result["best_sharpe"]    = round(display_row["sharpe"], 4)
+            result["best_roi"]       = round(display_row["roi"], 2)
+            result["best_n_bets"]    = display_row["n_bets"]
+        result["sparkline"] = [round(r["adj_score"], 4) for r in positive_rows[-30:]]
         if rows:
             result["last_activity"] = rows[-1]["ts"]
         return result
