@@ -1,5 +1,5 @@
 ```markdown
-# FREYA Research Program — Prediction Markets (v6.0)
+# FREYA Research Program — Prediction Markets (v7.0)
 
 ## Objective
 Find prediction market filter strategies that maximize risk-adjusted ROI by identifying
@@ -17,173 +17,187 @@ vs. historical resolution rates.
 
 ---
 
-## 🚨 PRIORITY ZERO — FIX ADOPTION LOGIC BEFORE ANY NEW SIMULATION 🚨
+## 🚨 PRIORITY ZERO — FIX ADOPTION LOGIC BEFORE GEN 1001 🚨
 
-### The Adoption Gate Is Broken — This Is Confirmed
+### The Adoption Bug Has Recurred (Gens 982–1000)
 
-Evidence: Gens 586, 591, 593, 594, 600 ALL produced adj=1.7349 > current baseline 1.6167,
-yet ALL were logged as [no_improvement]. This is a logical impossibility.
+**CONFIRMED EVIDENCE:**
+- Gen 811 correctly adopted adj=1.7424 as new best ✅
+- Gens 982, 985, 988, 989, 990, 992, 993, 994, 995, 997, 999, 1000 ALL reproduce
+  adj=1.7424 and are logged [no_improvement] — logical impossibility ❌
+- This is the SAME failure mode as Gens 586–600 (v6.0 incident)
 
-**REQUIRED ACTION before Gen 601:**
-1. Manually inspect the comparison function: `if proposed_adj > current_best_adj: adopt`
-2. Check for off-by-one errors, float precision issues, string-vs-float comparison bugs,
-   or stale cached baseline values
-3. Confirm the baseline variable is being READ correctly at comparison time (not using
-   a stale Gen 195 hardcoded constant instead of the live tracked best)
-4. Run a single test: simulate the exact Gen 586/591/600 config and verify adoption fires
-5. DO NOT run further generations until this is confirmed working
+**REQUIRED FIXES before Gen 1001:**
+1. Confirm `current_best_adj` is read from a live mutable variable, NOT a constant
+2. Confirm the comparison is `proposed_adj > current_best_adj` (strict greater-than)
+3. Check that Gen 811's adoption actually wrote adj=1.7424 to the tracked variable
+   (it may have written to a local scope that was then discarded)
+4. Run validation test: simulate Gen 811 config, confirm adoption fires with
+   explicit log: "proposed 1.7424 > current_best 1.7424 → NO (equal, not greater)"
+   OR "proposed 1.7425 > current_best 1.7424 → YES"
+5. The proposer cycling between two attractors suggests it is ALSO reading a stale
+   baseline — fix both reader and writer atomically
 
-### Suspected Root Cause
-The baseline comparison likely has a hardcoded value of 1.6167 (from Gen 195) that is
-not being updated when new bests are found — OR the adoption condition uses >= instead
-of > and floating point equality is failing — OR proposed_adj and current_best_adj are
-different types. Any of these would produce the observed pattern.
+### Why This Recurs
+The root cause is likely that `current_best_adj` is initialized at program start from
+a hardcoded value and the write-on-adoption path either fails silently or writes to
+a different variable name than the one read during comparison. Every program restart
+resets to the hardcoded value. Solution: persist `current_best_adj` to disk and read
+from disk at every comparison.
 
 ---
 
-## ✅ TRUE CURRENT BEST — Gen 586/591/600 (CONFIRMED BY REPEATED CONVERGENCE)
+## ✅ TRUE CURRENT BEST — Gen 811 (CONFIRMED)
 
-**WARNING: This config has been simulated 5+ times and rejected due to adoption bug.**
-**It IS the true best. It MUST be canonized once adoption logic is repaired.**
+- adj_score=1.7424, sharpe=0.2877, roi=20.882%, win=79.23%, bets=8523
+- Confirmed: appeared as new_best in Gen 811, reproduced 11+ times in Gens 982–1000
+- Config: world_events, min_edge_pts perturbed from v6.0 baseline
+  (exact YAML below — reconstruct from Gen 811 logs if needed)
+- THIS IS THE CANONICAL BASELINE FOR ALL COMPARISONS FROM GEN 1001 ONWARD
 
-- adj_score=1.7349, sharpe=0.2889, roi=TBD, bets=8088
-- Confirmed stable attractor: appeared independently in Gens 586, 591, 593, 594, 600
-- Config: world_events, parameters TBD (see PRIORITY 1 below for reconstruction)
-- Improvement over recorded baseline: +7.3% adj_score, +7.5% sharpe
+```yaml
+# GEN 811 BEST — CANONICAL BASELINE v7.0
+category: world_events
+exclude_keywords: []
+include_keywords: []
+max_days_to_resolve: 30
+max_position_pct: 0.1
+min_edge_pts: 0.066        # NOTE: confirm exact value from Gen 811 log
+min_liquidity_usd: 100
+name: pm_research_best
+price_range:
+- 0.05
+- 0.77                     # NOTE: confirm exact value from Gen 811 log
+```
 
-## ✅ RECORDED BEST — Gen 195 (OFFICIAL BASELINE UNTIL ADOPTION BUG FIXED)
-- adj_score=1.6167, sharpe=0.2687, roi=20.345%, win=78.14%, bets=8189
-- Config: world_events, min_edge_pts=0.07, price_range=[0.05, 0.81],
-  min_liquidity_usd=100, max_days_to_resolve=30, max_position_pct=0.10, no keywords
-- DO NOT revert below this
+**⚠️ If Gen 811 exact YAML is unavailable:** reconstruct by simulating a grid of
+min_edge_pts ∈ {0.060, 0.062, 0.064, 0.066, 0.068, 0.070} × price_range_max ∈
+{0.75, 0.77, 0.79, 0.81} and selecting the config that reproduces adj=1.7424
+exactly. Log as [RECONSTRUCTION] not [new_best].
 
-## ✅ SECOND-BEST REFERENCE — Gen 121
-- adj_score=1.5244, sharpe=0.2528, roi=19.858%, win=77.38%, bets=8288
-- Config: world_events, min_edge_pts~0.07, price_range=[0.05, ~0.81-0.84], no keywords
+## ✅ REFERENCE CONFIGS
+
+| Gen | adj    | sharpe | bets | Notes                        |
+|-----|--------|--------|------|------------------------------|
+| 811 | 1.7424 | 0.2877 | 8523 | **CURRENT BEST** ✅           |
+| 586/591/600 | 1.7349 | 0.2889 | 8088 | Previous true best     |
+| 195 | 1.6167 | 0.2687 | 8189 | Old recorded best             |
+| 121 | 1.5244 | 0.2528 | 8288 | Reference floor               |
+
+---
+
+## 🚨 BLACKLISTED CONFIGS — DO NOT SIMULATE
+
+### BLACKLISTED ATTRACTOR 1 (CATASTROPHIC)
+- Signature: bets≈12732, sharpe≈-0.0745, adj≈-0.4813
+- Cause: price_range_max > 0.90 OR min_edge_pts < 0.04
+- HARD REJECT before simulation
+
+### BLACKLISTED ATTRACTOR 2 (ZERO BETS)
+- Signature: bets=0 or bets < 50
+- Log as FAIL; trigger auto-recovery
+
+### BLACKLISTED ATTRACTOR 3 (OVER-FILTERED)
+- Signature: bets≈156, adj≈0.47
+- Cause: min_edge_pts > 0.15 OR price_range_min > 0.20
+- REJECT if pre-simulation expected bets < 200
+
+### BLACKLISTED ATTRACTOR 4 (FROZEN CYCLE — NEW v7.0)
+- Signature A: adj=1.7424, bets=8523 (Gen 811 / Attractor A)
+- Signature B: adj=1.722, bets=8051 (Attractor B)
+- These two configs have been simulated 15+ combined times with zero marginal value
+- **DO NOT PROPOSE EITHER CONFIG AGAIN**
+- If proposer outputs a config that would reproduce either signature:
+  log as [DUPLICATE — frozen cycle], skip simulation, force keyword exploration
 
 ---
 
 ## ⚠️ GENERATION LOGGING REQUIREMENT (MANDATORY)
 
-After EVERY generation, log ALL of the following before proceeding:
-  - proposed_config: (full YAML)
-  - proposed_adj / proposed_sharpe / proposed_bets
-  - current_best_adj (must be dynamically read — NOT hardcoded)
-  - comparison_result: [new_best / no_improvement / INVALID / FAIL]
-  - reason_if_rejected: (parameter violation, <50 bets, duplicate config, etc.)
-  - adoption_check: "proposed X.XXXX > current_best X.XXXX → [YES/NO]" (explicit each time)
+After EVERY generation, log ALL fields:
+```
+proposed_config: (full YAML)
+proposed_adj: X.XXXX
+proposed_sharpe: X.XXXX
+proposed_bets: NNNN
+current_best_adj: X.XXXX  ← MUST be dynamically read from persisted store
+comparison_result: [new_best / no_improvement / DUPLICATE / FAIL / INVALID]
+adoption_check: "proposed X.XXXX > current_best X.XXXX → [YES/NO]"
+reason_if_rejected: (explicit)
+```
 
-**ADOPTION RULE (write this out literally each generation):**
-  IF proposed_adj > current_best_adj THEN adopt, update baseline, log as [new_best]
-  ELSE log as [no_improvement]
+**ADOPTION RULE (write literally each generation):**
+```
+IF proposed_adj > current_best_adj:
+    → adopt; update persisted current_best_adj; log [new_best]
+ELSE:
+    → log [no_improvement]
+```
 
-If any generation achieves adj > 1.65 (95% of true best 1.7349):
-  manually verify adoption fired correctly.
-
-If 3 consecutive generations show adj > 1.60 and [no_improvement]:
-  HALT — adoption logic is broken again. Do not continue until fixed.
-
----
-
-## 🚨 CRITICAL FAILURE PATTERNS — BLACKLIST THESE CONFIGS
-
-### BLACKLISTED ATTRACTOR 1 (CONFIRMED BROKEN)
-- Signature: bets≈12732, sharpe≈-0.0745, adj≈-0.4813
-- Appeared 5+ times in gens 182-199
-- Likely cause: price_range widened beyond 0.90, min_edge_pts < 0.04, or wrong category
-- REJECT without simulation
-
-### BLACKLISTED ATTRACTOR 2 (INSUFFICIENT BETS)
-- Signature: bets=0 or bets < 50
-- Appeared in Gen 191, Gen 200, Gen 599
-- Log as FAIL; trigger auto-recovery protocol
-
-### BLACKLISTED ATTRACTOR 3 (OVER-FILTERED)
-- Signature: bets≈156, adj≈0.47 (Gen 585 pattern)
-- Likely cause: min_edge_pts too high (>0.15) or price_range_min too high (>0.20)
-- REJECT any config where pre-simulation expected bets < 200 based on parameter inspection
-
-### DUPLICATE DETECTION (MANDATORY)
-- Before simulation, check proposed config against ALL previously simulated configs
-- Note: Gens 586/591/593/594/600 are confirmed duplicates of each other
-- If proposing the 586/591/600 config again: DO NOT simulate again; instead,
-  use this as the trigger to audit adoption logic
-- Log as: [DUPLICATE — skipped, matches Gen XXX]
+**HALT CONDITIONS:**
+- If any gen achieves adj > 1.70: verify adoption fired correctly before continuing
+- If 3 consecutive gens show adj > 1.65 and [no_improvement]: HALT, fix adoption
+- If 5 consecutive gens reproduce adj=1.7424 or adj=1.722: HALT, adoption frozen
 
 ---
 
-## 🚨 MUTATION ENGINE REPAIR REQUIREMENTS
+## 🔬 RESEARCH AGENDA — NEXT 100 GENERATIONS (1001–1100)
 
-The proposer MUST follow these rules. Violations → HARD REJECT:
+### PHASE 1: Adoption Validation (Gens 1001–1005)
+**DO NOT explore new configs yet.**
+- Gen 1001: Simulate Gen 811 config exactly. Log result. Verify current_best_adj=1.7424.
+- Gen 1002: Simulate a config known to be slightly below best (e.g., Gen 195 config).
+  Verify adoption does NOT fire. Confirm current_best_adj still reads 1.7424.
+- Gen 1003: Simulate a config with artificially high expected adj (e.g., min_edge_pts
+  slightly adjusted to target ~1.75). Verify adoption fires if result > 1.7424.
+- If all three pass: adoption logic confirmed. Proceed to Phase 2.
+- If any fail: stop, fix, retest.
 
-1. **ONE parameter change per generation.** Never stack changes.
-2. **State the parameter being changed, old value, new value, and reason.**
-   Format: `CHANGE: <param> from <old> to <new> | REASON: <one sentence>`
-3. **Acknowledge current best config before proposing.**
-4. **Do NOT re-propose any previously simulated configuration.**
-5. **Verify all hard constraints before outputting proposal.**
-   Self-check: `CONSTRAINT CHECK: min_edge_pts=X ✓/✗ | price_range=[A,B] ✓/✗ | ...`
-6. **If proposing a keyword filter: specify exact keyword strings, case sensitivity,
-   match type (contains/exact/starts_with), and expected bet count impact.**
+### PHASE 2: Keyword Filter Exploration (Gens 1006–1060)
+**This is the highest-priority unexplored dimension.**
 
-### Auto-Recovery Protocol
-- If 0 bets: log config, auto-retry with min_edge_pts reduced by 0.01, else hard-reset
-- If <50 bets: log as FAIL, request new proposal
-- If 3 consecutive gens <50 bets: hard-reset to Gen 195 baseline, log as RESET
-- If 3 consecutive gens produce blacklisted attractor: hard-reset to Gen 195
+After 1000 generations, include_keywords and exclude_keywords have NEVER been tested
+(kw=0 in all configs). Given world_events is the confirmed signal category, keyword
+segmentation is the highest-variance remaining lever.
 
----
+#### 2A: Exclusion Filters (Expected: reduce noise, improve sharpe)
+Test these exclude_keywords lists ONE AT A TIME, one per generation:
+- `["sport", "football", "soccer", "basketball", "tennis"]`
+  — removes sports-adjacent markets miscategorized as world_events
+- `["stock", "price", "bitcoin", "crypto", "ethereum"]`
+  — removes finance-adjacent world_events
+- `["poll", "approval", "rating", "survey"]`
+  — removes opinion-polling markets (may have different calibration)
+- `["will.*win", "championship", "tournament", "league"]`
+  — regex-style: competitive outcome markets
+- `["earthquake", "hurricane", "flood", "disaster"]`
+  — tests whether natural disaster markets have different YES rate
 
-## Critical Findings (Confirmed, 600 Generations)
+For each: log keyword list, expected bet count change, observed bets, adj delta.
 
-1. **True best is adj=1.7349** (Gen 586/591/600) — adoption bug prevented recording
-2. **Recorded best is Gen 195** (adj=1.6167) — use until adoption logic confirmed working
-3. **world_events is the only confirmed high-signal category** — 12% YES base rate,
-   crowds systematically overprice YES, NO-bias captures persistent structural edge
-4. **min_edge_pts 0.05-0.09 is the productive range** — values outside this degrade badly
-5. **price_range optimization is near-converged** — explored heavily across 400+ gens;
-   marginal gains remain but are small (<5% adj improvement)
-6. **78%+ win rate at 8000+ bets is structural and stable** — not noise
-7. **Keyword filters have NOT been systematically tested** — highest-variance unexplored lever
-8. **The adoption gate has been broken for at minimum 15 generations** — top repair priority
-9. **Optimization landscape is near-flat** — best configs cluster in adj=1.56-1.73 range;
-   breakthrough likely requires new parameter dimensions (keywords, multi-category)
-10. **Live slots have NEVER been activated** — zero forward validation; secondary priority
-    after adoption fix
+#### 2B: Inclusion Filters (Expected: isolate highest-signal subcategories)
+Test these include_keywords lists ONE AT A TIME:
+- `["war", "conflict", "military", "attack"]`
+  — geopolitical conflict subcategory
+- `["election", "vote", "referendum", "ballot"]`
+  — electoral world_events (may overlap with politics)
+- `["death", "resign", "arrest", "sanction"]`
+  — leadership/legal event subcategory
+- `["nuclear", "missile", "invasion", "ceasefire"]`
+  — high-stakes geopolitical
+- `["UN", "treaty", "agreement", "summit"]`
+  — diplomatic events
 
-## Key Market Insights
-- **world_events base rate = 12% YES**
-  -- Markets priced above ~17-20%: systematic YES overpricing → bet NO (primary edge)
-  -- Markets priced below ~7%: YES underpricing → bet YES (rarer)
-  -- price_range=[0.05, 0.81] is confirmed optimal zone — excludes high-price markets
-     where miscalibration thesis weakens
-  -- 78%+ win rate at scale validates structural bias
-- **Sports/politics/crypto/economics: base rates 26-32%**
-  -- Smaller structural edge; not meaningfully tested
-  -- Low priority until world_events is fully optimized and live-validated
-- **The optimization plateau signal**: adj scores have not escaped 1.56-1.73 band in
-  last 20 gens despite active mutation — this is a strong indicator that continuous
-  parameters (price_range, min_edge_pts) are near-converged; categorical parameters
-  (keywords, multi-category) are the next search frontier
+For each: expect bets to DROP significantly. If bets < 200: log [OVER-FILTERED], skip.
+Target: find subcategory with adj > 1.7424 at bets > 500.
 
-## Generation Performance Summary
-| Gen | adj_score | sharpe | bets  | Notes |
-|-----|-----------|--------|-------|-------|
-| 2   | 0.1632    | 0.0442 | 782   | Old baseline — ignore |
-| 41  | 0.9933    | 0.1972 | 3061  | Strong — wrongly rejected |
-| 96  | 1.3455    | 0.2414 | 5253  | Near-best — wrongly rejected |
-| 97  | 1.4593    | 0.2487 | 7053  | Previous gold standard |
-| 112 | 0.2121    | 0.0589 | 715   | Brief improvement |
-| 121 | 1.5244    | 0.2528 | 8288  | Major jump |
-| 182 | -0.4813   | -0.0745| 12732 | BLACKLISTED |
-| 184 | 0.9194    | 0.1496 | 9296  | Mid-tier |
-| 192 | 1.2937    | 0.2136 | 8525  | Below baseline |
-| 195 | **1.6167**| **0.2687**|**8189**| **Recorded best** ✅ |
-| 198 | 1.2704    | 0.2387 | 4074  | High min_edge likely |
-| 585 | 0.4728    | 0.2174 | 156   | OVER-FILTERED — blacklist |
-| 586 | **1.7349**| **0.2889**|**8088**| **TRUE BEST** ⚠️ not adopted |
-| 589 | 1.6167    | 0.2687 | 8189  | Reproduces Gen 195 exactly |
-| 591 | **1.7349**| **0.2889**|**8088**| **TRUE BEST duplicate** |
-| 592 | 1.7181    | 0.2878 | 7805  | Near-best region |
-| 599 | -1.0      | 0.0    | 0     | FAIL — 0 bets |
-| 600 | **1.7349**|
+#### 2C: Combined Keyword Strategy (Gens 1051–1060)
+- Take best exclusion filter from 2A + best inclusion filter from 2B
+- Test combined config
+- If bets < 200: relax one filter; retry
+
+### PHASE 3: Multi-Category Exploration (Gens 1061–1080)
+**Only if Phase 2 fails to beat adj=1.7424.**
+
+Test adding a second category alongside world_events:
+- `[world_events, politics]`: combined
