@@ -648,9 +648,9 @@ def get_mimir_state():
         snippet = ""
         if analysis:
             sentences = analysis.replace("\n", " ").split(". ")
-            snippet = ". ".join(sentences[:2]).strip()
-            if len(snippet) > 280:
-                snippet = snippet[:277] + "..."
+            snippet = ". ".join(sentences[:4]).strip()
+            if len(snippet) > 480:
+                snippet = snippet[:477] + "..."
             elif not snippet.endswith("."):
                 snippet += "."
         entry_full = {
