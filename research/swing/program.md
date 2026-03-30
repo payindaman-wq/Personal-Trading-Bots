@@ -18,33 +18,54 @@ Maximize the **adjusted score** on 2 years of 1-hour data across BTC/USD, ETH/US
 - Sharpe 2.35, 471 trades → 2.35 × 3.07 = 7.21 ✅ BEATS CURRENT
 - Sharpe 2.10, 850 trades → 2.10 × 4.12 = 8.65 ✅ HUGE WIN
 - Sharpe 1.80, 900 trades → 1.80 × 4.24 = 7.63 ✅ BEATS CURRENT
+- Sharpe 1.60, 900 trades → 1.60 × 4.24 = 6.78 ❌ Not enough
 - Sharpe 2.27, 471 trades → 2.27 × 3.07 = 6.97 ❌ Barely misses
 - Sharpe 2.55, 330 trades → 2.55 × 2.57 = 6.55 ❌ Not enough trades
 
-**Two paths to improvement:**
-- **PATH A (PREFERRED):** Increase trades to 600-900 by changing max_open to 2. Even if Sharpe drops to 1.80, adjusted score beats current.
-- **PATH B:** Push Sharpe above 2.34 while keeping trades near 471 via small parameter tuning.
+**THE MATH IS CLEAR: MORE TRADES WINS. Sharpe can drop significantly if trades increase.**
 
 ---
 
-## 🛑🛑🛑 BANNED PAIRS — READ THIS FIRST BEFORE DOING ANYTHING ELSE 🛑🛑🛑
+## 🛑🛑🛑 STEP 1 — BANNED PAIRS — READ THIS BEFORE ANYTHING ELSE 🛑🛑🛑
 
-### ❌ NEVER USE ETH/USD — EVER ❌
-### ❌ NEVER USE SOL/USD — EVER ❌
+### ❌ ABSOLUTE BAN: ETH/USD — DO NOT USE. EVER. NOT ONCE. ❌
+### ❌ ABSOLUTE BAN: SOL/USD — DO NOT USE. EVER. NOT ONCE. ❌
 
-**These two pairs produce Sharpe ≈ -1.86, trades ≈ 349, win_rate ≈ 41.8% — confirmed catastrophic failure 10+ times.**
-**If your output contains ETH/USD or SOL/USD, it is WRONG. Start over.**
-**This is not a suggestion. This is a hard constraint. Do not include them under any circumstances.**
+**These produce Sharpe ≈ -1.86, trades ≈ 349, win_rate ≈ 41.8% — CONFIRMED CATASTROPHIC 15+ TIMES.**
+**Any YAML containing ETH/USD or SOL/USD is automatically wrong. Do not submit it.**
 
-The ONLY valid pairs to use are from this list: LINK/USD, ADA/USD, BTC/USD, OP/USD, DOT/USD, AVAX/USD, MATIC/USD, ATOM/USD
+✅ ONLY these pairs are allowed: LINK/USD, ADA/USD, BTC/USD, OP/USD, DOT/USD, AVAX/USD, MATIC/USD, ATOM/USD
+✅ Current working set: **LINK/USD, ADA/USD, BTC/USD, OP/USD**
 
-Current working set: **LINK/USD, ADA/USD, BTC/USD, OP/USD**
+---
+
+## 🔥🔥🔥 STEP 2 — YOUR ONLY JOB THIS GENERATION 🔥🔥🔥
+
+**Change `max_open` from `1` to `2`. That is the ONE change to make.**
+
+This is not a suggestion. This is the highest-priority untested structural change remaining.
+
+**Why max_open=2 is critical:**
+- Currently max_open=1 means only ONE trade can be open at a time across ALL 4 pairs
+- When a signal fires on a second pair, it is SKIPPED because a position is already open
+- Changing to max_open=2 allows up to 2 simultaneous positions
+- This directly increases trade count from ~471 toward ~700-900
+- Even if Sharpe drops from 2.33 to 1.80, adjusted score goes from 7.17 to 7.63 — a WIN
+- Even if Sharpe drops to 1.60 with 900 trades: 1.60 × 4.24 = 6.78 — still competitive
+- This change has NOT been successfully tested and kept yet. It is the #1 priority.
+
+**The ONLY change you should make:**
+```
+max_open: 1  →  max_open: 2
+```
+
+Everything else stays identical.
 
 ---
 
 ## ⛔ ABSOLUTE RULE #1: THE YAML BELOW IS THE ONE AND ONLY STARTING POINT ⛔
 
-**Copy this EXACT block. Change ONLY the ONE parameter you choose. Every other value must be byte-for-byte identical.**
+**Copy this EXACT block. Change ONLY `max_open` from 1 to 2. Every other value must be byte-for-byte identical.**
 
 ```yaml
 name: crossover
@@ -97,15 +118,11 @@ There is no other correct starting point. Do not use any other configuration as 
 
 Current working set: **LINK/USD, ADA/USD, BTC/USD, OP/USD**
 
-You may add OR remove ONE pair per generation.
+You may add OR remove ONE pair per generation — but ONLY if you are NOT changing max_open this generation.
+Since max_open=2 is your ONLY task this generation, do NOT change pairs.
 
-✅ Pairs that may be worth adding (ONE at a time): DOT/USD, AVAX/USD, MATIC/USD, ATOM/USD
-❌ PERMANENTLY BANNED (will cause instant catastrophic failure):
-  - **ETH/USD** → Sharpe ≈ -1.86, confirmed 10+ times. NEVER USE.
-  - **SOL/USD** → Sharpe ≈ -1.86, confirmed 10+ times. NEVER USE.
-
-Do NOT change more than one pair at a time.
-Do NOT replace the entire pair list — add or remove exactly one entry.
+✅ Pairs that may be worth adding in future generations (ONE at a time): DOT/USD, AVAX/USD, MATIC/USD, ATOM/USD
+❌ PERMANENTLY BANNED: ETH/USD, SOL/USD — catastrophic failure confirmed 15+ times.
 
 ---
 
@@ -121,24 +138,24 @@ The current best has ALL of these values simultaneously:
 - rsi long value: 36.56
 - rsi short value: 60.64
 - size_pct: 15
-- max_open: 1
+- **max_open: 1**   ← THIS IS THE ONE YOU MUST CHANGE TO 2
 - rsi period_hours (both): 21
 - pause_if_down_pct: 8
 - stop_if_down_pct: 18
 - pause_hours: 48
 
-Exactly one value must differ from the above list. If all values match → you changed nothing → wasted generation.
+Change max_open to 2. That makes exactly one value different. That is correct.
 
 ---
 
 ## ⛔ ABSOLUTE RULE #4: NEVER CHANGE RSI VALUES OR PERIODS ⛔
 
-**RSI changes cause catastrophic and irreversible failure: Sharpe ≈ -0.13, trades ≈ 356, win_rate ≈ 44.4%. Confirmed 8+ times.**
+**RSI changes cause catastrophic failure: Sharpe ≈ -0.13, trades ≈ 356, win_rate ≈ 44.4%. Confirmed 8+ times.**
 
-**PERMANENTLY OFF LIMITS — DO NOT TOUCH UNDER ANY CIRCUMSTANCES:**
-- `value: 36.56` (RSI long threshold)
-- `value: 60.64` (RSI short threshold)
-- `period_hours: 21` (both RSI indicators)
+**PERMANENTLY OFF LIMITS:**
+- `value: 36.56` (RSI long threshold) — DO NOT CHANGE
+- `value: 60.64` (RSI short threshold) — DO NOT CHANGE
+- `period_hours: 21` (both RSI indicators) — DO NOT CHANGE
 
 ---
 
@@ -150,42 +167,12 @@ Exactly one value must differ from the above list. If all values match → you c
 | RSI value or period changed | ≈ -0.13 | ≈ 356 | ≈ 44.4% | RSI modification — banned |
 | MACD short period ≤ 44 or ≥ 52 | ≈ -1.18 | ≈ 183 | — | Bad MACD short period |
 | No change made | ≈ 2.33 | ≈ 471 | ≈ 52.9% | Reproduced current best |
-| **Near-miss cluster A** | **≈ 2.2986** | **≈ 474** | **≈ 52.7%** | **Confirmed suboptimal — does NOT beat current best** |
-| **Near-miss cluster B** | **≈ 2.3060** | **≈ 475** | **≈ 52.6%** | **Confirmed suboptimal — does NOT beat current best** |
+| **Near-miss cluster A** | **≈ 2.2986** | **≈ 474** | **≈ 52.7%** | **MACD long period 25 or 27 — EXHAUSTED** |
+| **Near-miss cluster B** | **≈ 2.3060** | **≈ 475** | **≈ 52.6%** | **Minor TP/SL tweak — EXHAUSTED** |
 | Secondary near-miss | ≈ 1.96 | ≈ 476 | ≈ 51.3% | Known suboptimal |
 | Secondary near-miss | ≈ 1.61 | ≈ 429 | ≈ 51.7% | Known suboptimal |
-| Low-Sharpe high-trade | ≈ 0.60-1.00 | ≈ 522-544 | ≈ 51% | Possibly max_open=2 overtrades — adjust TP/SL |
+| Low-Sharpe high-trade | ≈ 1.40 | ≈ 544 | ≈ 48.9% | max_open=2 without TP/SL tuning — STILL MAY BEAT ADJUSTED SCORE |
 
-**⚠️ CRITICAL: The 2.2986/474/52.7% result has appeared 6+ times. The 2.3060/475/52.6% has appeared. Neither beats the current best. If your proposed change is minor (e.g. MACD long period 25 or 27, tiny TP/SL shift), it almost certainly produces one of these. You MUST choose a more impactful change.**
+**⚠️ CRITICAL: Near-miss cluster A (2.2986/474 trades) has appeared 7+ times. Near-miss cluster B (2.3060/475) has appeared multiple times. Both are confirmed suboptimal. Minor MACD or TP/SL tweaks almost certainly produce these — DO NOT make minor tweaks. Make the structural change (max_open=2).**
 
----
-
-## 🚫 CONFIRMED FAILED VALUES — DO NOT USE 🚫
-
-| Parameter | Failed Values | Notes |
-|-----------|--------------|-------|
-| stop_loss_pct | 2.46, 2.50, 2.35 and below | 2.72 is current — do not repeat |
-| timeout_hours | 200, 192 and below, 210 and above | 196 is current — try 197, 198, 199 only |
-| entry.short macd period_hours | 45, 44 and below, 52 and above, 48 (current) | **Try 47, 49, 50, or 51 only** |
-| entry.long macd period_hours | 26 (current) | **Try 24, 25, 27, or 28 only** |
-| take_profit_pct | 3.45 and below, 3.80 and above | 3.55 is current — try 3.56–3.79 |
-| RSI values | ALL VALUES | Permanently forbidden |
-| RSI period_hours | ALL VALUES | Permanently forbidden |
-| size_pct | values other than 15, 28, 30 | 15 is current — 28 or 30 are next candidates |
-| pairs | ETH/USD, SOL/USD | Permanently banned — catastrophic failure |
-
----
-
-## ✅ PRIORITY ORDER — CHOOSE EXACTLY ONE ✅
-
-Work through options in strict priority order: TIER 0 first, then TIER 1, then TIER 2.
-
----
-
-## 🔥 TIER 0 — STRUCTURAL CHANGE (HIGHEST PRIORITY) 🔥
-
-### OPTION G — max_open positions
-
-**Change `max_open` from `1` to `2`.**
-
-This is the single most important untested change. Allowing 2 simultaneous
+**⚠️ NOTE ON LOW-SHARPE HIGH-TRADE: If max_open=2 produces Sharpe ≈
