@@ -1,21 +1,22 @@
-name: thrud
-category: research
-type: disabled
-description: FREYA research slot — awaiting strategy assignment
-prompt_persona: Reserved for FREYA autonomous research assignment.
-market_filter:
-  include_keywords: []
-  exclude_keywords: []
-  price_range:
-    - 0.5
-    - 0.5
-  min_liquidity_usd: 999999
-  max_days_to_resolve: 0
+category: world_events
+description: FREYA research slot — gen 100 evolved strategy
 edge:
-  min_edge_pts: 1.0
-  min_confidence: high
-  max_positions: 0
-  max_position_pct: 0.0
+  max_position_pct: 0.1
+  max_positions: 8
+  min_confidence: medium
+  min_edge_pts: 0.078
+market_filter:
+  exclude_keywords: []
+  include_keywords: []
+  max_days_to_resolve: 30
+  min_liquidity_usd: 100
+  price_range:
+  - 0.05
+  - 0.84
+name: thrud
+prompt_persona: You are a global events analyst specializing in predicting world news
+  outcomes.
 risk:
-  stop_if_down_pct: 20
   starting_capital: 1000.0
+  stop_if_down_pct: 20
+type: opinion
