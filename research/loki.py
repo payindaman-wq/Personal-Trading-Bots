@@ -26,6 +26,9 @@ MIMIR_LOG        = os.path.join(RESEARCH, "mimir_log.jsonl")
 LOKI_LOG         = os.path.join(RESEARCH, "loki_log.jsonl")
 LOKI_ESC_LOG     = os.path.join(RESEARCH, "loki_escalation_log.jsonl")
 RESEARCHER       = os.path.join(RESEARCH, "odin_researcher_v2.py")
+FREYA_RESEARCHER = os.path.join(RESEARCH, "freya_researcher.py")
+PM_RESEARCH_DIR  = os.path.join(RESEARCH, "pm")
+PM_FLEET_DIR     = os.path.join(WORKSPACE, "fleet", "polymarket")
 
 ANTHROPIC_SECRET = "/root/.openclaw/secrets/anthropic.json"
 ANTHROPIC_MODEL  = "claude-haiku-4-5-20251001"
@@ -45,7 +48,14 @@ CODE_CHANGE_KEYWORDS = [
 ]
 
 # Only these constants can be changed automatically (hard whitelist)
-ALLOWED_CONSTANTS = {"MIN_TRADES", "POPULATION_SIZE", "SUSPICIOUS_SHARPE", "STALL_ALERT_GENS"}
+ALLOWED_CONSTANTS      = {"MIN_TRADES", "POPULATION_SIZE", "SUSPICIOUS_SHARPE", "STALL_ALERT_GENS"}
+FREYA_ALLOWED_CONSTS   = {"MIN_BETS", "STALL_ALERT_GENS", "POPULATION_SIZE"}
+
+PM_CODE_CHANGE_KEYWORDS = [
+    "freya_researcher", "MIN_BETS", "STALL_ALERT_GENS", "POPULATION_SIZE",
+    "change the constant", "update the constant", "the code should",
+    "modify the script", "the researcher script",
+]
 
 # Files LOKI must never touch (block list for extra safety)
 BLOCKED_FILES = [
@@ -278,11 +288,124 @@ def apply_constant_change(constant, subkey, new_value):
     return True, f"Changed {label} -> {new_value}"
 
 
+# ── PM-specific helpers ───────────────────────────────────────────────────────
+
+def classify_freya_change(analysis_text):
+    """Use Haiku to identify constant changes needed in freya_researcher.py."""
+    prompt = (
+        "Analyze this Mimir prediction markets research report for code changes "
+        "needed in freya_researcher.py.\n\n"
+        f"MIMIR ANALYSIS:\n{analysis_text[:3000]}\n\n"
+        "Constants in freya_researcher.py that can be changed:\n"
+        "- MIN_BETS = 20  (minimum bets required for valid simulation)\n"
+        "- POPULATION_SIZE = 5  (elite population size)\n"
+        "- STALL_ALERT_GENS = 300  (alert after N consecutive non-improving gens)\n\n"
+        "Does the analysis request changing one of these constants?\n\n"
+        "Output ONLY a JSON object:\n"
+        '{"type": "none"}\n'
+        '{"type": "constant", "constant": "MIN_BETS", "subkey": null, "new_value": 30, "reason": "..."}\n'
+        '{"type": "structural", "description": "brief description"}'
+    )
+    try:
+        response = call_haiku(prompt)
+        match = re.search(r'\{[^{}]*\}', response, re.DOTALL)
+        if match:
+            return json.loads(match.group())
+        return {"type": "none"}
+    except Exception as e:
+        print(f"  [loki] Haiku PM classification error: {e}")
+        return {"type": "none"}
+
+
+def apply_freya_constant(constant, new_value):
+    """Apply a simple constant change to freya_researcher.py."""
+    if constant not in FREYA_ALLOWED_CONSTS:
+        return False, f"{constant} not in FREYA allowed-constants whitelist"
+    with open(FREYA_RESEARCHER) as f:
+        content = f.read()
+    original = content
+    pattern  = rf'^({re.escape(constant)}\s*=\s*)\S+$'
+    new_content = re.sub(pattern, rf'\g<1>{new_value}', content, flags=re.MULTILINE)
+    if new_content == original:
+        return False, f"Regex pattern for {constant} not found — no change made"
+    if not DRY_RUN:
+        backup = FREYA_RESEARCHER + f".loki_{datetime.now().strftime('%Y%m%d_%H%M')}.bak"
+        shutil.copy2(FREYA_RESEARCHER, backup)
+        with open(FREYA_RESEARCHER, "w") as f:
+            f.write(new_content)
+    return True, f"Changed {constant} -> {new_value}"
+
+
+def process_pm_entry(entry):
+    """Handle PM league Mimir entries."""
+    ts              = entry.get("ts", "")
+    gen             = entry.get("generation", "?")
+    analysis        = entry.get("analysis", "")
+    program_updated = entry.get("program_updated", False)
+    actions         = []
+
+    print(f"\n[loki] MIMIR/PM Gen {gen} ({ts})")
+
+    # Step 1: Commit program.md
+    program_path = os.path.join(PM_RESEARCH_DIR, "program.md")
+    if program_updated and os.path.exists(program_path):
+        rel_path  = os.path.relpath(program_path, WORKSPACE)
+        committed = git_commit(
+            [rel_path],
+            f"[loki] MIMIR/PM Gen {gen}: apply program.md update",
+        )
+        actions.append("pm/program.md committed" if committed else "pm/program.md already committed")
+    else:
+        print(f"  [loki] program_updated={program_updated} — no program.md commit")
+
+    # Step 2: Check for freya_researcher.py constant changes
+    text_lower = analysis.lower()
+    has_code_kw = any(kw.lower() in text_lower for kw in PM_CODE_CHANGE_KEYWORDS)
+    if has_code_kw:
+        print(f"  [loki] PM code change keywords found — classifying...")
+        change = classify_freya_change(analysis)
+        print(f"  [loki] PM classification: {change}")
+        if change.get("type") == "constant":
+            constant  = change.get("constant", "")
+            new_value = change.get("new_value")
+            reason    = change.get("reason", "")
+            if constant in FREYA_ALLOWED_CONSTS and new_value is not None:
+                success, desc = apply_freya_constant(constant, new_value)
+                if success:
+                    rel_freya = os.path.relpath(FREYA_RESEARCHER, WORKSPACE)
+                    git_commit(
+                        [rel_freya],
+                        f"[loki] MIMIR/PM Gen {gen}: {desc} — {reason[:60]}",
+                    )
+                    if not DRY_RUN:
+                        try:
+                            subprocess.run(["systemctl", "restart", "freya.service"],
+                                           check=True, capture_output=True)
+                            print("  [loki] Restarted freya.service")
+                        except Exception as e:
+                            print(f"  [loki] freya.service restart failed: {e}")
+                    actions.append(f"freya_code: {desc}")
+                else:
+                    actions.append(f"freya_code-skip: {desc}")
+        elif change.get("type") == "structural":
+            desc = change.get("description", "see Mimir analysis")
+            write_escalation_log(ts, "pm", gen, desc)
+            actions.append(f"escalated(Phase2): {desc[:60]}")
+    else:
+        print(f"  [loki] No PM code change keywords — program.md only")
+
+    write_loki_log(ts, "pm", gen, actions)
+
+
 # ── Main processing ────────────────────────────────────────────────────────────
 
 def process_entry(entry):
+    league = entry.get("league", "")
+    if league == "pm":
+        process_pm_entry(entry)
+        return
+
     ts              = entry.get("ts", "")
-    league          = entry.get("league", "")
     gen             = entry.get("generation", "?")
     analysis        = entry.get("analysis", "")
     program_updated = entry.get("program_updated", False)

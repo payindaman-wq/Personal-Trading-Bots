@@ -1,0 +1,4 @@
+gen	sharpe	win_rate	roi_pct	n_bets	adj_score	status	description	ts
+1	0.0	0.0	0.0	0	-1.0	no_improvement	llm|world_events|kw=2	2026-03-30T03:43
+2	0.0442	50.0	5.817	782	0.1632	new_best	perturb:min_edge_pts|world_events|kw=0	2026-03-30T03:44
+3	0.0	0.0	0.0	0	-1.0	no_improvement	llm|world_events|kw=4	2026-03-30T03:45

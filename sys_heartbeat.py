@@ -67,6 +67,7 @@ SERVICES = [
     {"name": "odin_swing", "unit": "odin_swing.service"},
     {"name": "polymarket",     "unit": "polymarket.service"},
     {"name": "polymarket_syn", "unit": "polymarket_syn.service"},
+    {"name": "freya",          "unit": "freya.service"},
 ]
 
 # ── State / cooldown ────────────────────────────────────────────────────────

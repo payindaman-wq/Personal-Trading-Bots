@@ -15,6 +15,18 @@ WORKSPACE = "/root/.openclaw/workspace"
 ODIN_SWING_BEST    = os.path.join(WORKSPACE, "research", "swing", "best_strategy.yaml")
 AUTOBOTSWING_STRAT = os.path.join(WORKSPACE, "fleet", "swing", "autobotswing", "strategy.yaml")
 
+FREYA_BEST         = os.path.join(WORKSPACE, "research", "pm", "best_strategy.yaml")
+PM_FLEET_DIR       = os.path.join(WORKSPACE, "fleet", "polymarket")
+FREYA_SLOTS        = ["mist", "kara", "thrud"]
+
+PM_PERSONAS = {
+    "sports":       "You are a sports analytics expert specializing in predicting sporting event outcomes. You analyze team form, head-to-head records, player availability, and situational factors to estimate probabilities.",
+    "politics":     "You are a political analyst specializing in predicting electoral and policy outcomes. You analyze polling trends, endorsements, historical patterns, and political dynamics.",
+    "crypto":       "You are a cryptocurrency analyst specializing in predicting crypto-related outcomes. You analyze market data, technical indicators, project fundamentals, and news sentiment.",
+    "economics":    "You are an economic data analyst specializing in predicting macroeconomic outcomes. You analyze economic indicators, central bank signals, consensus estimates, and historical release patterns.",
+    "world_events": "You are a global events analyst specializing in predicting world news outcomes. You analyze geopolitical dynamics, historical precedents, news coverage, and expert consensus to estimate probabilities.",
+}
+
 LEAGUES = {
     "swing": {
         "active_dir":   os.path.join(WORKSPACE, "competition", "swing", "active"),
@@ -52,6 +64,69 @@ def inject_odin_swing_strategy(dry_run=False):
     if not dry_run:
         shutil.copy2(ODIN_SWING_BEST, AUTOBOTSWING_STRAT)
     print("  [odin-swing] Injected best swing strategy -> " + AUTOBOTSWING_STRAT)
+
+
+def inject_freya_strategy(dry_run=False):
+    """Apply FREYA best_strategy.yaml to the three FREYA research slots (mist/kara/thrud)."""
+    if not os.path.exists(FREYA_BEST):
+        print("  [freya] No best_strategy.yaml yet — FREYA slots stay disabled.")
+        return
+    try:
+        import yaml
+    except ImportError:
+        print("  [freya] PyYAML not available — skipping injection.")
+        return
+
+    with open(FREYA_BEST) as f:
+        best = yaml.safe_load(f)
+
+    cat     = best.get("category", "world_events")
+    persona = PM_PERSONAS.get(cat, PM_PERSONAS["world_events"])
+
+    for i, bot_name in enumerate(FREYA_SLOTS):
+        strat_path = os.path.join(PM_FLEET_DIR, bot_name, "strategy.yaml")
+        if not os.path.exists(os.path.dirname(strat_path)):
+            print(f"  [freya] {bot_name}: fleet dir missing — skipping")
+            continue
+
+        # Build full strategy from research params
+        strategy = {
+            "name":           bot_name,
+            "category":       cat,
+            "type":           "opinion",
+            "description":    f"FREYA research slot — gen {best.get('_gen', '?')} evolved strategy",
+            "prompt_persona": persona,
+            "market_filter": {
+                "include_keywords": list(best.get("include_keywords", [])),
+                "exclude_keywords": list(best.get("exclude_keywords", [])),
+                "price_range":      list(best.get("price_range", [0.05, 0.90])),
+                "min_liquidity_usd": best.get("min_liquidity_usd", 500),
+                "max_days_to_resolve": best.get("max_days_to_resolve", 30),
+            },
+            "edge": {
+                "min_edge_pts":    best.get("min_edge_pts", 0.08),
+                "min_confidence":  "medium",
+                "max_positions":   8,
+                "max_position_pct": best.get("max_position_pct", 0.10),
+            },
+            "risk": {
+                "stop_if_down_pct": 20,
+                "starting_capital": 1000.0,
+            },
+        }
+        # Slight variation per slot: kara gets tighter edge, thrud gets wider
+        if i == 1:   # kara — conservative variant
+            strategy["edge"]["min_edge_pts"] = round(
+                min(0.25, best.get("min_edge_pts", 0.08) + 0.03), 3)
+        elif i == 2:  # thrud — aggressive variant
+            strategy["edge"]["min_edge_pts"] = round(
+                max(0.03, best.get("min_edge_pts", 0.08) - 0.02), 3)
+
+        if not dry_run:
+            with open(strat_path, "w") as f:
+                yaml.dump(strategy, f, default_flow_style=False, allow_unicode=True)
+        print(f"  [freya] Injected strategy -> {bot_name} "
+              f"(cat={cat}, edge={strategy['edge']['min_edge_pts']})")
 
 
 def find_active_meta(active_dir):
@@ -205,6 +280,7 @@ try:
         if hrs < 24:
             print(f"  [POLYMARKET] Sprint only {hrs:.1f}h old — skipping.")
         else:
+            inject_freya_strategy(args.dry_run)
             if not args.dry_run:
                 state["sprint_ends_at"] = (now - timedelta(seconds=1)).isoformat()
                 with open(POLYMARKET_AUTO_STATE, "w") as f:

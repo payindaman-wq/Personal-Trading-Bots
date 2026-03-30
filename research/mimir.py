@@ -26,6 +26,8 @@ MIMIR_LOG         = os.path.join(RESEARCH, "mimir_log.jsonl")
 
 DAY_RESULTS_DIR   = os.path.join(WORKSPACE, "competition", "results")
 SWING_RESULTS_DIR = os.path.join(WORKSPACE, "competition", "swing", "results")
+PM_RESULTS_DIR    = os.path.join(WORKSPACE, "competition", "polymarket", "auto_results")
+PM_RESEARCH       = os.path.join(RESEARCH, "pm")
 
 
 def load_anthropic_key():
@@ -213,6 +215,166 @@ Output EXACTLY two sections, using these exact headers:
 (The complete rewritten program.md — same structure, improved guidance)"""
 
 
+def load_pm_research_results(n=200):
+    """Load last N rows from research/pm/results.tsv."""
+    path = os.path.join(PM_RESEARCH, "results.tsv")
+    if not os.path.exists(path):
+        return []
+    rows = []
+    with open(path) as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("gen"):
+                continue
+            parts = line.split("\t")
+            if len(parts) >= 6:
+                rows.append({
+                    "gen":       parts[0],
+                    "sharpe":    parts[1],
+                    "win_rate":  parts[2],
+                    "roi_pct":   parts[3],
+                    "n_bets":    parts[4],
+                    "adj_score": parts[5],
+                    "status":    parts[6] if len(parts) > 6 else "",
+                    "desc":      parts[7] if len(parts) > 7 else "",
+                })
+    return rows[-n:]
+
+
+def summarize_pm_research(rows):
+    if not rows:
+        return "No research results yet."
+    total        = len(rows)
+    improvements = [r for r in rows if r["status"] == "new_best"]
+    errors       = [r for r in rows if "error" in r["status"]]
+    sharpes = []
+    for r in rows:
+        try:
+            sharpes.append(float(r["sharpe"]))
+        except ValueError:
+            pass
+    lines = [
+        f"Total generations analyzed: {total}",
+        f"Improvements (new_best): {len(improvements)}",
+        f"Error generations: {len(errors)}",
+    ]
+    if sharpes:
+        lines.append(f"Sharpe range: {min(sharpes):.4f} to {max(sharpes):.4f}")
+    lines.append("\nAll improvement events (new_best):")
+    for r in improvements:
+        lines.append(
+            f"  Gen {r['gen']}: adj={r['adj_score']}  sharpe={r['sharpe']}"
+            f"  roi={r['roi_pct']}%  win={r['win_rate']}%  bets={r['n_bets']}"
+            f"  [{r['desc']}]"
+        )
+    lines.append("\nLast 20 generations:")
+    for r in rows[-20:]:
+        marker = " ***" if r["status"] == "new_best" else ""
+        lines.append(
+            f"  Gen {r['gen']}: adj={r['adj_score']}  sharpe={r['sharpe']}"
+            f"  bets={r['n_bets']}  [{r['status']}]{marker}"
+        )
+    return "\n".join(lines)
+
+
+def load_pm_sprint_results(n=5):
+    """Load last N completed PM sprint results for FREYA research bots."""
+    freya_bots = {"mist", "kara", "thrud"}
+    if not os.path.isdir(PM_RESULTS_DIR):
+        return {}
+    results = {b: [] for b in freya_bots}
+    for sprint_dir in sorted(os.listdir(PM_RESULTS_DIR), reverse=True):
+        score_path = os.path.join(PM_RESULTS_DIR, sprint_dir, "final_score.json")
+        if not os.path.exists(score_path):
+            continue
+        try:
+            score      = json.load(open(score_path))
+            all_bots   = score.get("bots", [])
+            total_bots = len(all_bots)
+            for entry in all_bots:
+                bot = entry.get("bot", "")
+                if bot in results and len(results[bot]) < n:
+                    results[bot].append({
+                        "sprint_id": sprint_dir,
+                        "total_bots": total_bots,
+                        "pnl_pct":   entry.get("sprint_pnl_pct", 0),
+                        "trades":    entry.get("sprint_trades", 0),
+                        "wins":      entry.get("sprint_wins", 0),
+                        "win_rate":  entry.get("win_rate", 0),
+                    })
+        except Exception:
+            continue
+    return results
+
+
+def summarize_pm_sprints(sprint_results):
+    lines = []
+    for bot, sprints in sprint_results.items():
+        if not sprints:
+            lines.append(f"{bot}: no completed sprints (disabled research slot)")
+        else:
+            lines.append(f"\n{bot} ({len(sprints)} sprints):")
+            for s in sprints:
+                lines.append(
+                    f"  {s['sprint_id']}: pnl={s['pnl_pct']:+.1f}%"
+                    f"  trades={s['trades']}  wins={s['wins']}"
+                    f"  win_rate={s['win_rate']:.1f}%"
+                )
+    return "\n".join(lines) if lines else "No PM sprint data."
+
+
+def build_pm_prompt(program_md, best_strategy_yaml, research_summary,
+                    sprint_summary, generation):
+    return f"""You are MIMIR, a prediction markets strategy analyst. You are reviewing {generation} generations of automated research from FREYA, a strategy optimization loop for prediction markets.
+
+FREYA works by asking Gemini Flash Lite to propose ONE change to the current best strategy (keyword filters, category, edge threshold, etc.), then simulating it against 300k+ historical resolved markets. If adj_score (sharpe x log(n_bets/20+1)) improves, the change is kept.
+
+SIMULATION MODEL:
+- Category base rates (historical YES resolution): sports=30.6%, politics=29.1%, crypto=31.5%, economics=26.0%, world_events=12.0%
+- Bet: if market_odds > base_rate + min_edge_pts -> bet NO; if market_odds < base_rate - min_edge_pts -> bet YES
+- Fee: 2% per bet
+- adj_score = sharpe x log(n_bets/20 + 1)
+
+---
+## Current Research Program
+
+{program_md}
+
+---
+## Current Best Strategy
+
+```yaml
+{best_strategy_yaml}
+```
+
+---
+## Simulation Research Results
+
+{research_summary}
+
+---
+## Live Competition (FREYA research slots: mist, kara, thrud)
+
+{sprint_summary}
+
+---
+## Your Task
+
+Analyze and identify:
+1. What category/keyword combinations improve adj_score vs. what fails?
+2. What does the simulation reveal about prediction market calibration patterns?
+3. Are live sprint results consistent with simulation findings?
+4. What should FREYA prioritize in the next 100 generations?
+
+Output EXACTLY two sections:
+
+### ANALYSIS
+(3-5 paragraphs)
+
+### UPDATED PROGRAM
+(Complete rewritten program.md — same structure, improved guidance)"""
+
+
 def parse_response(response):
     analysis = ""
     program  = ""
@@ -230,32 +392,42 @@ def parse_response(response):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--league",      choices=["day", "swing"], required=True)
-    parser.add_argument("--generation",  type=int,                 required=True)
+    parser.add_argument("--league",      choices=["day", "swing", "pm"], required=True)
+    parser.add_argument("--generation",  type=int,                       required=True)
     args = parser.parse_args()
 
     league     = args.league
     generation = args.generation
-    bot_name   = "autobotday" if league == "day" else "autobotswing"
 
     print(f"[mimir/{league}] Gen {generation} milestone — deep analysis starting...")
 
     api_key = load_anthropic_key()
 
-    program_path  = os.path.join(RESEARCH, league, "program.md")
-    best_path     = os.path.join(RESEARCH, league, "best_strategy.yaml")
-    program_md    = open(program_path).read()  if os.path.exists(program_path) else ""
-    best_strategy = open(best_path).read()     if os.path.exists(best_path)    else ""
-
-    research_rows    = load_research_results(league)
-    research_summary = summarize_research(research_rows)
-    sprint_results   = load_sprint_results(league, bot_name)
-    sprint_summary   = summarize_sprints(sprint_results, bot_name)
-
-    prompt = build_prompt(
-        league, program_md, best_strategy,
-        research_summary, sprint_summary, generation,
-    )
+    if league == "pm":
+        program_path  = os.path.join(PM_RESEARCH, "program.md")
+        best_path     = os.path.join(PM_RESEARCH, "best_strategy.yaml")
+        program_md    = open(program_path).read()  if os.path.exists(program_path) else ""
+        best_strategy = open(best_path).read()     if os.path.exists(best_path)    else ""
+        research_rows    = load_pm_research_results()
+        research_summary = summarize_pm_research(research_rows)
+        sprint_data      = load_pm_sprint_results()
+        sprint_summary   = summarize_pm_sprints(sprint_data)
+        prompt = build_pm_prompt(program_md, best_strategy,
+                                 research_summary, sprint_summary, generation)
+    else:
+        bot_name      = "autobotday" if league == "day" else "autobotswing"
+        program_path  = os.path.join(RESEARCH, league, "program.md")
+        best_path     = os.path.join(RESEARCH, league, "best_strategy.yaml")
+        program_md    = open(program_path).read()  if os.path.exists(program_path) else ""
+        best_strategy = open(best_path).read()     if os.path.exists(best_path)    else ""
+        research_rows    = load_research_results(league)
+        research_summary = summarize_research(research_rows)
+        sprint_results   = load_sprint_results(league, bot_name)
+        sprint_summary   = summarize_sprints(sprint_results, bot_name)
+        prompt = build_prompt(
+            league, program_md, best_strategy,
+            research_summary, sprint_summary, generation,
+        )
 
     print(f"  Calling Claude ({ANTHROPIC_MODEL})...")
     try:
