@@ -8,18 +8,18 @@ Maximize the **adjusted score** on 2 years of 1-hour data across BTC/USD, ETH/US
 **Adjusted score = Sharpe × sqrt(num_trades / 50)**
 
 ### Current Best Performance
-- **Adjusted score: 7.35** (Sharpe 2.3087, 504 trades, 51.6% win rate)
+- **Adjusted score: ~8.17** (Sharpe 2.5324, 523 trades, 52.0% win rate)
 - Beat this number.
 
 ### Score Intuition
 | Sharpe | Trades | Adjusted Score | Result |
 |--------|--------|----------------|--------|
-| 2.31 | 504 | 7.35 | Current best |
-| 2.00 | 700 | 7.48 | ✅ BEATS |
-| 1.80 | 900 | 7.63 | ✅ BEATS |
-| 1.60 | 1000 | 7.16 | ❌ Misses |
-| 2.40 | 504 | 7.63 | ✅ BEATS |
-| 0.93 | 953 | 4.07 | ❌ Far off — confirmed failure |
+| 2.53 | 523 | 8.17 | Current best |
+| 2.40 | 650 | 8.66 | ✅ BEATS |
+| 2.60 | 523 | 8.40 | ✅ BEATS |
+| 2.20 | 700 | 8.24 | ✅ BEATS |
+| 2.00 | 800 | 8.00 | ❌ Misses |
+| 1.80 | 900 | 7.63 | ❌ Far off |
 
 **The backtester accepts changes only if raw Sharpe improves. The adjusted score is used here for guidance only.**
 **This means: a change that raises trades but drops Sharpe will be rejected by the backtester, even if the adjusted score looks good.**
@@ -34,7 +34,7 @@ Maximize the **adjusted score** on 2 years of 1-hour data across BTC/USD, ETH/US
 These produce Sharpe ≈ -1.86, confirmed 20+ times.
 
 ✅ **ONLY allowed pairs:** BTC/USD, LINK/USD, ADA/USD, OP/USD, DOT/USD, AVAX/USD, MATIC/USD, ATOM/USD
-✅ **Current working set:** LINK/USD, ADA/USD, BTC/USD, OP/USD
+✅ **Current working set:** LINK/USD, ADA/USD, BTC/USD, OP/USD, DOT/USD
 
 ---
 
@@ -43,9 +43,11 @@ These produce Sharpe ≈ -1.86, confirmed 20+ times.
 1. **Never use ETH/USD or SOL/USD** — catastrophic, confirmed 20+ times
 2. **Never change RSI period_hours from 21** — confirmed catastrophic 8+ times
 3. **Never set MACD short period ≤ 44 or ≥ 52** — confirmed bad
-4. **Never set max_open to 2 without also tightening TP/SL/timeout** — standalone max_open=2 produces Sharpe ≈ 0.93, confirmed 10+ times across Gens 5182–5190. This loses to current best and will be rejected.
-5. **Never reproduce the current best exactly** — no change = no improvement
-6. **Never change RSI values (36.63 or 58.32) drastically** — small adjustments only (±2.0 max)
+4. **Never set max_open to 2 without also tightening TP/SL/timeout** — standalone max_open=2 produces Sharpe ≈ 0.93, confirmed 10+ times. It will be rejected.
+5. **Never reproduce the current best exactly** — no change = no improvement. CHECK YOUR OUTPUT.
+6. **Never change RSI values (36.88 or 58.32) drastically** — small adjustments only (±2.0 max)
+7. **Never set timeout_hours above 163** — confirmed suboptimal, strategy improves with shorter timeouts
+8. **Never add more than one new pair at a time**
 
 ---
 
@@ -59,6 +61,7 @@ pairs:
 - ADA/USD
 - BTC/USD
 - OP/USD
+- DOT/USD
 position:
   size_pct: 30
   max_open: 1
@@ -69,7 +72,7 @@ entry:
     - indicator: rsi
       period_hours: 21
       operator: lt
-      value: 36.63
+      value: 36.88
     - indicator: macd_signal
       period_hours: 26
       operator: eq
@@ -86,8 +89,8 @@ entry:
       value: bearish
 exit:
   take_profit_pct: 3.55
-  stop_loss_pct: 2.43
-  timeout_hours: 163
+  stop_loss_pct: 2.33
+  timeout_hours: 126
 risk:
   pause_if_down_pct: 8
   stop_if_down_pct: 18
@@ -100,13 +103,76 @@ Copy this exactly. Change ONE thing. Submit.
 
 ## 🔥 PRIORITY CHANGES — TRY THESE IN ORDER 🔥
 
-### PRIORITY 1: Add a fifth pair — DOT/USD (HIGHEST PRIORITY)
+### PRIORITY 1: Tighten take_profit_pct (HIGHEST PRIORITY — UNTESTED FROM CURRENT BEST)
 
-Add DOT/USD to the pairs list. This adds a fifth uncorrelated asset, increasing signal frequency while keeping all strategy logic identical. DOT/USD has similar volatility profile to LINK/USD and has never been tested.
+Reduce `take_profit_pct` from 3.55 to 3.20–3.35. Faster exits lock in gains and reduce variance, improving Sharpe. This has NOT been tested from the current best (which now has timeout=126, SL=2.33).
 
-**Expected outcome:** Trades rise from ~504 toward ~600-650. Sharpe may improve slightly or stay flat. Adjusted score improves.
+- **Option A:** `take_profit_pct: 3.20`
+- **Option B:** `take_profit_pct: 3.30`
+- **Option C:** `take_profit_pct: 3.35`
 
-**The ONLY change:**
+Change ONLY take_profit_pct. Everything else stays identical.
+
+**Expected outcome:** Sharpe improves slightly (fewer stalled winners), trade count stays ~520.
+
+---
+
+### PRIORITY 2: Tighten stop_loss_pct further
+
+Reduce `stop_loss_pct` from 2.33 toward 2.10–2.20. Each tightening step has historically improved Sharpe (confirmed at Gen 5316 which dropped SL from 2.43 → 2.33).
+
+- **Option A:** `stop_loss_pct: 2.20`
+- **Option B:** `stop_loss_pct: 2.15`
+- **Option C:** `stop_loss_pct: 2.10`
+
+Change ONLY stop_loss_pct. Do not change take_profit_pct or timeout_hours.
+
+**Expected outcome:** Sharpe improves (fewer large losses), trade count stays ~520.
+
+---
+
+### PRIORITY 3: Reduce timeout_hours further
+
+Current timeout is 126h. Try reducing to 110–120h to free up capital faster.
+
+- **Option A:** `timeout_hours: 115`
+- **Option B:** `timeout_hours: 110`
+- **Option C:** `timeout_hours: 120`
+
+Change ONLY timeout_hours. Everything else stays identical.
+
+**Expected outcome:** Marginal Sharpe improvement, trade count stays ~520.
+
+---
+
+### PRIORITY 4: Adjust long RSI entry threshold (minor tune)
+
+Small upward nudge to long RSI may catch slightly more entries without noise:
+- Try `value: 37.50` (current: 36.88) — +0.62
+- Try `value: 38.00` (current: 36.88) — +1.12
+- Try `value: 37.00` (current: 36.88) — +0.12
+
+Change ONLY the long entry RSI value. Must stay within range 35.00–38.88 (±2.0 from current).
+Do NOT change the RSI period_hours (must stay 21).
+
+---
+
+### PRIORITY 5: Adjust short RSI entry threshold (minor tune)
+
+Small adjustment to short RSI may improve entry precision:
+- Try `value: 57.50` (current: 58.32) — -0.82
+- Try `value: 59.00` (current: 58.32) — +0.68
+- Try `value: 58.00` (current: 58.32) — -0.32
+
+Change ONLY the short entry RSI value. Must stay within range 56.32–60.32 (±2.0 from current).
+Do NOT change the RSI period_hours (must stay 21).
+
+---
+
+### PRIORITY 6: Add a sixth pair — AVAX/USD
+
+Add AVAX/USD to the pairs list. AVAX has higher volatility and may generate more frequent RSI/MACD signals, increasing trade count while keeping strategy logic identical.
+
 ```yaml
 pairs:
 - LINK/USD
@@ -114,29 +180,15 @@ pairs:
 - BTC/USD
 - OP/USD
 - DOT/USD
-```
-Everything else stays identical.
-
----
-
-### PRIORITY 2: Add a fifth pair — AVAX/USD (if DOT/USD has been tried)
-
-Add AVAX/USD instead of DOT/USD. AVAX has higher volatility and may generate more frequent RSI/MACD signals.
-
-```yaml
-pairs:
-- LINK/USD
-- ADA/USD
-- BTC/USD
-- OP/USD
 - AVAX/USD
 ```
 
+**Expected outcome:** Trades rise from ~523 toward ~620-680. Sharpe may stay flat or improve slightly.
+**Warning:** If AVAX signals are noisy, Sharpe may drop. If rejected, do not try again.
+
 ---
 
-### PRIORITY 3: Add a fifth pair — ATOM/USD (if AVAX/USD has been tried)
-
-Add ATOM/USD. Tends to be uncorrelated with BTC signal timing.
+### PRIORITY 7: Add a sixth pair — MATIC/USD (if AVAX tried and failed)
 
 ```yaml
 pairs:
@@ -144,51 +196,30 @@ pairs:
 - ADA/USD
 - BTC/USD
 - OP/USD
-- ATOM/USD
+- DOT/USD
+- MATIC/USD
 ```
 
 ---
 
-### PRIORITY 4: Tighten exit parameters to improve Sharpe
-
-These changes reduce noise in returns and may improve raw Sharpe without affecting trade count much:
-
-- **Option A:** Reduce `take_profit_pct` from 3.55 → 3.20 (faster exits, higher completion rate)
-- **Option B:** Reduce `stop_loss_pct` from 2.43 → 2.10 (tighter risk, fewer large losses)
-- **Option C:** Reduce `timeout_hours` from 163 → 130 (free up capital faster)
-
-Change ONLY ONE of these. Do not change RSI or MACD parameters.
-
----
-
-### PRIORITY 5: Adjust RSI entry thresholds (minor tune)
-
-Small adjustments to RSI values may sharpen entry timing:
-- Long entry RSI: try 35.00–38.00 (current: 36.63) — change by no more than ±2.0
-- Short entry RSI: try 57.00–60.00 (current: 58.32) — change by no more than ±2.0
-
-Change ONLY ONE RSI value. Do not change the period_hours (must stay 21).
-
----
-
-### PRIORITY 6: Tune long-entry MACD period (minor)
+### PRIORITY 8: Tune long-entry MACD period
 
 - Long entry MACD: try period_hours 24 or 28 (current: 26)
 - Do NOT try 25 or 27 — confirmed suboptimal
-- Short entry MACD: keep at 48 (current best)
+- Short entry MACD: keep at 48 (do not change)
 
 ---
 
-### PRIORITY 7: max_open=2 ONLY as part of a bundled change
+### PRIORITY 9: max_open=2 ONLY as a bundled change
 
 **WARNING: max_open=2 alone produces Sharpe ≈ 0.93, confirmed 10+ times. It will be rejected.**
 
-If you choose to try max_open=2, you MUST simultaneously make ONE of these compensating changes to protect Sharpe:
-- Reduce take_profit_pct to 2.80–3.00 (faster exits reduce variance)
-- Reduce stop_loss_pct to 1.80–2.00 (tighter risk control)
-- Reduce timeout_hours to 100–120 (faster capital recycling)
+If you try max_open=2, you MUST simultaneously change ONE exit parameter:
+- Reduce `take_profit_pct` to 2.80–3.00, OR
+- Reduce `stop_loss_pct` to 1.80–2.00, OR
+- Reduce `timeout_hours` to 90–110
 
-Example bundled change (max_open=2 + tighter TP):
+Example bundled change:
 ```yaml
 position:
   size_pct: 30
@@ -196,10 +227,9 @@ position:
   fee_rate: 0.001
 exit:
   take_profit_pct: 2.90
-  stop_loss_pct: 2.43
-  timeout_hours: 163
+  stop_loss_pct: 2.33
+  timeout_hours: 126
 ```
-Do not attempt max_open=2 without a compensating exit parameter change.
 
 ---
 
@@ -211,35 +241,7 @@ Do not attempt max_open=2 without a compensating exit parameter change.
 | RSI period changed from 21 | ≈ -0.13 | ≈ 356 | BANNED — never change |
 | MACD short period ≤ 44 or ≥ 52 | ≈ -1.18 | ≈ 183 | Bad period |
 | MACD long period 25 or 27 | ≈ 2.30 | ≈ 474 | Confirmed suboptimal |
-| max_open=2 standalone (no other changes) | ≈ 0.93 | ≈ 953 | Confirmed 10+ times, REJECTED |
-| Minor TP/SL tweak only | ≈ 2.31 | ≈ 475 | Barely misses adjusted score |
-| No change made | ≈ 2.31 | ≈ 504 | Reproduces current best — REJECTED |
-
----
-
-## Decision Tree — What to Output
-
-1. **Is max_open still 1 in the current best?** YES.
-   - **Do NOT change max_open to 2 alone** — this has been tested 10+ times and always rejected (Sharpe 0.93).
-   - Instead: add a fifth pair (Priority 1).
-
-2. **Has a fifth pair been added?**
-   - YES → Try tightening one exit parameter (Priority 4) or adjusting RSI threshold (Priority 5)
-   - NO → Add DOT/USD (Priority 1)
-
-3. **Are all structural changes done?**
-   - Try MACD period tune (Priority 6)
-   - Or try max_open=2 bundled with a tighter exit parameter (Priority 7) — not standalone
-
-**Right now: add DOT/USD as the fifth pair. That is the most productive untested change.**
-
----
-
-## Output Format
-
-Output ONLY a YAML block. No text before or after.
-
-```yaml
-[complete strategy YAML here]
-```
-```
+| max_open=2 standalone | ≈ 0.93 | ≈ 953 | Confirmed 10+ times, REJECTED |
+| Reproducing current best exactly | 2.5324 | 523 | No change — REJECTED |
+| Aggressive RSI change (>±2.0) | ≈ -0.68 | ≈ 376 | Too much signal noise |
+| Large trade count increase without Sharpe gain | ≈ 1.19–1.35 | 542–566
