@@ -1,5 +1,5 @@
 ```markdown
-# FREYA Research Program — Prediction Markets (v9.0)
+# FREYA Research Program — Prediction Markets (v10.0)
 
 ## Objective
 Find prediction market filter strategies that maximize risk-adjusted ROI by identifying
@@ -17,22 +17,25 @@ vs. historical resolution rates.
 
 ---
 
-## 🚨 SYSTEM STATE — GEN 1400
+## 🏆 SYSTEM STATE — GEN 1600
 
-- **Current best:** adj=1.7474, sharpe=0.2881, bets=8597 (Gen 1009, confirmed)
-- **Generations since last improvement:** 391+ (Gen 1009 was last [new_best])
-- **Status: FULLY DEADLOCKED — STRUCTURAL INTERVENTION REQUIRED**
-- All 200 gens 1201–1400 show zero improvements
-- Proposer is cycling between ~6 known attractor configurations
-- Blacklist enforcement is NOT functioning (blacklisted configs reappear every 3–5 gens)
-- Phase 1 keyword exploration was NEVER executed despite being mandatory since Gen 1201
+- **Current best:** adj=1.8802, sharpe=0.3158, bets=7686 (Gen 1440, confirmed)
+- **Generations since last improvement:** 160 (Gen 1440 was last [new_best])
+- **Status: LOCAL BASIN DEADLOCK — STRUCTURAL CATEGORY EXPLORATION REQUIRED**
+- Gens 1441–1600: zero improvements, cycling between three near-identical configs
+- Attractor A: adj≈1.8802, bets≈7686 (Gen 1440 config exactly)
+- Attractor B: adj≈1.8797, bets≈7685 (1-bet difference from A)
+- Attractor C: adj≈1.8641, bets≈7487
+- Root cause: proposer is making micro-perturbations only; proposal diversity has collapsed
+- Fix: MANDATORY category diversification — world_events exploration is SUSPENDED
+  for Gens 1601–1650
 
 ---
 
-## 🔴 CRITICAL: PROPOSER CONSTRAINT PROTOCOL (MANDATORY v9.0)
+## 🔴 CRITICAL: PROPOSER CONSTRAINT PROTOCOL (MANDATORY v10.0)
 
 The proposer MUST maintain a `seen_configs.json` file containing the fingerprint of
-every configuration ever simulated. A fingerprint is defined as:
+every configuration ever simulated.
 
 ```python
 def fingerprint(config):
@@ -53,11 +56,16 @@ def fingerprint(config):
 3. If fingerprint exists: LOG `[DUPLICATE — seen gen NNN]`, DO NOT SIMULATE, force new proposal
 4. If fingerprint is new: add to `seen_configs.json`, proceed with simulation
 
-**This is not optional. This is the primary fix for the attractor cycle.**
+**ADDITIONAL DIVERSITY ENFORCEMENT (NEW v10.0):**
+- If proposed config has same `category` as current best AND same exclude_keywords
+  set (regardless of minor numeric differences): REJECT, force category change
+- If 3 consecutive proposals have adj within 0.01 of current best: FORCE a config
+  with category != world_events on the 4th proposal
+- Proposer must explicitly state which research phase the proposal belongs to
 
 ---
 
-## 🔴 ADOPTION LOGIC (MANDATORY — unchanged from v8.0, must be verified working)
+## 🔴 ADOPTION LOGIC (MANDATORY — unchanged)
 
 ```python
 def maybe_adopt(proposed_adj, proposed_config, gen_id):
@@ -80,20 +88,20 @@ def maybe_adopt(proposed_adj, proposed_config, gen_id):
 
 ## ✅ CANONICAL CONFIGS
 
-| Gen  | adj    | sharpe | bets  | Notes                          |
-|------|--------|--------|-------|--------------------------------|
-| 1009 | 1.7474 | 0.2881 | 8597  | **CURRENT BEST** ✅             |
-| 811  | 1.7424 | 0.2877 | 8523  | Attractor B (BLACKLISTED)      |
-| 586–600 | 1.7349 | 0.2889 | 8088 | Attractor C (BLACKLISTED)   |
-| ???  | 0.9578 | 0.1963 | 2607  | Mystery cluster — INVESTIGATE  |
-| ???  | 0.7004 | 0.1663 | 1328  | Mystery cluster — INVESTIGATE  |
-| 195  | 1.6167 | 0.2687 | 8189  | Old recorded best              |
+| Gen  | adj    | sharpe | bets  | Notes                                    |
+|------|--------|--------|-------|------------------------------------------|
+| 1440 | 1.8802 | 0.3158 | 7686  | **CURRENT BEST** ✅                       |
+| 1438 | 1.8797 | 0.3155 | 7709  | Attractor B (BLACKLISTED)                |
+| 1409 | 1.8781 | 0.3153 | 7710  | Attractor C (BLACKLISTED)                |
+| 1009 | 1.7474 | 0.2881 | 8597  | Superseded best (BLACKLISTED)            |
+| 811  | 1.7424 | 0.2877 | 8523  | Old attractor (BLACKLISTED)              |
+| 195  | 1.6167 | 0.2687 | 8189  | Old recorded best (BLACKLISTED)          |
 
-**MYSTERY CLUSTER PRIORITY:** Configurations producing bets≈1328/adj≈0.7004 and
-bets≈2607/adj≈0.9578 have appeared 5+ times each in gens 1201–1400 but have NEVER
-been identified. These represent a specific keyword or filter combination. Phase 2
-below is dedicated to identifying them, because their sharpe (~0.17–0.20) combined
-with the world_events base rate may indicate a refinable sub-market.
+**KEY INSIGHT FROM GEN 1401–1440:**
+- Sharpe improved from 0.2881 → 0.3158 by REDUCING bets (8597→7686)
+- Mechanism: excluding well-calibrated sub-topics raises per-bet edge quality
+- The world_events base rate (12%) is the engine; keyword exclusion is the tuning
+- This methodology should now be applied to politics and economics categories
 
 ---
 
@@ -105,20 +113,23 @@ with the world_events base rate may indicate a refinable sub-market.
 - HARD REJECT before simulation
 
 ### BLACKLISTED ATTRACTOR 2 (ZERO BETS)
-- Signature: bets < 50, adj=-1.0
+- Signature: bets < 50, adj=-1.0 (confirmed reappearance Gen 1597)
 - Log as FAIL; trigger auto-recovery; widen filters
+- Note: Gen 1597 confirmed this attractor is still reachable — add guard:
+  if expected_bets < 100 based on keyword count > 15 AND price_range < 0.3 wide: REJECT
 
 ### BLACKLISTED ATTRACTOR 3 (OVER-FILTERED)
 - Signature: bets≈156, adj≈0.47
 - Cause: min_edge_pts > 0.15 OR price_range_min > 0.20
 - REJECT if pre-simulation expected bets < 200
 
-### BLACKLISTED ATTRACTOR 4 (FROZEN CYCLE)
-- Signature A: adj=1.7474, bets=8597 — Gen 1009 config exactly
-- Signature B: adj=1.7424, bets=8523 — Gen 811 config exactly
-- Signature C: adj=1.7349, bets=8088 — Gen 586–600 config exactly
-- Detection: fingerprint match via seen_configs.json (supersedes manual rule)
-- These have been simulated 50+ combined times. Zero marginal value remains.
+### BLACKLISTED ATTRACTOR 4 (CURRENT BASIN — MICRO-PERTURBATIONS)
+- Signature A: adj=1.8802, bets=7686 — Gen 1440 config exactly
+- Signature B: adj=1.8797, bets=7685 — 1-bet variant
+- Signature C: adj=1.8641, bets=7487 — price_range variant
+- Detection: fingerprint match OR (category=world_events AND adj within 0.005 of 1.8802)
+- These represent the exhausted world_events local optimum.
+- SUSPENDED: no world_events proposals in Gens 1601–1650
 
 ---
 
@@ -137,89 +148,74 @@ comparison_result: [new_best / no_improvement / DUPLICATE / FAIL / INVALID]
 adoption_check: "proposed X.XXXX > disk X.XXXX → [YES/NO]"
 disk_write_confirmed: [YES / NO / N/A]
 reason_if_rejected: (explicit)
-keyword_change_from_baseline: (describe diff from Gen 1009 config)
+keyword_change_from_baseline: (describe diff from Gen 1440 config)
+category_change_from_baseline: [YES / NO] (new v10.0)
 phase: (which research phase this gen belongs to)
 ```
 
 **HALT CONDITIONS:**
 - If 5 consecutive gens are DUPLICATE: HALT, seen_configs.json is not loading correctly
-- If 3 consecutive gens show adj > 1.65 and [no_improvement]: HALT, fix adoption
+- If 3 consecutive gens show adj > 1.85 and [no_improvement]: HALT, fix adoption logic
 - If keyword exploration produces 0 bets in 3 consecutive gens: widen filters
-- If ANY gen achieves adj > 1.75: verify disk write fired before continuing
+- If ANY gen achieves adj > 1.90: verify disk write fired before continuing
+- If 10 consecutive gens propose world_events during Gens 1601–1650: HALT, proposer
+  is ignoring phase constraints
 
 ---
 
-## 🔬 RESEARCH AGENDA — GENS 1401–1500
+## 🔬 RESEARCH AGENDA — GENS 1601–1700
 
-### PHASE 0: System Integrity Check (Gens 1401–1403) — 3 GENS ONLY
-Verify adoption and deduplication are working before any exploration.
+### PHASE 3: Politics Category Exploration (Gens 1601–1620)
+**Goal: Apply the keyword-exclusion methodology to politics (base rate 29.1%)**
 
-- **Gen 1401:** Simulate Gen 1009 config. Expect adj=1.7474, [no_improvement] (or DUPLICATE).
-  Confirm fingerprint logged. Confirm disk still reads 1.7474.
-  Log: "DISK READ: current_best_adj = X.XXXX"
-- **Gen 1402:** Simulate any config not in seen_configs.json with expected adj < 1.7474.
-  Confirm [no_improvement]. Confirm disk unchanged. Confirm fingerprint added to seen_configs.
-- **Gen 1403:** Attempt to re-simulate Gen 1402's config. Confirm [DUPLICATE — seen gen 1402].
-  Confirm simulation was skipped. **If this fails: HALT. seen_configs.json is broken.**
-- **If 1401–1403 all pass: log [PHASE 0 COMPLETE v9.0] and proceed.**
+Hypothesis: Politics markets have analogous miscalibration to world_events, but in
+different sub-topics. Election markets may be well-calibrated (sophisticated bettors),
+while obscure legislative/appointment markets may be overpriced.
 
----
+**Baseline politics config:**
+```yaml
+category: politics
+min_edge_pts: 0.07
+price_range: [0.05, 0.77]
+max_days_to_resolve: 30
+min_liquidity_usd: 100
+max_position_pct: 0.1
+exclude_keywords: []
+```
 
-### PHASE 1: Mystery Cluster Identification (Gens 1404–1420)
-**Goal: Identify the configuration(s) producing bets≈1328/adj≈0.7004 and bets≈2607/adj≈0.9578**
+**Gen 1601–1605: Politics baseline and single-keyword exclusions**
+- Gen 1601: Politics baseline (no keyword filters). Record bets, sharpe, adj.
+  This is the politics zero-point.
+- Gen 1602: exclude_keywords: ["election"]
+- Gen 1603: exclude_keywords: ["poll"]
+- Gen 1604: exclude_keywords: ["president"]
+- Gen 1605: exclude_keywords: ["congress"]
 
-These configs appeared 5+ times in gens 1201–1400 as accidental proposals. We now
-deliberately hunt for them. A config with sharpe~0.20 and clean bets~2600 may be a
-refinable sub-market with untapped adj potential.
+**Gen 1606–1610: Politics multi-keyword exclusions**
+- Gen 1606: exclude_keywords: ["election", "poll"]
+- Gen 1607: exclude_keywords: ["election", "poll", "president"]
+- Gen 1608: exclude_keywords: ["election", "poll", "president", "congress"]
+- Gen 1609: exclude_keywords: ["vote", "ballot", "referendum"]
+- Gen 1610: exclude_keywords: ["election", "poll", "vote", "ballot", "approval"]
 
-Strategy: Systematic include_keywords grid on world_events baseline.
+**Gen 1611–1615: Politics edge threshold sweep**
+Use the best keyword config from 1601–1610. Sweep min_edge_pts:
+- Gen 1611: min_edge_pts=0.05
+- Gen 1612: min_edge_pts=0.06
+- Gen 1613: min_edge_pts=0.07 (baseline repeat — expect DUPLICATE, confirm dedup)
+- Gen 1614: min_edge_pts=0.08
+- Gen 1615: min_edge_pts=0.09
 
-**Gen 1404–1408: Single geographic keyword includes**
-Test one keyword per gen. Baseline: Gen 1009 config + include_keywords=[KEYWORD].
-Target keywords (regions frequently in world_events markets):
-- Gen 1404: include_keywords: ["africa"]
-- Gen 1405: include_keywords: ["middle east"]
-- Gen 1406: include_keywords: ["asia"]
-- Gen 1407: include_keywords: ["europe"]
-- Gen 1408: include_keywords: ["latin america"]
-
-**Gen 1409–1413: Single topic keyword includes**
-- Gen 1409: include_keywords: ["war"]
-- Gen 1410: include_keywords: ["election"]  ← note: may shift to politics base rate
-- Gen 1411: include_keywords: ["climate"]
-- Gen 1412: include_keywords: ["earthquake"]
-- Gen 1413: include_keywords: ["sanctions"]
-
-**Gen 1414–1418: Single topic keyword EXCLUDES (reduce noise)**
-Baseline: Gen 1009 config + exclude_keywords=[KEYWORD]
-- Gen 1414: exclude_keywords: ["election"]
-- Gen 1415: exclude_keywords: ["crypto"]
-- Gen 1416: exclude_keywords: ["sports"]
-- Gen 1417: exclude_keywords: ["will there be"]
-- Gen 1418: exclude_keywords: ["price"]
-
-**Gen 1419–1420: Analysis checkpoint**
-- Gen 1419: Simulate the include_keywords config with highest adj from 1404–1418.
-  Vary min_edge_pts ±0.005 to test sensitivity.
-- Gen 1420: Simulate the exclude_keywords config with highest adj from 1404–1418.
-  Vary min_edge_pts ±0.005 to test sensitivity.
-- Log: "MYSTERY CLUSTER STATUS: [IDENTIFIED / UNIDENTIFIED]"
-- If identified: document the fingerprint and add to CANONICAL CONFIGS table.
+**Gen 1616–1620: Politics price_range sweep**
+Use best config from 1601–1615:
+- Gen 1616: price_range: [0.05, 0.70]
+- Gen 1617: price_range: [0.05, 0.65]
+- Gen 1618: price_range: [0.08, 0.77]
+- Gen 1619: price_range: [0.10, 0.77]
+- Gen 1620: price_range: [0.08, 0.70]
+- Log: "POLITICS EXPLORATION CHECKPOINT — best adj found: X.XXXX"
 
 ---
 
-### PHASE 2: Sharpe Improvement via Keyword Exclusion Stacking (Gens 1421–1445)
-**Goal: Improve sharpe above 0.2881 by excluding systematically miscalibrated-low subsets**
-
-Hypothesis: Some world_events sub-topics have WORSE miscalibration than average
-(crowds are better calibrated there), dragging down sharpe. Excluding them improves
-sharpe even if bets decrease, because adj_score is sharpe-dominated at high bet counts.
-
-**Gen 1421–1430: Two-keyword exclude combinations**
-Build from best single-excludes found in Phase 1. Test pairs:
-- Each gen: exclude_keywords: [best_single_1, candidate_2]
-- Vary candidate_2 across: "sports", "crypto", "price", "will", "odds", "bitcoin",
-  "nba", "nfl", "ufc", "weather"
-- Target: find combo where sharpe > 0.29 with bets > 5000
-
-**Gen 1431–1
+### PHASE 4: Economics Category Exploration (Gens 1621–1640)
+**Goal: Apply keyword-exclusion methodology to economics (base rate 26.0%)**
