@@ -1,5 +1,5 @@
 ```markdown
-# FREYA Research Program — Prediction Markets (v7.0)
+# FREYA Research Program — Prediction Markets (v8.0)
 
 ## Objective
 Find prediction market filter strategies that maximize risk-adjusted ROI by identifying
@@ -17,72 +17,106 @@ vs. historical resolution rates.
 
 ---
 
-## 🚨 PRIORITY ZERO — FIX ADOPTION LOGIC BEFORE GEN 1001 🚨
+## 🚨 PRIORITY ZERO — ADOPTION LOGIC BROKEN AGAIN (AS OF GEN 1009) 🚨
 
-### The Adoption Bug Has Recurred (Gens 982–1000)
+### What Happened (Third Recurrence)
+- Gen 1009 correctly logged adj=1.7474 as [new_best] ✅
+- Gens 1184–1198 show both adj=1.7474 AND adj=1.7424 logged as [no_improvement] ❌
+- This proves Gen 1009's adoption wrote to a local variable, not the persisted store
+- current_best_adj in the persisted store was NEVER updated from 1.7424
+- The proposer is reading the stale persisted value (1.7424) and cycling between
+  the two known attractors
 
-**CONFIRMED EVIDENCE:**
-- Gen 811 correctly adopted adj=1.7424 as new best ✅
-- Gens 982, 985, 988, 989, 990, 992, 993, 994, 995, 997, 999, 1000 ALL reproduce
-  adj=1.7424 and are logged [no_improvement] — logical impossibility ❌
-- This is the SAME failure mode as Gens 586–600 (v6.0 incident)
+### MANDATORY FIXES — DO NOT PROCEED TO GEN 1201 WITHOUT COMPLETING ALL
 
-**REQUIRED FIXES before Gen 1001:**
-1. Confirm `current_best_adj` is read from a live mutable variable, NOT a constant
-2. Confirm the comparison is `proposed_adj > current_best_adj` (strict greater-than)
-3. Check that Gen 811's adoption actually wrote adj=1.7424 to the tracked variable
-   (it may have written to a local scope that was then discarded)
-4. Run validation test: simulate Gen 811 config, confirm adoption fires with
-   explicit log: "proposed 1.7424 > current_best 1.7424 → NO (equal, not greater)"
-   OR "proposed 1.7425 > current_best 1.7424 → YES"
-5. The proposer cycling between two attractors suggests it is ALSO reading a stale
-   baseline — fix both reader and writer atomically
+**Fix 1: Persistent Store**
+- current_best_adj MUST be stored in a file (e.g., `best_adj.json`)
+- Format: `{"adj": 1.7474, "gen": 1009, "config": {...full YAML...}}`
+- Every read of current_best_adj MUST load from this file
+- Every write (adoption) MUST write to this file AND fsync before continuing
+- NEVER cache current_best_adj in memory between generations
 
-### Why This Recurs
-The root cause is likely that `current_best_adj` is initialized at program start from
-a hardcoded value and the write-on-adoption path either fails silently or writes to
-a different variable name than the one read during comparison. Every program restart
-resets to the hardcoded value. Solution: persist `current_best_adj` to disk and read
-from disk at every comparison.
+**Fix 2: Atomic Adoption**
+```python
+# REQUIRED ADOPTION PSEUDOCODE (implement exactly)
+def maybe_adopt(proposed_adj, proposed_config, gen_id):
+    current = load_from_disk("best_adj.json")  # always read from disk
+    if proposed_adj > current["adj"]:
+        write_to_disk("best_adj.json", {
+            "adj": proposed_adj,
+            "gen": gen_id,
+            "config": proposed_config
+        })
+        fsync()
+        log(f"[new_best] proposed {proposed_adj} > current {current['adj']} → ADOPTED")
+        return True
+    else:
+        log(f"[no_improvement] proposed {proposed_adj} <= current {current['adj']} → REJECTED")
+        return False
+```
+
+**Fix 3: Attractor Blacklist Enforcement**
+- Before ANY simulation, check if proposed config would reproduce a blacklisted
+  signature (see BLACKLISTED CONFIGS below)
+- If yes: log [DUPLICATE — frozen cycle], do NOT simulate, force new proposal
+- The proposer MUST be capable of detecting its own attractor convergence
+
+**Fix 4: Validation Test (run BEFORE Gen 1201)**
+```
+Test A: Load best_adj.json. Confirm it reads 1.7474 (or 1.7424 if Gen 1009
+        adoption truly failed). Log: "DISK READ: current_best_adj = X.XXXX"
+Test B: Simulate Gen 1009 config. Confirm adj=1.7474.
+Test C: Simulate a config with expected adj=1.7480 (minor perturbation).
+        If adj > 1.7474: confirm adoption fires and disk is updated.
+        If adj <= 1.7474: confirm [no_improvement] is logged.
+Test D: Restart the process. Re-read disk. Confirm current_best_adj persisted.
+```
+
+### Root Cause History (Three Recurrences — Pattern Analysis)
+| Event | Gens | Symptom | Root Cause |
+|-------|------|---------|------------|
+| First | 586–600 | adj=1.7349 cycling | Write to local var |
+| Second | 982–1000 | adj=1.7424 cycling | Same; v7.0 reinit |
+| Third | 1185–1200 | 1.7424+1.7474 cycling | Same; adoption at Gen 1009 |
+
+All three have the same root cause. The fix must be structural, not procedural.
 
 ---
 
-## ✅ TRUE CURRENT BEST — Gen 811 (CONFIRMED)
+## ✅ TRUE CURRENT BEST — Gen 1009 (CONFIRMED, PENDING DISK VALIDATION)
 
-- adj_score=1.7424, sharpe=0.2877, roi=20.882%, win=79.23%, bets=8523
-- Confirmed: appeared as new_best in Gen 811, reproduced 11+ times in Gens 982–1000
-- Config: world_events, min_edge_pts perturbed from v6.0 baseline
-  (exact YAML below — reconstruct from Gen 811 logs if needed)
-- THIS IS THE CANONICAL BASELINE FOR ALL COMPARISONS FROM GEN 1001 ONWARD
+- adj_score=1.7474, sharpe=0.2881, roi=20.831%, win=79.38%, bets=8597
+- Confirmed: appeared as [new_best] in Gen 1009
+- Config: world_events, min_edge_pts slightly below Gen 811's 0.066
 
 ```yaml
-# GEN 811 BEST — CANONICAL BASELINE v7.0
+# GEN 1009 BEST — CANONICAL BASELINE v8.0
 category: world_events
 exclude_keywords: []
 include_keywords: []
 max_days_to_resolve: 30
 max_position_pct: 0.1
-min_edge_pts: 0.066        # NOTE: confirm exact value from Gen 811 log
+min_edge_pts: 0.064        # NOTE: confirm exact value from Gen 1009 log
 min_liquidity_usd: 100
 name: pm_research_best
 price_range:
 - 0.05
-- 0.77                     # NOTE: confirm exact value from Gen 811 log
+- 0.77
 ```
 
-**⚠️ If Gen 811 exact YAML is unavailable:** reconstruct by simulating a grid of
-min_edge_pts ∈ {0.060, 0.062, 0.064, 0.066, 0.068, 0.070} × price_range_max ∈
-{0.75, 0.77, 0.79, 0.81} and selecting the config that reproduces adj=1.7424
-exactly. Log as [RECONSTRUCTION] not [new_best].
+**⚠️ If Gen 1009 exact YAML is unavailable:** reconstruct by simulating grid
+min_edge_pts ∈ {0.062, 0.063, 0.064, 0.065, 0.066} × price_range_max ∈ {0.75, 0.77}
+and selecting config that reproduces adj=1.7474 exactly. Log as [RECONSTRUCTION].
 
 ## ✅ REFERENCE CONFIGS
 
-| Gen | adj    | sharpe | bets | Notes                        |
-|-----|--------|--------|------|------------------------------|
-| 811 | 1.7424 | 0.2877 | 8523 | **CURRENT BEST** ✅           |
-| 586/591/600 | 1.7349 | 0.2889 | 8088 | Previous true best     |
-| 195 | 1.6167 | 0.2687 | 8189 | Old recorded best             |
-| 121 | 1.5244 | 0.2528 | 8288 | Reference floor               |
+| Gen  | adj    | sharpe | bets | Notes                          |
+|------|--------|--------|------|--------------------------------|
+| 1009 | 1.7474 | 0.2881 | 8597 | **CURRENT BEST** ✅             |
+| 811  | 1.7424 | 0.2877 | 8523 | Previous best (attractor A)    |
+| 586–600 | 1.7349 | 0.2889 | 8088 | Pre-v7.0 best               |
+| 195  | 1.6167 | 0.2687 | 8189 | Old recorded best              |
+| 121  | 1.5244 | 0.2528 | 8288 | Reference floor                |
 
 ---
 
@@ -102,13 +136,15 @@ exactly. Log as [RECONSTRUCTION] not [new_best].
 - Cause: min_edge_pts > 0.15 OR price_range_min > 0.20
 - REJECT if pre-simulation expected bets < 200
 
-### BLACKLISTED ATTRACTOR 4 (FROZEN CYCLE — NEW v7.0)
-- Signature A: adj=1.7424, bets=8523 (Gen 811 / Attractor A)
-- Signature B: adj=1.722, bets=8051 (Attractor B)
-- These two configs have been simulated 15+ combined times with zero marginal value
-- **DO NOT PROPOSE EITHER CONFIG AGAIN**
-- If proposer outputs a config that would reproduce either signature:
-  log as [DUPLICATE — frozen cycle], skip simulation, force keyword exploration
+### BLACKLISTED ATTRACTOR 4 (FROZEN CYCLE — v7.0/v8.0)
+- Signature A: adj=1.7474, bets=8597 (Gen 1009 / Attractor A)
+- Signature B: adj=1.7424, bets=8523 (Gen 811 / Attractor B)
+- Signature C: adj=1.7349, bets=8088 (Gen 586–600 / Attractor C)
+- These configs have been simulated 30+ combined times with zero marginal value
+- **DO NOT PROPOSE ANY OF THESE CONFIGS AGAIN**
+- Detection rule: if proposed config has kw=0 AND category=world_events AND
+  min_edge_pts ∈ [0.060, 0.070] AND price_range_max ∈ [0.75, 0.79]:
+  → flag as likely attractor, require keyword diff OR category diff to proceed
 
 ---
 
@@ -116,88 +152,57 @@ exactly. Log as [RECONSTRUCTION] not [new_best].
 
 After EVERY generation, log ALL fields:
 ```
-proposed_config: (full YAML)
+gen_id: NNNN
+proposed_config: (full YAML including all keyword lists)
 proposed_adj: X.XXXX
 proposed_sharpe: X.XXXX
 proposed_bets: NNNN
-current_best_adj: X.XXXX  ← MUST be dynamically read from persisted store
+disk_read_current_best_adj: X.XXXX  ← MUST show disk read, not cached value
 comparison_result: [new_best / no_improvement / DUPLICATE / FAIL / INVALID]
-adoption_check: "proposed X.XXXX > current_best X.XXXX → [YES/NO]"
+adoption_check: "proposed X.XXXX > disk_best X.XXXX → [YES/NO]"
+disk_write_confirmed: [YES / NO / N/A]
 reason_if_rejected: (explicit)
+keyword_change_from_baseline: (describe any include/exclude diff from Gen 1009)
 ```
 
 **ADOPTION RULE (write literally each generation):**
 ```
-IF proposed_adj > current_best_adj:
-    → adopt; update persisted current_best_adj; log [new_best]
+READ current_best_adj FROM DISK
+IF proposed_adj > current_best_adj (disk value):
+    WRITE proposed_adj TO DISK (fsync)
+    LOG [new_best] "proposed X.XXXX > disk X.XXXX → ADOPTED, disk updated"
 ELSE:
-    → log [no_improvement]
+    LOG [no_improvement] "proposed X.XXXX <= disk X.XXXX → REJECTED"
 ```
 
 **HALT CONDITIONS:**
-- If any gen achieves adj > 1.70: verify adoption fired correctly before continuing
+- If ANY gen achieves adj > 1.70: verify disk write fired before continuing
 - If 3 consecutive gens show adj > 1.65 and [no_improvement]: HALT, fix adoption
-- If 5 consecutive gens reproduce adj=1.7424 or adj=1.722: HALT, adoption frozen
+- If 5 consecutive gens reproduce adj=1.7474 or adj=1.7424 or adj=1.7349: HALT
+- If keyword exploration produces 0 bets in 3 consecutive gens: widen filters
 
 ---
 
-## 🔬 RESEARCH AGENDA — NEXT 100 GENERATIONS (1001–1100)
+## 🔬 RESEARCH AGENDA — NEXT 100 GENERATIONS (1201–1300)
 
-### PHASE 1: Adoption Validation (Gens 1001–1005)
-**DO NOT explore new configs yet.**
-- Gen 1001: Simulate Gen 811 config exactly. Log result. Verify current_best_adj=1.7424.
-- Gen 1002: Simulate a config known to be slightly below best (e.g., Gen 195 config).
-  Verify adoption does NOT fire. Confirm current_best_adj still reads 1.7424.
-- Gen 1003: Simulate a config with artificially high expected adj (e.g., min_edge_pts
-  slightly adjusted to target ~1.75). Verify adoption fires if result > 1.7424.
-- If all three pass: adoption logic confirmed. Proceed to Phase 2.
-- If any fail: stop, fix, retest.
+### PHASE 0: Adoption Re-Validation (Gens 1201–1205)
+**MANDATORY before any new exploration.**
 
-### PHASE 2: Keyword Filter Exploration (Gens 1006–1060)
-**This is the highest-priority unexplored dimension.**
+- Gen 1201: Read disk. Log "DISK READ: current_best_adj = X.XXXX". Should be 1.7474.
+  If disk shows 1.7424: Gen 1009 adoption failed. Manually write 1.7474 to disk.
+  Simulate Gen 1009 config. Confirm adj=1.7474. Log [RECONSTRUCTION if needed].
+- Gen 1202: Simulate Gen 811 config (adj expected=1.7424). Confirm [no_improvement].
+  Log: "proposed 1.7424 <= disk 1.7474 → REJECTED". Confirm disk still shows 1.7474.
+- Gen 1203: Simulate a minor perturbation targeting adj~1.75 (e.g., min_edge_pts=0.063,
+  price_range_max=0.78). If adj > 1.7474: confirm adoption fires and disk updates.
+  If adj <= 1.7474: log [no_improvement], confirm disk unchanged.
+- Gen 1204: Restart process cold. Re-read disk. Confirm value persisted from Gen 1203.
+- Gen 1205: Simulate any non-attractor config. Confirm logging format complete.
+- **If any of 1201–1205 fail: HALT, fix, rerun from Gen 1201.**
+- **If all pass: log [PHASE 0 COMPLETE] and proceed to Phase 1.**
 
-After 1000 generations, include_keywords and exclude_keywords have NEVER been tested
-(kw=0 in all configs). Given world_events is the confirmed signal category, keyword
-segmentation is the highest-variance remaining lever.
+### PHASE 1: Keyword Exclusion Filters (Gens 1206–1230)
+**Highest-priority unexplored dimension. Never tested in 1200 generations.**
 
-#### 2A: Exclusion Filters (Expected: reduce noise, improve sharpe)
-Test these exclude_keywords lists ONE AT A TIME, one per generation:
-- `["sport", "football", "soccer", "basketball", "tennis"]`
-  — removes sports-adjacent markets miscategorized as world_events
-- `["stock", "price", "bitcoin", "crypto", "ethereum"]`
-  — removes finance-adjacent world_events
-- `["poll", "approval", "rating", "survey"]`
-  — removes opinion-polling markets (may have different calibration)
-- `["will.*win", "championship", "tournament", "league"]`
-  — regex-style: competitive outcome markets
-- `["earthquake", "hurricane", "flood", "disaster"]`
-  — tests whether natural disaster markets have different YES rate
-
-For each: log keyword list, expected bet count change, observed bets, adj delta.
-
-#### 2B: Inclusion Filters (Expected: isolate highest-signal subcategories)
-Test these include_keywords lists ONE AT A TIME:
-- `["war", "conflict", "military", "attack"]`
-  — geopolitical conflict subcategory
-- `["election", "vote", "referendum", "ballot"]`
-  — electoral world_events (may overlap with politics)
-- `["death", "resign", "arrest", "sanction"]`
-  — leadership/legal event subcategory
-- `["nuclear", "missile", "invasion", "ceasefire"]`
-  — high-stakes geopolitical
-- `["UN", "treaty", "agreement", "summit"]`
-  — diplomatic events
-
-For each: expect bets to DROP significantly. If bets < 200: log [OVER-FILTERED], skip.
-Target: find subcategory with adj > 1.7424 at bets > 500.
-
-#### 2C: Combined Keyword Strategy (Gens 1051–1060)
-- Take best exclusion filter from 2A + best inclusion filter from 2B
-- Test combined config
-- If bets < 200: relax one filter; retry
-
-### PHASE 3: Multi-Category Exploration (Gens 1061–1080)
-**Only if Phase 2 fails to beat adj=1.7424.**
-
-Test adding a second category alongside world_events:
-- `[world_events, politics]`: combined
+Baseline for all Phase 1 tests: Gen 1009 config with ONLY the keyword field changed.
+Test ONE exclude_keywords list per
