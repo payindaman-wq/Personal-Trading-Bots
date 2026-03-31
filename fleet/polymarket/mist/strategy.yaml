@@ -1,12 +1,14 @@
 category: world_events
-description: FREYA research slot — gen 1200 evolved strategy
+description: FREYA research slot — gen 1400 evolved strategy
 edge:
   max_position_pct: 0.1
   max_positions: 8
   min_confidence: medium
-  min_edge_pts: 0.065
+  min_edge_pts: 0.07
 market_filter:
-  exclude_keywords: []
+  exclude_keywords:
+  - election
+  - price
   include_keywords: []
   max_days_to_resolve: 30
   min_liquidity_usd: 100
