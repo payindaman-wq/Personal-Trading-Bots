@@ -1,5 +1,5 @@
 category: world_events
-description: FREYA research slot — gen 1800 evolved strategy
+description: FREYA research slot — gen 2000 evolved strategy
 edge:
   max_position_pct: 0.1
   max_positions: 8
@@ -24,8 +24,65 @@ market_filter:
   - covid
   - china
   - russia
+  - trump
+  - biden
+  - economy
+  - market
+  - stocks
+  - federal
+  - reserve
+  - inflation
+  - airline
+  - flight
+  - travel
+  - company
+  - company's
+  - tech
+  - technology
+  - government
+  - policy
+  - law
+  - bill
+  - regulation
+  - agreement
+  - treaty
+  - court
+  - judge
+  - arrest
+  - investigation
+  - strike
+  - protest
+  - riot
+  - collapse
+  - disaster
+  - accident
+  - explosion
+  - attack
+  - death
+  - murder
+  - suicide
+  - scandal
+  - scandal's
+  - report
+  - data
+  - forecast
+  - prediction
+  - forecast's
+  - prediction's
+  - analysis
+  - analyze
+  - analyze's
+  - estimate
+  - estimation
+  - estimate's
+  - outcome
+  - results
+  - resolution
+  - resolved
+  - event
+  - events
   include_keywords: []
-  max_days_to_resolve: 30
+  max_days_to_resolve: 90
   min_liquidity_usd: 100
   price_range:
   - 0.05
