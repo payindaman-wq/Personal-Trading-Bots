@@ -1,5 +1,5 @@
 category: world_events
-description: FREYA research slot — gen 2000 evolved strategy
+description: FREYA research slot — gen 2200 evolved strategy
 edge:
   max_position_pct: 0.1
   max_positions: 8
@@ -81,8 +81,74 @@ market_filter:
   - resolved
   - event
   - events
+  - outcome
+  - outcomes
+  - result
+  - results
+  - resolution
+  - resolutions
+  - resolved
+  - developing
+  - continue
+  - continues
+  - ongoing
+  - progress
+  - progress's
+  - development
+  - developments
+  - phase
+  - stage
+  - phase's
+  - stage's
+  - progress
+  - progress's
+  - trend
+  - trends
+  - trend's
+  - potential
+  - potentially
+  - likely
+  - unlikely
+  - award
+  - ceremony
+  - festival
+  - conference
+  - summit
+  - launch
+  - release
+  - announced
+  - announced's
+  - announced by
+  - announced for
+  - launched
+  - launched by
+  - launched for
+  - released
+  - released by
+  - released for
+  - announced
+  - announced's
+  - announced by
+  - announced for
+  - launched
+  - launched by
+  - launched for
+  - released
+  - released by
+  - released for
+  - dispute
+  - conflict
+  - violence
+  - civil
+  - unrest
+  - coup
+  - insurgency
+  - rebellion
+  - uprising
+  - chaos
+  - turmoil
   include_keywords: []
-  max_days_to_resolve: 90
+  max_days_to_resolve: 180
   min_liquidity_usd: 100
   price_range:
   - 0.05
