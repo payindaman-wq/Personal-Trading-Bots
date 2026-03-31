@@ -207,8 +207,10 @@ def check_entries(portfolio, strategy, history, prices, comp_dir, dry_run):
     entry_rules = strategy.get("entry", {})
 
     for pair in strategy.get("pairs", []):
-        if pair in open_pairs or len(open_pairs) >= max_open:
+        if len(open_pairs) >= max_open:
             break
+        if pair in open_pairs:
+            continue
 
         current = prices.get(pair, {}).get("last")
         if current is None:

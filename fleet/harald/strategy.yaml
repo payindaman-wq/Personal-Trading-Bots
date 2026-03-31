@@ -1,19 +1,24 @@
 name: harald
 style: rsi_mean_reversion
-inspiration: Scott Melker -- RSI pullback within confirmed trend, buys when short-term RSI oversold but macro direction intact
+inspiration: Scott Melker -- RSI pullback within confirmed trend, buys when short-term
+  RSI oversold but macro direction intact
 pairs:
-  - BTC/USD
-  - ETH/USD
-  - SOL/USD
-  - XRP/USD
-  - DOGE/USD
-  - AVAX/USD
-  - LINK/USD
-  - AAVE/USD
-  - NEAR/USD
-  - APT/USD
-  - SUI/USD
-  - UNI/USD
+- BTC/USD
+- ETH/USD
+- SOL/USD
+- XRP/USD
+- DOGE/USD
+- AVAX/USD
+- LINK/USD
+- UNI/USD
+- AAVE/USD
+- NEAR/USD
+- APT/USD
+- SUI/USD
+- ARB/USD
+- OP/USD
+- WIF/USD
+- PEPE/USD
 position:
   size_pct: 22
   max_open: 2
@@ -21,30 +26,38 @@ position:
 entry:
   long:
     conditions:
-      - indicator: rsi
-        period_minutes: 35
-        operator: lt
-        value: 35
-      - indicator: trend
-        period_minutes: 60
-        operator: in
-        value: [up, flat]
-      - indicator: price_vs_vwap
-        operator: in
-        value: [below, at]
+    - indicator: rsi
+      period_minutes: 35
+      operator: lt
+      value: 35
+    - indicator: trend
+      period_minutes: 60
+      operator: in
+      value:
+      - up
+      - flat
+    - indicator: price_vs_vwap
+      operator: in
+      value:
+      - below
+      - at
   short:
     conditions:
-      - indicator: rsi
-        period_minutes: 35
-        operator: gt
-        value: 65
-      - indicator: trend
-        period_minutes: 60
-        operator: in
-        value: [down, flat]
-      - indicator: price_vs_vwap
-        operator: in
-        value: [above, at]
+    - indicator: rsi
+      period_minutes: 35
+      operator: gt
+      value: 65
+    - indicator: trend
+      period_minutes: 60
+      operator: in
+      value:
+      - down
+      - flat
+    - indicator: price_vs_vwap
+      operator: in
+      value:
+      - above
+      - at
 exit:
   take_profit_pct: 2.2
   stop_loss_pct: 0.7

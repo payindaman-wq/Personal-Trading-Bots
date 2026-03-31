@@ -1,19 +1,24 @@
 name: bjorn
 style: ema_trend_continuation
-inspiration: Crypto Tony -- EMA trend direction with MACD momentum, rides pullbacks to EMA support
+inspiration: Crypto Tony -- EMA trend direction with MACD momentum, rides pullbacks
+  to EMA support
 pairs:
-  - BTC/USD
-  - ETH/USD
-  - SOL/USD
-  - XRP/USD
-  - DOGE/USD
-  - AVAX/USD
-  - LINK/USD
-  - AAVE/USD
-  - NEAR/USD
-  - APT/USD
-  - SUI/USD
-  - UNI/USD
+- BTC/USD
+- ETH/USD
+- SOL/USD
+- XRP/USD
+- DOGE/USD
+- AVAX/USD
+- LINK/USD
+- UNI/USD
+- AAVE/USD
+- NEAR/USD
+- APT/USD
+- SUI/USD
+- ARB/USD
+- OP/USD
+- WIF/USD
+- PEPE/USD
 position:
   size_pct: 20
   max_open: 2
@@ -21,32 +26,32 @@ position:
 entry:
   long:
     conditions:
-      - indicator: price_vs_ema
-        period_minutes: 50
-        operator: eq
-        value: above
-      - indicator: trend
-        period_minutes: 240
-        operator: eq
-        value: up
-      - indicator: macd_signal
-        period_minutes: 130
-        operator: eq
-        value: bullish
+    - indicator: price_vs_ema
+      period_minutes: 50
+      operator: eq
+      value: above
+    - indicator: trend
+      period_minutes: 240
+      operator: eq
+      value: up
+    - indicator: macd_signal
+      period_minutes: 130
+      operator: eq
+      value: bullish
   short:
     conditions:
-      - indicator: price_vs_ema
-        period_minutes: 50
-        operator: eq
-        value: below
-      - indicator: trend
-        period_minutes: 240
-        operator: eq
-        value: down
-      - indicator: macd_signal
-        period_minutes: 130
-        operator: eq
-        value: bearish
+    - indicator: price_vs_ema
+      period_minutes: 50
+      operator: eq
+      value: below
+    - indicator: trend
+      period_minutes: 240
+      operator: eq
+      value: down
+    - indicator: macd_signal
+      period_minutes: 130
+      operator: eq
+      value: bearish
 exit:
   take_profit_pct: 2.5
   stop_loss_pct: 0.7

@@ -2,18 +2,22 @@ name: ragnar
 style: vwap_pullback_buyer
 inspiration: VWAP reclaim -- buys dips to VWAP in uptrending markets with MACD confirmation
 pairs:
-  - BTC/USD
-  - ETH/USD
-  - SOL/USD
-  - XRP/USD
-  - DOGE/USD
-  - AVAX/USD
-  - LINK/USD
-  - AAVE/USD
-  - NEAR/USD
-  - APT/USD
-  - SUI/USD
-  - UNI/USD
+- BTC/USD
+- ETH/USD
+- SOL/USD
+- XRP/USD
+- DOGE/USD
+- AVAX/USD
+- LINK/USD
+- UNI/USD
+- AAVE/USD
+- NEAR/USD
+- APT/USD
+- SUI/USD
+- ARB/USD
+- OP/USD
+- WIF/USD
+- PEPE/USD
 position:
   size_pct: 20
   max_open: 2
@@ -21,38 +25,46 @@ position:
 entry:
   long:
     conditions:
-      - indicator: price_vs_vwap
-        operator: in
-        value: [below, at]
-      - indicator: trend
-        period_minutes: 240
-        operator: in
-        value: [up, flat]
-      - indicator: rsi
-        period_minutes: 35
-        operator: lt
-        value: 45
-      - indicator: macd_signal
-        period_minutes: 130
-        operator: eq
-        value: bullish
+    - indicator: price_vs_vwap
+      operator: in
+      value:
+      - below
+      - at
+    - indicator: trend
+      period_minutes: 240
+      operator: in
+      value:
+      - up
+      - flat
+    - indicator: rsi
+      period_minutes: 35
+      operator: lt
+      value: 45
+    - indicator: macd_signal
+      period_minutes: 130
+      operator: eq
+      value: bullish
   short:
     conditions:
-      - indicator: price_vs_vwap
-        operator: in
-        value: [above, at]
-      - indicator: trend
-        period_minutes: 240
-        operator: in
-        value: [down, flat]
-      - indicator: rsi
-        period_minutes: 35
-        operator: gt
-        value: 55
-      - indicator: macd_signal
-        period_minutes: 130
-        operator: eq
-        value: bearish
+    - indicator: price_vs_vwap
+      operator: in
+      value:
+      - above
+      - at
+    - indicator: trend
+      period_minutes: 240
+      operator: in
+      value:
+      - down
+      - flat
+    - indicator: rsi
+      period_minutes: 35
+      operator: gt
+      value: 55
+    - indicator: macd_signal
+      period_minutes: 130
+      operator: eq
+      value: bearish
 exit:
   take_profit_pct: 2.0
   stop_loss_pct: 0.6

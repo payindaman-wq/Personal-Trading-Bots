@@ -1,19 +1,24 @@
 name: lagertha
 style: vwap_trend_directional
-inspiration: TheWhiteWhaleHL -- VWAP-anchored directional conviction trades, buys pullbacks to VWAP with macro trend confirmation
+inspiration: TheWhiteWhaleHL -- VWAP-anchored directional conviction trades, buys
+  pullbacks to VWAP with macro trend confirmation
 pairs:
-  - BTC/USD
-  - ETH/USD
-  - SOL/USD
-  - XRP/USD
-  - DOGE/USD
-  - AVAX/USD
-  - LINK/USD
-  - AAVE/USD
-  - NEAR/USD
-  - APT/USD
-  - SUI/USD
-  - UNI/USD
+- BTC/USD
+- ETH/USD
+- SOL/USD
+- XRP/USD
+- DOGE/USD
+- AVAX/USD
+- LINK/USD
+- UNI/USD
+- AAVE/USD
+- NEAR/USD
+- APT/USD
+- SUI/USD
+- ARB/USD
+- OP/USD
+- WIF/USD
+- PEPE/USD
 position:
   size_pct: 22
   max_open: 2
@@ -21,38 +26,46 @@ position:
 entry:
   long:
     conditions:
-      - indicator: price_vs_vwap
-        operator: in
-        value: [below, at]
-      - indicator: trend
-        period_minutes: 240
-        operator: eq
-        value: up
-      - indicator: trend
-        period_minutes: 60
-        operator: in
-        value: [up, flat]
-      - indicator: rsi
-        period_minutes: 35
-        operator: lt
-        value: 42
+    - indicator: price_vs_vwap
+      operator: in
+      value:
+      - below
+      - at
+    - indicator: trend
+      period_minutes: 240
+      operator: eq
+      value: up
+    - indicator: trend
+      period_minutes: 60
+      operator: in
+      value:
+      - up
+      - flat
+    - indicator: rsi
+      period_minutes: 35
+      operator: lt
+      value: 42
   short:
     conditions:
-      - indicator: price_vs_vwap
-        operator: in
-        value: [above, at]
-      - indicator: trend
-        period_minutes: 240
-        operator: eq
-        value: down
-      - indicator: trend
-        period_minutes: 60
-        operator: in
-        value: [down, flat]
-      - indicator: rsi
-        period_minutes: 35
-        operator: gt
-        value: 58
+    - indicator: price_vs_vwap
+      operator: in
+      value:
+      - above
+      - at
+    - indicator: trend
+      period_minutes: 240
+      operator: eq
+      value: down
+    - indicator: trend
+      period_minutes: 60
+      operator: in
+      value:
+      - down
+      - flat
+    - indicator: rsi
+      period_minutes: 35
+      operator: gt
+      value: 58
 exit:
   take_profit_pct: 2.8
   stop_loss_pct: 0.8
