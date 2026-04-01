@@ -55,6 +55,68 @@ def call_claude(prompt, api_key):
     return data["content"][0]["text"].strip()
 
 
+
+def load_researcher_constants():
+    """Extract current ALLOWED_CONSTANTS values from odin_researcher_v2.py."""
+    researcher_path = os.path.join(RESEARCH, "odin_researcher_v2.py")
+    if not os.path.exists(researcher_path):
+        return {}
+    allowed = {"MIN_TRADES", "POPULATION_SIZE", "SUSPICIOUS_SHARPE", "STALL_ALERT_GENS"}
+    constants = {}
+    with open(researcher_path) as f:
+        for line in f:
+            stripped = line.strip()
+            for name in allowed:
+                if stripped.startswith(name + " ="):
+                    constants[name] = stripped.split("=", 1)[1].strip()
+                    break
+    return constants
+
+
+def load_loki_changes(league, n=20):
+    """Load recent LOKI code changes and escalations for this league."""
+    loki_log = os.path.join(RESEARCH, "loki_log.jsonl")
+    if not os.path.exists(loki_log):
+        return []
+    entries = []
+    with open(loki_log) as f:
+        for line in f:
+            try:
+                entry = json.loads(line.strip())
+            except Exception:
+                continue
+            if entry.get("league") != league:
+                continue
+            actions = entry.get("actions", [])
+            notable = [a for a in actions if a.startswith("code:") or a.startswith("escalated")]
+            if notable:
+                entries.append({
+                    "ts":      entry.get("ts", ""),
+                    "gen":     entry.get("gen", "?"),
+                    "actions": notable,
+                })
+    return entries[-n:]
+
+
+def format_self_audit(constants, loki_changes):
+    lines = ["## Current Researcher Constants"]
+    if constants:
+        for k, v in constants.items():
+            lines.append(f"  {k} = {v}")
+    else:
+        lines.append("  (unavailable)")
+    lines.append("")
+    lines.append("## Your Recent Code Changes (via LOKI)")
+    if loki_changes:
+        for c in loki_changes:
+            lines.append(f"  [{c['ts']} gen={c['gen']}]")
+            for a in c["actions"]:
+                lines.append(f"    {a}")
+    else:
+        lines.append("  No code changes on record.")
+    return chr(10).join(lines)
+
+
 def load_research_results(league):
     path = os.path.join(RESEARCH, league, "results.tsv")
     if not os.path.exists(path):
@@ -164,7 +226,8 @@ def summarize_sprints(sprint_results, bot_name):
 
 
 def build_prompt(league, program_md, best_strategy_yaml,
-                 research_summary, sprint_summary, generation):
+                 research_summary, sprint_summary, generation,
+                 self_audit=""):
     bot_name  = "AutoBotDay"  if league == "day"   else "AutoBotSwing"
     timeframe = "5-minute (day trading)" if league == "day" else "1-hour (swing trading)"
 
@@ -195,9 +258,19 @@ ODIN works by asking a small LLM (llama-3.1-8b-instant) to propose ONE change to
 {sprint_summary}
 
 ---
+## Self-Audit: Constants & Your Past Decisions
+
+{self_audit}
+
+---
 ## Your Task
 
-Analyze the above and identify:
+FIRST — self-audit: review the constants and your past LOKI changes above. Ask yourself:
+- Did any constant change coincide with a performance regression or stall beginning?
+- Is the current MIN_TRADES threshold consistent with the trade counts that actually produce good Sharpe in the results above?
+- If a past change hurt performance, say so explicitly and recommend reversing or adjusting it.
+
+THEN analyze the research results and identify:
 1. What types of changes improve Sharpe vs. what consistently fails
 2. Failure patterns — what mistakes does the small LLM keep making?
 3. Gaps between backtest Sharpe and live sprint performance (if any)
@@ -428,9 +501,13 @@ def main():
         research_summary = summarize_research(research_rows)
         sprint_results   = load_sprint_results(league, bot_name)
         sprint_summary   = summarize_sprints(sprint_results, bot_name)
+        constants        = load_researcher_constants()
+        loki_changes     = load_loki_changes(league)
+        self_audit       = format_self_audit(constants, loki_changes)
         prompt = build_prompt(
             league, program_md, best_strategy,
             research_summary, sprint_summary, generation,
+            self_audit=self_audit,
         )
 
     print(f"  Calling Claude ({ANTHROPIC_MODEL})...")
