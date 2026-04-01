@@ -1,10 +1,10 @@
 category: world_events
-description: FREYA research slot — gen 3000 evolved strategy
+description: FREYA research slot — gen 3200 evolved strategy
 edge:
   max_position_pct: 0.1
   max_positions: 8
   min_confidence: medium
-  min_edge_pts: 0.18
+  min_edge_pts: 0.089
 market_filter:
   exclude_keywords: []
   include_keywords: []
@@ -12,7 +12,7 @@ market_filter:
   min_liquidity_usd: 200
   price_range:
   - 0.07
-  - 0.84
+  - 0.8
 name: kara
 prompt_persona: You are a global events analyst specializing in predicting world news
   outcomes.
