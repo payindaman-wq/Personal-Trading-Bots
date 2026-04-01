@@ -23,6 +23,7 @@ START_SCRIPT        = "/root/.openclaw/skills/competition-start/scripts/competit
 SCORE_SCRIPT        = "/root/.openclaw/skills/competition-score/scripts/competition_score.py"
 ODIN_BEST_DAY       = os.path.join(WORKSPACE, "research", "day", "best_strategy.yaml")
 AUTOBOTDAY_STRATEGY = os.path.join(WORKSPACE, "fleet", "autobotday", "strategy.yaml")
+LOKI_LOG            = os.path.join(WORKSPACE, "research", "loki_log.jsonl")
 
 
 def load_cycle_state():
@@ -59,6 +60,23 @@ def hours_running(meta):
     return (datetime.now(timezone.utc) - started).total_seconds() / 3600
 
 
+def write_loki_activity(league, actions):
+    """Append an activity record to loki_log.jsonl for dashboard visibility."""
+    entry = {
+        "ts":       datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
+        "mimir_ts": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
+        "league":   league,
+        "gen":      "inject",
+        "actions":  actions,
+        "dry_run":  False,
+    }
+    try:
+        with open(LOKI_LOG, "a") as f:
+            f.write(json.dumps(entry) + "\n")
+    except Exception as e:
+        print(f"  [loki] log write failed: {e}")
+
+
 def inject_odin_strategy():
     """Copy Odin's current best day strategy into AutoBotDay's fleet slot before sprint starts."""
     if not os.path.exists(ODIN_BEST_DAY):
@@ -68,6 +86,7 @@ def inject_odin_strategy():
         import shutil
         shutil.copy2(ODIN_BEST_DAY, AUTOBOTDAY_STRATEGY)
         print(f"  [odin] Injected best day strategy -> {AUTOBOTDAY_STRATEGY}")
+        write_loki_activity("day", ["odin_inject: AutoBotDay <- best day strategy"])
     except Exception as e:
         print(f"  [odin] Injection failed: {e} — AutoBotDay keeps current strategy.")
 

@@ -49,6 +49,7 @@ LEAGUES = {
 }
 
 POLYMARKET_AUTO_STATE = os.path.join(WORKSPACE, "competition", "polymarket", "auto_state.json")
+LOKI_LOG             = os.path.join(WORKSPACE, "research", "loki_log.jsonl")
 
 CYCLE_STATE_FILES = {
     "swing":  os.path.join(WORKSPACE, "competition", "swing", "swing_cycle_state.json"),
@@ -57,12 +58,30 @@ CYCLE_STATE_FILES = {
 }
 
 
+def write_loki_activity(league, actions):
+    """Append an activity record to loki_log.jsonl for dashboard visibility."""
+    entry = {
+        "ts":       datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
+        "mimir_ts": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
+        "league":   league,
+        "gen":      "inject",
+        "actions":  actions,
+        "dry_run":  False,
+    }
+    try:
+        with open(LOKI_LOG, "a") as f:
+            f.write(json.dumps(entry) + "\n")
+    except Exception as e:
+        print(f"  [loki] log write failed: {e}")
+
+
 def inject_odin_swing_strategy(dry_run=False):
     if not os.path.exists(ODIN_SWING_BEST):
         print("  [odin-swing] No best_strategy.yaml yet — AutoBotSwing keeps current strategy.")
         return
     if not dry_run:
         shutil.copy2(ODIN_SWING_BEST, AUTOBOTSWING_STRAT)
+        write_loki_activity("swing", ["odin_inject: AutoBotSwing <- best swing strategy"])
     print("  [odin-swing] Injected best swing strategy -> " + AUTOBOTSWING_STRAT)
 
 
@@ -127,6 +146,9 @@ def inject_freya_strategy(dry_run=False):
                 yaml.dump(strategy, f, default_flow_style=False, allow_unicode=True)
         print(f"  [freya] Injected strategy -> {bot_name} "
               f"(cat={cat}, edge={strategy['edge']['min_edge_pts']})")
+
+    if not dry_run:
+        write_loki_activity("pm", ["freya_inject: " + ", ".join(FREYA_SLOTS) + " <- weekly FREYA best strategy"])
 
 
 def find_active_meta(active_dir):

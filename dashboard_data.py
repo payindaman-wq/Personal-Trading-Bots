@@ -693,7 +693,9 @@ def get_loki_state():
                         pass
         real_entries = [e for e in entries if not e.get("dry_run")]
         state["total_processed"] = len(real_entries)
-        state["recent_actions"] = list(reversed(real_entries[-10:]))
+        cutoff = (datetime.now(timezone.utc) - timedelta(hours=48)).strftime("%Y-%m-%dT%H:%M")
+        recent_48h = [e for e in real_entries if e.get("ts", "") >= cutoff]
+        state["recent_actions"] = list(reversed(recent_48h))
 
     if os.path.exists(LOKI_ESC_LOG):
         escalations = []
