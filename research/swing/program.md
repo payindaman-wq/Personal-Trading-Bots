@@ -17,9 +17,31 @@ If ALL fields are identical, you have FAILED. You must change ONE value.
 3. Confirm new value ≠ old value.
 4. Confirm NO other field changed.
 5. Confirm the new value is NOT in any banned list below.
-6. Confirm your output would NOT produce Sharpe≈1.5861 (~427 trades) or Sharpe≈2.2836 (~474 trades).
+6. Confirm your output would NOT produce a known bad attractor (see table below).
    - IF your change touches short entry macd_signal period_hours: the ONLY safe values are [53, 54, 55, 56].
    - IF your change touches pairs: confirm no ETH/USD or SOL/USD.
+   - IF your output would produce ~473–482 trades: you are in the regime B attractor cluster — START OVER.
+
+---
+
+## ⚠️ REGIME ALERT — READ THIS FIRST ⚠️
+
+**The current best strategy (2.4120 Sharpe, 476 trades, 52.9% win rate) is in REGIME B — high volume, marginal edge.**
+
+**There exists a FAR SUPERIOR regime:**
+- Gen 2126: Sharpe=2.9286, 30 trades, 90% win rate
+- Gen 2100: Sharpe=2.8771, 30 trades, 86.7% win rate
+- Gen 810: Sharpe=2.8157, 30 trades, 83.3% win rate
+
+**Regime A characteristics:** Very tight entry conditions → few but high-quality trades → 80–90% win rate → Sharpe approaching 3.0.
+
+**Regime B characteristics (where we are now):** Loose entry conditions → 470–530 trades → 52–53% win rate → Sharpe ceiling ~2.53, currently regressing.
+
+**YOUR GOAL: Escape Regime B. Enter Regime A.**
+
+**How to escape Regime B:** Tighten entry conditions. Lower the long RSI threshold (e.g., 33–35). Raise the short RSI threshold (e.g., 63+). Increase take_profit_pct (4.50+). Increase timeout_hours (240+). Any of these moves ALONE will start pulling toward Regime A. Options D, E, A, and C are your escape routes.
+
+**WARNING:** If your proposed config would produce more than 200 trades, you are probably still in Regime B. Consider whether your change is aggressive enough.
 
 ---
 
@@ -69,33 +91,38 @@ risk:
 ```
 
 **Current performance: Sharpe=2.4120, 476 trades, 52.9% win rate**
-**No improvement in ~1600 generations. You MUST try something genuinely different from the options below.**
+**No improvement in ~1600 generations. This is a REGIME B plateau. You MUST push toward Regime A.**
 
 ---
 
-## ⚠️ ATTRACTOR ALERT — READ THIS BEFORE CHOOSING ANY OPTION ⚠️
+## ⚠️ ATTRACTOR ALERT — REGIME B CLUSTER IS DEADLY ⚠️
 
-**Two attractors are destroying generations right now:**
-
-### Attractor 1: Sharpe=1.5861 / ~427 trades
+### Attractor 1: Sharpe≈1.5861 / ~427 trades
 - Caused by: short entry `macd_signal period_hours` in range [44–52], or bad pair substitution
 - **ONLY safe MACD short values: 53, 54, 55, 56**
 
-### Attractor 2: Sharpe=2.2836 / ~474 trades  
-- Appeared 5 times in last 20 generations — the LLM keeps landing here
-- Caused by: a specific combination of current parameters with a minor change
-- If your output would produce 474 trades, you are in this attractor — START OVER
+### Attractor 2: Sharpe≈2.2836 / ~474 trades
+- High-frequency attractor — appeared 5+ times recently
+- Caused by minor parameter tweaks that stay in Regime B
+- If your output would produce ~474 trades → START OVER
 
-**Both attractors are BELOW the current best (2.4120). If you produce either one, your change is REJECTED.**
+### Attractor 3: Regime B Cluster / 473–482 trades / Sharpe 2.27–2.35
+- This entire zone (473–482 trades) is a trap — all configs here are BELOW current best
+- Recent examples: 2.2819/482, 2.2888/473, 2.2703/474, 2.3505/478
+- If your change would land in this zone → START OVER with a more aggressive change
+
+**All three attractors are BELOW the current best (2.4120). Any config producing them is REJECTED.**
 
 ---
 
-## Performance Target
+## Performance Targets
 
-Beat Sharpe=2.4120 (the backtester keeps a change only if raw Sharpe improves).
-
-## 🏆 STRETCH TARGET: Sharpe=2.93 was achieved at gen 2126 with only 30 trades and 90% win rate.
-That regime used VERY TIGHT entry conditions. Options A, D, E, and C are most likely to recover it.
+- **Minimum to beat:** Sharpe=2.4120
+- **Good result:** Sharpe=2.53+ (previous best in Regime B)
+- **🏆 STRETCH TARGET: Sharpe=2.93** — achieved at gen 2126 with 30 trades, 90% win rate
+  - This required VERY TIGHT entry conditions
+  - Options D, E, A (high values), and C (long timeout) are most likely to recover it
+  - A config with 25–35 trades and 80%+ win rate is on the right path even if Sharpe is temporarily lower
 
 ---
 
@@ -111,8 +138,8 @@ That regime used VERY TIGHT entry conditions. Options A, D, E, and C are most li
 | max_open: 2 | Sharpe ≈ 0.93, confirmed 10+ times |
 | timeout_hours: 120 | Confirmed 2.2133 attractor |
 | short RSI value: 57.50 | Confirmed 2.2133 attractor |
-| long RSI value change > ±3.0 from 36.68 | Catastrophic drop confirmed |
-| short RSI value change > ±3.0 from 60.64 | Catastrophic drop confirmed |
+| long RSI value < 33.00 or > 39.68 | Out of safe range (±3.0 from 36.68) |
+| short RSI value < 57.64 or > 63.64 | Out of safe range (±3.0 from 60.64) |
 | DOT/USD added as 5th pair | Previously dropped Sharpe |
 | take_profit_pct: 3.55 | Current best value — must change if using Option A |
 | stop_loss_pct: 2.43 | Current best value — must change if using Option B |
@@ -126,10 +153,14 @@ That regime used VERY TIGHT entry conditions. Options A, D, E, and C are most li
 
 | Sharpe | Trades | Frequency | What to avoid |
 |--------|--------|-----------|---------------|
-| **2.2836** | **~474** | **⚠️ 5 times in last 20 gens — CRITICAL** | **Minor parameter tweak landing on this — verify your change is meaningfully different** |
-| **1.5861** | **~427** | **3 times in last 20 gens** | **Short MACD period 44–52, or bad pair substitution** |
-| 2.5324 | 523 | Older best | Different config from current best |
+| **Regime B cluster** | **473–482** | **⚠️ CRITICAL — recurring trap** | **Any minor tweak that stays in high-volume territory** |
+| **2.2836** | **~474** | **⚠️ 5+ times — CRITICAL** | **Minor parameter tweak in Regime B** |
+| **1.5861** | **~427** | **3 times recent** | **Short MACD period 44–52, or bad pair substitution** |
+| 2.5324 | 523 | Older best | Different config — hard to replicate |
 | 2.4356 | 517 | Marginal | Below target |
+| 2.3505 | 478 | Recent | Regime B cluster |
+| 2.2819 | 482 | Recurring | Regime B cluster |
+| 2.2888 | 473 | Recurring | Regime B cluster |
 | 2.2133 | 519 | Older attractor | timeout=120 or short RSI=57.50 |
 | 2.1261 | 443 | Recurring | Check pairs or MACD period |
 | 1.3187 | 422 | 4 times recent | Check pairs/RSI combo |
@@ -143,57 +174,14 @@ That regime used VERY TIGHT entry conditions. Options A, D, E, and C are most li
 
 Pick ONE option (A through I). Make ONLY that one change. Do not combine options.
 
-**⚠️ PRIORITY ORDER: A > C > D > E > B > I > G > H**
-**Options A, C, D, and E are most likely to recover the high-Sharpe low-trade regime. Start here.**
+**⚠️ PRIORITY ORDER: D > E > A > C > B > I > G > H**
+**Options D and E (RSI tightening) are the PRIMARY escape routes to Regime A. Prioritize these.**
+**Options A (high TP) and C (long timeout) are secondary Regime A escape routes.**
 
 ---
 
-### Option A — Adjust take_profit_pct ⭐ TOP PRIORITY ⭐
-Change `take_profit_pct` to ONE of:
-`3.60` / `3.65` / `3.70` / `3.75` / `3.80` / `3.85` / `3.90` / `3.95` / `4.00` / `4.10` / `4.20` / `4.50` / `4.75` / `5.00`
-
-**Strategic note:** Higher take_profit values force the strategy to be MORE selective — only entering when a large move is likely. This is consistent with the high-Sharpe/low-trade regime (Sharpe=2.93 at gen 2126). Values 4.50+ are especially worth trying.
-
-**Known results:**
-- 3.55 = older best config — avoid recreating that exact config
-- 2.43 stop_loss + 3.55 TP = known attractor territory
-- Values 3.60 and above: largely untested at current config
-
-⚠️ Do NOT use 3.55. Change NOTHING else.
-
----
-
-### Option C — Adjust timeout_hours ⭐ HIGH PRIORITY ⭐
-Change `timeout_hours` to ONE of:
-`168` / `180` / `192` / `210` / `220` / `240` / `260` / `280` / `300` / `336` / `360`
-
-**Strategic note:** The high-Sharpe regime (gen 707–2126, Sharpe 2.63–2.93, 29–30 trades) likely used a long timeout allowing trades to mature fully. Values 240+ are especially worth exploring.
-
-**Known bad values:**
-- 120 = banned attractor (2.2133)
-- 115 / 130 / 140 / 150 / 163 / 175 = tested below target
-- 196 = produced 2.5324 at older config
-- 200 = current best value — DO NOT USE
-
-**Untested/promising:** `210`, `220`, `240`, `260`, `280`, `300`, `336`, `360`
-⚠️ Do NOT use 200. Change NOTHING else.
-
----
-
-### Option D — Adjust long RSI entry threshold ⭐ HIGH PRIORITY ⭐
+### Option D — Tighten long RSI entry threshold ⭐⭐ TOP PRIORITY — REGIME A ESCAPE ⭐⭐
 Change the long entry `value` from `36.68` to ONE of:
-`33.00` / `33.50` / `34.00` / `34.50` / `35.00` / `35.50` / `36.00` / `37.00` / `37.50` / `38.00` / `39.00`
+`33.00` / `33.50` / `34.00` / `34.50` / `35.00` / `35.50` / `36.00`
 
-**Strategic note:** Tightening the long RSI threshold (lower value = more selective) reduces trade count but may dramatically improve win rate and Sharpe — consistent with the high-quality regime. Try values below 35 first.
-
-⚠️ Do NOT change period_hours (must stay 21).
-⚠️ Stay within ±3.0 of 36.68 (so range is roughly 33.68–39.68).
-⚠️ Do NOT use 36.68. Change NOTHING else.
-
----
-
-### Option E — Adjust short RSI entry threshold ⭐ HIGH PRIORITY ⭐
-Change the short entry `value` from `60.64` to ONE of:
-`61.00` / `61.50` / `62.00` / `62.50` / `63.00` / `63.50` / `59.50` / `60.00`
-
-**Strategic note:** Tightening the short RSI threshold (higher value = more
+**Strategic note:** This is your most powerful lever for escaping Regime B. Lower values = fewer but higher-quality long entries. The high-Sharpe regime (gen 2126: Sharpe=2.93, 30
