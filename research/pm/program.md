@@ -1,213 +1,240 @@
 ```markdown
-# FREYA Research Program — Prediction Markets (v16.0)
+# FREYA Research Program — Prediction Markets (v17.0)
 
 ## Objective
 Find prediction market filter strategies that maximize risk-adjusted ROI by identifying
-market categories and keyword buckets where crowd prices are systematically miscalibrated
-vs. historical resolution rates.
+market categories where crowd prices are systematically miscalibrated vs. historical
+resolution rates. adj_score = sharpe × log(n_bets/20 + 1).
+
+## Key Learnings (Gens 1–3400)
+- **Keyword filters are non-functional or unreliable.** 200 gens of keyword-based
+  exploration (Phase A/D, Gens 3201–3400) produced zero improvements. Gen 2410
+  (bets=79, win=100%) is treated as a data artifact. ALL keyword-based phases
+  are suspended indefinitely.
+- **The real signal is structural:** world_events base rate ~12% vs. crowd pricing
+  25–40%. Broad NO-bias across the full category. Consistent but low-sharpe.
+- **adj_score improvement currently driven by bet-count scaling**, not sharpe gains.
+  Gen 3269 improvement came from min_liquidity relaxation (bets: 6807→10386).
+- **Current ceiling:** sharpe ~0.23, adj ~1.42 in world_events/no-keywords.
+- **Primary targets:** adj ≥ 2.0, sharpe ≥ 0.5, bets ≥ 1000
 
 ## Simulator
 - 300k+ resolved Polymarket/Kalshi/Manifold markets
 - Category base rates: sports=30.6%, politics=29.1%, crypto=31.5%, economics=26.0%,
   world_events=12.0%
-- Bet: if market_odds > base_rate + min_edge_pts -> bet NO;
-       if market_odds < base_rate - min_edge_pts -> bet YES
+- Bet: if market_odds > base_rate + min_edge_pts → bet NO;
+       if market_odds < base_rate - min_edge_pts → bet YES
 - Fee: 2% per bet
-- Fitness: adj_score = sharpe x log(n_bets/20 + 1)
+- Fitness: adj_score = sharpe × log(n_bets/20 + 1)
 
 ---
 
-## 🏆 SYSTEM STATE — GEN 3200
+## 🏆 SYSTEM STATE — GEN 3400
 
-- **Current best:** adj=1.2132, sharpe=0.208, roi=16.1%, win=75.3%, bets=6807
-  (Gen 3144, world_events, no keywords, perturb:min_edge_pts)
-- **Secondary reference:** adj=2.6747, sharpe=1.6723, roi=44.3%, win=100%, bets=79
-  (Gen 2410 — STATUS UNKNOWN, see Critical Diagnostic below)
-- **Generations since last improvement:** 56 (Gen 3144 was last [new_best])
-- **Status: ATTRACTOR COLLAPSE — DUAL DEAD ZONE ACTIVE**
+- **Current best:** adj=1.4155, sharpe=0.2263, roi=17.26%, win=76.38%, bets=10386
+  (Gen 3269, world_events, no keywords, perturb:min_liquidity_usd)
+- **Previous best:** adj=1.2132, sharpe=0.208, roi=16.1%, win=75.3%, bets=6807
+  (Gen 3144)
+- **Generations since last improvement:** 131 (Gen 3269 was last [new_best])
+- **Status: NEAR-LOCAL-OPTIMUM — KEYWORD HYPOTHESIS RETIRED — STRUCTURAL PIVOT**
 
-### Dead Zone Summary (Gens 3145–3200)
-- 0 improvements across 56 generations
-- Only 3 distinct outcomes in last 20 gens:
-  - adj=1.2132 (bets=6807): Current best exact clone — appears 2x — EXHAUSTED
-  - adj=-0.458 (bets=78): Broken small-bet attractor — appears 8x — BLACKLIST
-  - adj≈0.36 (bets=193): Mid-range attractor — appears 2x — LOW PRIORITY
-- Deduplication is failing: proposer is replaying dead configs
-- **ALL LIVE SLOTS DISABLED — no live validation active**
-
----
-
-## 🚨 CRITICAL DIAGNOSTIC — MUST RUN BEFORE GEN 3201
-
-**The entire research strategy depends on resolving this ambiguity.**
-
-The v15.0 program was built around Gen 2410 (adj=2.6747, bets=79, 11 Middle East
-keywords). The Gen 3001–3200 results show NO keyword-filtered improvements and a
-completely different best config (no keywords, bets=6807). This discontinuity must
-be explained before further keyword-based exploration.
-
-### Diagnostic Gen D1 — Exact Gen 2410 Replay
+### Current Best Config
 ```yaml
 category: world_events
-include_keywords: [iran, israel, palestine, syria, lebanon, iraq, turkey, saudi, 
-                   yemen, afghanistan, armenia]
+include_keywords: []
 exclude_keywords: []
 max_days_to_resolve: 14
-min_edge_pts: 0.065
-price_range: [0.05, 0.77]
-min_liquidity_usd: 200
+min_edge_pts: 0.059
+min_liquidity_usd: [UNKNOWN — confirm from Gen 3269 exact params]
+price_range: [0.07, 0.80]
 max_position_pct: 0.1
 ```
-
-**Interpretation matrix:**
-| Result | Meaning | Action |
-|--------|---------|--------|
-| bets≈79, sharpe≈1.67 | Keyword filter intact, Gen 2410 real | Proceed Phase A |
-| bets=6807, sharpe≈0.208 | Keywords silently ignored by simulator | Fix keyword filter, halt Phase A–D |
-| bets=0 | Over-filtering or keyword mismatch | Check keyword syntax, fix filter |
-| bets=79, sharpe<<1.67 | Universe same, base rate changed | Recalibrate and proceed |
-
-**Do NOT proceed to Phase A or any keyword-based phase until D1 is run and
-the keyword filter is confirmed working. Log D1 result explicitly.**
-
-### Diagnostic Gen D2 — Minimal Keyword Sanity Check
-If D1 shows keywords are ignored, run this to confirm:
-```yaml
-category: world_events
-include_keywords: [war]
-max_days_to_resolve: 30
-min_edge_pts: 0.05
-price_range: [0.05, 0.90]
-```
-Expected: bets should be substantially fewer than 6807.
-If bets≈6807: keyword filter is completely broken. Escalate immediately.
+**ACTION REQUIRED:** Log exact min_liquidity_usd from Gen 3269 before proceeding.
+Assumption: likely reduced from 100 to ~25–50.
 
 ---
 
-## 🧠 TWO-TRACK UNDERSTANDING
+## 🔴 MANDATORY DEDUPLICATION PROTOCOL (v17.0 — NON-NEGOTIABLE)
 
-### Track 1: The Gen 2410 Signal (IF KEYWORD FILTER IS WORKING)
-- Config: world_events + 11 Middle East keywords + max_days=14 + min_edge=0.065
-- adj=2.6747, sharpe=1.6723, roi=44.3%, win=100%, bets=79
-- Theoretical basis: availability bias causes systematic YES overpricing on
-  Middle East crisis markets. True YES rate ≈5–8% vs. 12% category base rate.
-  Crowds price at 25–40%+. Betting NO captures this miscalibration.
-- Limitation: bets=79 is small. Target: 300+ bets at sharpe≥0.9.
-- Note: 100% win rate on 79 bets contains survivorship risk. Needs live validation.
-
-### Track 2: The Broad World_Events Signal (CONFIRMED WORKING)
-- Config: world_events, no keywords, min_edge≈0.057–0.059, price_range≈[0.07, 0.80]
-- adj=1.2132, sharpe=0.208, roi=16.1%, win=75.3%, bets=6807
-- Theoretical basis: world_events 12% base rate + crowd overpricing broadly.
-  Weak but consistent NO-bias across the full category.
-- Limitation: sharpe=0.208 is low. Any regime shift could flip negative.
-- This is a real, replicable signal but not the primary optimization target.
-
-**Primary target:** adj ≥ 1.5, sharpe ≥ 0.5, bets ≥ 500
-**Stretch target:** adj ≥ 2.5, sharpe ≥ 1.0, bets ≥ 300
-
----
-
-## 🔴 MANDATORY DEDUPLICATION PROTOCOL (v16.0 — NON-NEGOTIABLE)
-
-The bets=78 attractor (adj=-0.458) appeared 8 times in the last 20 gens.
-The bets=6807 attractor appeared as exact clone twice.
-This represents complete proposer failure. The following must be enforced:
-
-### Blacklisted Bet Universes (by bet count signature + adj score)
+### Hard Blacklist (reject pre-simulation if bet count within ±3)
 ```python
 HARD_BLACKLIST = [
-    {"bets": 78, "adj": -0.458},      # broken small-bet attractor
-    {"bets": 92, "adj": -0.7536},     # broken mid-small attractor  
-    {"bets": 153, "adj": -0.0258},    # marginal attractor
-    {"bets": 194, "adj": -0.303},     # near-miss attractor
+    {"bets": 78,   "adj": -0.458},    # recurring broken attractor
+    {"bets": 83,   "adj": -0.5785},   # new recurring attractor (Gens 3391, 3394)
+    {"bets": 92,   "adj": -0.7536},
+    {"bets": 153,  "adj": -0.0258},
+    {"bets": 194,  "adj": -0.303},
+    {"bets": 270,  "adj": -0.3616},
 ]
-# Any config returning these exact (bets, adj) pairs is REJECTED pre-simulation
-# using bet-universe fingerprinting.
+
+# ABSOLUTE FLOOR: reject any config where estimated bets < 500
+# These are statistically meaningless and waste generations
+MIN_BETS_FLOOR = 500
 ```
 
-### Deduplication Guard (must be implemented before Gen 3201)
+### Deduplication Guard (enforce before every generation)
 ```python
 def pre_simulation_guard(config):
-    cfg_fp = hash(frozenset(config.items()))
-    
+    cfg_fp = hash(frozenset(flatten(config).items()))
     if cfg_fp in seen_config_fingerprints:
-        raise HardReject("Config fingerprint seen before")
+        raise HardReject("Exact config fingerprint already simulated")
     
-    # Run lightweight pre-sim to get bet count
     preview_bets = estimate_bet_count(config)
-    for blacklisted in HARD_BLACKLIST:
-        if abs(preview_bets - blacklisted["bets"]) < 3:
-            raise HardReject(f"Bet count matches blacklisted attractor: {blacklisted}")
+    
+    if preview_bets < MIN_BETS_FLOOR:
+        raise HardReject(f"Estimated bets={preview_bets} below floor={MIN_BETS_FLOOR}")
+    
+    for b in HARD_BLACKLIST:
+        if abs(preview_bets - b["bets"]) < 3:
+            raise HardReject(f"Matches blacklisted attractor: {b}")
     
     seen_config_fingerprints.add(cfg_fp)
+    return True
 ```
 
----
-
-## 🗺️ RESEARCH PHASES — GEN 3201–3300
-
-**ALL PHASES contingent on D1/D2 diagnostic result.**
-**Label every generation: Phase, Axis, and D1-status (verified/unverified).**
-**No more than 8 consecutive gens on same Phase without rotation.**
+### Anti-Cycling Rule
+- If the same (category, kw_count, bets_bucket) triple appears 3+ times in the
+  last 15 gens without improvement → force category rotation on next gen.
+- bets_bucket = round(bets, -2)  # nearest 100
 
 ---
 
-### PHASE D: DIAGNOSTIC (Gens 3201–3205) — MANDATORY FIRST
-Run D1 and D2 as described above. Log results. Branch:
-- If keyword filter working → proceed Phase A
-- If keyword filter broken → proceed Phase E (no-keyword optimization)
+## 🧠 SIGNAL INVENTORY
+
+### Signal 1: World Events Structural NO-Bias (CONFIRMED, ACTIVE)
+- Base rate: 12.0% vs. crowd pricing 25–40%
+- Best config: world_events, no keywords, min_edge≈0.059, bets~10k
+- adj=1.4155, sharpe=0.2263, roi=17.26%, win=76.38%
+- Headroom: sharpe improvement unlikely without new insight; bet-count scaling
+  may yield incremental adj gains
+- **Status: EXPLOITATION MODE — minor parameter tuning only**
+
+### Signal 2: Cross-Category Structural Signals (UNTESTED, PRIORITY)
+- Hypothesis: economics (base 26%) and sports (base 30.6%) may show similar
+  crowd overpricing in YES direction
+- economics: low base rate + macro uncertainty → potential NO-bias
+- sports: high-salience events → availability bias → YES overpricing likely
+- **Status: PRIMARY EXPLORATION TARGET Gens 3401–3450**
+
+### Signal 3: Bet-Count Scaling via Liquidity Relaxation (PARTIALLY EXPLOITED)
+- Gen 3269 showed relaxing min_liquidity_usd boosted adj via n_bets multiplier
+- Further relaxation (min_liquidity → 10–20) may push bets toward 15k–20k
+- Risk: very low liquidity markets may have worse calibration (noisier signal)
+- **Status: SECONDARY EXPLORATION TARGET — test carefully**
+
+### Signal 4: Price Range Expansion (UNTESTED)
+- Current: [0.07, 0.80]. Expanding to [0.05, 0.90] or [0.03, 0.95] adds markets
+  at the extremes where crowd mispricing may be strongest (tails)
+- Risk: very low-priced markets (0.03–0.07) may be legitimately low-probability
+- **Status: SECONDARY EXPLORATION TARGET**
+
+### Signal 5: Category Union / Multi-Category (UNTESTED)
+- Hypothesis: combining world_events + economics (both low base rates, both
+  susceptible to crowd overpricing) doubles bet universe while preserving signal
+- If simulator supports category arrays, test [world_events, economics]
+- **Status: TEST IN PHASE C if category union is supported**
 
 ---
 
-### PHASE A: KEYWORD SIGNAL EXPANSION (Gens 3206–3230)
-*Only execute if D1 confirms keyword filter working and bets≈79, sharpe≈1.67*
+## 🗺️ RESEARCH PHASES — GEN 3401–3500
 
-**Hypothesis:** The availability-bias overpricing phenomenon extends beyond the 11
-Middle East keywords to other high-salience geopolitical conflict zones.
-Adding regions should increase bet count while preserving sharpe.
+**Label every generation: Phase, Axis, bets, adj. No keywords unless explicitly
+authorized by a future program revision.**
 
-**Exploration axes (execute in order, stop early if sharpe < 0.7):**
-
-- A1: Add South/Central Asia: original 11 + [pakistan, kashmir, myanmar, bangladesh]
-  max_days=14, min_edge=0.065, price_range=[0.05, 0.77]
-  
-- A2: Add East Asia: original 11 + [taiwan, korea, philippines]
-  (note: remove any china exclude_kw, test include_kw only)
-  max_days=14, min_edge=0.065, price_range=[0.05, 0.77]
-  
-- A3: Add Africa conflicts: original 11 + [ethiopia, sudan, somalia, mali, congo]
-  max_days=14, min_edge=0.065, price_range=[0.05, 0.77]
-  
-- A4: UNION test — all A1+A2+A3 additions combined with original 11
-  max_days=14, min_edge=0.065, price_range=[0.05, 0.77]
-  Target: bets ≥ 150, sharpe ≥ 0.9
-  
-- A5: Time expansion — original 11 keywords, max_days=21
-  (more bets from same geographic signal)
-  
-- A6: Time expansion — original 11 keywords, max_days=30
-  
-- A7: Time expansion — A4 union keywords, max_days=21
-  (geographic + time expansion combined)
-  
-- A8: Time compression — original 11 keywords, max_days=7
-  (tighter time window = sharper signal?)
-  
-- A9: Terrorism sub-signal: world_events + [terror, attack, bombing, assassination,
-  hostage, kidnap, militant, insurgent] max_days=14, min_edge=0.065
-  (test if availability bias extends to terrorism without geographic filter)
-  
-- A10: Natural disaster sub-signal: world_events + [earthquake, tsunami, hurricane,
-  typhoon, volcano, flood, wildfire] max_days=14, min_edge=0.065
-  (test if disaster escalation also overpriced)
-
-**Accept criteria:** bets ≥ 150, sharpe ≥ 0.9 → continue Phase A
-**Reject criteria:** if best Phase A result has bets < 100 OR sharpe < 0.7 → move to Phase B
+**Rotation rule: max 10 consecutive gens on same Phase before forced rotation.**
 
 ---
 
-### PHASE B: CROSS-CATEGORY KEYWORD SIGNALS (Gens 3231–3250)
-*Execute regardless of D1 result — some axes use no keywords*
+### PHASE E: WORLD_EVENTS LOCAL EXPLOITATION (Gens 3401–3415)
+*Squeeze remaining value from confirmed signal*
 
-**Hypothesis:** Availability
+Axis E1 — Liquidity floor reduction:
+```yaml
+category: world_events
+include_keywords: []
+min_liquidity_usd: [25, 15, 10, 5]  # test each
+min_edge_pts: 0.059
+price_range: [0.07, 0.80]
+max_days_to_resolve: 14
+```
+Target: bets ≥ 12000, sharpe ≥ 0.22
+
+Axis E2 — Price range expansion:
+```yaml
+category: world_events
+include_keywords: []
+min_liquidity_usd: [best from E1]
+min_edge_pts: 0.059
+price_range: [0.05, 0.85]  # then [0.05, 0.90], [0.03, 0.90]
+max_days_to_resolve: 14
+```
+Target: incremental adj improvement
+
+Axis E3 — Edge threshold micro-tuning:
+```yaml
+min_edge_pts: [0.055, 0.057, 0.060, 0.062]  # test each
+# all other params: best from E1/E2
+```
+Target: find sharpe-maximizing edge threshold
+
+Axis E4 — Time window expansion:
+```yaml
+max_days_to_resolve: [21, 30, 60, null]  # null = no filter
+# all other params: best from E1–E3
+```
+Target: more bets, check if sharpe degrades
+
+**Stop criteria:** if E1–E4 yield < 0.05 adj improvement over 1.4155 → move to Phase F
+
+---
+
+### PHASE F: CROSS-CATEGORY STRUCTURAL SIGNALS (Gens 3416–3450)
+*Test whether availability-bias NO-overpricing exists in other categories*
+
+**F1 — Economics structural signal:**
+```yaml
+category: economics
+include_keywords: []
+exclude_keywords: []
+min_edge_pts: [0.05, 0.06, 0.07, 0.08]  # economics base=26%, need higher edge
+price_range: [0.07, 0.80]
+max_days_to_resolve: 30
+min_liquidity_usd: 25
+```
+Hypothesis: economic forecasts (recession, rate hikes, GDP) are systematically
+overpriced YES by optimism/recency bias. True rate 26% vs. crowd 35–45%.
+Target: sharpe ≥ 0.3, bets ≥ 1000
+
+**F2 — Sports structural signal:**
+```yaml
+category: sports
+include_keywords: []
+exclude_keywords: []
+min_edge_pts: [0.06, 0.08, 0.10]  # sports base=30.6%
+price_range: [0.07, 0.80]
+max_days_to_resolve: 14
+min_liquidity_usd: 25
+```
+Hypothesis: high-salience sports outcomes (upsets, championships) overpriced YES.
+Base rate 30.6% but crowd may price 40–50% on favorites.
+Target: sharpe ≥ 0.3, bets ≥ 500
+
+**F3 — Politics structural signal:**
+```yaml
+category: politics
+include_keywords: []
+exclude_keywords: []
+min_edge_pts: [0.05, 0.07, 0.09]  # politics base=29.1%
+price_range: [0.07, 0.80]
+max_days_to_resolve: 30
+min_liquidity_usd: 25
+```
+Hypothesis: political event markets overpriced YES on dramatic/controversial events.
+Note: politics may have stronger informed trader presence — lower signal expected.
+Target: sharpe ≥ 0.25, bets ≥ 500
+
+**F4 — Best cross-category × best world_events params:**
+Take the best-performing non-world_events category from F1–F3 and test its
+optimal parameters alongside best world_events params for comparison.
+
+**F5 — Combined category
