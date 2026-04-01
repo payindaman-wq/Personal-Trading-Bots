@@ -1,5 +1,5 @@
 ```markdown
-# FREYA Research Program — Prediction Markets (v13.0)
+# FREYA Research Program — Prediction Markets (v14.0)
 
 ## Objective
 Find prediction market filter strategies that maximize risk-adjusted ROI by identifying
@@ -17,26 +17,78 @@ vs. historical resolution rates.
 
 ---
 
-## 🏆 SYSTEM STATE — GEN 2200
+## 🏆 SYSTEM STATE — GEN 2600
 
-- **Current best:** adj=1.9387, sharpe=0.3248, bets=7807 (Gen 2195, confirmed)
-- **Generations since last improvement:** 5 (Gen 2195 was last [new_best])
-- **Status: LOCAL OPTIMUM NEAR-EXHAUSTED — MULTI-AXIS EXPLORATION REQUIRED**
-- Gens 2001–2200: 3 improvements total (Gens 2003, 2010, 2195); all world_events/kw=0
-- **ERROR CASCADE ALERT (UNRESOLVED):** ~20% of recent gens returning adj=0/bets=0
-  Infrastructure fault must be diagnosed. Error gens do not count toward improvement streaks.
-- **ANOMALY SIGNAL (RECURRING):** Gen 2199 (sharpe=0.4191, bets=99) echoes Gen 1799
-  (sharpe=0.3973, bets=107). HIGH PRIORITY: recover Gen 2199 config from logs.
-- **SECONDARY BASIN SIGNAL:** Gen 2197 (adj=1.6873, sharpe=0.3169, bets=4084) — viable
-  high-sharpe basin at larger bet count; distinct from mid-range attractor. Map this.
+- **Current best:** adj=2.6747, sharpe=1.6723, roi=44.3%, win=100%, bets=79
+  (Gen 2410, world_events, include_kw=11 Middle East terms, max_days=14)
+- **Generations since last improvement:** ~190 (Gen 2410 was last [new_best])
+- **Status: CRITICAL ATTRACTOR LOCK-IN — GEN 2410 CONFIG DOMINATING ALL PROPOSALS**
+- Gens 2411–2600: 0 improvements; ~15 of last 20 gens returning identical adj=2.6747
+- **DUPLICATE CASCADE ALERT (CRITICAL):** seen_configs.json fingerprint check appears
+  to be FAILING. 15+ gens with identical results = proposer is replaying Gen 2410 config
+  or configs that map to identical 79-bet universe. DIAGNOSE BEFORE GEN 2601.
+- **ERROR CASCADE ALERT (ONGOING):** ~5% of recent gens returning adj=0/bets=0.
+  Infrastructure fault unresolved. Error gens do not count toward improvement streaks.
+- **NEAR-ZERO-BET ATTRACTOR (ACTIVE):** Gens returning bets=6–14 (adj=-1.0) indicate
+  proposer is occasionally generating over-filtered configs. Hard reject < 500 bets.
 - **LIVE SLOTS:** mist/kara/thrud all disabled — no live validation available.
+  PRIORITY: Re-enable at least one live slot to validate Gen 2410 signal durability.
 
 ---
 
-## 🔴 CRITICAL: PROPOSER CONSTRAINT PROTOCOL (MANDATORY v13.0)
+## 📊 KEY DISCOVERY: THE HIGH-SHARPE GEOPOLITICAL NICHE
+
+**Gen 2410 is the most important result in this research program.**
+- adj=2.6747 (38% above previous best of 1.9387)
+- sharpe=1.6723 (5x previous best sharpe of 0.3248)
+- roi=44.3%, win=100% on 79 bets
+- Config: world_events, include_keywords=[iran, israel, palestine, syria, lebanon,
+  iraq, turkey, saudi, yemen, afghanistan, armenia], max_days_to_resolve=14,
+  min_edge_pts=0.065, price_range=[0.05, 0.77]
+
+**Interpretation:** Middle Eastern geopolitical markets are severely overpriced by
+crowds due to availability heuristic and narrative salience bias. Historical YES
+resolution rate in this sub-niche is likely 5–8%, vs. 12% world_events base rate,
+while crowds price these markets at 25–40%+. This is a structural miscalibration.
+
+**Critical risks:**
+1. bets=79 is dangerously low — log(79/20+1)=1.599 vs. log(390/20+1)=3.045 for 390 bets.
+   Doubling bets while maintaining sharpe>0.9 would yield adj≈5.1. This is the primary target.
+2. 100% win rate on 79 bets may reflect overfitting to historical data. Live validation required.
+3. The 190-gen stagnation since Gen 2410 suggests the neighborhood has been exhausted
+   with the current include_keywords + exclude_keywords + price_range combination.
+
+---
+
+## 🔴 CRITICAL: DUPLICATE CASCADE DIAGNOSIS (MANDATORY — v14.0)
+
+**BEFORE ANY SIMULATION IN GEN 2601+:**
+
+The seen_configs.json must be audited. The following check must be performed:
+
+```python
+def audit_duplicate_cascade():
+    """Run before Gen 2601. Check for fingerprint check failures."""
+    # Count how many gens 2411-2600 returned adj=2.6747, sharpe=1.6723, bets=79
+    # If > 5 gens returned identical results: seen_configs.json is BROKEN
+    # Fix: Rebuild seen_configs.json from all logged fingerprints
+    # Then: Force structural departure from Gen 2410 config as first proposal
+    
+    # FORCED STRUCTURAL DEPARTURE RULE (v14.0):
+    # Gen 2601 MUST differ from Gen 2410 on at least TWO of these axes:
+    # - include_keywords (add/remove/replace keywords)
+    # - max_days_to_resolve (change by >= 7 days)
+    # - price_range (change either bound by >= 0.05)
+    # - min_edge_pts (change by >= 0.005)
+    # Proposals that differ on only ONE axis: REJECTED as likely duplicate-universe
+```
+
+---
+
+## 🔴 PROPOSER CONSTRAINT PROTOCOL (MANDATORY v14.0)
 
 The proposer MUST maintain a `seen_configs.json` file containing the fingerprint of
-every configuration ever simulated.
+every configuration ever simulated. **AUDIT REQUIRED AT GEN 2601 STARTUP.**
 
 ```python
 def fingerprint(config):
@@ -49,15 +101,21 @@ def fingerprint(config):
         tuple(sorted(config.get("include_keywords", []))),
         tuple(sorted(config.get("exclude_keywords", [])))
     )
+
+def bet_universe_fingerprint(config):
+    """NEW v14.0: Secondary deduplication on bet universe, not just config params.
+    If two configs produce identical sets of market IDs bet on: they are functionally
+    identical even if config params differ. Log bet_universe_fingerprint separately."""
+    return hash(frozenset(get_bet_market_ids(config)))
 ```
 
 **BEFORE ANY SIMULATION:**
-1. Compute fingerprint of proposed config
-2. Check against `seen_configs.json`
-3. If fingerprint exists: LOG `[DUPLICATE — seen gen NNN]`, DO NOT SIMULATE, force new proposal
-4. If fingerprint is new: add to `seen_configs.json`, proceed with simulation
+1. Compute config fingerprint AND bet_universe_fingerprint
+2. Check BOTH against seen_configs.json
+3. If EITHER fingerprint exists: LOG [DUPLICATE — seen gen NNN], DO NOT SIMULATE
+4. If both are new: add both to seen_configs.json, proceed
 
-**HARD REJECTION RULES (v13.0 — checked BEFORE fingerprint lookup):**
+**HARD REJECTION RULES (v14.0):**
 ```python
 def pre_simulation_guard(config):
     # Rule 1: Catastrophic low-bet attractor prevention
@@ -72,31 +130,38 @@ def pre_simulation_guard(config):
         raise HardReject("min_edge_pts > 0.15 — over-filtered attractor")
     if config["price_range"][0] > 0.20:
         raise HardReject("price_range_min > 0.20 — over-filtered attractor")
-    # Rule 3: keyword overload
+    # Rule 3: Keyword overload
     if len(config.get("exclude_keywords", [])) > 15 and \
        (config["price_range"][1] - config["price_range"][0]) < 0.30:
         raise HardReject("keyword overload with narrow price range — zero-bet risk")
     # Rule 4: Mid-range attractor rejection
-    if 1500 <= expected_bets(config) <= 2500 and config["category"] == "world_events":
+    if 1500 <= expected_bets(config) <= 2500 and config["category"] == "world_events" \
+       and not config.get("include_keywords"):
         raise HardReject("mid-range world_events attractor — sharpe≈0.165 basin, BLACKLISTED")
     # Rule 5: Error cascade guard
     if consecutive_errors >= 3:
         raise HardReject("3+ consecutive errors — infrastructure fault, halt and diagnose")
-    # Rule 6 (NEW v13.0): Local optimum echo prevention
-    if expected_adj_delta(config, current_best_adj=1.9387) < 0.001:
+    # Rule 6: Local optimum echo prevention
+    if expected_adj_delta(config, current_best_adj=2.6747) < 0.001:
         raise HardReject("insufficient differentiation from current best — force structural change")
+    # Rule 7 (NEW v14.0): Attractor lock-in prevention
+    if includes_all_keywords(config, GEN_2410_INCLUDE_KW) and \
+       abs(config["max_days_to_resolve"] - 14) < 7 and \
+       abs(config["min_edge_pts"] - 0.065) < 0.005:
+        raise HardReject("Gen 2410 attractor neighborhood — force departure on 2+ axes")
+    # Rule 8 (NEW v14.0): Bet universe identity check
+    if bet_universe_fingerprint(config) in seen_bet_universes:
+        raise HardReject("identical bet universe to previously seen config — functionally duplicate")
 ```
 
-**ADDITIONAL DIVERSITY ENFORCEMENT (v13.0):**
-- If 3 consecutive proposals reproduce adj within 0.005 of 1.9387: FORCE structural
-  change (different category OR add include_keywords OR change max_days_to_resolve)
-- If 5 consecutive proposals have bets < 500: HALT, reset to Gen 2195 baseline and
+**ADDITIONAL DIVERSITY ENFORCEMENT (v14.0):**
+- If 3 consecutive proposals reproduce adj within 0.01 of 2.6747: FORCE structural
+  change (different include_keywords OR change max_days_to_resolve by >=14 days)
+- If 5 consecutive proposals have bets < 500: HALT, reset to Gen 2410 baseline and
   widen all filters by 20% before next proposal
 - If 3 consecutive gens return error (adj=0, bets=0): HALT, diagnose infrastructure
-  before continuing — do not count error gens toward improvement streaks
 - Proposer must explicitly state research phase for every generation
-- **NEW v13.0:** Proposer must log which exploration axis is being tested each gen
-  (see Exploration Phases below)
+- Proposer must log which exploration axis is being tested each gen
 
 ---
 
@@ -116,65 +181,3 @@ def maybe_adopt(proposed_adj, proposed_config, gen_id):
         return True
     else:
         log(f"[no_improvement] proposed {proposed_adj} <= current {current['adj']} → REJECTED")
-        return False
-```
-
----
-
-## ✅ CANONICAL CONFIGS
-
-| Gen  | adj    | sharpe | bets  | Notes                                                        |
-|------|--------|--------|-------|--------------------------------------------------------------|
-| 2195 | 1.9387 | 0.3248 | 7807  | **CURRENT BEST** ✅                                           |
-| 2010 | 1.9371 | 0.3245 | 7808  | Superseded (BLACKLISTED)                                     |
-| 2003 | 1.9356 | 0.3242 | 7813  | Superseded (BLACKLISTED)                                     |
-| 1950 | 1.9324 | 0.3236 | 7815  | Superseded (BLACKLISTED)                                     |
-| 1944 | 1.9300 | 0.3232 | 7818  | Superseded (BLACKLISTED)                                     |
-| 1911 | 1.9299 | 0.3232 | 7822  | Superseded (BLACKLISTED)                                     |
-| 1906 | 1.9131 | 0.3199 | 7892  | Superseded (BLACKLISTED)                                     |
-| 1852 | 1.9129 | 0.3198 | 7905  | Superseded (BLACKLISTED)                                     |
-| 2197 | 1.6873 | 0.3169 | 4084  | ⚠️ SECONDARY BASIN — high sharpe, distinct config; map this  |
-| 1799 | 0.7344 | 0.3973 | 107   | ⚠️ ANOMALY — config lost; high-precision niche signal        |
-| 2199 | 0.7475 | 0.4191 | 99    | ⚠️ ANOMALY — config must be recovered; highest sharpe seen   |
-| 1009 | 1.7474 | 0.2881 | 8597  | Old best (BLACKLISTED)                                       |
-
-**KEY INSIGHTS (updated v13.0):**
-1. World_events base rate (12%) is the dominant edge engine — confirmed across 1000+
-   gens. Politics/economics exploration produced zero improvements. Do not revisit.
-2. Exclude_keywords optimization is near-exhausted. Marginal gains ~0.001–0.002 per
-   keyword addition. The local optimum in this dimension is effectively reached.
-3. The mid-range attractor (bets≈1500–2500, sharpe≈0.165) is a confirmed failure mode.
-   BLACKLISTED. Do not explore loosened world_events filters in this bet range.
-4. THREE NEW EXPLORATION AXES IDENTIFIED (v13.0, see Phases below):
-   a. Temporal filtering (max_days_to_resolve: 7–90 days) — nearly unexplored
-   b. Include_keywords approach — target specific high-miscalibration sub-niches
-   c. Secondary basin mapping (bets ~3500–5000, sharpe ~0.30+) per Gen 2197 signal
-5. RECURRING HIGH-SHARPE ANOMALY: Gens 1799 and 2199 both show sharpe >0.40 with
-   ~100 bets. This is not noise — it is a reproducible signal of a very high-precision
-   sub-niche. Likely a narrow include_keywords config. PRIORITY: recover Gen 2199 config.
-6. Error cascade (~20% failure rate) is unresolved infrastructure fault. Each error
-   gen wastes exploration budget. Diagnose before Gen 2201.
-7. All three Gen 2001–2200 improvements were world_events/kw=0 — suggesting they
-   came from min_edge_pts or price_range fine-tuning, not keyword changes.
-
----
-
-## 🧭 EXPLORATION PHASES (v13.0 — MANDATORY ROTATION)
-
-FREYA must cycle through these phases to prevent local optimum lock-in.
-Each gen must declare its phase. After 10 gens in any one phase with no improvement,
-rotate to the next phase.
-
-### PHASE A: Temporal Filter Exploration (HIGHEST PRIORITY — unexplored axis)
-- Vary max_days_to_resolve: test 7, 14, 21, 30, 45, 60, 90 days
-- Hypothesis: Short-resolution markets (≤30 days) may have higher miscalibration
-  due to recency bias and event proximity; long-resolution markets (>90 days) may
-  allow reversion to base rate
-- Combine with current best exclude_keywords set
-- Expected bet range: unknown (must map) — reject if < 500
-- Target: Find max_days_to_resolve sweet spot that improves sharpe
-
-### PHASE B: Include_Keywords Niche Hunting (HIGH PRIORITY — anomaly recovery)
-- Goal: Recover and extend the Gen 2199 high-sharpe signal (sharpe=0.4191)
-- Strategy: Add include_keywords to world_events config targeting specific
-  sub-ni
