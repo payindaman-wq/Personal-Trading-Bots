@@ -35,7 +35,7 @@ GEMINI_BASE   = "https://generativelanguage.googleapis.com/v1beta/models"
 
 SUSPICIOUS_SHARPE   = 3.5
 POPULATION_SIZE     = 10
-STALL_ALERT_GENS    = 300
+STALL_ALERT_GENS    = 500
 TG_BOT_TOKEN = "8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
 TG_CHAT_ID   = "8154505910"
 MIN_TRADES = {"day": 100, "swing": 45}
