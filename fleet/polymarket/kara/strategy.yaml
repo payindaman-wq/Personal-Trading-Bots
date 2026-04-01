@@ -1,5 +1,5 @@
 category: world_events
-description: FREYA research slot — gen 2200 evolved strategy
+description: FREYA research slot — gen 2600 evolved strategy
 edge:
   max_position_pct: 0.1
   max_positions: 8
@@ -147,8 +147,126 @@ market_filter:
   - uprising
   - chaos
   - turmoil
-  include_keywords: []
-  max_days_to_resolve: 180
+  - country
+  - countries
+  - nation
+  - nations
+  - state
+  - states
+  - territory
+  - territories
+  - region
+  - regions
+  - island
+  - islands
+  - continent
+  - continents
+  - global
+  - worldwide
+  - international
+  - national
+  - local
+  - domestic
+  - foreign
+  - western
+  - eastern
+  - northern
+  - southern
+  - american
+  - european
+  - asian
+  - african
+  - australian
+  - south
+  - north
+  - east
+  - west
+  - human
+  - rights
+  - refugee
+  - crisis
+  - famine
+  - shortage
+  - drought
+  - flood
+  - earthquake
+  - storm
+  - wildfire
+  - fire
+  - rescue
+  - aid
+  - humanitarian
+  - aid
+  - development
+  - assistance
+  - assistance's
+  - help
+  - support
+  - support's
+  - offer
+  - offered
+  - offering
+  - offered by
+  - offer for
+  - offer's
+  - support
+  - supported
+  - supporting
+  - support's
+  - help
+  - helped
+  - helping
+  - help's
+  - aid
+  - aided
+  - aiding
+  - aid's
+  - donate
+  - donated
+  - donating
+  - donation
+  - donations
+  - fund
+  - funded
+  - funding
+  - fund's
+  - contribute
+  - contributed
+  - contributing
+  - contribution
+  - contributions
+  - assistance
+  - assisted
+  - assisting
+  - assistance's
+  - palestinian
+  - gaza
+  - west bank
+  - hamas
+  - hezbollah
+  - lebanese
+  - syrian
+  - iraqi
+  - turkish
+  - saudi
+  - yemeni
+  - afghan
+  - armenian
+  - iranian
+  - israeli
+  include_keywords:
+  - iran
+  - israel
+  - palestine
+  - syria
+  - lebanon
+  - iraq
+  - turkey
+  - saudi
+  - yemen
+  - afghanistan
+  - armenia
+  max_days_to_resolve: 14
   min_liquidity_usd: 100
   price_range:
   - 0.05
