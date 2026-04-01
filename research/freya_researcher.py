@@ -453,7 +453,7 @@ def main():
     program_md    = open(PROGRAM_MD).read() if os.path.exists(PROGRAM_MD) else ""
     gen           = gen_state["gen"]
     gens_no_best  = gen_state["gens_since_best"]
-    stall_alerted = False
+    stall_alerted = gen_state.get("stall_alerted", False)
 
     log(f"Gen {gen}: best adj={best_score:.4f} sharpe={best_metrics['sharpe']:.4f} "
         f"n_bets={best_metrics['n_bets']}")
@@ -535,7 +535,7 @@ def main():
             if os.path.exists(PROGRAM_MD):
                 program_md = open(PROGRAM_MD).read()
 
-        save_gen_state({"gen": gen, "gens_since_best": gens_no_best})
+        save_gen_state({"gen": gen, "gens_since_best": gens_no_best, "stall_alerted": stall_alerted})
 
         if gen % 10 == 0:
             log(f"  Gen {gen}: best adj={best_score:.4f} "
