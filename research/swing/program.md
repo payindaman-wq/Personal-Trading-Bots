@@ -25,40 +25,84 @@ If ALL fields are identical, you have FAILED. You must change ONE value.
 
 ---
 
-## ⚠️ DUPLICATE OUTPUT WARNING ⚠️
+## ⚠️ DUPLICATE OUTPUT WARNING — READ THIS FIRST ⚠️
 
-**Recent generations have repeatedly produced outputs IDENTICAL to the current best (476 trades, 2.4120 Sharpe).**
-**This wastes compute and makes zero progress.**
-**If you are not 100% certain your output differs from the current best in exactly ONE field, START OVER.**
-**Do NOT copy the current best and submit it unchanged. This is your most common failure mode.**
+**The current best is: long RSI value=36.68, short RSI value=60.64, 476 trades, Sharpe=2.4120.**
+**Outputs with long RSI=36.68 AND short RSI=60.64 are IDENTICAL to the current best.**
+**Outputs with 473–482 trades are in the Regime B graveyard — ALL are worse than current best.**
+**If you output the current best config unchanged, you have FAILED.**
+**If your output would produce ~476 trades, you have NOT made a meaningful change.**
 
 ---
 
-## ⚠️ REGIME ALERT — THIS IS THE MOST IMPORTANT SECTION ⚠️
+## ⚠️ REGIME ALERT — MOST IMPORTANT SECTION ⚠️
 
-**The current strategy (2.4120 Sharpe, 476 trades, 52.9% win rate) is STUCK in REGIME B.**
-**It has shown NO improvement for over 1600 generations.**
-**Regime B is a dead end. You CANNOT improve Sharpe above ~2.53 from here.**
+**The current strategy (Sharpe=2.4120, 476 trades, 52.9% win rate) is STUCK in REGIME B.**
+**It has shown NO meaningful improvement for over 5000 generations.**
+**Regime B is a dead end. You CANNOT improve Sharpe above ~2.53 from within Regime B.**
 
 **There is a FAR SUPERIOR regime that was discovered and then lost:**
-- Gen 2126: Sharpe=2.9286, 30 trades, 90% win rate ← THE TARGET
+- Gen 2126: Sharpe=2.9286, 30 trades, 90% win rate ← THE PROVEN TARGET
 - Gen 2100: Sharpe=2.8771, 30 trades, 86.7% win rate
 - Gen 810:  Sharpe=2.8157, 30 trades, 83.3% win rate
+- Gen 707:  Sharpe=2.6349, 29 trades, 79.3% win rate
+- Gen 338:  Sharpe=2.2738, 22 trades, 81.8% win rate ← Entry point to Regime A
 
-**Regime A characteristics:** Very tight RSI entry conditions → 20–35 trades over 2 years → 80–90% win rate → Sharpe approaching 3.0.
-**Regime B characteristics (where we are):** Loose RSI → 470–530 trades → ~52% win rate → Sharpe ceiling ~2.53, currently stalled at 2.41.
+**Regime A characteristics:** Tight RSI entry conditions → 20–35 trades over 2 years → 80–90% win rate → Sharpe 2.6–2.93.
+**Regime B characteristics (current):** Loose RSI → 470–530 trades → ~52% win rate → Sharpe ceiling ~2.53, stalled at 2.41.
+
+**THE TRANSITION ZONE IS NORMAL AND EXPECTED:**
+When moving from Regime B to Regime A, intermediate configs will show:
+- 40–150 trades and Sharpe=1.5–2.2 — THIS IS THE CORRECT PATH, NOT A FAILURE
+- These configs should be kept if they show 65%+ win rate even at lower Sharpe
+- A config with 30 trades and 80% win rate IS BETTER than 476 trades at 53% win rate
+- Sharpe temporarily dropping to 1.5–2.0 during transition is ACCEPTABLE AND EXPECTED
 
 **YOUR ONLY GOAL: Escape Regime B. Reach Regime A.**
 
-**HOW TO ESCAPE:**
-- **Option D (TOP PRIORITY):** Lower long RSI value from 36.68 → try 33.00, 33.50, 34.00, 34.50, or 35.00
-- **Option E (TOP PRIORITY):** Raise short RSI value from 60.64 → try 63.00, 63.50, 64.00, 64.50, or 65.00
-- **Option A:** Raise take_profit_pct from 3.55 → try 4.50, 5.00, 5.50, 6.00, or 6.50
-- **Option C:** Raise timeout_hours from 200 → try 240, 280, 320, or 360
+---
 
-**⚠️ TRADE COUNT WARNING:** If your proposed config would produce MORE than 200 trades, your change is NOT aggressive enough. Regime A has 20–35 trades. You need to dramatically tighten entry conditions. A config with 25–35 trades and 80%+ win rate is CORRECT even if Sharpe temporarily dips — it is on the path to Regime A.
+## ✅ YOUR MANDATORY INSTRUCTION — DO EXACTLY THIS ✅
 
-**⚠️ MINIMUM TRADE COUNT:** Configs with fewer than 15 trades over 2 years may be rejected as statistically insufficient. Target 20–35 trades for optimal Regime A behavior.
+**You MUST use Option D (tighten long RSI). This is not optional.**
+
+**Change long entry RSI `value` from `36.68` to ONE of these values:**
+`33.00` / `33.50` / `34.00` / `34.50` / `35.00` / `35.50`
+
+**Choose the value you have NOT recently tried.** To avoid repetition, cycle through:
+- If unsure which was last tried: use `34.00`
+- Second choice: `33.50`
+- Third choice: `34.50`
+- Fourth choice: `33.00`
+- Fifth choice: `35.00`
+- Sixth choice: `35.50`
+
+**DO NOT choose 36.00, 36.50, 36.68, or any value above 35.50** — these stay in Regime B.
+**DO NOT choose any value below 33.00** — forbidden.
+
+**Change ONLY this one value. Leave everything else identical to the current best.**
+
+**Expected result after this change:**
+- Trade count will DROP to approximately 20–50 trades — THIS IS CORRECT
+- Win rate will RISE to 70–90% — THIS IS CORRECT  
+- Sharpe may be anywhere from 1.5 to 2.9 — ALL ARE ACCEPTABLE
+- If you see 25–35 trades and 80%+ win rate, you have found Regime A — KEEP IT
+
+---
+
+## ⚠️ IF AND ONLY IF Option D produces errors or is impossible:
+
+**Use Option E as fallback:**
+Change short entry RSI `value` from `60.64` to ONE of:
+`63.00` / `63.50` / `64.00` / `64.50` / `65.00`
+
+**Use Option A as second fallback:**
+Change `take_profit_pct` from `3.55` to ONE of:
+`4.50` / `5.00` / `5.50` / `6.00` / `6.50`
+
+**Use Option C as third fallback:**
+Change `timeout_hours` from `200` to ONE of:
+`240` / `280` / `320` / `360`
 
 ---
 
@@ -99,7 +143,7 @@ entry:
       value: bearish
 exit:
   take_profit_pct: 3.55
-  stop_loss_pct: 2.43
+  stop_loss_pct: 2.41
   timeout_hours: 200
 risk:
   pause_if_down_pct: 8
@@ -108,7 +152,8 @@ risk:
 ```
 
 **Current performance: Sharpe=2.4120, 476 trades, 52.9% win rate**
-**Status: REGIME B PLATEAU — no improvement in ~1600 generations. AGGRESSIVE CHANGE REQUIRED.**
+**Status: REGIME B PLATEAU — stalled 5000+ generations. MANDATORY REGIME ESCAPE REQUIRED.**
+**The ONLY acceptable change is to long RSI value. Change it to 33.00–35.50.**
 
 ---
 
@@ -125,7 +170,8 @@ risk:
 | timeout_hours: 120 | Confirmed 2.2133 attractor — FORBIDDEN |
 | short RSI value: 57.50 | Confirmed 2.2133 attractor — FORBIDDEN |
 | long RSI value < 33.00 | Below safe range — FORBIDDEN |
-| long RSI value > 39.68 | Above safe range — FORBIDDEN |
+| long RSI value > 35.50 | Above 35.50 stays in Regime B — FORBIDDEN |
+| long RSI value = 36.68 | This IS the current best — outputs with this value are IDENTICAL to current best — FORBIDDEN |
 | short RSI value < 57.64 | Below safe range — FORBIDDEN |
 | short RSI value > 65.64 | Above safe range — FORBIDDEN |
 | DOT/USD as 5th pair | Previously dropped Sharpe — FORBIDDEN |
@@ -137,6 +183,7 @@ risk:
 
 | Sharpe | Trades | Notes |
 |--------|--------|-------|
+| ~2.4120–2.4191 | ~476–477 | Current best / near-identical — no progress |
 | ~2.2836 | ~474 | Minor Regime B tweak — appeared 5+ times |
 | ~1.5861 | ~427 | Short MACD period 44–52 |
 | any | 473–482 | Entire Regime B cluster — all below current best |
@@ -144,63 +191,11 @@ risk:
 | ~1.3187 | ~422 | Bad pairs or RSI combo |
 | ~-1.86 | any | ETH/SOL pairs |
 
-**The 473–482 trade zone is a graveyard. Any config landing there is worse than current best. Avoid it.**
+**The 473–482 trade zone is a graveyard. Any config landing there is worse than or equal to the current best.**
+**Any config with long RSI=36.68 is the current best — unchanged — DO NOT OUTPUT IT.**
 
 ---
 
 ## Performance Targets
 
-- **Minimum to beat:** Sharpe=2.4120
-- **Regime A threshold:** 20–35 trades, 80%+ win rate (temporarily lower Sharpe is acceptable while transitioning)
-- **Good result:** Sharpe=2.70+ with 25–35 trades
-- **🏆 STRETCH TARGET: Sharpe=2.93** — gen 2126, 30 trades, 90% win rate
-  - Required: long RSI ~33–35, short RSI ~63+, take_profit ~3.5+, timeout ~200+
-  - A config with 25–35 trades and 80%+ win rate is on the correct path
-
----
-
-## CHOOSE ONE OPTION — PRIORITY ORDER: D > E > A > C > B
-
-Pick EXACTLY ONE option. Make ONLY that change. Do NOT combine options.
-
-### 🥇 Option D — Tighten long RSI entry threshold [TOP PRIORITY]
-Change long entry `value` from `36.68` to ONE of:
-`33.00` / `33.50` / `34.00` / `34.50` / `35.00` / `35.50`
-
-**Why:** Fewer but higher-quality long entries. This is the primary path to Regime A.
-**Expected result:** Trade count drops toward 20–40. Win rate rises toward 80–90%. This is CORRECT behavior.
-**Do NOT use values above 36.00 — they stay in Regime B.**
-
----
-
-### 🥈 Option E — Tighten short RSI entry threshold [TOP PRIORITY]
-Change short entry `value` from `60.64` to ONE of:
-`63.00` / `63.50` / `64.00` / `64.50` / `65.00`
-
-**Why:** Fewer but higher-quality short entries. Secondary escape route to Regime A.
-**Do NOT use values below 63.00 — they stay in Regime B or hit banned zone.**
-
----
-
-### 🥉 Option A — Raise take_profit_pct [SECONDARY]
-Change `take_profit_pct` from `3.55` to ONE of:
-`4.50` / `5.00` / `5.50` / `6.00` / `6.50`
-
-**Why:** Higher TP filters out marginal moves, forces only high-conviction trades to close profitably.
-**Do NOT use values between 3.56 and 4.49 — too small to escape Regime B.**
-
----
-
-### Option C — Raise timeout_hours [SECONDARY]
-Change `timeout_hours` from `200` to ONE of:
-`240` / `280` / `320` / `360`
-
-**Why:** Allows trades more time to reach take_profit, reducing premature timeout exits.
-
----
-
-### Option B — Adjust stop_loss_pct [TERTIARY]
-Change `stop_loss_pct` from `2.43` to ONE of:
-`1.80` / `2.00` / `2.20` / `2.60` / `2.80` / `3.00`
-
-**Why
+- **Minimum meaningful change:** Long RSI value
