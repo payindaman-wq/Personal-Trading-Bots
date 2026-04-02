@@ -24,11 +24,32 @@ Answer each question internally before writing output:
 1. Which field am I changing? → `entry.long.conditions[0].value`
 2. Is the new value in this list: `33.00 / 33.50 / 34.50 / 35.00 / 35.50 / 36.00`? → YES or START OVER
 3. Is the new value different from `34.00`? → YES or START OVER
-4. Did I change `period_hours` anywhere? → NO, or START OVER
-5. Did I change the short RSI value `60.64`? → NO, or START OVER
-6. Did I change any other field? → NO, or START OVER
+4. Did I change `period_hours` anywhere? → NO or START OVER
+5. Did I change the short RSI value `60.64`? → NO or START OVER
+6. Did I change any other field? → NO or START OVER
 
 If any answer is wrong → discard output and start over with a different value from the list.
+
+---
+
+## ⚠️ REGIME GUARD — READ THIS BEFORE SUBMITTING ⚠️
+
+This strategy operates in two radically different regimes. You MUST target Regime A only.
+
+| Regime | Trades (2yr backtest) | Win Rate | Sharpe | Status |
+|--------|----------------------|----------|--------|--------|
+| **Regime A** ✅ | 20–50 | 75–90% | 2.5–2.93 | TARGET |
+| **Regime B** ❌ | 400–550 | 50–55% | 1.5–2.5 | REJECT |
+| **Attractor** ❌ | 150–220 | 38–42% | −1.8 to −1.0 | REJECT |
+
+**Regime B is caused by changing `period_hours` on any indicator.** Do not change any `period_hours` field. If you change `period_hours`, the backtester will produce 400–550 trades and the result will be discarded.
+
+The all-time best result is **Sharpe=2.9232** (30 trades, 90% win rate) — achieved with long RSI < 34.00.
+Your goal: find a value in [33.00, 36.00] that matches or exceeds this.
+
+A result of 20–50 trades and 75%+ win rate = SUCCESS.
+A result of 400–550 trades and ~52% win rate = REGIME B FAILURE — means you changed `period_hours` or another structural field.
+A result of 150–220 trades and ~40% win rate = ATTRACTOR FAILURE — means you changed `period_hours` to a mid-range value.
 
 ---
 
@@ -91,7 +112,7 @@ The output must be the full YAML. The ONLY difference from above is the `value:`
       value: 33.50
 ```
 
-❌ WRONG — changed period_hours (FORBIDDEN):
+❌ WRONG — changed period_hours (causes Regime B or Attractor — FORBIDDEN):
 ```yaml
     - indicator: rsi
       period_hours: 18
@@ -107,6 +128,14 @@ The output must be the full YAML. The ONLY difference from above is the `value:`
       value: 34.00
 ```
 
+❌ WRONG — value not in allowed list (e.g. 36.68 is NOT allowed):
+```yaml
+    - indicator: rsi
+      period_hours: 21
+      operator: lt
+      value: 36.68
+```
+
 ❌ WRONG — changed short RSI value:
 ```yaml
     - indicator: rsi
@@ -120,9 +149,10 @@ The output must be the full YAML. The ONLY difference from above is the `value:`
 ## ABSOLUTE RULES — YOUR OUTPUT MUST SATISFY ALL OF THESE
 
 | Field | Required value |
-|-------|---------------|
-| `entry.long.conditions[0].value` | One of: 33.00, 33.50, 34.50, 35.00, 35.50, 36.00 — NOT 34.00 |
+|-------|----------------|
+| `entry.long.conditions[0].value` | One of: 33.00, 33.50, 34.50, 35.00, 35.50, 36.00 — NOT 34.00, NOT 36.68, NOT any other number |
 | `entry.long.conditions[0].period_hours` | MUST be 21 — do not change |
+| `entry.long.conditions[0].operator` | MUST be `lt` — do not change |
 | `entry.short.conditions[0].value` | MUST be 60.64 — do not change |
 | `entry.short.conditions[0].period_hours` | MUST be 21 — do not change |
 | `entry.long.conditions[1].period_hours` | MUST be 26 — do not change |
@@ -132,30 +162,48 @@ The output must be the full YAML. The ONLY difference from above is the `value:`
 | `timeout_hours` | MUST be 200 |
 | `take_profit_pct` | MUST be 3.55 |
 | `stop_loss_pct` | MUST be 2.41 |
+| `size_pct` | MUST be 30 |
+| `fee_rate` | MUST be 0.001 |
 
 ---
 
 ## CONTEXT: WHY THIS RANGE WORKS
 
-Long RSI values in the range 33–36 produce 20–35 trades over 2 years with 80–90% win rate.
-This is the correct behavior. Do not be alarmed by the low trade count.
-A result of 25–35 trades and 75%+ win rate is SUCCESS.
-A result of 400–550 trades and 52% win rate is FAILURE — that means period_hours or another field was changed.
+Long RSI values in the range 33–36 produce 20–50 trades over 2 years with 75–90% win rate.
+This is the correct behavior — a low trade count with high win rate is the goal.
+Do not be alarmed by the low trade count.
 
-The all-time best result was Sharpe=2.9286 at approximately long RSI < 34.00 (30 trades, 90% win rate).
+| Result | Interpretation |
+|--------|---------------|
+| 20–50 trades, 75%+ win rate, Sharpe > 2.0 | ✅ SUCCESS — Regime A |
+| 400–550 trades, ~52% win rate | ❌ FAILURE — Regime B (period_hours was changed) |
+| 150–220 trades, ~40% win rate, Sharpe < −1.0 | ❌ FAILURE — Attractor (period_hours was changed) |
+
+The all-time best result was **Sharpe=2.9232** at long RSI < 34.00 (30 trades, 90% win rate).
 Your goal is to find a value in [33.00, 36.00] that matches or exceeds this.
+
+Cycle through the allowed values systematically:
+- Try 33.50 if not recently tried
+- Try 34.50 if not recently tried
+- Try 33.00 if not recently tried
+- Try 35.00 if not recently tried
+- Try 35.50 if not recently tried
+- Try 36.00 if not recently tried
 
 ---
 
 ## IF THE ABOVE IS IMPOSSIBLE — FALLBACK OPTIONS ONLY
 
 Use these ONLY if Option D (changing long RSI value) is genuinely impossible.
+**Do not use fallbacks unless you have exhausted all 6 values in the allowed list.**
 
 **Fallback E:** Change short RSI `value` from `60.64` to one of: `63.00` / `63.50` / `64.00` / `64.50` / `65.00`
 **Fallback A:** Change `take_profit_pct` from `3.55` to one of: `4.50` / `5.00` / `5.50` / `6.00`
 **Fallback C:** Change `timeout_hours` from `200` to one of: `240` / `280` / `320`
+**Fallback S:** Change `stop_loss_pct` from `2.41` to one of: `2.00` / `2.20` / `2.60` / `2.80`
 
 Prefer Option D above all fallbacks.
+Never use a fallback that changes `period_hours` or `pairs`.
 ```
 
 ---
@@ -164,36 +212,6 @@ Prefer Option D above all fallbacks.
 
 ### CRITICAL — Implement before next run
 
-**1. Override current best with Gen 2126 config**
+**1. Restore Gen 2126 as incumbent immediately**
 
-The all-time best Sharpe is 2.9286 (Gen 2126), not the current incumbent (2.4401). The optimization drifted into a worse basin (Regime B: ~477 trades, 52.9% win rate) starting at Gen 2149 and has not recovered in 5,600+ generations. Restore Gen 2126 as the incumbent manually.
-
-Gen 2126 approximate config (reconstruct from optimization history):
-- All fields identical to current best EXCEPT: `entry.long.conditions[0].value` ≈ 34.00 (the value that produced 30 trades, 90% win rate)
-- The updated research program above reflects this restoration
-
-**2. Add MAX_TRADES guard to backtester**
-
-```python
-# In backtester evaluation logic:
-MAX_TRADES = {"swing": 150}  # Regime B produces 400-550; Regime A produces 20-50
-
-if result.trades > MAX_TRADES[style]:
-    log(f"REJECTED: {result.trades} trades exceeds MAX_TRADES={MAX_TRADES[style]} — Regime B detected")
-    return  # do not update best
-```
-
-This single change prevents Regime B from ever becoming the incumbent, regardless of Sharpe. Regime A at Sharpe 2.93 and 30 trades will always beat Regime B at Sharpe 2.53 and 477 trades under this guard.
-
-**3. Hard-reject the 176-trade attractor in backtester**
-
-```python
-# Add to attractor detection logic:
-KNOWN_BAD_ATTRACTORS = [
-    {"trades_range": (160, 195), "sharpe_range": (-1.5, -1.0), "label": "RSI_period_change_attractor"},
-    {"trades_range": (195, 220), "sharpe_range": (-1.8, -1.1), "label": "RSI_period_change_attractor_2"},
-]
-
-for attractor in KNOWN_BAD_ATTRACTORS:
-    if (attractor["trades_range"][0] <= result.trades <= attractor["trades_range"][1] and
-        attractor["sharpe
+The all-time best Sharpe is **2.9232** (Gen 2126): 30 trades, 90% win rate, long RSI < 34.00.
