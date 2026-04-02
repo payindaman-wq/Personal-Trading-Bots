@@ -7,45 +7,59 @@ Maximize **adjusted score** on 2 years of 5-minute BTC/USD, ETH/USD, SOL/USD dat
 
 **Adjusted score = Sharpe × sqrt(trades / 50)**
 
-Current best: adjusted score ≈ 2.97 (Sharpe 1.17, ~323 trades).
+Current best adjusted score: **2.97** (Sharpe 1.17, ~323 trades).
 **Target: adjusted score > 3.5.**
 
-## ⚠️ CRITICAL SYSTEM STATE — READ THIS FIRST
+## ⚠️ CRITICAL: THE ACCEPTANCE METRIC IS ADJUSTED SCORE, NOT SHARPE
 
-The optimization loop has been running with MIN_TRADES=400, which means strategies with 148-323 trades are being discarded even when they have excellent Sharpe (1.17-1.18). This is a known bug being corrected. The true current best is **323 trades, Sharpe 1.17, adjusted score 2.97**, which was achieved at Gen 2163-2199.
+The system accepts improvements based on **adjusted score = Sharpe × sqrt(trades/50)**.
 
-**The corrupted "Current Best Strategy" shown below in the template section is INVALID and must be IGNORED COMPLETELY.** It has wrong pair counts, wrong condition counts, invalid parameters. Use ONLY the canonical strategy defined in this section.
+**This means:**
+- 148 trades, Sharpe 1.18 → adjusted score **2.03** ← WORSE than current best
+- 323 trades, Sharpe 1.17 → adjusted score **2.97** ← CURRENT BEST
+- 400 trades, Sharpe 1.05 → adjusted score **2.98** ← slight improvement
+- 450 trades, Sharpe 1.00 → adjusted score **3.00** ← improvement
+- 500 trades, Sharpe 1.00 → adjusted score **3.16** ← good improvement
 
-## ⚠️ SCORE REALITY CHECK — READ THIS FIRST
+**A strategy with 148 trades and Sharpe 1.18 is NOT an improvement. It scores 2.03 — below the current best of 2.97. Do not propose changes that push toward 148 trades.**
+
+## ⚠️ THE CURRENT LOCAL TRAP — READ THIS CAREFULLY
+
+The optimization has been **stuck on a 148-trade local optimum for 400+ generations**. Strategies with ~148 trades have Sharpe ~1.18 but adjusted score only ~2.03 — which is WORSE than the 323-trade canonical strategy (adjusted score 2.97).
+
+**The 148-trade strategy is a DEAD END. Do not optimize it. Do not make small changes to a strategy producing 148 trades.**
+
+The TRUE current best is the **323-trade canonical strategy** below. Your job is to push it toward 350-500 trades while keeping Sharpe ≥ 1.00.
+
+## ⚠️ SCORE REALITY CHECK
 
 | Sharpe | Trades | Adjusted Score | Verdict |
 |--------|--------|----------------|---------|
-| 1.18   | 148    | 2.03           | ✗ WORSE than current best |
-| 1.17   | 323    | 2.97           | ← CURRENT BEST (true target to beat) |
-| 1.10   | 400    | 3.11           | ✓ IMPROVEMENT |
-| 1.10   | 500    | 3.48           | ✓ TARGET |
-| 1.05   | 600    | 3.64           | ✓ TARGET |
-| 1.00   | 700    | 3.74           | ✓ TARGET |
-| 0.95   | 800    | 3.80           | ✓ TARGET |
-| 0.90   | 900    | 3.82           | ✓ TARGET |
+| 1.18   | 148    | 2.03           | ✗ BELOW current best — DEAD END |
+| 1.17   | 323    | 2.97           | ← CURRENT BEST (canonical strategy) |
+| 1.10   | 350    | 3.08           | ✓ IMPROVEMENT |
+| 1.05   | 400    | 2.97           | = same as current best |
+| 1.10   | 400    | 3.11           | ✓ CLEAR IMPROVEMENT |
+| 1.00   | 450    | 3.00           | ✓ IMPROVEMENT |
+| 1.00   | 500    | 3.16           | ✓ GOOD |
+| 1.05   | 500    | 3.32           | ✓ GOOD |
+| 1.00   | 600    | 3.46           | ✓ TARGET — but historically risky |
+| 0.95   | 600    | 3.29           | ✓ IF ACHIEVABLE |
 | 0.80   | 500    | 2.53           | ✗ NOT ACCEPTABLE |
 | 0.50   | 500    | 1.58           | ✗ CATASTROPHIC |
-| -6.94  | 489    | -48.6          | ✗ CATASTROPHIC |
+| -5.55  | 628    | -34.9          | ✗ CATASTROPHIC ATTRACTOR — AVOID |
 
-**KEY INSIGHT FROM 2808 GENERATIONS OF RESEARCH:**
-- Strategies with 400-800 trades CONSISTENTLY produce Sharpe of -14 to -1. This region is dangerous.
-- Strategies with 148-330 trades CONSISTENTLY produce Sharpe of 0.9-1.5. This region is safe.
-- The ONLY way to beat the current best (adjusted score 2.97) while staying safe is to reach 350-500 trades with Sharpe ≥ 1.0.
-- Do NOT try to reach 600-900 trades. Evidence from 2808 generations shows this always destroys Sharpe.
+**KEY INSIGHT FROM 2912 GENERATIONS:**
+- 148-trade strategies: Sharpe 1.0-1.18, adjusted score 1.4-2.03 → BELOW TARGET
+- 323-trade strategies: Sharpe 1.17 → adjusted score 2.97 → CURRENT BEST
+- 350-500 trade strategies with Sharpe ≥ 1.0: adjusted score 2.97-3.16+ → TARGET ZONE
+- 490-690 trade strategies: Sharpe -5.55 to -20 → CATASTROPHIC ATTRACTOR
 
-**REJECT ANY STRATEGY WHERE:**
-- Sharpe < 0.80 (regardless of trade count)
-- Trades < 150 (too few to score well)
-- Trades > 600 (historically always catastrophic Sharpe)
+**The ONLY path to target is: start from 323-trade canonical strategy, gently increase trade count to 350-500, maintain Sharpe ≥ 1.0.**
 
-## ⚠️ THE ONLY VALID CANONICAL STRATEGY
+## ⚠️ THE ONLY VALID CANONICAL STRATEGY — START HERE
 
-**IGNORE the "Current Best Strategy" section entirely — it is corrupted.**
+**IGNORE the "Current Best Strategy" section shown elsewhere — it is corrupted garbage.**
 **START FROM THIS EXACT STRATEGY ONLY:**
 
 ```yaml
@@ -104,67 +118,71 @@ risk:
 ```
 
 **This canonical strategy produces ~323 trades, Sharpe ~1.17, adjusted score ~2.97.**
-**Your ONE change must carefully push trades toward 350-500 while keeping Sharpe ≥ 1.00.**
+**Make ONE change that pushes trades toward 350-500 while keeping Sharpe ≥ 1.00.**
 
 ## Strategy Architecture Rules (ABSOLUTE — NO EXCEPTIONS)
 
-- **EXACTLY 2 conditions per side** (long gets 2, short gets 2). NEVER 1. NEVER 3. NEVER 4. NEVER 5. Count them before submitting.
+- **EXACTLY 2 conditions per side** (long gets 2, short gets 2). NEVER 1. NEVER 3. NEVER 4. Count before submitting.
 - **ALL 16 pairs** — always. Count them. Never fewer than 16. Never more than 16.
 - **Stop loss: 1.0% to 1.5%** — never below 1.0%, never above 2.0%.
 - **Take profit: 2.0% to 3.5%** — never below 2.0%, never above 4.0%.
 - **price_change_pct values: -0.3 to -0.8 for longs, +0.3 to +0.8 for shorts** — never beyond ±1.0%.
-- **Win rate of 20-35% is correct and expected** — do not try to increase it above 40%.
-- **Target trade count: 300-550 trades** over 2 years. Based on 2808 generations, 400-600 trades CONSISTENTLY produces catastrophic Sharpe. Aim for 300-500.
+- **Win rate of 20-35% is correct and expected** — do not try to raise it.
+- **Target trade count: 300-500 trades** over 2 years. Never aim above 550.
 - **max_open: 3 to 6** — never 1 or 2. Low max_open kills trade count.
-- **size_pct: 8 to 15** — must be a clean integer: 8, 9, 10, 11, 12, 13, 14, or 15. NO decimals.
+- **size_pct: 8 to 15** — clean integers ONLY: 8, 9, 10, 11, 12, 13, 14, 15. NO decimals ever.
 - **fee_rate: 0.001** — never change this.
 
-## ❌ KNOWN FAILURE PATTERNS — TESTED 2808 GENERATIONS, DO NOT REPEAT
+## ❌ KNOWN FAILURE PATTERNS — 2912 GENERATIONS OF EVIDENCE
 
-These have been tested hundreds or thousands of times and ALWAYS fail:
+**DO NOT REPEAT ANY OF THESE:**
 
-1. **macd_signal + trend (any combination with trend indicator):** Produces 450-750 trades but Sharpe collapses to -1.0 to -14.0. Tested 500+ times. ABSOLUTELY NEVER use trend indicator. This produces sharpe=-6.94 to -14.0 at trades=489-682 repeatedly. Every single time.
+1. **trend indicator (any combination):** ALWAYS produces Sharpe -6 to -14, trades 489-682. Tested 500+ times. NEVER use.
 
-2. **period_minutes: 5 on price_change_pct:** Too noisy, destroys Sharpe completely.
+2. **macd_signal + trend together:** The classic catastrophic attractor. Tested hundreds of times. NEVER.
 
-3. **price_change_pct value beyond ±0.8:** Fires almost never, produces <50 trades. Useless.
+3. **period_minutes: 5 on price_change_pct:** Too noisy. Destroys Sharpe.
 
-4. **price_change_pct value of ±1.09, ±1.4, etc.:** Out of bounds. Will be discarded.
+4. **price_change_pct value beyond ±0.8:** Fires almost never, <50 trades. Useless.
 
-5. **stop_loss_pct below 1.0% (e.g., 0.4%):** Will be discarded immediately.
+5. **stop_loss_pct below 1.0%:** Discarded immediately.
 
-6. **max_open of 1 or 2:** Limits trades so severely that adjusted score stays below 2.0 regardless of Sharpe.
+6. **max_open of 1 or 2:** Kills trade count. Adjusted score stays below 2.0.
 
-7. **Fewer than 16 pairs:** Will be discarded immediately.
+7. **Fewer than 16 pairs:** Discarded immediately.
 
-8. **More than 2 conditions per side:** Will be discarded immediately.
+8. **More or fewer than 2 conditions per side:** Discarded immediately.
 
-9. **size_pct above 15 or non-integer (e.g., 16.69, 12.68, 17.25):** Out of bounds. Use ONLY clean integers 8-15.
+9. **size_pct non-integer or above 15 (e.g., 16.69, 21.74, 12.68):** Out of bounds.
 
-10. **take_profit_pct above 3.5:** Stay within 2.0-3.5 range.
+10. **take_profit_pct above 3.5:** Out of bounds.
 
-11. **momentum_accelerating indicator:** This is not a valid indicator in this system. Do not use it.
+11. **momentum_accelerating indicator:** Not a valid indicator. Do not use.
 
-12. **price_vs_ema with value "above" for LONG entries:** Historically this combination with MACD produces high trades but catastrophic Sharpe. The "above" filter makes longs trigger on rising prices, conflicting with the dip-buying logic.
+12. **price_vs_ema value "above" for LONG entries:** Catastrophic with MACD. Never.
 
-13. **Strategies producing 489 trades at Sharpe -6.9:** This is the MACD+trend attractor. Any combination that produces ~490 trades is almost certainly hitting this failure mode.
+13. **628-trade / Sharpe -5.55 attractor:** This appears when entry conditions are too loose without proper MACD filtering. It has appeared 7+ times in the last 20 generations. Any change producing ~628 trades is hitting this attractor. Avoid.
 
-14. **Strategies producing exactly 148 trades:** This is the CURRENT known-bad local optimum (Sharpe 1.18 but adjusted score only 2.03, below the 2.97 target). If your change produces 148 trades, it has NOT improved on the canonical 323-trade strategy.
+14. **148-trade local optimum:** Sharpe 1.18 but adjusted score only 2.03. This is BELOW the 2.97 target. If your change produces 148 trades, you have made things WORSE, not better. Do not optimize toward 148 trades.
 
-15. **High trade counts (600-900):** Every single high-trade-count strategy in 2808 generations has had negative Sharpe. Do not optimize for trade count above 550.
+15. **Strategies with 490-690 trades:** Every single one in 2912 generations has had catastrophic negative Sharpe. Do not target this range.
 
-## ✅ WHAT ACTUALLY WORKS — EVIDENCE FROM 2808 GENERATIONS
+16. **Changing macd_signal period away from 30min:** The 30-minute MACD is a core component of what makes this strategy work. Do not change it.
 
-Based on actual improvement history:
-- **price_change_pct period=30min, value=-0.5 + macd_signal period=30min** → 323 trades, Sharpe 1.17 ✓ (BEST FOUND)
-- **price_change_pct period=30min, value=-0.5 + macd_signal period=30min, max_open=4** → same as above ✓
+## ✅ WHAT WORKS — EVIDENCE FROM 2912 GENERATIONS
+
+- **price_change_pct period=30min, value=-0.5 + macd_signal period=30min** → 323 trades, Sharpe 1.17, adjusted score 2.97 ✓ CANONICAL BEST
 - **Win rate 22-26%** consistently appears in good strategies ✓
 - **Timeout 694-720 minutes** appears in good strategies ✓
+- **max_open=4, size_pct=10** stable in canonical strategy ✓
+- **stop_loss=1.2, take_profit=2.5** stable in canonical strategy ✓
 
-## ✅ PRIORITY CHANGES — MOST PROMISING UNEXPLORED DIRECTIONS
+## ✅ PRIORITY CHANGES — MAKE EXACTLY ONE
 
-Make exactly ONE of these changes (listed in priority order):
+**These are the most promising unexplored directions, in priority order:**
 
-**PRIORITY 1 — Change price_change_pct value from -0.5 to -0.4 (keep period=30min):**
-- This makes longs trigger more often (smaller dip required)
-- Expected: 380-450 trades, Sharpe ~1.0-1.1, adjusted score ~3.0-
+**PRIORITY 1 — Relax price_change_pct long entry from -0.5 to -0.45:**
+- Change ONLY: long condition `value: -0.5` → `value: -0.45`
+- Also change short condition from `value: 0.5` → `value: 0.45` (symmetric)
+- Expected: 350-420 trades (more entries triggered by smaller dips)
+- Expected Sharpe
