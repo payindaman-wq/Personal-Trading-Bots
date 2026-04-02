@@ -38,7 +38,7 @@ POPULATION_SIZE     = 10
 STALL_ALERT_GENS    = 500
 TG_BOT_TOKEN = "8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
 TG_CHAT_ID   = "8154505910"
-MIN_TRADES = {"day": 80, "swing": 10}
+MIN_TRADES = {"day": 250, "swing": 10}
 
 ALL_PAIRS = [
     "BTC/USD",  "ETH/USD",  "SOL/USD",  "XRP/USD",
