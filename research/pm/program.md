@@ -1,180 +1,207 @@
 ```markdown
-# FREYA Research Program — Prediction Markets (v25.0)
+# FREYA Research Program — Prediction Markets (v26.0)
 
-## Status at Gen 5000
-- **800 generations without improvement** (Gens 4201–5000). Baseline ceiling at
-  adj=1.6196 unbroken. LLM proposal loop is confirmed exhausted on current baseline.
-- **Config persistence bug UNRESOLVED.** Gens 4796/4797/4799 configs still unknown.
-  This is the highest-value unresolved issue in the program. Every generation run
-  before fixing persistence risks losing another high-value config permanently.
-- **Guard system PARTIALLY BROKEN.** Gen 4996 (bets=0, adj=-1.0) passed through.
-  Null-check and post-simulation bets < MIN_BETS_FLOOR reject are NOT implemented.
-  Do not declare guard functional until both checks are verified in code.
-- **LLM proposal loop: SUSPENDED for next 100 generations.**
-  Switching to deterministic grid search for config recovery (Actions 3 and 4).
-- **Live slots (mist, kara, thrud): mist CONDITIONALLY ENABLED (see below).**
-  kara and thrud remain disabled pending new confirmed config.
+## Status at Gen 5200
+- **1,200 generations without improvement** (Gens 4201–5200). Baseline ceiling at
+  adj=1.6196 unbroken.
+- **Guard system CONFIRMED BROKEN.** Gen 5197 (bets=144, adj=-0.3809) passed through.
+  Pre-simulation fast estimator and post-simulation hard reject are NOT implemented.
+  This is the same failure as Gen 4790 and Gen 4996. Do not run Gen 5201 until fixed.
+- **LLM proposal loop: NOT SUSPENDED despite v25.0 mandate.** Actions 0–6 from v25.0
+  were not completed. The loop continued generating baseline reproductions and marginal
+  variants. Suspension is re-mandated with enforcement mechanism (see Action 0).
+- **Action 3 grid search: NOT EXECUTED.** 75-generation deterministic grid is still
+  pending. This is now the highest-priority simulation task.
+- **Live slots: ALL DISABLED.** mist was conditionally enabled in v25.0 but shows
+  no completed sprints. kara and thrud remain disabled. Zero live bets placed to date.
+- **Config persistence bug: UNRESOLVED.** Gens 4796/4797/4799 configs still unknown.
 
-## IMMEDIATE ACTIONS REQUIRED (Before Gen 5001)
+## HARD BLOCKERS — Gen 5201 MUST NOT RUN UNTIL RESOLVED
 
-### ACTION 0: Guard System Fix — BLOCKING, MUST COMPLETE BEFORE ANY GENERATION RUNS
-- Gen 4996 (bets=0) passed through to simulation. This is the same gap as Gen 4790.
-- The pre_simulation_guard null-check branch is not catching zero-bet configs.
-- **IMPLEMENT NOW — two checks required:**
-  1. Pre-simulation fast bet estimator: if estimated_bets < MIN_BETS_FLOOR (500),
-     reject config before simulation runs. Log as HardReject with reason.
-  2. Post-simulation hard reject: if result.bets < MIN_BETS_FLOOR after simulation,
-     log HardReject, do NOT update any state, do NOT count as valid generation.
-- **Do not run Gen 5001 until both checks are confirmed in code with test cases.**
-- Test cases required:
-  - Config with expected bets=0 → HardReject pre-simulation
-  - Config with expected bets=3 → HardReject pre-simulation
-  - Config with expected bets=499 → HardReject pre-simulation
-  - Config with expected bets=501 → Pass to simulation
+### BLOCKER A: Guard System Fix (same as v25.0 Action 0 — STILL NOT DONE)
+Implement BOTH checks before any generation runs:
 
-### ACTION 1: Config Persistence Fix — BLOCKING, MUST COMPLETE BEFORE GEN 5001
-- Current system only persists configs on new_best events.
-- **IMPLEMENT: Persist ALL simulation results where adj > 1.2 OR bets > 5000.**
-- Log format (mandatory fields):
+1. **Pre-simulation fast estimator:**
+   - Estimate bet count from config parameters before running full simulation.
+   - If estimated_bets < MIN_BETS_FLOOR (500): log HardReject, skip simulation,
+     do NOT count as valid generation, do NOT update any state.
+
+2. **Post-simulation hard reject:**
+   - After simulation completes: if result.bets < MIN_BETS_FLOOR (500):
+     log HardReject, do NOT update best config, do NOT count as valid generation.
+
+Required test cases (must pass before proceeding):
+- Config → estimated_bets=0: HardReject pre-sim ✓
+- Config → estimated_bets=3: HardReject pre-sim ✓
+- Config → estimated_bets=499: HardReject pre-sim ✓
+- Config → estimated_bets=501: passes to simulation ✓
+- Simulation returns bets=144: HardReject post-sim ✓
+- Simulation returns bets=500: HardReject post-sim ✓
+- Simulation returns bets=501: accepted ✓
+
+### BLOCKER B: LLM Loop Suspension Enforcement
+The v25.0 suspension was not honored. Enforce mechanically:
+- **Add a generation counter lock:** if gen ∈ [5201, 5300], the LLM proposal
+  function must not be called. Replace with deterministic grid iterator.
+- **If LLM loop is called during suspension window:** throw hard error, halt,
+  log "SUSPENSION VIOLATION at gen N".
+- This is not advisory. The loop must be structurally disabled, not just documented.
+
+### BLOCKER C: Config Persistence Fix (same as v25.0 Action 1 — STILL NOT DONE)
+- **Implement: Persist ALL simulation results where adj > 1.2 OR bets > 5000.**
+- Log format (mandatory):
   ```
   {gen, config_hash, category, min_edge_pts, price_range, max_days_to_resolve,
    min_liquidity_usd, bets, sharpe, adj_score, roi, win_rate, timestamp}
   ```
-- **Retroactive recovery attempt for Gens 4796/4797/4799:**
-  - If any generation state or RNG seed is preserved, attempt replay.
-  - If not recoverable, document as permanently lost and proceed to grid recovery.
-- **Verify persistence is writing to disk** (not memory-only) before proceeding.
-- Test: run one simulation, confirm log entry appears in persistent store.
+- **Verify writes to disk** (not memory-only) with a test read-back after write.
+- Retroactive recovery of Gens 4796/4797/4799: if RNG seeds or state preserved,
+  attempt replay. If unrecoverable, document as permanently lost.
 
-### ACTION 2: Live Slot mist — CONDITIONALLY ENABLE (Baseline Config)
-- Baseline config (world_events, min_edge=0.055, min_liquidity=50,
-  price_range=[0.07,0.80], max_days=14) is confirmed reproducible 4 times.
-- adj=1.6196 > 1.4 unlock threshold. Config is fully logged and verified.
-- **DECISION: Enable mist on baseline config immediately.**
-  Rationale: 800 generations of stagnation with no live data is worse than
-  deploying a confirmed strategy while recovery work continues in simulation.
-- kara and thrud remain disabled until a second confirmed config (adj > 1.4)
-  is recovered and logged.
-- If mist performance diverges significantly from simulation (roi < 10% over
-  100+ live bets), disable and flag for calibration review.
+## GENERATION PLAN: Gens 5201–5300 (Deterministic Grid Only)
 
-### ACTION 3: Gen 4799/4796/4797 Config Recovery — HIGHEST SIM PRIORITY
-- **Gens 4796–4799 produced adj 1.50–1.59 with bets 11,500–13,700.**
-  This is a different profile from the baseline (14,510 bets) suggesting a
-  multi-category union or parameter variant with different market coverage.
-- **Recovery grid (deterministic, 75 generation budget):**
-  ```
-  categories: [
-    "world_events+economics",
-    "world_events+politics",
-    "world_events+economics+politics",
-    "economics",
-    "politics"
-  ]
-  min_edge_pts: [0.04, 0.045, 0.05, 0.055, 0.06, 0.065, 0.07, 0.075, 0.08]
-  price_range: [[0.07,0.80], [0.05,0.90], [0.10,0.75], [0.07,0.90]]
-  max_days_to_resolve: [14, 21, 30]
-  min_liquidity_usd: [10, 25, 50]
-  ```
-  Target: configs producing bets ∈ [11000, 14500] with sharpe > 0.23.
-  Priority order: world_events+economics first (most likely), then
-  world_events+politics, then world_events+economics+politics.
-- **If any grid result has adj > 1.4 AND is logged by Action 1 middleware:**
-  - Confirm by running identical config a second time (reproduction check).
-  - If reproduced: enable live slot kara on that config.
-- **If Gen 4799 config recovered with adj confirmed > 1.4:**
-  - This is a second independent deployable signal.
-  - Enable kara. Document as Signal 2.
+### Phase 1: Action 3 Grid — Primary Recovery (Gens 5201–5275, 75 gen budget)
 
-### ACTION 4: Clean Solo Tests — Economics and Politics NO-Bias
-- **These have never been cleanly run. This is a 5,000-generation gap.**
-- Run as part of Action 3 grid but flag results explicitly.
-- Economics clean test config:
-  ```yaml
-  category: economics
-  min_edge_pts: 0.055
-  min_liquidity_usd: 50
-  price_range: [0.07, 0.80]
-  max_days_to_resolve: 14
-  ```
-- Politics clean test config:
-  ```yaml
-  category: politics
-  min_edge_pts: 0.055
-  min_liquidity_usd: 50
-  price_range: [0.07, 0.80]
-  max_days_to_resolve: 14
-  ```
-- Expected: economics base rate 26% → smaller structural edge than world_events (12%).
-  Politics base rate 29.1% → smaller still. Expect lower adj than baseline.
-  These are still worth running once to quantify the ceiling for each category.
-- Log all results regardless of adj score. These are calibration data points.
+Execute the following grid in priority order. Do NOT use LLM proposals.
+Each cell = one generation. Log ALL results via Blocker C middleware.
 
-### ACTION 5: Gen 4592 Config Recovery — Lower Priority (Post Action 3)
-- adj=1.213, sharpe=0.2079, bets=6814
-- Hypothesis: economics solo or world_events+economics with tighter params.
-- **Budget: 25 generations, run only after Action 3 grid completes.**
-- Grid:
-  ```
-  categories: ["economics", "world_events+economics"]
-  min_edge_pts: [0.045, 0.05, 0.055, 0.06, 0.065, 0.07, 0.075]
-  price_range: [[0.07,0.80], [0.05,0.85]]
-  max_days_to_resolve: [14]
-  min_liquidity_usd: [10, 25]
-  ```
+**Priority 1: world_events+economics (most likely match for Gens 4796–4799)**
+```
+categories: world_events+economics
+min_edge_pts: [0.04, 0.045, 0.05, 0.055, 0.06, 0.065, 0.07, 0.075, 0.08]
+price_range: [[0.07,0.80], [0.05,0.90], [0.10,0.75], [0.07,0.90]]
+max_days_to_resolve: [14, 21]
+min_liquidity_usd: [25, 50]
+```
+Target: bets ∈ [11000, 14500], sharpe > 0.23. Stop Priority 1 early if found.
 
-### ACTION 6: LLM Proposal Loop — Suspension and Redesign
-- **LLM proposal loop is SUSPENDED for Gens 5001–5100.**
-  800 generations of no improvement confirms the unconstrained loop is
-  not generating useful variation from the current baseline.
-- **When loop resumes (Gen 5101+), enforce these constraints:**
-  1. Proposals MUST change at least one parameter meaningfully
-     (not within ±0.005 of current best for continuous params).
-  2. Proposals MUST NOT reproduce any config in the blacklist history.
-  3. Proposals MUST estimate expected bets before submitting.
-     If estimated_bets < MIN_BETS_FLOOR: regenerate (max 3 attempts, then skip).
-  4. Proposals that reproduce the baseline config exactly are rejected.
-  5. Inject remaining high-priority untested signals as forced proposals
-     before allowing free-form LLM generation (see Signal Targets below).
+**Priority 2: world_events+politics**
+```
+categories: world_events+politics
+min_edge_pts: [0.04, 0.05, 0.055, 0.065, 0.07, 0.08]
+price_range: [[0.07,0.80], [0.05,0.90], [0.10,0.75]]
+max_days_to_resolve: [14, 21]
+min_liquidity_usd: [25, 50]
+```
+
+**Priority 3: world_events+economics+politics**
+```
+categories: world_events+economics+politics
+min_edge_pts: [0.05, 0.055, 0.065, 0.07]
+price_range: [[0.07,0.80], [0.05,0.90]]
+max_days_to_resolve: [14]
+min_liquidity_usd: [25, 50]
+```
+
+**Recovery trigger:** If any grid result has adj > 1.4 AND is logged by Blocker C:
+- Run identical config a second time (reproduction check).
+- If reproduced: log as "Signal 2 CONFIRMED", enable live slot kara.
+
+### Phase 2: Clean Solo Tests (Gens 5276–5285, 10 gen budget)
+These have never been cleanly run. Run exactly once each. Log all results.
+
+**Economics clean test:**
+```yaml
+category: economics
+min_edge_pts: 0.055
+min_liquidity_usd: 50
+price_range: [0.07, 0.80]
+max_days_to_resolve: 14
+```
+Expected: lower adj than baseline (base rate 26% vs world_events 12%).
+
+**Politics clean test:**
+```yaml
+category: politics
+min_edge_pts: 0.055
+min_liquidity_usd: 50
+price_range: [0.07, 0.80]
+max_days_to_resolve: 14
+```
+Expected: lower adj than baseline (base rate 29.1%).
+
+**Economics parameter variants (3 configs):**
+```
+min_edge_pts: [0.04, 0.05, 0.07]  (all other params as clean test above)
+```
+
+**Politics parameter variants (3 configs):**
+```
+min_edge_pts: [0.04, 0.05, 0.07]  (all other params as clean test above)
+```
+
+### Phase 3: Gen 3788 Recovery (Gens 5286–5295, 10 gen budget)
+Gen 3788: adj=1.4766, bets=14771 — bets ABOVE baseline (14510), config unknown.
+Hypothesis: looser price_range or lower min_liquidity on world_events.
+```
+category: world_events
+min_edge_pts: [0.05, 0.055]
+price_range: [[0.07,0.85], [0.06,0.80], [0.07,0.90], [0.05,0.80]]
+max_days_to_resolve: [14]
+min_liquidity_usd: [25, 10]
+```
+If recovered: log as Signal 1b. Do not deploy live unless adj > 1.45.
+
+### Phase 4: Gen 4592 Recovery (Gens 5296–5300, 5 gen budget)
+adj=1.213, sharpe=0.2079, bets=6814. Lower priority. Run only if Phase 1–3 complete.
+```
+categories: [economics, world_events+economics]
+min_edge_pts: [0.055, 0.065, 0.075]
+price_range: [[0.07,0.80]]
+max_days_to_resolve: [14]
+min_liquidity_usd: [10, 25]
+```
+
+## GENERATION PLAN: Gens 5301–5400 (LLM Loop Resumes with Constraints)
+
+Before resuming LLM proposals, enforce ALL of the following:
+
+1. **Meaningful change requirement:** Proposals MUST change at least one parameter
+   by more than ±0.005 (continuous) or one categorical level (discrete).
+2. **Blacklist enforcement:** Proposals MUST NOT reproduce any config in history.
+   Check config_hash before submitting. Reject and regenerate if match found.
+3. **Bet estimator gate:** Proposals MUST pass estimated_bets ≥ MIN_BETS_FLOOR
+   before simulation. Max 3 regeneration attempts, then skip generation.
+4. **Baseline injection ban:** The exact baseline config is permanently blacklisted.
+   Any proposal matching it is rejected without regeneration attempt.
+5. **Forced signal injection (first 20 gens of resumed loop):**
+   Before free-form LLM generation, inject these untested/undertested configs:
+   - crypto solo (base rate 31.5%, different bias direction — TEST ONCE)
+   - world_events with keyword filters (e.g., exclude: ["election", "war"])
+   - world_events with max_days=7 (shorter resolution window)
+   - world_events with max_days=21 (longer window)
+   - world_events + min_liquidity=100 (higher liquidity filter)
+   - world_events + min_liquidity=200
+   - world_events + price_range=[0.07, 0.70] (tighter upper bound)
+   - world_events + price_range=[0.07, 0.65]
+   - world_events + price_range=[0.10, 0.80] (tighter lower bound)
+   - world_events + min_edge=0.04 (looser edge — more bets, lower sharpe?)
+   - world_events + min_edge=0.07 (tighter edge — fewer bets, higher sharpe?)
+   - world_events + min_edge=0.08
+   - sports solo (base rate 30.6%)
+   - economics + min_edge=0.04
+   - world_events + exclude_keywords: [most common high-frequency noise terms]
+
+6. **After forced injections:** LLM may propose freely within constraints above.
+
+## Live Slot Status and Deployment Plan
+
+### mist — DEPLOY IMMEDIATELY (no further blockers)
+- Config: world_events, min_edge=0.055, min_liquidity=50,
+  price_range=[0.07,0.80], max_days=14
+- adj=1.6196, confirmed reproducible 6+ times.
+- **This was approved in v25.0 and still not deployed. Deploy now.**
+- Monitor: if live roi < 10% over 100+ bets, disable and flag for calibration review.
+- Report live results in next program version.
+
+### kara — Enable on Signal 2 recovery
+- Disabled until Action 3 grid recovers a config with adj > 1.4 (reproduced).
+- If recovered during Gens 5201–5275: enable immediately on recovered config.
+
+### thrud — Disabled
+- Enable only when a third confirmed config (adj > 1.4, reproduced) is available.
+- Do not speculate on thrud config until kara is live.
 
 ## All-Time Best (Confirmed)
-- **Gen 3402/4382/4591/4800/4981–4995/4998–5000:**
-  adj=1.6196, sharpe=0.2458, roi=18.225%, win=77.79%, bets=14510
-  ```yaml
-  category: world_events
-  min_edge_pts: 0.055
-  min_liquidity_usd: 50
-  price_range: [0.07, 0.80]
-  max_days_to_resolve: 14
-  exclude_keywords: []
-  include_keywords: []
-  ```
-  CONFIRMED REPRODUCIBLE (multiple independent reproductions).
-  **STATUS: BASELINE REFERENCE + LIVE DEPLOYMENT (mist, pending Action 2).**
-  Do not tune. Do not inject as a proposal. Do not simulate again unless
-  reproducing a specific recovery target.
 
-## High-Value Unconfirmed Configs (adj > 1.4, config unknown)
-- **Gen 4799:** adj=1.5865, sharpe=0.2431, bets=13634 — RECOVER PRIORITY 1.
-  Likely Gen 4187 match. Config unknown. Recovery via Action 3 grid.
-- **Gen 4796:** adj=1.5129, sharpe=0.2368, bets=11895 — RECOVER PRIORITY 2.
-  Config unknown. Recovery via Action 3 grid.
-- **Gen 4797:** adj=1.5008, sharpe=0.2358, bets=11588 — RECOVER PRIORITY 3.
-  Config unknown. Recovery via Action 3 grid.
-- **Gen 4187:** adj=1.5865, sharpe=0.2431, bets=13634 — likely = Gen 4799.
-- **Gen 4188:** adj=1.5020, sharpe=0.2371, bets=11258 — likely ≈ Gen 4797.
-- **Gen 3788:** adj=1.4766, sharpe=0.2235, bets=14771 — CONFIG UNKNOWN. Priority 4.
-  Note: bets=14771 is ABOVE baseline bets=14510 — may be a looser price_range
-  or lower min_liquidity variant. Include in Action 3 grid sweep.
-- **Gen 3786:** adj=1.4665, sharpe=0.2348, bets=10304 — likely ≈ Gen 4796. Priority 2.
-- **Gen 4592:** adj=1.213, sharpe=0.2079, bets=6814 — CONFIG UNKNOWN. Priority 5.
-- **Gen 4389:** adj=0.0412, sharpe=0.0119, bets=623 — WEAK POSITIVE, log only.
-
-## Key Learnings (Gens 1–5000)
-
-### Confirmed Signals
-- **Signal 1 — World Events Structural NO-Bias (CONFIRMED, CEILING adj≈1.62)**
-  - Base rate 12% vs. crowd pricing 25–40%.
-  - Best config: world_events, no keywords, min_edge=0.055, min_liquidity=50,
-    price_range=[0.07,0.80], max_days=14
-  - adj=1.6196, sharpe=0.2458 — repro
+**Gen 3402/4382/4591/4800/4981–4995/4998–5000/5181/5183–5190/5193/5195–5196/5198–5
