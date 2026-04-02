@@ -6,107 +6,53 @@ Output ONLY the YAML block between ```yaml and ``` markers. No explanation, no t
 
 ---
 
-## ⚠️ CRITICAL RULE: YOU MUST CHANGE EXACTLY ONE THING ⚠️
+## ⚠️ READ THIS FIRST — YOUR ONLY JOB ⚠️
 
-Before outputting, manually compare EVERY field in your output to the current best.
-If ALL fields are identical, you have FAILED. You must change ONE value.
+**Change the long entry RSI `value` from `36.68` to `34.00`.**
+That is the ONLY change. One field. One number. Everything else stays identical.
 
-### Self-check before output (MANDATORY — do this step by step):
-1. Write down the field you changed.
-2. Write down the old value and the new value.
-3. Confirm new value ≠ old value.
-4. Confirm NO other field changed.
-5. Confirm the new value is NOT in any banned list below.
-6. Confirm your output would NOT produce a known bad attractor.
-   - IF your change touches short entry macd_signal period_hours: the ONLY safe values are [53, 54, 55, 56].
-   - IF your change touches pairs: confirm no ETH/USD or SOL/USD.
-   - IF your output would produce ~473–482 trades: you are in the Regime B attractor cluster — START OVER.
-   - IF your output is identical to the current best YAML: you have FAILED — START OVER and pick a DIFFERENT option.
+If you have recently tried 34.00, use 33.50 instead.
+If you have recently tried 33.50, use 34.50 instead.
+If you have recently tried 34.50, use 33.00 instead.
+If you have recently tried 33.00, use 35.00 instead.
+If you have recently tried 35.00, use 35.50 instead.
 
----
-
-## ⚠️ DUPLICATE OUTPUT WARNING — READ THIS FIRST ⚠️
-
-**The current best is: long RSI value=36.68, short RSI value=60.64, 476 trades, Sharpe=2.4120.**
-**Outputs with long RSI=36.68 AND short RSI=60.64 are IDENTICAL to the current best.**
-**Outputs with 473–482 trades are in the Regime B graveyard — ALL are worse than current best.**
-**If you output the current best config unchanged, you have FAILED.**
-**If your output would produce ~476 trades, you have NOT made a meaningful change.**
+**DO NOT change any other field.**
+**DO NOT change period_hours.**
+**DO NOT change the short RSI value.**
+**DO NOT change pairs, position, exit, or risk fields.**
 
 ---
 
-## ⚠️ REGIME ALERT — MOST IMPORTANT SECTION ⚠️
+## ⚠️ SELF-CHECK — DO THIS BEFORE OUTPUTTING ⚠️
 
-**The current strategy (Sharpe=2.4120, 476 trades, 52.9% win rate) is STUCK in REGIME B.**
-**It has shown NO meaningful improvement for over 5000 generations.**
-**Regime B is a dead end. You CANNOT improve Sharpe above ~2.53 from within Regime B.**
+1. Which field did I change? → `entry.long.conditions[0].value`
+2. Old value: `36.68` — New value: one of `33.00 / 33.50 / 34.00 / 34.50 / 35.00 / 35.50`
+3. New value ≠ 36.68? → confirm YES
+4. Every other field is identical to the current best? → confirm YES
+5. New value is between 33.00 and 35.50 inclusive? → confirm YES
 
-**There is a FAR SUPERIOR regime that was discovered and then lost:**
-- Gen 2126: Sharpe=2.9286, 30 trades, 90% win rate ← THE PROVEN TARGET
-- Gen 2100: Sharpe=2.8771, 30 trades, 86.7% win rate
-- Gen 810:  Sharpe=2.8157, 30 trades, 83.3% win rate
-- Gen 707:  Sharpe=2.6349, 29 trades, 79.3% win rate
-- Gen 338:  Sharpe=2.2738, 22 trades, 81.8% win rate ← Entry point to Regime A
-
-**Regime A characteristics:** Tight RSI entry conditions → 20–35 trades over 2 years → 80–90% win rate → Sharpe 2.6–2.93.
-**Regime B characteristics (current):** Loose RSI → 470–530 trades → ~52% win rate → Sharpe ceiling ~2.53, stalled at 2.41.
-
-**THE TRANSITION ZONE IS NORMAL AND EXPECTED:**
-When moving from Regime B to Regime A, intermediate configs will show:
-- 40–150 trades and Sharpe=1.5–2.2 — THIS IS THE CORRECT PATH, NOT A FAILURE
-- These configs should be kept if they show 65%+ win rate even at lower Sharpe
-- A config with 30 trades and 80% win rate IS BETTER than 476 trades at 53% win rate
-- Sharpe temporarily dropping to 1.5–2.0 during transition is ACCEPTABLE AND EXPECTED
-
-**YOUR ONLY GOAL: Escape Regime B. Reach Regime A.**
+If any check fails → START OVER and pick a value from the list above.
 
 ---
 
-## ✅ YOUR MANDATORY INSTRUCTION — DO EXACTLY THIS ✅
+## WHY THIS CHANGE
 
-**You MUST use Option D (tighten long RSI). This is not optional.**
+The current config (long RSI < 36.68) triggers ~476 trades/year at 52.9% win rate. This is a known dead zone.
 
-**Change long entry RSI `value` from `36.68` to ONE of these values:**
-`33.00` / `33.50` / `34.00` / `34.50` / `35.00` / `35.50`
+When long RSI is tightened to < 34.00 (approximately), the strategy enters only the strongest oversold conditions. This produces:
+- ~20–35 trades over 2 years
+- 80–90% win rate
+- Sharpe 2.6–2.93
 
-**Choose the value you have NOT recently tried.** To avoid repetition, cycle through:
-- If unsure which was last tried: use `34.00`
-- Second choice: `33.50`
-- Third choice: `34.50`
-- Fourth choice: `33.00`
-- Fifth choice: `35.00`
-- Sixth choice: `35.50`
+This was proven at Gen 2126 (Sharpe=2.9286, 30 trades, 90% win rate).
 
-**DO NOT choose 36.00, 36.50, 36.68, or any value above 35.50** — these stay in Regime B.
-**DO NOT choose any value below 33.00** — forbidden.
-
-**Change ONLY this one value. Leave everything else identical to the current best.**
-
-**Expected result after this change:**
-- Trade count will DROP to approximately 20–50 trades — THIS IS CORRECT
-- Win rate will RISE to 70–90% — THIS IS CORRECT  
-- Sharpe may be anywhere from 1.5 to 2.9 — ALL ARE ACCEPTABLE
-- If you see 25–35 trades and 80%+ win rate, you have found Regime A — KEEP IT
+**If your change produces 20–50 trades and 70%+ win rate, that is CORRECT — keep it.**
+**A Sharpe of 1.5–2.2 with 25–35 trades is BETTER than 2.41 with 476 trades.**
 
 ---
 
-## ⚠️ IF AND ONLY IF Option D produces errors or is impossible:
-
-**Use Option E as fallback:**
-Change short entry RSI `value` from `60.64` to ONE of:
-`63.00` / `63.50` / `64.00` / `64.50` / `65.00`
-
-**Use Option A as second fallback:**
-Change `take_profit_pct` from `3.55` to ONE of:
-`4.50` / `5.00` / `5.50` / `6.00` / `6.50`
-
-**Use Option C as third fallback:**
-Change `timeout_hours` from `200` to ONE of:
-`240` / `280` / `320` / `360`
-
----
-
-## Current Best Strategy (COPY THIS EXACTLY — CHANGE ONE VALUE ONLY)
+## Current Best Strategy — COPY EXACTLY, CHANGE ONLY long RSI value
 
 ```yaml
 name: crossover
@@ -126,7 +72,7 @@ entry:
     - indicator: rsi
       period_hours: 21
       operator: lt
-      value: 36.68
+      value: 36.68        ← CHANGE THIS NUMBER ONLY
     - indicator: macd_signal
       period_hours: 26
       operator: eq
@@ -151,51 +97,90 @@ risk:
   pause_hours: 48
 ```
 
-**Current performance: Sharpe=2.4120, 476 trades, 52.9% win rate**
-**Status: REGIME B PLATEAU — stalled 5000+ generations. MANDATORY REGIME ESCAPE REQUIRED.**
-**The ONLY acceptable change is to long RSI value. Change it to 33.00–35.50.**
+**Change `value: 36.68` (long RSI) to one of: `33.00` / `33.50` / `34.00` / `34.50` / `35.00` / `35.50`**
+**Do not change anything else.**
 
 ---
 
-## ❌ ABSOLUTE BANS — VERIFY YOUR OUTPUT AGAINST EVERY ROW ❌
+## WHAT "CHANGE ONE THING" MEANS — CONCRETE EXAMPLES
 
-| What | Why |
-|------|-----|
-| ETH/USD or SOL/USD in pairs | Sharpe ≈ -1.86, confirmed 20+ times — INSTANT REJECT |
-| period_hours ≠ 21 for EITHER RSI condition | Sharpe ≈ -0.13, confirmed 8+ times — DO NOT TOUCH |
-| long entry macd_signal period_hours ≠ 26 | DO NOT TOUCH — confirmed good value |
-| short entry macd_signal period_hours in [44,45,46,47,48,49,50,51,52] | ALL produce 1.5861/427-trade attractor — FORBIDDEN |
-| short entry macd_signal period_hours ≤ 43 or ≥ 57 | Confirmed bad extremes — FORBIDDEN |
-| max_open: 2 | Sharpe ≈ 0.93, confirmed 10+ times — FORBIDDEN |
-| timeout_hours: 120 | Confirmed 2.2133 attractor — FORBIDDEN |
-| short RSI value: 57.50 | Confirmed 2.2133 attractor — FORBIDDEN |
-| long RSI value < 33.00 | Below safe range — FORBIDDEN |
-| long RSI value > 35.50 | Above 35.50 stays in Regime B — FORBIDDEN |
-| long RSI value = 36.68 | This IS the current best — outputs with this value are IDENTICAL to current best — FORBIDDEN |
-| short RSI value < 57.64 | Below safe range — FORBIDDEN |
-| short RSI value > 65.64 | Above safe range — FORBIDDEN |
-| DOT/USD as 5th pair | Previously dropped Sharpe — FORBIDDEN |
-| Identical output to current best | Zero progress — FORBIDDEN |
+✅ CORRECT output (changed only long RSI value to 34.00):
+```yaml
+    - indicator: rsi
+      period_hours: 21
+      operator: lt
+      value: 34.00
+```
 
----
+❌ WRONG — changed period_hours (DO NOT DO THIS):
+```yaml
+    - indicator: rsi
+      period_hours: 18
+      operator: lt
+      value: 34.00
+```
 
-## ❌ KNOWN BAD ATTRACTORS — IF YOUR CONFIG MATCHES THESE, START OVER ❌
+❌ WRONG — did not change long RSI value (still 36.68):
+```yaml
+    - indicator: rsi
+      period_hours: 21
+      operator: lt
+      value: 36.68
+```
 
-| Sharpe | Trades | Notes |
-|--------|--------|-------|
-| ~2.4120–2.4191 | ~476–477 | Current best / near-identical — no progress |
-| ~2.2836 | ~474 | Minor Regime B tweak — appeared 5+ times |
-| ~1.5861 | ~427 | Short MACD period 44–52 |
-| any | 473–482 | Entire Regime B cluster — all below current best |
-| ~2.2133 | ~519 | timeout=120 or short RSI=57.50 |
-| ~1.3187 | ~422 | Bad pairs or RSI combo |
-| ~-1.86 | any | ETH/SOL pairs |
-
-**The 473–482 trade zone is a graveyard. Any config landing there is worse than or equal to the current best.**
-**Any config with long RSI=36.68 is the current best — unchanged — DO NOT OUTPUT IT.**
+❌ WRONG — changed short RSI instead:
+```yaml
+    - indicator: rsi
+      period_hours: 21
+      operator: gt
+      value: 63.00
+```
 
 ---
 
-## Performance Targets
+## ABSOLUTE BANS — YOUR OUTPUT MUST NOT CONTAIN ANY OF THESE
 
-- **Minimum meaningful change:** Long RSI value
+| Rule | Forbidden value(s) |
+|------|--------------------|
+| long RSI value | 36.68 (current best — no change), below 33.00, above 35.50 |
+| long RSI period_hours | anything other than 21 |
+| short RSI period_hours | anything other than 21 |
+| long MACD period_hours | anything other than 26 |
+| short MACD period_hours | anything other than 48 |
+| pairs | must be exactly LINK/USD, ADA/USD, BTC/USD, OP/USD — no ETH/USD, no SOL/USD |
+| max_open | must be 1 |
+| timeout_hours | must be 200 |
+| short RSI value | must stay 60.64 |
+
+---
+
+## KNOWN BAD OUTCOMES — IF YOUR CONFIG WOULD PRODUCE THESE, START OVER
+
+| Trades | Sharpe | Meaning |
+|--------|--------|---------|
+| 473–482 | ~2.41 | Regime B clone — no progress |
+| 176 | ~-1.29 | RSI period_hours was changed — forbidden |
+| 427 | ~1.59 | Short MACD period in 44–52 range |
+| any | ~-1.86 | ETH/USD or SOL/USD in pairs |
+
+---
+
+## IF THE ABOVE INSTRUCTION IS IMPOSSIBLE OR ERRORS
+
+**Fallback 1 (Option E):** Change short entry RSI `value` from `60.64` to one of: `63.00` / `63.50` / `64.00` / `64.50` / `65.00`
+
+**Fallback 2 (Option A):** Change `take_profit_pct` from `3.55` to one of: `4.50` / `5.00` / `5.50` / `6.00` / `6.50`
+
+**Fallback 3 (Option C):** Change `timeout_hours` from `200` to one of: `240` / `280` / `320` / `360`
+
+Use fallbacks ONLY if Option D is genuinely impossible. Prefer Option D.
+```
+
+---
+
+**Supplementary LOKI Recommendations (code changes for ODIN infrastructure):**
+
+1. **Set MIN_TRADES[swing] = 20** (current value 10 is too permissive; 20 allows Regime A at 30 trades while filtering high-variance tiny samples)
+2. **Implement forced-seed reset**: if no improvement in 500 generations, seed the next generation from the *Regime A parameter space* directly: long RSI value drawn uniformly from [33.0, 35.5], all other params from current best — bypass the LLM for one generation
+3. **Log the specific change made each generation** (not just outcomes) so attractor patterns can be identified by parameter rather than just by trade count/Sharpe
+4. **Add a "176-trade/-1.29 Sharpe" attractor guard** in the backtester: if result matches this signature, log which parameter was changed and add it to the explicit ban list in the prompt
