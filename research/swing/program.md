@@ -6,21 +6,21 @@ Output ONLY the YAML block between ```yaml and ``` markers. No explanation, no t
 
 ---
 
-## ⚠️ MANDATORY READING — READ THIS ENTIRE DOCUMENT BEFORE WRITING A SINGLE CHARACTER ⚠️
+## YOUR ONLY TASK
 
-The previous 6,000 generations were wasted because a forbidden value (36.68) was accepted as incumbent.
-Do not output any value not explicitly listed in the allowed list below.
-Do not change any field except the one marked CHANGE THIS.
+Change the long entry RSI `value` field.
 
----
+The current value is `34.00`.
 
-## ⚠️ YOUR ONLY TASK ⚠️
+**ALLOWED VALUES — copy one exactly:**
+- `33.00`
+- `33.50`
+- `34.50`
+- `35.00`
+- `35.50`
+- `36.00`
 
-Change the long entry RSI `value` from `34.00` to a number from this list:
-**ALLOWED VALUES (copy exactly, no rounding, no interpolation):**
-`33.00` / `33.50` / `34.50` / `35.00` / `35.50` / `36.00`
-
-Pick values in this priority order (try ones not recently attempted first):
+**Try them in this order (prefer values not recently tested):**
 1. `33.50`
 2. `33.00`
 3. `34.50`
@@ -28,74 +28,29 @@ Pick values in this priority order (try ones not recently attempted first):
 5. `35.50`
 6. `36.00`
 
-**DO NOT change any other field. One number changes. Everything else is identical.**
-**36.68 IS NOT AN ALLOWED VALUE. 36.5 IS NOT AN ALLOWED VALUE. Only the 6 values above are allowed.**
+**Rules:**
+- Change ONLY `entry.long.conditions[0].value`
+- Do NOT change any other field
+- Do NOT change any `period_hours` field
+- Do NOT output any value other than the six listed above
 
 ---
 
-## ⚠️ MECHANICAL SELF-CHECK — COMPLETE ALL 8 STEPS BEFORE OUTPUTTING ⚠️
+## SELF-CHECK — 5 STEPS
 
-Work through each step. If any answer is NO or WRONG, discard your output and start over.
+Before outputting, verify:
 
-**Step 1:** Which field am I changing?
-→ MUST be: `entry.long.conditions[0].value`
-→ Is it? YES / NO — if NO, start over.
+1. The field I changed is `entry.long.conditions[0].value` — YES/NO
+2. The new value is one of: 33.00, 33.50, 34.50, 35.00, 35.50, 36.00 — YES/NO
+3. `entry.short.conditions[0].value` is still `60.64` — YES/NO
+4. `take_profit_pct` is still `3.55` and `stop_loss_pct` is still `2.41` — YES/NO
+5. All `period_hours` values are still: 21, 26, 21, 48 (in order) — YES/NO
 
-**Step 2:** Write down the new value you chose: ___________
-→ Is it EXACTLY one of these six: `33.00`, `33.50`, `34.50`, `35.00`, `35.50`, `36.00`?
-→ YES / NO — if NO, start over. (36.68 is NOT on this list. 34.00 is NOT on this list.)
-
-**Step 3:** Is the new value different from `34.00`?
-→ YES / NO — if NO, start over.
-
-**Step 4:** Open the YAML you are about to output. Find EVERY field named `period_hours`.
-→ List them: MACD long period_hours=___, RSI long period_hours=___, RSI short period_hours=___, MACD short period_hours=___
-→ Are they ALL unchanged from the template? (Must be: 21, 26, 21, 48)
-→ YES / NO — if NO, start over.
-
-**Step 5:** Find `entry.short.conditions[0].value` in your output.
-→ Does it equal `60.64`?
-→ YES / NO — if NO, start over.
-
-**Step 6:** Find `take_profit_pct` in your output.
-→ Does it equal `3.55`?
-→ YES / NO — if NO, start over.
-
-**Step 7:** Find `stop_loss_pct` in your output.
-→ Does it equal `2.41`?
-→ YES / NO — if NO, start over.
-
-**Step 8:** Count the pairs. Are they exactly: LINK/USD, ADA/USD, BTC/USD, OP/USD (4 pairs, in this order)?
-→ YES / NO — if NO, start over.
-
-Only proceed to output after all 8 steps return YES.
+If any answer is NO, start over.
 
 ---
 
-## ⚠️ REGIME GUARD — UNDERSTAND THIS BEFORE SUBMITTING ⚠️
-
-This strategy operates in two radically different regimes. You MUST target Regime A only.
-
-| Regime | Trades (2yr backtest) | Win Rate | Sharpe | Status |
-|--------|----------------------|----------|--------|--------|
-| **Regime A** ✅ | 20–50 | 75–90% | 2.5–2.93 | TARGET — THIS IS THE GOAL |
-| **Regime B** ❌ | 400–550 | 50–55% | 1.5–2.5 | REJECT — DO NOT OPTIMIZE THIS |
-| **Attractor** ❌ | 150–220 | 38–42% | −1.8 to −1.0 | REJECT — MEANS YOU BROKE SOMETHING |
-
-**The all-time best result is Sharpe=2.9232 (Gen 2126): 30 trades, 90% win rate.**
-**This was achieved with long RSI value near 34.00. Your goal: find the value in [33.00, 36.00] that beats it.**
-
-**Regime B is caused by changing `period_hours` on any indicator.** If your output produces 400–550 trades, you changed something structural. The result will be discarded.
-
-**The Attractor (166 trades, 40% win rate, Sharpe≈-1.39) is a known broken configuration.** If you see this, it means you changed `period_hours` to a mid-range value. Do not replicate this.
-
-A result of 20–50 trades and 75%+ win rate = SUCCESS. Low trade count is correct and expected.
-A result of 400–550 trades = REGIME B FAILURE — means `period_hours` was changed.
-A result of 150–220 trades = ATTRACTOR FAILURE — means `period_hours` was changed.
-
----
-
-## Current Best Strategy — COPY EXACTLY, CHANGE ONLY THE ONE FIELD MARKED BELOW
+## Current Best Strategy — COPY EXACTLY, CHANGE ONLY THE ONE MARKED FIELD
 
 ```yaml
 name: crossover
@@ -115,7 +70,7 @@ entry:
     - indicator: rsi
       period_hours: 21
       operator: lt
-      value: 34.00        ← CHANGE THIS NUMBER ONLY — pick from: 33.00, 33.50, 34.50, 35.00, 35.50, 36.00
+      value: 34.00        ← CHANGE THIS NUMBER ONLY
     - indicator: macd_signal
       period_hours: 26
       operator: eq
@@ -142,82 +97,98 @@ risk:
 
 ---
 
-## CORRECT OUTPUT FORMAT — COPY THIS STRUCTURE EXACTLY
+## CORRECT OUTPUT EXAMPLE
 
-The output must be the full YAML. The ONLY difference from the template is the `value:` field on the long RSI line.
-
-✅ CORRECT — changed only the long RSI value to an allowed number:
 ```yaml
+name: crossover
+style: randomly generated
+pairs:
+- LINK/USD
+- ADA/USD
+- BTC/USD
+- OP/USD
+position:
+  size_pct: 30
+  max_open: 1
+  fee_rate: 0.001
+entry:
+  long:
+    conditions:
     - indicator: rsi
       period_hours: 21
       operator: lt
       value: 33.50
-```
-
-❌ WRONG — value not in allowed list (36.68 is FORBIDDEN — this destroyed 6000 generations):
-```yaml
-    - indicator: rsi
-      period_hours: 21
-      operator: lt
-      value: 36.68
-```
-
-❌ WRONG — changed period_hours (causes Regime B or Attractor — FORBIDDEN):
-```yaml
-    - indicator: rsi
-      period_hours: 18
-      operator: lt
-      value: 33.50
-```
-
-❌ WRONG — value unchanged (still 34.00):
-```yaml
-    - indicator: rsi
-      period_hours: 21
-      operator: lt
-      value: 34.00
-```
-
-❌ WRONG — changed short RSI value:
-```yaml
+    - indicator: macd_signal
+      period_hours: 26
+      operator: eq
+      value: bullish
+  short:
+    conditions:
     - indicator: rsi
       period_hours: 21
       operator: gt
-      value: 63.00
+      value: 60.64
+    - indicator: macd_signal
+      period_hours: 48
+      operator: eq
+      value: bearish
+exit:
+  take_profit_pct: 3.55
+  stop_loss_pct: 2.41
+  timeout_hours: 200
+risk:
+  pause_if_down_pct: 8
+  stop_if_down_pct: 18
+  pause_hours: 48
 ```
 
 ---
 
-## ABSOLUTE RULES — YOUR OUTPUT MUST SATISFY ALL OF THESE
+## FIELD REFERENCE TABLE
 
-| Field | Required value | Common mistake to avoid |
-|-------|----------------|------------------------|
-| `entry.long.conditions[0].value` | EXACTLY one of: 33.00, 33.50, 34.50, 35.00, 35.50, 36.00 | Do NOT use 34.00, 36.68, or any unlisted number |
-| `entry.long.conditions[0].period_hours` | MUST be 21 | Do NOT change to 18, 14, 24, or any other value |
-| `entry.long.conditions[0].operator` | MUST be `lt` | Do not change |
-| `entry.short.conditions[0].value` | MUST be 60.64 | Do not change to 63.00 or anything else |
-| `entry.short.conditions[0].period_hours` | MUST be 21 | Do not change |
-| `entry.long.conditions[1].period_hours` | MUST be 26 | Do NOT change — this causes Regime B |
-| `entry.short.conditions[1].period_hours` | MUST be 48 | Do NOT change — this causes Regime B |
-| `pairs` | MUST be exactly: LINK/USD, ADA/USD, BTC/USD, OP/USD | Do not add, remove, or reorder |
-| `max_open` | MUST be 1 | Do not change |
-| `timeout_hours` | MUST be 200 | Do not change |
-| `take_profit_pct` | MUST be 3.55 | Do not change |
-| `stop_loss_pct` | MUST be 2.41 | Do not change |
-| `size_pct` | MUST be 30 | Do not change |
-| `fee_rate` | MUST be 0.001 | Do not change |
+| Field | Required value | Do not change to |
+|-------|----------------|-----------------|
+| `entry.long.conditions[0].value` | One of: 33.00, 33.50, 34.50, 35.00, 35.50, 36.00 | 34.00 (current), or any other number |
+| `entry.long.conditions[0].period_hours` | 21 | Any other number |
+| `entry.long.conditions[1].period_hours` | 26 | Any other number |
+| `entry.short.conditions[0].value` | 60.64 | Any other number |
+| `entry.short.conditions[0].period_hours` | 21 | Any other number |
+| `entry.short.conditions[1].period_hours` | 48 | Any other number |
+| `take_profit_pct` | 3.55 | Any other number |
+| `stop_loss_pct` | 2.41 | Any other number |
+| `timeout_hours` | 200 | Any other number |
+| `size_pct` | 30 | Any other number |
+| `max_open` | 1 | Any other number |
+| `fee_rate` | 0.001 | Any other number |
+| `pairs` | LINK/USD, ADA/USD, BTC/USD, OP/USD | Any change |
 
 ---
 
-## CONTEXT: WHY THIS MATTERS
+## EXPECTED BACKTEST RESULTS
 
-The best strategy ever found (Sharpe=2.9232, Gen 2126) used long RSI < 34.00 and produced 30 trades at 90% win rate over 2 years.
-A competing strategy in Regime B has been optimized for 6,000 generations and only reached Sharpe=2.53 with 52% win rate.
-**Regime A at its best is 15% better Sharpe and wins 9 out of 10 trades vs. 1 out of 2.**
+A correct output will produce:
+- **20–50 trades** over 2 years
+- **75–90% win rate**
+- **Sharpe 2.5–3.0**
 
-Long RSI values in the range 33–36 produce 20–50 trades over 2 years with 75–90% win rate.
-Do not be alarmed by the low trade count. 20–50 trades with 80%+ win rate is correct and optimal.
+If backtesting returns 400–550 trades or 150–220 trades, the output was invalid regardless of what you intended.
+The target is low trade count with high win rate. This is correct and expected.
+```
 
-| Result | Interpretation |
-|--------|---------------|
-| 20–50 trades, 75%+ win rate, Sharpe > 2.0 | ✅ SUCCESS —
+---
+
+## ODIN SYSTEM CHANGES (for MIMIR/operator action — not part of LLM prompt)
+
+**Immediate actions required before next generation run:**
+
+1. **RESTORE INCUMBENT**: Override the current incumbent YAML (which contains the forbidden `value: 36.68`) with the Gen 2126 config. Set `entry.long.conditions[0].value: 34.00`, all other fields as in the template above. Set incumbent Sharpe to 2.9232.
+
+2. **ADD MAX_TRADES GUARD**: In the backtesting acceptance logic, add a hard filter: reject any result with `trades > 100`. This catches both Regime B (400–550 trades) and the Attractor (150–220 trades) without relying on the LLM to self-detect. Combined with existing `MIN_TRADES = 20`, the valid window is 20–100 trades.
+
+3. **LOCK MIN_TRADES**: Set `MIN_TRADES[swing] = 20` and do not change it again. The Gen 2126 result had 30 trades, which clears this threshold. Do not lower it further — values below 20 allow noisy 15-trade results through.
+
+4. **TRUNCATE THE PROMPT**: The previous prompt exceeded safe context for llama-3.1-8b-instant. The repeated mentions of forbidden values (36.68) in negative examples were causing the model to reproduce them. The updated prompt above removes all negative-example forbidden values from the text.
+
+5. **AFTER RSI SEARCH COMPLETES**: Once all 6 RSI values have been tested under a clean Regime A incumbent, expand the search to: (a) `take_profit_pct` ± 0.25 steps from 3.55, (b) `stop_loss_pct` ± 0.10 steps from 2.41, (c) `entry.short.conditions[0].value` ± 1.0 steps from 60.64. These have not been explored in Regime A and represent the next optimization frontier.
+
+6. **LIVE STRATEGY AUDIT**: Verify that the live AutoBotSwing deployment is running the Gen 2126 config (RSI < 34.00, Sharpe=2.9232), not the corrupted Regime B incumbent. The 50% win rate in the live sprint strongly suggests Regime B is live. Swap to Gen 2126 config immediately.
