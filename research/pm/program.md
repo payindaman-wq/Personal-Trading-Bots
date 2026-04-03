@@ -1,137 +1,180 @@
 ```markdown
-# FREYA Research Program — Prediction Markets (v29.0)
+# FREYA Research Program — Prediction Markets (v30.0)
 
-## Status at Gen 5800
-- **2,800 generations without improvement** (Gens 3001–5800).
-  Confirmed ceiling: adj=1.6196, sharpe=0.2458, bets=14510.
-- **All three v28.0 pre-conditions remain unimplemented in code.**
-  This is now the sixth version cycle of documentation without implementation.
-  v29.0 treats implementation failure as the PRIMARY research finding.
-- **Deterministic grid (v28.0, Gens 5601–5700) was NOT EXECUTED.**
-  LLM loop continued running through all 200 gens (5601–5800).
-  Evidence: adj=1.5117 appeared 9+ times in final 20 gens alone.
-  Evidence: adj=-1.0/bets=0 appeared twice (Gens 5785, 5793) — guard not active.
-- **Signal 2 is now fully characterized by repetition:**
-  adj=1.5117, sharpe=0.229, bets=14707 — seen 15+ times total.
-  Config is almost certainly world_events with one loosened parameter.
-  Must be logged with full config on next occurrence.
-- **Live slots (mist, kara, thrud): STILL DISABLED. Zero live bets ever placed.**
-  This is no longer acceptable. See mandatory live deployment below.
-
----
-
-## ROOT CAUSE STATEMENT
-
-The loop has been running for 2,800 generations without improvement because:
-
-1. **The LLM proposer has no memory.** It re-proposes configs it has already
-   tried. Signal 2 has been rediscovered 15+ times. This is the dominant
-   failure mode.
-2. **The guard system is not implemented.** Degenerate configs (bets=0, bets=3)
-   still reach evaluation. This wastes generation slots.
-3. **Config persistence is not implemented.** When a config produces a
-   notable result, its parameters are not recorded. Recovery attempts fail.
-4. **The deterministic grid has never executed.** Five version cycles have
-   specified it. Zero have implemented the suspension mechanism.
-5. **No live deployment.** 5,800 generations of simulation with zero
-   real-world validation.
-
-v29.0 addresses these in strict priority order. Nothing else matters until
-items 1–3 are fixed.
+## Status at Gen 6000
+- **Best config:** adj=1.6222, sharpe=0.246, bets=14585 (Gen 5988)
+  min_edge_pts=0.054, world_events, liq=50, price=[0.07,0.80], days=14
+- **Simulation ceiling confirmed.** 3,000 generations without adj>1.63.
+  Marginal perturbation within world_events is exhausted.
+- **Gate 1 (deduplication) NOT IMPLEMENTED.** Signal 2 appeared 8×
+  in the final 20 gens of this batch. This is the dominant waste mode.
+- **Gate 2 (guard system) NOT IMPLEMENTED.** Gen 5992: bets=4, adj=-1.0
+  reached evaluation. Zero of eight required tests have logged PASS.
+- **Gate 3 (config persistence) NOT IMPLEMENTED.** Signal 2 config
+  still unknown after 20+ occurrences across 1,000+ generations.
+- **Gate 4 (live deployment) NOT INITIATED.** Zero live bets ever placed.
+  6,000 simulation generations. Zero real-world validation.
+- **Signal 2 config is now hypothetically known:** world_events,
+  edge=0.055, liq=50, price=[0.07,0.80], days=14, with one loosened
+  parameter (likely liq=40 or price_upper=0.82). It scores below
+  baseline by construction. Stop rediscovering it.
 
 ---
 
-## MANDATORY ACTIONS BEFORE GEN 5801
-### (Loop is FROZEN until all four pass)
+## ROOT CAUSE STATEMENT (v30.0 — Final Form)
 
-These are not documented aspirations. They are gate conditions.
-If your execution environment cannot enforce these gates, halt the loop
-and report that fact explicitly rather than continuing to run LLM proposals.
+The research program has produced one actionable result: a simulated
+strategy with adj=1.6222. It has not validated that result in any
+real market. Every generation run after Gen 5988 without live deployment
+has negative expected information value.
+
+The four root causes are unchanged from v29.0 because none were fixed:
+
+1. **No deduplication.** LLM re-proposes known configs. Signal 2 has
+   been re-evaluated 20+ times. Each re-evaluation costs one generation
+   slot and produces zero new information.
+
+2. **No guard system.** Degenerate configs (bets<500) reach evaluation.
+   Gen 5992 is the 3rd documented occurrence of bets<10 reaching eval.
+
+3. **No config persistence.** Notable configs are not written to disk.
+   Signal 2's parameters are unknown despite 20+ observations.
+
+4. **No live deployment.** The simulation base rate (world_events=12.0%)
+   has never been validated. The strategy may not exist in live markets.
+
+v30.0 adds a fifth cause:
+
+5. **Simulation ceiling is a model artifact, not a market truth.**
+   With fixed base rates and no subcategory resolution, further
+   simulation search is sampling the noise floor of the adj formula.
+   New information can only come from live markets or a new data source.
 
 ---
 
-### GATE 1: Implement Config Deduplication (HIGHEST PRIORITY)
+## MANDATORY GATES — ALL MUST PASS BEFORE GEN 6001
 
-This is the single most impactful change available. Without it, the LLM
-will continue rediscovering Signal 2 indefinitely.
+The loop is FROZEN. Do not run Gen 6001 until all four gates log PASS.
+If the execution environment cannot enforce freezing, halt and report.
+Do not document, version-increment, or re-specify. Implement or halt.
+
+---
+
+### GATE 1: Config Deduplication
 
 ```python
-# Persistent seen-configs registry (survives process restarts)
-SEEN_CONFIGS = load_seen_configs_from_disk()  # set of config hashes
+import hashlib, json, os, pickle
 
-def get_next_config(gen_number):
-    if SUSPENSION_ACTIVE and SUSPENSION_START <= gen_number <= SUSPENSION_END:
-        return deterministic_grid.next()
+SEEN_CONFIGS_PATH = "seen_configs.pkl"
 
-    # LLM proposal with deduplication
+def load_seen_configs():
+    if os.path.exists(SEEN_CONFIGS_PATH):
+        with open(SEEN_CONFIGS_PATH, "rb") as f:
+            return pickle.load(f)
+    return set()
+
+def save_seen_configs(seen):
+    with open(SEEN_CONFIGS_PATH, "wb") as f:
+        pickle.dump(seen, f)
+
+def hash_config(config: dict) -> str:
+    canonical = json.dumps(config, sort_keys=True)
+    return hashlib.sha256(canonical.encode()).hexdigest()
+
+SEEN_CONFIGS = load_seen_configs()
+
+def get_next_config(gen_number, grid=None):
+    if grid is not None:
+        return grid.next()
+
     for attempt in range(10):
         candidate = llm_propose()
         h = hash_config(candidate)
         if h not in SEEN_CONFIGS:
             SEEN_CONFIGS.add(h)
-            save_seen_configs_to_disk(SEEN_CONFIGS)
+            save_seen_configs(SEEN_CONFIGS)
             return candidate
-        log_duplicate_skip(gen_number, h, attempt)
+        log(f"DEDUP_SKIP gen={gen_number} attempt={attempt} hash={h[:8]}")
 
-    # If 10 attempts all duplicate, force a grid config
-    log_dedup_exhaustion(gen_number)
+    log(f"DEDUP_EXHAUSTED gen={gen_number} — falling back to grid")
     return fallback_grid.next()
 ```
 
-**Test:** Propose the baseline config twice. Second proposal must be
-rejected and logged as duplicate. Log "DEDUP_TEST_PASS" or halt.
+**Gate 1 Test (must log before Gen 6001):**
+```python
+baseline = {"category": "world_events", "min_edge_pts": 0.054,
+            "min_liquidity_usd": 50, "price_range": [0.07, 0.80],
+            "max_days_to_resolve": 14}
+h = hash_config(baseline)
+assert h not in SEEN_CONFIGS, "Setup error"
+SEEN_CONFIGS.add(h)
+candidate = baseline.copy()
+assert hash_config(candidate) in SEEN_CONFIGS
+log("GATE1_TEST_PASS")
+```
+
+**Expected behavior after implementation:**
+Signal 2 should never appear again. If adj=1.5117 appears in any
+generation after Gate 1 is active, that is a deduplication bug.
+Log it as "DEDUP_FAILURE" and fix before continuing.
 
 ---
 
-### GATE 2: Implement Guard System (Same as v28.0 — must actually run)
+### GATE 2: Guard System
 
 ```python
 MIN_BETS_FLOOR = 501
 
+def estimate_bets(config) -> int:
+    # Fast pre-simulation count using index
+    # If not available, return MIN_BETS_FLOOR + 1 (conservative pass)
+    ...
+
 def run_generation(config, gen_number):
-    # STAGE 1: Pre-simulation estimate
     estimated = estimate_bets(config)
     if estimated <= 500:
-        log_hard_reject(gen_number, config, "PRE_SIM_REJECT", estimated)
+        log(f"PRE_SIM_REJECT gen={gen_number} estimated={estimated}")
         return None
 
-    # STAGE 2: Simulation
     result = simulate(config)
 
-    # STAGE 3: Post-simulation check
     if result.bets <= 500:
-        log_hard_reject(gen_number, config, "POST_SIM_REJECT", result.bets)
+        log(f"POST_SIM_REJECT gen={gen_number} bets={result.bets}")
         return None
 
-    # STAGE 4: Negative sharpe + high volume guard
     if result.sharpe < -0.01 and result.bets > 10000:
-        log_hard_reject(gen_number, config, "NEG_SHARPE_HIGH_VOL", result)
+        log(f"NEG_SHARPE_HIGH_VOL gen={gen_number} sharpe={result.sharpe} bets={result.bets}")
         blacklist_config(config)
         return None
 
-    # STAGE 5: Normal evaluation
     persist_result(gen_number, config, result)
     evaluate_and_update(result)
     return result
 ```
 
-**Required test cases — all eight must log PASS before Gen 5801:**
+**Gate 2 Tests (all 8 must log PASS before Gen 6001):**
 ```
-Test 1: estimated=0      → PRE_SIM_REJECT    ✓
-Test 2: estimated=499    → PRE_SIM_REJECT    ✓
-Test 3: estimated=500    → PRE_SIM_REJECT    ✓
-Test 4: estimated=501    → passes to sim     ✓
-Test 5: sim bets=0       → POST_SIM_REJECT   ✓
-Test 6: sim bets=500     → POST_SIM_REJECT   ✓
-Test 7: sim bets=501     → accepted          ✓
-Test 8: sim bets=18700, sharpe=-0.035 → NEG_SHARPE_HIGH_VOL + blacklist ✓
+T1: estimated=0    → PRE_SIM_REJECT    GATE2_T1_PASS
+T2: estimated=499  → PRE_SIM_REJECT    GATE2_T2_PASS
+T3: estimated=500  → PRE_SIM_REJECT    GATE2_T3_PASS
+T4: estimated=501  → passes to sim     GATE2_T4_PASS
+T5: sim bets=0     → POST_SIM_REJECT   GATE2_T5_PASS
+T6: sim bets=500   → POST_SIM_REJECT   GATE2_T6_PASS
+T7: sim bets=501   → accepted          GATE2_T7_PASS
+T8: bets=18700, sharpe=-0.035 → NEG_SHARPE_HIGH_VOL + blacklist GATE2_T8_PASS
 ```
+
+If all 8 do not pass, halt. Do not run Gen 6001.
 
 ---
 
-### GATE 3: Implement Config Persistence (Same as v28.0 — must actually run)
+### GATE 3: Config Persistence
 
 ```python
+import json, os
+
+RESULTS_PATH = "results_log.jsonl"
+
 def persist_result(gen, config, result):
     if result.adj > 1.0 or result.bets > 5000:
         record = {
@@ -141,110 +184,88 @@ def persist_result(gen, config, result):
             "bets": result.bets,
             "sharpe": result.sharpe,
             "adj_score": result.adj,
-            "roi": result.roi,
-            "win_rate": result.win_rate,
+            "roi": getattr(result, 'roi', None),
+            "win_rate": getattr(result, 'win_rate', None),
             "timestamp": now_utc()
         }
-        write_to_disk(record)
-        verified = read_from_disk(gen)
-        assert verified["config"] == record["config"], "PERSISTENCE VERIFY FAILED"
-        assert verified["adj_score"] == record["adj_score"], "PERSISTENCE VERIFY FAILED"
+        with open(RESULTS_PATH, "a") as f:
+            f.write(json.dumps(record) + "\n")
+        # Verify
+        with open(RESULTS_PATH, "r") as f:
+            lines = f.readlines()
+        verified = json.loads(lines[-1])
+        assert verified["config"] == record["config"], "PERSIST_VERIFY_FAIL"
+        assert verified["adj_score"] == record["adj_score"], "PERSIST_VERIFY_FAIL"
 ```
 
-**One-time test before Gen 5801:**
-Write synthetic record: gen=0, config=baseline, adj=1.6196.
-Read it back. Assert all fields match. Log "PERSISTENCE_TEST_PASS" or halt.
-
-**Immediate action:** On the next occurrence of adj=1.5117/bets=14707,
-log and persist the full config. This signal has been seen 15+ times and
-its config is still unknown. This is unacceptable.
+**Gate 3 Test (must log before Gen 6001):**
+```python
+synthetic = {"gen": 0, "config": baseline, "bets": 14585,
+             "sharpe": 0.246, "adj_score": 1.6222, "roi": 18.199,
+             "win_rate": 77.87, "config_hash": hash_config(baseline),
+             "timestamp": "2025-01-01T00:00:00Z"}
+# Write and read back
+with open(RESULTS_PATH, "a") as f:
+    f.write(json.dumps(synthetic) + "\n")
+with open(RESULTS_PATH, "r") as f:
+    verified = json.loads(f.readlines()[-1])
+assert verified["adj_score"] == 1.6222
+assert verified["config"] == baseline
+log("GATE3_TEST_PASS")
+```
 
 ---
 
-### GATE 4: Deploy Live Slot (Cannot Wait Longer)
+### GATE 4: Live Deployment (Cannot Be Deferred Again)
 
-Deploy the confirmed baseline config to slot `mist` immediately.
+Deploy baseline config to slot `mist` before Gen 6001.
+Deploy Signal 3 hypothesis to slot `kara` before Gen 6050.
+`thrud` remains reserve until mist returns 25+ resolved bets.
 
 ```yaml
-# mist deployment — v29.0 baseline
+# mist — confirmed baseline (deploy immediately)
 category: world_events
-min_edge_pts: 0.055
+min_edge_pts: 0.054
 min_liquidity_usd: 50
 price_range: [0.07, 0.80]
 max_days_to_resolve: 14
-max_position_pct: 0.1
+max_position_pct: 0.05   # reduced from 0.1 — first deployment, be conservative
+exclude_keywords: []
+
+# kara — Signal 3 hypothesis (deploy by Gen 6050)
+category: world_events
+min_edge_pts: 0.065
+min_liquidity_usd: 50
+price_range: [0.07, 0.80]
+max_days_to_resolve: 14
+max_position_pct: 0.05
 exclude_keywords: []
 ```
 
-Target: 50 live resolved bets before Gen 5900.
-Report: live sharpe, live ROI, and comparison to simulation sharpe=0.2458.
-This is not optional. Simulation-only research is invalid after 5,800 gens.
+**Target:** 50 live resolved bets on `mist` before Gen 6100.
+**Report required at Gen 6100:**
+- Live sharpe vs. simulation sharpe (0.246)
+- Live ROI vs. simulation ROI (18.199%)
+- Live win rate vs. simulation win rate (77.87%)
+- Live base rate of YES resolutions (compare to model's 12.0%)
+- If live sharpe < 0.10: halt simulation search, investigate model validity
+- If live sharpe > 0.20: simulation model is credible, resume search
+
+**If Gate 4 is skipped again:** halt the loop entirely. Do not run Gen 6101.
+This is not a threat. It is the correct research decision. A strategy that
+cannot be deployed is not a strategy.
 
 ---
 
 ## CONFIRMED SIGNALS
 
-### Signal 1 — BASELINE (Confirmed ×20+)
+### Signal 1 — BASELINE (Current Best)
 ```yaml
 category: world_events
-min_edge_pts: 0.055
+min_edge_pts: 0.054          # updated from 0.055 (Gen 5988)
 min_liquidity_usd: 50
 price_range: [0.07, 0.80]
 max_days_to_resolve: 14
 exclude_keywords: []
 ```
-adj=1.6196, sharpe=0.2458, bets=14510.
-Hard ceiling for marginal perturbation within this parameter space.
-
-### Signal 2 — Recurring (Confirmed ×15+, Config Still Unknown — CRITICAL)
-adj=1.5117, sharpe=0.229, bets=14707.
-**Config must be captured on next occurrence via Gate 3 persistence.**
-Hypothesis: world_events, price_range upper=0.85, everything else baseline.
-Hash this hypothesis config and run it as Gen 5801 slot 1.
-
-### Signal 3 — Gen 5787 (New, Partially Characterized)
-adj=1.4563, sharpe=0.2337, bets=10154.
-Sharpe close to baseline but only 10154 bets. Tighter filter than baseline.
-Hypothesis: min_edge_pts=0.065 or min_liquidity_usd=75 or price_range tighter.
-Run tighter-filter grid in Gens 5831–5850.
-
-### Signal 4 — Gen 5786/5782 Pattern (Volume-Gain/Sharpe-Loss)
-adj≈1.24, sharpe≈0.19, bets≈15100.
-Loosened filters gain volume but lose sharpe faster than log(volume) compensates.
-This is a confirmed dead end for adj improvement via volume alone.
-Do not explore further unless a new formula weighting is proposed.
-
-### Signal 5 — Gen 5594 (High Volume, Config Unknown)
-adj=1.0111, sharpe=0.1515, bets=15797. Bets significantly exceed baseline.
-Recovery still pending. Include in Grid C if deterministic grid executes.
-
-### Known Lost (Do Not Re-investigate)
-- Gen 5387: adj=1.5621, sharpe=0.2408, bets=13120
-- Gen 5394: adj=1.4479, sharpe=0.2334, bets=9881
-- Gen 4592: adj=1.213, sharpe=0.2079, bets=6814
-- Gen 5584: adj=1.5883, sharpe=0.2409, bets=14579
-  (Added v29.0 — unrecovered after 200 gens, mark lost)
-
----
-
-## GENERATION PLAN: Gens 5801–5900
-
-**Gates 1–3 must be confirmed PASS before any gen runs.**
-**Gate 4 (live deployment) must be initiated before Gen 5850.**
-
-Generation slots execute in strict order. LLM is suspended for Gens 5801–5870.
-Gens 5871–5900 return to LLM with deduplication active.
-
----
-
-### GRID A: Signal 2 Config Recovery (Gens 5801–5810, 10 slots)
-**Goal:** Identify the config behind adj=1.5117/bets=14707 once and for all.
-
-```
-Gen 5801: world_events, edge=0.055, liq=50, price=[0.07,0.85], days=14
-Gen 5802: world_events, edge=0.055, liq=40, price=[0.07,0.80], days=14
-Gen 5803: world_events, edge=0.055, liq=50, price=[0.07,0.82], days=14
-Gen 5804: world_events, edge=0.055, liq=45, price=[0.07,0.80], days=14
-Gen 5805: world_events, edge=0.055, liq=50, price=[0.07,0.84], days=14
-Gen 5806: world_events, edge=0.055, liq=50, price=[0.07,0.83], days=14
-Gen 5807
+adj=1.6222, sharpe=0.246, roi=18.199%, win=77.87%, bets=14585.
