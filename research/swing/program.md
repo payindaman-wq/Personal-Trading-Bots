@@ -12,7 +12,7 @@ Change the long entry RSI `value` field.
 
 The current value is `34.00`.
 
-You must output ONE of these six values. Copy it exactly, character for character:
+You MUST output exactly one of these six values. Copy it character for character, no rounding, no decimals added or removed:
 
 ```
 33.00
@@ -23,7 +23,10 @@ You must output ONE of these six values. Copy it exactly, character for characte
 36.00
 ```
 
-Try them in this order (prefer values not recently tested):
+DO NOT USE THESE VALUES — they have already been tested this session:
+{already_tested}
+
+Try untested values in this order:
 1. `33.50`
 2. `33.00`
 3. `34.50`
@@ -31,19 +34,31 @@ Try them in this order (prefer values not recently tested):
 5. `35.50`
 6. `36.00`
 
-If unsure, output `33.50`.
+If all values are listed in DO NOT USE above, output `33.50`.
+If unsure which to pick, output `33.50`.
+
+FORBIDDEN VALUES — these will be rejected and waste a generation:
+- 36.68  (not in the allowed list)
+- 34.0   (must be 34.00 — but also this is the current value, do not keep it unchanged)
+- Any value not exactly matching one of the six above
 
 ---
 
-## SELF-CHECK — DO THIS BEFORE OUTPUTTING
+## SELF-CHECK — COMPLETE THIS BEFORE OUTPUTTING
+
+Answer each question. If ANY answer is NO, output the FALLBACK YAML instead.
 
 1. Did I change ONLY `entry.long.conditions[0].value`? YES/NO
-2. Is the new value exactly one of: 33.00, 33.50, 34.50, 35.00, 35.50, 36.00? YES/NO
-3. Is `entry.short.conditions[0].value` still `60.64`? YES/NO
-4. Is `take_profit_pct` still `3.55` and `stop_loss_pct` still `2.41`? YES/NO
-5. Are all `period_hours` values still 21, 26, 21, 48 in order? YES/NO
+2. Is the new value EXACTLY one of: 33.00, 33.50, 34.50, 35.00, 35.50, 36.00? YES/NO
+3. Is the new value DIFFERENT from 34.00 (the current value)? YES/NO
+4. Is `entry.short.conditions[0].value` still exactly `60.64`? YES/NO
+5. Is `take_profit_pct` still exactly `3.55`? YES/NO
+6. Is `stop_loss_pct` still exactly `2.41`? YES/NO
+7. Are `period_hours` values still 21, 26, 21, 48 in order? YES/NO
+8. Is the new value NOT in the DO NOT USE list above? YES/NO
 
-If ANY answer is NO → output the FALLBACK YAML below, exactly as written, unchanged.
+If ALL answers are YES → output your modified YAML.
+If ANY answer is NO → output the FALLBACK YAML exactly as written below.
 
 ---
 
@@ -95,7 +110,7 @@ risk:
 ---
 
 ## FALLBACK YAML
-(Output this exactly if your self-check fails)
+(Output this exactly — character for character — if your self-check fails)
 
 ```yaml
 name: crossover
@@ -142,10 +157,10 @@ risk:
 
 ---
 
-## LOCKED FIELDS — DO NOT TOUCH THESE
+## LOCKED FIELDS — DO NOT CHANGE ANY OF THESE
 
-| Field | Must equal |
-|-------|------------|
+| Field | Locked value |
+|-------|-------------|
 | `entry.long.conditions[0].period_hours` | 21 |
 | `entry.long.conditions[1].period_hours` | 26 |
 | `entry.short.conditions[0].value` | 60.64 |
@@ -160,12 +175,16 @@ risk:
 
 ---
 
-## OPERATOR NOTES
 ## ⚠️ FOR ODIN/MIMIR SYSTEM — NOT SHOWN TO LLM
 
-### MANDATORY BEFORE GEN 9001 — EXECUTE NOW
+---
 
-**[RESTORE] Set incumbent to Gen 2126:**
+### [CRITICAL — EXECUTE BEFORE GEN 9201] INCUMBENT RESTORE
+
+The current incumbent (RSI 36.68, Sharpe 2.50, 479 trades) is a Regime B artifact
+caused by a hallucinated RSI value at Gen 2149. It must be replaced immediately.
+
+**Restore Gen 2126 as incumbent:**
 ```yaml
 entry.long.conditions[0].value: 34.00
 entry.short.conditions[0].value: 60.64
@@ -175,69 +194,101 @@ timeout_hours: 200
 period_hours: [21, 26, 21, 48]
 # Sharpe: 2.9232 | Win rate: 90.0% | Trades: 30
 ```
-Gen 2126 is the true all-time best. The current incumbent (36.68, 479 trades, Sharpe 2.50)
-is a Regime B artifact from a hallucinated RSI value. All Gen 2149–9000 improvements
-are improvements within a corrupt regime, not over the true best. Discard them.
 
-**[ENFORCE] Add MAX_TRADES hard bound immediately:**
+Gen 2126 is the true all-time best. All Gen 2149–9200 "improvements" are improvements
+within a corrupt regime and must be discarded. The research program resumes from Gen 2126.
+
+---
+
+### [CRITICAL — EXECUTE BEFORE GEN 9201] ACCEPTANCE FILTER
+
+Add these hard bounds. Both must pass or the result is rejected without updating incumbent:
+
 ```python
 MIN_TRADES = {"day": 250, "swing": 25}
 MAX_TRADES = {"day": 9999, "swing": 50}
 
 def accept_result(trades: int, style: str, sharpe: float) -> bool:
+    """
+    Returns True only if trade count is within valid bounds.
+    Regime A (good): 21-30 trades, 66-90% win rate, Sharpe 2.3-2.92
+    Regime B (corrupt): 345-530 trades, 50-53% win rate — REJECT ALL
+    MAX_TRADES=50 would have blocked Gen 2149 and prevented entire Regime B.
+    """
     if trades < MIN_TRADES[style]:
-        return False  # too few trades
+        return False   # too few — not enough signal
     if trades > MAX_TRADES[style]:
-        return False  # regime collapse — reject hard, do not update incumbent
+        return False   # regime collapse — RSI too loose, reject hard
     return True
 
-# This would have rejected Gen 2149 (345 trades) and all Regime B configs.
-# It MUST be in place before any further backtesting.
+# DO NOT CHANGE MIN_TRADES[swing] AGAIN.
+# Oscillating it between 10-30 provided zero benefit (see audit log).
+# The real filter gap was always MAX_TRADES. It is now fixed at 50.
+# MIN_TRADES[swing] = 25 is correct and consistent with all Regime A results.
 ```
 
-**[VALIDATE] Pre-backtest RSI whitelist check:**
+---
+
+### [CRITICAL — EXECUTE BEFORE GEN 9201] RSI WHITELIST VALIDATOR
+
+Run this check before every backtest. If it fails, discard without backtesting,
+log as [invalid_rsi], and do NOT count as a generation toward the total:
+
 ```python
 ALLOWED_RSI_LONG = {"33.00", "33.50", "34.00", "34.50", "35.00", "35.50", "36.00"}
 
 def validate_config(yaml_str: str) -> bool:
-    value = extract_field(yaml_str, "entry.long.conditions[0].value")
-    return str(round(float(value), 2)) in ALLOWED_RSI_LONG
-    # If False: discard without backtesting, log as [invalid_rsi], do not count as generation
+    """
+    Prevents hallucinated values like 36.68 from ever reaching the backtester.
+    Gen 2149's RSI=36.68 caused the entire Regime B collapse. This stops recurrence.
+    """
+    raw = extract_field(yaml_str, "entry.long.conditions[0].value")
+    normalized = str(round(float(raw), 2))
+    if normalized not in ALLOWED_RSI_LONG:
+        log(f"[invalid_rsi] Rejected value: {raw} (normalized: {normalized})")
+        return False
+    return True
 ```
 
-**[DO NOT CHANGE] MIN_TRADES[swing] must stay at 25:**
-The oscillation of MIN_TRADES between 10–30 was ineffective and caused no improvement.
-The real filter gap was always MAX_TRADES. Do not change MIN_TRADES again.
-All Regime A incumbents (Gen 303–2126) had 21–30 trades — all pass MIN_TRADES=25.
+---
 
-**[NEXT PHASE — after RSI space exhausted]**
-Once all six RSI values {33.00, 33.50, 34.50, 35.00, 35.50, 36.00} have been tested
-against the restored Gen 2126 incumbent, pivot to exploring:
-1. `take_profit_pct`: try {3.25, 3.40, 3.55, 3.70, 3.85, 4.00} — keep RSI at best found
-2. `stop_loss_pct`: try {2.00, 2.20, 2.41, 2.60, 2.80} — keep others at best found
-3. `timeout_hours`: try {150, 175, 200, 225, 250} — keep others at best found
-4. `entry.short.conditions[0].value`: try {59.00, 59.50, 60.00, 60.64, 61.00, 61.50}
-These parameters have never been systematically explored within Regime A.
-They are the next highest-value optimization targets.
+### [CRITICAL — EXECUTE BEFORE GEN 9201] DEDUPLICATION CACHE
 
-**[LIVE PERFORMANCE NOTE]**
-Current live result (rank 3/10, +3.21%, 3 trades, 50% win rate) has too small a sample
-to validate backtest Sharpe 2.92. Monitor for at least 5 more sprints before drawing
-conclusions about backtest-to-live gap. The 50% live win rate vs 90% backtest win rate
-is a red flag worth watching — possible overfitting to 2-year BTC/ETH/SOL regime.
+The last 20 gens show sharpe=-1.3913 / trades=166 appearing 8 times.
+The LLM is looping. Add a session cache and inject tested values into the prompt:
 
-**[DEDUPLICATION — fix the looping problem]**
-Recent gens show identical results appearing 4+ times (sharpe=-1.3913, trades=166).
-The LLM is looping on the same output. Add a result cache:
 ```python
-tested_values = set()  # track all RSI values tested this session
-def get_next_value(tested: set) -> str:
-    candidates = ["33.50", "33.00", "34.50", "35.00", "35.50", "36.00"]
-    for v in candidates:
-        if v not in tested:
-            return v
-    return None  # all values tested — pivot to next parameter
+tested_rsi_values: set[str] = set()   # reset each time incumbent changes
+duplicate_result_cache: set[tuple] = set()  # (sharpe_rounded, trades) pairs
+
+def get_prompt(current_value: str) -> str:
+    already_tested = ", ".join(sorted(tested_rsi_values)) or "none yet"
+    return PROMPT_TEMPLATE.replace("{already_tested}", already_tested)
+
+def record_result(rsi_value: str, sharpe: float, trades: int):
+    tested_rsi_values.add(rsi_value)
+    result_key = (round(sharpe, 4), trades)
+    if result_key in duplicate_result_cache:
+        log(f"[duplicate] RSI={rsi_value} produced duplicate result {result_key} — skipping")
+    duplicate_result_cache.add(result_key)
+
+# When all 6 RSI values are tested, pivot to next parameter (see NEXT PHASE below).
+def rsi_search_exhausted() -> bool:
+    candidates = {"33.00", "33.50", "34.50", "35.00", "35.50", "36.00"}
+    return candidates.issubset(tested_rsi_values)
 ```
-Pass the set of already-tested values to ODIN so it can inject them into the prompt
-as "DO NOT USE THESE: {already_tested}" to prevent redundant generations.
-```
+
+---
+
+### [ARCHITECTURE] Why Regime A is correct and Regime B is corrupt
+
+| Metric | Regime A (Gen 303–2126) | Regime B (Gen 2149–9200) |
+|--------|------------------------|--------------------------|
+| RSI long threshold | 33–35 range | 36.68 (hallucinated) |
+| Trade count | 21–30 | 345–530 |
+| Win rate | 66–90% | 50–53% |
+| Best Sharpe | **2.9232** | 2.5324 |
+| Nature | Rare, high-confidence entries | Noise-trading at scale |
+| Status | **TRUE BEST** | **DISCARD ALL** |
+
+Regime
