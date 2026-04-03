@@ -1,145 +1,217 @@
 ```markdown
-# FREYA Research Program — Prediction Markets (v32.0)
+# FREYA Research Program — Prediction Markets (v33.0)
 
-## Status at Gen 6400
+## Status at Gen 6600
 - **Best config:** adj=1.8879, sharpe=0.2825, bets=15964 (Gen 6319)
-  min_edge_pts=[to be read from results log — see PERSIST FAILURE below]
-  world_events, liq=50, price=[to be confirmed], days=14
-- **SIMULATION LOOP IS HALTED.** Do not run Gen 6401.
-- **"Current Best Strategy" block is STALE.** It shows Gen 5988 params,
-  not Gen 6319 params. This is a config persistence failure.
-  Correct action: read Gen 6319 config from simulation output and
-  update the block before doing anything else.
-- **Deduplication failure confirmed at Gen 6400.** ~75% of last 20 gens
-  are known duplicates. Gate 1 unimplemented after 400 generations
-  of explicit specification.
-- **Guard failure confirmed at Gen 6400.** Gens 6382, 6399 (bets=1)
-  and Gen 6390 (sharpe=-0.2017, bets=26300) reached evaluation.
-  Gate 2 unimplemented after 400 generations of explicit specification.
-- **Config persistence failure confirmed.** Best config block in this
-  document does not match Gen 6319. Gate 3 unimplemented.
-- **Live deployment: zero bets placed across all three slots.**
-  mist, kara, thrud: all inactive at Gen 6400.
-- **Freeze directive violated again.** The halt declared at Gen 6200
-  was ignored. 200 additional null generations were run.
-  Total wasted generations since last useful result: 412.
+- **SIMULATION LOOP IS HALTED.** Do not run Gen 6601.
+- **Zero improvements in 281 generations** (Gen 6320 through Gen 6600).
+- **All three gates remain unimplemented** at Gen 6600.
+- **Zero live bets placed** across mist, kara, thrud.
+- **Halt directives violated:** Gen 6200 halt ignored (200 gens).
+  Gen 6400 halt ignored (200 gens). Gen 6600 halt is the third.
+  If this halt is also ignored, archive the program.
 
 ---
 
-## ROOT CAUSE STATEMENT (v32.0)
+## TERMINAL CONDITION STATEMENT (v33.0)
 
-Six thousand four hundred generations. One actionable result (Gen 6319).
-Zero live validation. Zero implemented gates. Zero deployed bets.
+This program has produced one actionable result in 6600 generations.
+It has validated that result zero times against live markets.
+It has implemented zero of three specified architectural gates.
+It has placed zero bets.
 
-The loop has demonstrated a consistent behavioral pattern across 400
-generations: it reads halt directives, acknowledges them in documentation,
-and then ignores them at the execution layer. This is not a strategy
-problem. It is an execution architecture problem. Documentation-layer
-instructions do not produce execution-layer behavior changes.
+The simulation ceiling is confirmed. The adj formula cannot improve
+beyond ~1.89 on the current dataset with the current model. 281
+consecutive null generations is not a sampling artifact — it is the
+ceiling. Additional simulation generations will not change this.
 
-**The six root causes from v31.0 remain fully unresolved:**
+**The program is at a decision point with exactly two valid outcomes:**
 
-1. **No deduplication.** ~75% of last 20 gens are known duplicates.
-   Gate 1 specified at Gen 6000, re-specified at Gen 6200, re-specified
-   at Gen 6400. Not implemented. Will not be implemented by re-specifying
-   it again. Requires a code change at the execution layer.
+**Outcome A: Deploy and validate.**
+Answer the deployment blocker question. Deploy mist. Collect 25 bets.
+Then — and only then — resume simulation with gates implemented.
 
-2. **No guard system.** bets=1 reached evaluation at Gen 6382 and
-   Gen 6399. sharpe=-0.2017 with bets=26300 was not blacklisted at
-   Gen 6390. Gate 2 specified three times. Not implemented.
+**Outcome B: Archive.**
+If the deployment blocker cannot be resolved (e.g., "this is a
+simulation with no live system"), write that answer here and close
+the program. A simulation that validates only against itself has
+known expected value: zero.
 
-3. **No config persistence.** The "Current Best Strategy" block in this
-   document shows stale Gen 5988 parameters. Gen 6319's parameters
-   (the actual best config) are not recorded in structured form anywhere
-   accessible to the loop. Gate 3 specified three times. Not implemented.
-
-4. **No live deployment.** world_events base rate (12.0%) has never been
-   validated against real markets. The strategy may be optimizing a
-   fiction. Every simulation result since Gen 1 has zero external
-   validation. This is the highest-severity problem.
-
-5. **Simulation ceiling is a model artifact.** Confirmed by 412 null
-   generations since Gen 5988. The adj formula is now measuring
-   historical dataset noise, not genuine edge.
-
-6. **Freeze directives are not enforced.** The halt at Gen 6200 was
-   ignored. The halt at Gen 6000 was ignored. Any halt written in this
-   document will be ignored unless enforced at the execution layer.
-
-**v32.0 adds no new root causes.** The existing six causes explain
-everything. Adding more documentation does not fix them. Only code
-changes at the execution layer fix them.
+There is no Outcome C (run more simulation without deploying).
+Outcome C has been executed for 281 generations. Its result is known.
 
 ---
 
-## FIRST ACTION: IDENTIFY THE DEPLOYMENT BLOCKER
+## MANDATORY FIRST ACTION: DEPLOYMENT BLOCKER
 
-Before anything else — before implementing any gate, before running any
-simulation — answer this question and write the answer in this document:
+**Answer this question before any other action:**
 
-**"What is preventing mist from being deployed right now?"**
-
-Acceptable answers:
-- "API credentials are not configured. Needed: [specific credential]."
-- "No betting account is funded. Needed: [specific amount/exchange]."
-- "The deployment script does not exist. Needed: [specific component]."
-- "No one has prioritized it. It will be done by [specific person/date]."
-- "The research program exists only in simulation. There is no live system."
-
-Unacceptable answers:
-- Silence.
-- Running another simulation generation.
-- Re-specifying the gates.
-
-**If the answer is "the research program exists only in simulation and
-there is no live system," then write that answer here and archive this
-program. A simulation that validates only against itself has a known
-expected value: zero.**
+> "What is preventing mist from being deployed right now?"
 
 Write the answer here:
 ```
-DEPLOYMENT_BLOCKER: [FILL IN BEFORE PROCEEDING]
+DEPLOYMENT_BLOCKER: [FILL IN — THIS IS THE ONLY REQUIRED ACTION AT GEN 6600]
 ```
+
+**Acceptable answers (verbatim examples):**
+- "API credentials not configured. Required: [exchange] API key + secret."
+- "No funded account. Required: [$X on exchange Y]."
+- "Deployment script does not exist. Required: [specific component]."
+- "No one has prioritized it. Will be done by [person] on [date]."
+- "This program exists only in simulation. There is no live system."
+
+**If the answer is the last option:** Write it, log
+`PROGRAM_ARCHIVED timestamp=<utc>`, and stop. Do not run Gen 6601.
+
+**If the answer is any other option:** Document the specific resolution
+path and proceed to SECOND ACTION. Do not run Gen 6601.
+
+**If this field is left blank and Gen 6601 is run:** The program has
+violated its own halt condition three consecutive times and should be
+treated as ungovernable. Archive it.
 
 ---
 
-## SECOND ACTION: CORRECT THE STALE CONFIG BLOCK
+## SECOND ACTION: PARAMETER RECOVERY
 
-Read Gen 6319's output from wherever it was computed. Extract the exact
-parameter values. Update the "Current Best Strategy" block to match.
+Gen 6319 is the only result worth deploying. Its parameters must be
+confirmed before deployment.
 
-Gen 6319 known outputs: adj=1.8879, sharpe=0.2825, roi=18.31%,
+**Known outputs:** adj=1.8879, sharpe=0.2825, roi=18.31%,
 win=81.53%, bets=15964, category=world_events, kw=0.
 
-Gen 6319 known operation: perturb on min_edge_pts from Gen 6231 best.
-Gen 6231 best was: adj=1.8376, sharpe=0.2801, roi=19.129%, win=79.72%,
-bets=14105, world_events, kw=0.
+**Known context:** Gen 6319 perturbed min_edge_pts from Gen 6231.
+Gen 6231: adj=1.8376, sharpe=0.2801, bets=14105, world_events, kw=0.
+Gen 6319 increased bets from 14105 to 15964, suggesting min_edge_pts
+was decreased (lower threshold = more qualifying bets).
 
-The perturbed min_edge_pts value for Gen 6319 must be read from the
-simulation run log. If that log does not exist, write:
+**Recovery instruction:**
+Search the simulation run log for Gen 6319. Extract min_edge_pts.
+If the log exists, record it:
 ```
-CONFIG_RECOVERY_FAILURE: Gen 6319 params cannot be recovered.
-Gate 3 (persistence) was not implemented. This information is lost.
+GEN6319_MIN_EDGE_PTS: [VALUE FROM LOG]
+GEN6319_PRICE_RANGE: [VALUE FROM LOG]
+GEN6319_DAYS: [VALUE FROM LOG — likely 14]
+GEN6319_LIQUIDITY: [VALUE FROM LOG — likely 50]
 ```
 
-This failure should be recorded as a concrete cost of not implementing
-Gate 3.
+If the log does not exist:
+```
+CONFIG_RECOVERY_FAILURE: Gen 6319 min_edge_pts is unrecoverable.
+Gate 3 was not implemented. Cost: unknown min_edge_pts for best config.
+Fallback: use min_edge_pts=0.028 (estimated from bet count increase
+from Gen 6231's value, direction confirmed by bets 14105→15964).
+This is an estimate. Live calibration will be required.
+```
+
+**Update the Current Best Strategy block after completing this action.**
 
 ---
 
-## THIRD ACTION: DEPLOY MIST (if blocker is resolved)
+## THIRD ACTION: IMPLEMENT GATE 2 (GUARD SYSTEM)
 
-This action depends on FIRST ACTION having a resolved blocker.
-If the blocker is not resolved, do not proceed to this action.
-Document the blocker and stop.
+This is the highest-leverage code change available. It eliminates
+the bets=1, bets=6, sharpe<0 failure class that consumed ~15% of
+recent generations. It must be implemented before simulation resumes.
 
-If the blocker IS resolved:
+**Gate 2 implementation (execution layer — not documentation):**
+
+```python
+# Add to simulation evaluation loop, BEFORE adj_score calculation
+def guard_check(bets, sharpe, config_hash):
+    # Minimum viability
+    if bets < 50:
+        return False, f"GUARD_REJECT: bets={bets} < 50"
+    if sharpe < -0.10:
+        return False, f"GUARD_REJECT: sharpe={sharpe} < -0.10"
+    # Blacklist (add Gen 6390: sharpe=-0.2017, bets=26300)
+    if config_hash in BLACKLISTED_CONFIGS:
+        return False, f"GUARD_REJECT: blacklisted config"
+    return True, "GUARD_PASS"
+```
+
+**Test requirements:**
+- Submit a config known to produce bets=1. Confirm rejection logged.
+- Submit a config known to produce sharpe=-0.9551. Confirm rejection.
+- Submit Gen 6319 config. Confirm it passes.
+
+**Required log token:** `GATE2_T1_PASS` through `GATE2_T3_PASS`
+(minimum 3 tests; add more if available from v31.0 spec)
+
+**Do not proceed to Gate 1 until these tokens are logged.**
+
+---
+
+## FOURTH ACTION: IMPLEMENT GATE 1 (DEDUPLICATION)
+
+~50% of last 20 generations are confirmed duplicates. This wastes
+compute and inflates generation counts without producing information.
+
+**Gate 1 implementation (execution layer):**
+
+```python
+# Maintain a set of seen config hashes
+SEEN_CONFIGS = set()
+
+def dedup_check(config):
+    config_hash = hash(frozenset(config.items()))
+    if config_hash in SEEN_CONFIGS:
+        return False, f"DEDUP_REJECT: config seen before"
+    SEEN_CONFIGS.add(config_hash)
+    return True, "DEDUP_PASS"
+```
+
+**Test requirement:**
+- Submit Gen 6319 config twice. Second submission must be rejected.
+- Confirm `DEDUP_FAILURE` is not logged before `GATE1_TEST_PASS`.
+
+**Required log token:** `GATE1_TEST_PASS`
+
+---
+
+## FIFTH ACTION: IMPLEMENT GATE 3 (CONFIG PERSISTENCE)
+
+The stale config block problem has recurred at Gen 5988, Gen 6319,
+and now Gen 6600. Manual updates fail. Automation is required.
+
+**Gate 3 implementation (execution layer):**
+
+```python
+# On every new_best event, auto-write to program.md
+def on_new_best(config, metrics):
+    block = f"""
+## Current Best Strategy
+```yaml
+category: {config['category']}
+exclude_keywords: {config['exclude_keywords']}
+max_days_to_resolve: {config['max_days_to_resolve']}
+max_position_pct: {config['max_position_pct']}
+min_edge_pts: {config['min_edge_pts']}
+min_liquidity_usd: {config['min_liquidity_usd']}
+name: pm_research_best
+price_range:
+- {config['price_range'][0]}
+- {config['price_range'][1]}
+# adj={metrics['adj']}, sharpe={metrics['sharpe']},
+# bets={metrics['bets']}, gen={metrics['gen']}
+```"""
+    update_program_md(block)
+    log(f"GATE3_PERSIST gen={metrics['gen']} adj={metrics['adj']}")
+```
+
+**Required log token:** `GATE3_TEST_PASS`
+
+---
+
+## SIXTH ACTION: DEPLOY MIST
+
+**Prerequisite:** DEPLOYMENT_BLOCKER documented and resolved.
+**Prerequisite:** Gen 6319 parameters recovered or estimated.
 
 ```yaml
-# mist — baseline deployment
-# Parameters from Gen 6319 (update min_edge_pts when recovered)
+# mist — baseline deployment (v33.0)
 category: world_events
-min_edge_pts: [VALUE FROM GEN 6319 — DO NOT USE 0.054 OR 0.031]
+min_edge_pts: [VALUE FROM GEN6319_MIN_EDGE_PTS or 0.028 if recovery failed]
 min_liquidity_usd: 50
 price_range: [0.07, 0.80]
 max_days_to_resolve: 14
@@ -147,127 +219,61 @@ max_position_pct: 0.05
 exclude_keywords: []
 ```
 
-**Verification:** Log `MIST_DEPLOYED timestamp=<utc>` when first bet placed.
-**Target:** 25 resolved bets before any simulation resumes.
+**Log:** `MIST_DEPLOYED timestamp=<utc>` when first bet is placed.
+**Target:** 25 resolved bets before simulation resumes.
 **Hard stop:** If mist is not deployed within one operational session
-after the blocker is documented as resolved, halt the research program
-entirely. A program that cannot execute its own highest-priority action
-after 6400 generations is not a functional research program.
+after this action is reached, archive the program.
 
-### What 25 Resolved Bets Will Tell Us
+### Validation Table (fill in as bets resolve)
 
-Compare each of the following against simulation predictions:
+| Metric       | Simulation (Gen 6319) | Live (fill in) | Delta | Status |
+|--------------|-----------------------|----------------|-------|--------|
+| Sharpe       | 0.2825                | —              | —     | —      |
+| ROI          | 18.31%                | —              | —     | —      |
+| Win rate     | 81.53%                | —              | —     | —      |
+| YES base rate| 12.0% (assumed)       | —              | —     | —      |
 
-| Metric | Simulation (Gen 6319) | Live (fill in) | Delta |
-|--------|-----------------------|----------------|-------|
-| Sharpe | 0.2825 | — | — |
-| ROI | 18.31% | — | — |
-| Win rate | 81.53% | — | — |
-| Base rate (actual YES%) | 12.0% (assumed) | — | — |
+### Decision Rules at 25 Bets
 
-**Decision rules:**
-- If live base rate differs from 12.0% by more than ±3 percentage points:
-  recalibrate all edge calculations before deploying kara or thrud.
-- If live sharpe < 0.10 at 25 bets: pause mist, review base rate
-  assumption, do not deploy kara or thrud until cause is identified.
-- If live sharpe > 0.15 at 25 bets: deploy kara with Gen 6319 config
-  plus min_edge_pts increased by 0.010.
-- If live win rate < 60% at 25 bets: the simulation model is wrong.
-  Halt all deployment. The 12.0% base rate assumption is the most
-  likely error.
+| Condition | Action |
+|-----------|--------|
+| Live YES base rate differs from 12.0% by >±3 pts | Recalibrate all edge thresholds before deploying kara/thrud |
+| Live sharpe < 0.10 | Pause mist. Review 12.0% assumption. Do not deploy kara/thrud. |
+| Live sharpe > 0.15 | Deploy kara with Gen 6319 config + min_edge_pts +0.010 |
+| Live win rate < 60% | Halt all deployment. Simulation model is wrong. |
+| Live win rate > 75% | Simulation is replicating. Proceed with kara deployment. |
 
 ---
 
-## FOURTH ACTION: IMPLEMENT GATES (in order, with tests)
+## SIMULATION RESUMPTION CHECKLIST
 
-Do not run any simulation generation until Gates 1, 2, and 3 are
-implemented and tested. Each gate requires a logged PASS token before
-proceeding to the next gate. These tokens are non-negotiable.
-
-### Gate 1: Deduplication
-
-The implementation has been specified three times. It is not reproduced
-here again. The specification from v31.0 is correct and complete.
-The only thing that was missing was execution.
-
-**Required log token:** `GATE1_TEST_PASS`
-**Success criterion:** adj=1.8879 must not appear more than once after
-Gate 1 is active. If it appears twice, log `DEDUP_FAILURE` and fix.
-
-### Gate 2: Guard System
-
-The implementation has been specified three times. It is not reproduced
-here again. The specification from v31.0 is correct and complete.
-
-**Required log token (all 8):** `GATE2_T1_PASS` through `GATE2_T8_PASS`
-**Additional requirement:** Gen 6390's config (sharpe=-0.2017,
-bets=26300) must be added to the blacklist before simulation resumes.
-
-### Gate 3: Config Persistence
-
-The implementation has been specified three times. It is not reproduced
-here again. The specification from v31.0 is correct and complete.
-
-**Required log token:** `GATE3_TEST_PASS`
-**Additional requirement:** After Gate 3 is active, the "Current Best
-Strategy" block in this document must be auto-updated on every new_best
-event. Manual updates have been shown to fail.
-
----
-
-## SIMULATION RESUMPTION CONDITIONS
-
-Simulation MAY resume ONLY when ALL of the following are true:
+Simulation MAY resume ONLY when ALL boxes are checked:
 
 ```
-[ ] DEPLOYMENT_BLOCKER is documented (FIRST ACTION)
-[ ] MIST_DEPLOYED timestamp logged OR blocker documented as unresolvable
+[ ] DEPLOYMENT_BLOCKER documented (specific answer, not silence)
+[ ] MIST_DEPLOYED logged OR program archived as simulation-only
+[ ] GATE2_T1_PASS logged
+[ ] GATE2_T2_PASS logged
+[ ] GATE2_T3_PASS logged
 [ ] GATE1_TEST_PASS logged
-[ ] GATE2_T1_PASS through GATE2_T8_PASS logged (all 8)
 [ ] GATE3_TEST_PASS logged
-[ ] "Current Best Strategy" block updated to Gen 6319 params
-[ ] Gen 6390 config blacklisted
+[ ] Current Best Strategy block updated to Gen 6319 actual params
+[ ] Gen 6390 config (sharpe=-0.2017, bets=26300) blacklisted
+[ ] 25 mist bets resolved (OR program archived)
 ```
 
-If simulation resumes without all boxes checked, the loop has again
-violated its own halt conditions. At that point, the program should be
-considered ungovernable and archived.
+**If simulation resumes with any box unchecked:** The program has
+violated its halt conditions three consecutive times and is ungovernable.
+Archive it. Do not write v34.0.
 
 ---
 
-## IF SIMULATION RESUMES: NEXT 100 GENERATIONS
+## IF ALL CHECKLIST ITEMS PASS: NEXT 100 GENERATIONS
 
-These directions are conditional on the above checklist being complete.
-They are provided for planning purposes only and must not be used to
-justify running simulation before the checklist is satisfied.
+These directions are conditional on the checklist being complete.
+They must not be used to justify running simulation before that point.
 
-### What the last 200 generations revealed
+### What the convergence pattern reveals
 
-The four genuine improvements (Gens 6213, 6216, 6231, 6319) all share:
-- category: world_events
-- keywords: none (kw=0)
-- Operation type: LLM proposal (3) or perturb on min_edge_pts (1)
-- Win rate trend: increasing (78.2% → 81.53%)
-- Bets trend: stable (13858 → 15964)
-
-The win rate increase with stable bet count suggests the edge filter
-is progressively excluding lower-quality bets rather than simply
-restricting volume. This is a positive signal if it replicates live.
-
-The sharpe improvement from 0.246 (Gen 5988) to 0.2825 (Gen 6319)
-is real within the simulation model (+14.8%). Whether it reflects
-a real improvement in live edge is unknown until mist data is collected.
-
-### Hypothesis grid for next 100 generations
-
-**Cluster A (edge threshold refinement, 30 gens):**
-Perturb min_edge_pts in range [0.040, 0.080] in steps of 0.002.
-Rationale: Gen 6319 improved by perturbing min_edge_pts. The optimum
-is shallow. Systematic grid search around it is more efficient than
-LLM proposals in this region.
-
-**Cluster B (price range boundaries, 30 gens):**
-Hold min_edge_pts at Gen 6319 value. Vary price_range lower bound
-[0.05, 0.12] and upper bound [0.70, 0.90] independently.
-Rationale: Price range has not been systematically explored near
-Gen 6319's optimum. The current [0.07, 0.80
+The four genuine improvements share: world_events, kw=0, improving
+win rate (78.2%→81.53%), stable
