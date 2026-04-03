@@ -1,28 +1,143 @@
 ```markdown
-# FREYA Research Program — Prediction Markets (v27.0)
+# FREYA Research Program — Prediction Markets (v28.0)
 
-## Status at Gen 5400
-- **2,400 generations without improvement** (Gens 3001–5400, approximately).
+## Status at Gen 5600
+- **2,600 generations without improvement** (Gens 3001–5600).
   Confirmed ceiling: adj=1.6196, sharpe=0.2458, bets=14510.
-- **Guard system STILL BROKEN.** Gens 5381/5389/5392/5396/5399 (bets ≤ 6)
-  passed through. Gen 5400 (bets=18700, adj=-0.2387) indicates a high-volume
-  negative-sharpe config was run unguarded. This is the 4th documented cycle
-  of the same failure. It will not be fixed by documentation alone.
-- **LLM loop NOT suspended despite v25.0 and v26.0 mandates.**
-  Deterministic grid was not executed. Forced signal injections were not run.
-  The loop continued generating baseline reproductions and degenerate configs.
-- **Config persistence bug UNRESOLVED.** Gens 5397/5398 have adj > 1.3 and
-  bets > 14500 — configs are unknown. Gen 5394 (adj=1.4479) config unknown.
-  These are potentially significant signals that cannot be acted upon.
-- **Live slots: ALL STILL DISABLED.** mist approved in v25.0, re-approved v26.0,
-  still not deployed. Zero live bets placed. This is a critical program failure.
-- **Gen 5400 blacklisted:** adj=-0.2387, sharpe=-0.0349, bets=18700.
-  Config unknown but must be excluded from future runs. Likely cause: removal
-  of price_range upper cap or addition of positive-base-rate category. Investigate.
+- **Deterministic grid (v27.0, Gens 5401–5500) was NEVER EXECUTED.**
+  LLM loop continued running. Gen 5592 (bets=10) confirms guard still broken.
+  Gen 5584 (adj=1.5883) and Gen 5594 (bets=15797) are unrecovered signals.
+- **All three v27.0 blockers remain unimplemented in code.**
+  This is the fifth version cycle of documentation without implementation.
+  v28.0 treats all three as PRE-CONDITIONS, not blockers. See below.
+- **Live slots (mist, kara, thrud): STILL DISABLED. Zero live bets ever placed.**
+- **New recurring signals identified from Gens 5401–5600:**
+  - adj=1.5117, sharpe=0.229, bets=14707 (seen 8+ times — config unknown)
+  - adj=0.4785, sharpe=0.0713, bets=16436 (seen 4+ times — config unknown,
+    likely multi-category or heavily loosened price_range, poor sharpe)
+  - adj=1.5883, sharpe=0.2409, bets=14579 (Gen 5584 — config unknown)
+  - adj=1.0111, sharpe=0.1515, bets=15797 (Gen 5594 — config unknown,
+    HIGH PRIORITY: bets exceed baseline significantly)
 
-## CONFIRMED SIGNALS (Do Not Lose These)
+---
 
-### Signal 1 — BASELINE (Confirmed ×15+)
+## PRE-CONDITIONS FOR GEN 5601
+### (Loop MUST NOT advance until all three pass a live test)
+
+These are no longer called "blockers" because that framing has failed five times.
+They are PRE-CONDITIONS. If they are not met, the loop is frozen, not advisory.
+
+---
+
+### PRE-CONDITION 1: Guard System (Runtime Implementation Required)
+
+Translate the following to actual executable code. Run the eight test cases.
+Log PASS/FAIL for each. Do not proceed until all eight pass.
+
+```python
+MIN_BETS_FLOOR = 501  # 500 is NOT sufficient — strict greater-than
+
+def run_generation(config, gen_number):
+    # STAGE 1: Pre-simulation estimate
+    estimated = estimate_bets(config)
+    if estimated <= 500:
+        log_hard_reject(gen_number, config, "PRE_SIM_REJECT", estimated)
+        return None  # no simulation, no count
+
+    # STAGE 2: Simulation
+    result = simulate(config)
+
+    # STAGE 3: Post-simulation check
+    if result.bets <= 500:
+        log_hard_reject(gen_number, config, "POST_SIM_REJECT", result.bets)
+        return None
+
+    # STAGE 4: Negative sharpe + high volume guard
+    if result.sharpe < -0.01 and result.bets > 10000:
+        log_hard_reject(gen_number, config, "NEG_SHARPE_HIGH_VOL", result)
+        blacklist_config(config)
+        return None
+
+    # STAGE 5: Normal evaluation
+    persist_result(gen_number, config, result)  # always persist before eval
+    evaluate_and_update(result)
+    return result
+```
+
+**Required test cases — all eight must log PASS:**
+```
+Test 1: estimated=0      → PRE_SIM_REJECT    ✓
+Test 2: estimated=499    → PRE_SIM_REJECT    ✓
+Test 3: estimated=500    → PRE_SIM_REJECT    ✓
+Test 4: estimated=501    → passes to sim     ✓
+Test 5: sim bets=0       → POST_SIM_REJECT   ✓
+Test 6: sim bets=500     → POST_SIM_REJECT   ✓
+Test 7: sim bets=501     → accepted          ✓
+Test 8: sim bets=18700, sharpe=-0.035 → NEG_SHARPE_HIGH_VOL + blacklist ✓
+```
+
+---
+
+### PRE-CONDITION 2: LLM Loop Hard Suspension (Runtime Implementation Required)
+
+```python
+SUSPENSION_ACTIVE = True  # Set False only after Gen 5700 grid completes
+SUSPENSION_START = 5601
+SUSPENSION_END = 5700
+
+def get_next_config(gen_number):
+    if SUSPENSION_ACTIVE and SUSPENSION_START <= gen_number <= SUSPENSION_END:
+        # Pull from deterministic grid iterator, not LLM
+        config = deterministic_grid.next()
+        if config is None:
+            # Grid exhausted — log NOP, do not call LLM
+            log_nop(gen_number, "GRID_EXHAUSTED")
+            return None
+        return config
+    return llm_propose()
+```
+
+The deterministic grid iterator is defined in the Generation Plan below.
+It is a finite ordered list. Exhaust it before returning control to LLM.
+
+---
+
+### PRE-CONDITION 3: Config Persistence (Runtime Implementation Required)
+
+```python
+def persist_result(gen, config, result):
+    if result.adj > 1.0 or result.bets > 5000:
+        record = {
+            "gen": gen,
+            "config_hash": hash_config(config),
+            "config": config,          # full config object
+            "bets": result.bets,
+            "sharpe": result.sharpe,
+            "adj_score": result.adj,
+            "roi": result.roi,
+            "win_rate": result.win_rate,
+            "timestamp": now_utc()
+        }
+        write_to_disk(record)
+        verified = read_from_disk(gen)
+        assert verified["config"] == record["config"], "PERSISTENCE VERIFY FAILED"
+        assert verified["adj_score"] == record["adj_score"], "PERSISTENCE VERIFY FAILED"
+```
+
+**One-time test before Gen 5601:**
+Write a synthetic record with gen=0, config=baseline, adj=1.6196.
+Read it back. Assert all fields match. Log "PERSISTENCE_TEST_PASS" or halt.
+
+**Retroactive recovery (one attempt only):**
+- Try RNG seed replay for: Gens 3788, 5387, 5394, 5397, 5398, 5584, 5594.
+- For each: if recovered → log to known-signals registry.
+- If unrecoverable → log to known-lost registry. Do not attempt again.
+
+---
+
+## CONFIRMED SIGNALS
+
+### Signal 1 — BASELINE (Confirmed ×20+)
 ```yaml
 category: world_events
 min_edge_pts: 0.055
@@ -31,195 +146,101 @@ price_range: [0.07, 0.80]
 max_days_to_resolve: 14
 exclude_keywords: []
 ```
-adj=1.6196, sharpe=0.2458, bets=14510. Local maximum. Ceiling confirmed.
+adj=1.6196, sharpe=0.2458, bets=14510. Hard ceiling. Not improvable by
+marginal perturbation. Only systematic grid exploration will exceed this.
 
-### Signal 1b — Gen 3788 (Config Unknown — RECOVERY PRIORITY)
-adj=1.4766, bets=14771. Bets EXCEED baseline. Category likely world_events.
-Hypothesis: looser price_range upper bound OR lower min_liquidity.
+### Signal 2 — Recurring Unknown (High Confidence)
+adj=1.5117, sharpe=0.229, bets=14707. Seen 8+ times in Gens 5401–5600.
+Config is almost certainly world_events with price_range upper bound loosened
+to ~0.85 or min_liquidity reduced to ~40. RECOVERY PRIORITY via Grid A.
 
-### Signal 2 — Gens 5397/5398 (Configs Unknown — RECOVERY PRIORITY)
-Gen 5397: adj=1.3862, sharpe=0.2095, bets=14917 (bets exceed baseline)
-Gen 5398: adj=1.5117, sharpe=0.229, bets=14707 (bets exceed baseline)
-Both exceed baseline bet count. Strongly suggests loosened price_range or
-reduced min_liquidity on world_events. Must be recovered and reproduced.
+### Signal 3 — Gen 5584 (Config Unknown)
+adj=1.5883, sharpe=0.2409, bets=14579. Near-baseline sharpe, comparable bets.
+Likely a minor price_range or liquidity tweak. Recover via Grid A.
 
-### Signal 3 — Gen 5387 (Config Unknown)
-adj=1.5621, sharpe=0.2408, bets=13120. Near-baseline. Lower volume.
+### Signal 4 — Gen 5594 (Config Unknown — HIGH INTEREST)
+adj=1.0111, sharpe=0.1515, bets=15797. Bets significantly exceed baseline.
+Lower sharpe but volume is a new high. May indicate a category or filter
+combination that finds more markets. Recover via Grid C.
 
-### Signal 4 — Gen 5394 (Config Unknown)
-adj=1.4479, sharpe=0.2334, bets=9881. Mid-volume. Worth recovering.
+### Signal 5 — Unknown High-Volume Low-Sharpe
+adj=0.4785, sharpe=0.0713, bets=16436. Seen 4+ times. Very low sharpe.
+Likely a multi-category or heavily loosened config. Low priority but the
+bets count is useful — it shows more volume is achievable. Understand config
+to avoid accidentally optimizing toward it.
 
-### Signal 5 — Gen 4592 (Config Unknown)
-adj=1.213, sharpe=0.2079, bets=6814. Lower priority.
+### Signal 6 — Gen 3788 (Config Unknown — RECOVERY PRIORITY)
+adj=1.4766, bets=14771. Predates the current plateau. Likely world_events
+with minor loosening. Recover via Grid B.
 
-## HARD BLOCKERS — Gen 5401 MUST NOT RUN UNTIL ALL THREE RESOLVED
-
-### BLOCKER A: Guard System Fix (MANDATORY — 4th notice)
-This has been documented in v24.0, v25.0, v26.0 without implementation.
-It will not be documented again. It must be implemented in code.
-
-**Implementation (pseudocode — translate to actual runtime):**
-```python
-MIN_BETS_FLOOR = 501  # Strict: 500 is NOT sufficient
-
-def run_generation(config, gen_number):
-    # PRE-SIMULATION CHECK
-    estimated = estimate_bets(config)  # fast approximation
-    if estimated < MIN_BETS_FLOOR:
-        log_hard_reject(gen_number, config, "PRE_SIM", estimated)
-        return  # do NOT simulate, do NOT count as valid gen
-
-    # RUN SIMULATION
-    result = simulate(config)
-
-    # POST-SIMULATION CHECK
-    if result.bets < MIN_BETS_FLOOR:
-        log_hard_reject(gen_number, config, "POST_SIM", result.bets)
-        return  # do NOT update best, do NOT count as valid gen
-
-    # NEGATIVE SHARPE HIGH-VOLUME GUARD
-    if result.sharpe < -0.01 and result.bets > 10000:
-        log_hard_reject(gen_number, config, "NEG_SHARPE_HIGH_VOL", result)
-        return  # blacklist this config
-
-    # Proceed with normal scoring
-    evaluate_and_update(result)
-```
-
-**Required test cases — ALL must pass before Gen 5401:**
-- estimated_bets=0 → HardReject PRE_SIM ✓
-- estimated_bets=499 → HardReject PRE_SIM ✓
-- estimated_bets=500 → HardReject PRE_SIM ✓
-- estimated_bets=501 → passes to simulation ✓
-- sim returns bets=144 → HardReject POST_SIM ✓
-- sim returns bets=500 → HardReject POST_SIM ✓
-- sim returns bets=501 → accepted ✓
-- sim returns bets=18700, sharpe=-0.035 → HardReject NEG_SHARPE_HIGH_VOL ✓
-
-### BLOCKER B: LLM Loop Hard Suspension
-The LLM proposal function must be structurally disabled for Gens 5401–5500.
-Not advisory. Not documented. Disabled in code.
-
-```python
-SUSPENSION_START = 5401
-SUSPENSION_END = 5500
-
-def get_next_config(gen_number):
-    if SUSPENSION_START <= gen_number <= SUSPENSION_END:
-        raise HardError(f"SUSPENSION VIOLATION at gen {gen_number}. "
-                        f"LLM loop is disabled. Use deterministic grid iterator.")
-    return llm_propose()
-```
-
-The deterministic grid iterator (see Generation Plan below) replaces LLM
-for all gens in this range. If grid is exhausted before gen 5500, pad with
-NOP entries rather than calling LLM.
-
-### BLOCKER C: Config Persistence (MANDATORY — 3rd notice)
-Every simulation result with adj > 1.0 OR bets > 5000 must be written to disk.
-
-```python
-def persist_result(gen, config, result):
-    if result.adj > 1.0 or result.bets > 5000:
-        record = {
-            "gen": gen,
-            "config_hash": hash_config(config),
-            "config": config,  # full config, not just hash
-            "bets": result.bets,
-            "sharpe": result.sharpe,
-            "adj_score": result.adj,
-            "roi": result.roi,
-            "win_rate": result.win_rate,
-            "timestamp": now_utc()
-        }
-        write_to_disk(record)  # not memory-only
-        verify_readback(record)  # read back and assert match
-```
-
-**Retroactive recovery attempt (one-time):**
-- Gens 4796/4797/4799: attempt RNG seed replay if seeds were logged.
-- Gens 5387/5394/5397/5398: attempt RNG seed replay.
-- If unrecoverable: document as permanently lost, add to known-lost registry.
-
-**Do not proceed to Gen 5401 until a test write + readback passes.**
-
-## GENERATION PLAN: Gens 5401–5500 (Deterministic Grid Only)
-
-All 100 generations are fully specified below. Execute in order.
-No LLM proposals. No deviations. Log all results via Blocker C.
+### Known Lost (Unrecoverable — Do Not Re-investigate)
+- Gen 5387: adj=1.5621, sharpe=0.2408, bets=13120
+- Gen 5394: adj=1.4479, sharpe=0.2334, bets=9881
+- Gen 4592: adj=1.213, sharpe=0.2079, bets=6814
+  (Mark permanently lost after single recovery attempt fails)
 
 ---
 
-### GRID A: Gen 5397/5398 Recovery (Gens 5401–5430, 30 gen budget)
-**HIGHEST PRIORITY.** Gens 5397 and 5398 had bets > 14700 with adj > 1.38.
-This is the most likely path to breaking the adj=1.6196 ceiling.
-Hypothesis: world_events with loosened price_range upper bound or lower liquidity.
+## GENERATION PLAN: Gens 5601–5700 (Deterministic Grid Only)
 
-**Sub-grid A1: price_range upper bound expansion (world_events)**
+All 100 slots are fully specified. Execute in order. LLM is disabled.
+Every result with adj > 1.0 OR bets > 5000 must be persisted (Pre-condition 3).
+
+---
+
+### GRID A: Signal 2 + Signal 3 Recovery (Gens 5601–5630, 30 slots)
+**Goal:** Identify the config behind the recurring adj=1.5117/bets=14707 result
+and the Gen 5584 adj=1.5883 result.
+
+**Sub-grid A1: price_range upper bound expansion, baseline everything else**
 ```
 category: world_events
 min_edge_pts: 0.055
 min_liquidity_usd: 50
 max_days_to_resolve: 14
-price_range upper bound: [0.82, 0.83, 0.84, 0.85, 0.86, 0.87, 0.88, 0.90]
-price_range lower bound: 0.07 (fixed)
+price_range lower: 0.07 (fixed)
+price_range upper: [0.81, 0.82, 0.83, 0.84, 0.85, 0.86, 0.87, 0.88, 0.89, 0.90]
 ```
-8 configs × 1 = 8 gens (5401–5408)
+10 gens → slots 5601–5610
+**Stop early trigger:** First result matching adj≈1.5117±0.002 AND bets≈14707±50
+confirms the config. Log "SIGNAL_2_RECOVERED". Continue remaining slots.
 
-**Sub-grid A2: price_range lower bound relaxation (world_events)**
+**Sub-grid A2: price_range lower bound relaxation**
 ```
 category: world_events
 min_edge_pts: 0.055
 min_liquidity_usd: 50
 max_days_to_resolve: 14
-price_range lower bound: [0.06, 0.05, 0.04]
-price_range upper bound: 0.80 (fixed)
+price_range lower: [0.06, 0.05, 0.04, 0.03]
+price_range upper: 0.80 (fixed)
 ```
-3 configs × 1 = 3 gens (5409–5411)
+4 gens → slots 5611–5614
 
-**Sub-grid A3: lower bound + upper bound expansion combinations**
+**Sub-grid A3: combined bounds**
 ```
 category: world_events
 min_edge_pts: 0.055
 min_liquidity_usd: 50
 max_days_to_resolve: 14
 price_range: [[0.06, 0.85], [0.06, 0.90], [0.05, 0.85], [0.05, 0.90],
-              [0.07, 0.85], [0.07, 0.90]]
+              [0.07, 0.85], [0.07, 0.90], [0.06, 0.82], [0.07, 0.82]]
 ```
-6 configs × 1 = 6 gens (5412–5417)
+8 gens → slots 5615–5622
 
-**Sub-grid A4: min_liquidity reduction (world_events, baseline price_range)**
+**Sub-grid A4: min_liquidity reduction**
 ```
 category: world_events
 min_edge_pts: 0.055
-min_liquidity_usd: [40, 35, 30, 25, 20, 15, 10]
+min_liquidity_usd: [40, 35, 30, 25, 20]
 max_days_to_resolve: 14
 price_range: [0.07, 0.80]
 ```
-7 configs × 1 = 7 gens (5418–5424)
+5 gens → slots 5623–5627
 
-**Sub-grid A5: combined — reduced liquidity + expanded price_range**
+**Sub-grid A5: combined liquidity + price_range**
 ```
 category: world_events
 min_edge_pts: 0.055
-min_liquidity_usd: [25, 10]
+min_liquidity_usd: [25, 40]
 max_days_to_resolve: 14
-price_range: [[0.07, 0.85], [0.07, 0.90], [0.06, 0.80]]
-```
-2 × 3 = 6 configs × 1 = 6 gens (5425–5430)
-
-**Recovery trigger for Grid A:**
-If any result has adj > 1.40 AND bets > 14500:
-- Run identical config immediately (next gen slot).
-- If reproduced: log "SIGNAL A CONFIRMED", enable live slot kara on this config.
-- Continue grid (don't abandon remaining slots).
-
----
-
-### GRID B: Gen 3788 Recovery (Gens 5431–5445, 15 gen budget)
-Gen 3788: adj=1.4766, bets=14771. Config unknown. Looser than baseline.
-
-```
-category: world_events
-min_edge_pts: [0.05, 0.055]
-price_range: [[0.07, 0.85], [0.06, 0.80], [0.07, 0
+price_range: [[0.07, 0.85], [0.07,
