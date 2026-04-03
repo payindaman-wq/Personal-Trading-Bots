@@ -6,6 +6,15 @@ Output ONLY the YAML block between ```yaml and ``` markers. No explanation, no t
 
 ---
 
+## ⚠️ REGIME LOCK — READ FIRST
+
+This strategy operates in **Regime A**: 20–50 trades over 2 years, 80–90% win rate, Sharpe ~2.9.
+Any config producing more than 100 trades or less than 20 trades is **wrong** and will be auto-rejected.
+Do NOT increase RSI values above 36.00 — doing so breaks the regime and destroys win rate.
+Do NOT output any value not listed in the allowed values below.
+
+---
+
 ## YOUR ONLY TASK
 
 Change the long entry RSI `value` field.
@@ -32,7 +41,7 @@ The current value is `34.00`.
 - Change ONLY `entry.long.conditions[0].value`
 - Do NOT change any other field
 - Do NOT change any `period_hours` field
-- Do NOT output any value other than the six listed above
+- Do NOT output any value not in the six listed above — not 36.68, not 34.2, not anything else
 - If you are unsure, output `33.50`
 
 ---
@@ -42,12 +51,12 @@ The current value is `34.00`.
 Before outputting, verify each of these exactly:
 
 1. The field I changed is `entry.long.conditions[0].value` — YES/NO
-2. The new value is one of the six listed above (33.00, 33.50, 34.50, 35.00, 35.50, 36.00) — YES/NO
+2. The new value is one of exactly these six: 33.00, 33.50, 34.50, 35.00, 35.50, 36.00 — YES/NO
 3. `entry.short.conditions[0].value` is still `60.64` — YES/NO
 4. `take_profit_pct` is still `3.55` and `stop_loss_pct` is still `2.41` — YES/NO
 5. All `period_hours` values are still: 21, 26, 21, 48 (in order) — YES/NO
 
-If any answer is NO, output the CORRECT OUTPUT EXAMPLE below exactly as written.
+If ANY answer is NO → output the CORRECT OUTPUT EXAMPLE below exactly as written.
 
 ---
 
@@ -99,7 +108,7 @@ risk:
 ---
 
 ## CORRECT OUTPUT EXAMPLE
-(Use this exactly if your self-check fails, substituting only the value field with one of the six allowed values)
+(Use this exactly if your self-check fails)
 
 ```yaml
 name: crossover
@@ -166,72 +175,74 @@ risk:
 
 ---
 
-## EXPECTED BACKTEST RESULTS
+## EXPECTED BACKTEST RESULTS (REGIME A)
 
 A correct output will produce:
-- **20–100 trades** over 2 years
-- **75–90% win rate**
-- **Sharpe 2.5–3.0**
+- **20–50 trades** over 2 years
+- **80–90% win rate**
+- **Sharpe 2.5–3.1**
 
-Results outside these ranges indicate an error in your output. The target is low trade count with high win rate.
+If your output produces >100 trades or <20 trades, it is **wrong**.
+If win rate is below 75%, the value you chose is **too high** — try a lower value next time.
+The goal is selective, high-confidence entries — not frequent trading.
 ```
 
 ---
 
 ## OPERATOR NOTES (not part of LLM prompt — for MIMIR/ODIN system only)
 
-### Pre-Run Checklist (execute before next generation):
+### ⚠️ CRITICAL: Pre-Run Actions Required Before Next Generation
 
-**[CRITICAL] Restore incumbent:**
+**[CRITICAL — DO IMMEDIATELY] Restore Gen 2126 incumbent:**
 ```yaml
+# Restore this as the active incumbent before any further backtesting
 entry.long.conditions[0].value: 34.00
-# All other fields per template above
-# Incumbent Sharpe: 2.9232
+entry.short.conditions[0].value: 60.64
+take_profit_pct: 3.55
+stop_loss_pct: 2.41
+timeout_hours: 200
+period_hours: 21, 26, 21, 48 (in order)
+# Incumbent Sharpe: 2.9232 | Win rate: 90.0% | Trades: 30
 # Source: Gen 2126
+# All other fields per template above
 ```
+The current incumbent (`value: 36.68`, Sharpe 2.44, 477 trades) is a **Regime B artifact caused by a hallucinated RSI value that bypassed validation.** It must not be used as a starting point.
 
-**[CRITICAL] Add backtesting guard:**
+**[CRITICAL — DO IMMEDIATELY] Set and lock trade count bounds:**
 ```python
-# Acceptance logic — add both guards:
-MIN_TRADES = {"day": 250, "swing": 20}
+MIN_TRADES = {"day": 250, "swing": 25}
 MAX_TRADES = {"day": 9999, "swing": 100}
 
-# Reject if:
+# Reject if outside bounds:
 if trades < MIN_TRADES[style] or trades > MAX_TRADES[style]:
-    return "rejected: trade count out of bounds"
+    return f"rejected: trade count {trades} out of bounds [{MIN_TRADES[style]}, {MAX_TRADES[style]}]"
 ```
+- MIN_TRADES[swing] = 25. **Do not change without documented MIMIR sign-off.**
+- Rationale: Gen 2126 had 30 trades (clears 25). Regime B has 345–523 trades (correctly rejected). Any value below 20 allows noisy low-trade configs; any value above 30 would have rejected Gen 2126 itself.
+- History of oscillation (10→20→25→20→25→20) caused the Regime B corruption. This ends now.
 
-**[CRITICAL] Lock MIN_TRADES:**
-- Set `MIN_TRADES[swing] = 20` — do not change again without MIMIR sign-off
-- Rationale: Gen 2126 had 30 trades (clears 20). Values below 20 allow noisy results. Values above 30 would have rejected Gen 2126 itself.
-
-**[CRITICAL] Audit live deployment:**
-- Current live config almost certainly running corrupted Regime B incumbent (`value: 36.68` or similar)
-- Live sprint 50% win rate confirms Regime B fingerprint
-- Swap live bot to Gen 2126 config immediately
-- Expected live improvement: win rate from ~50% → ~80–90%
-
-**[IMPORTANT] Hallucination guard:**
-- Add post-LLM output validation before backtesting:
+**[CRITICAL — DO IMMEDIATELY] Activate hallucination guard:**
 ```python
-ALLOWED_RSI_LONG = {33.00, 33.50, 34.50, 35.00, 35.50, 36.00}
-parsed_value = yaml.safe_load(llm_output)
-rsi_val = parsed_value['entry']['long']['conditions'][0]['value']
-if rsi_val not in ALLOWED_RSI_LONG:
-    return "rejected: hallucinated value"
-```
-- This catches `36.68` and any other non-listed values before they corrupt the incumbent
+ALLOWED_RSI_LONG = {33.00, 33.50, 34.00, 34.50, 35.00, 35.50, 36.00}
 
-**[IMPORTANT] After RSI search completes (all 6 values tested in Regime A):**
-
-Expand search in this priority order:
-1. `take_profit_pct`: test {3.05, 3.30, 3.55, 3.80, 4.05} (±0.25 steps)
-2. `stop_loss_pct`: test {2.11, 2.21, 2.31, 2.41, 2.51, 2.61} (±0.10 steps)
-3. `entry.short.conditions[0].value`: test {58.64, 59.64, 60.64, 61.64, 62.64} (±1.0 steps)
-4. `timeout_hours`: test {150, 175, 200, 225, 250} (±25 steps)
-5. `entry.long.conditions[0].period_hours`: test {14, 18, 21, 24, 28} (RSI period)
-6. `entry.long.conditions[1].period_hours`: test {20, 23, 26, 29, 32} (MACD period)
-
-Each parameter search must:
-- Use a locked, validated Regime A incumbent as starting point
-- Apply the MAX_TRADES=
+def validate_llm_output(llm_output: str, current_incumbent: dict) -> dict | str:
+    try:
+        parsed = yaml.safe_load(llm_output)
+    except Exception:
+        return "rejected: invalid yaml"
+    
+    rsi_val = parsed['entry']['long']['conditions'][0]['value']
+    if rsi_val not in ALLOWED_RSI_LONG:
+        return f"rejected: hallucinated RSI value {rsi_val}"
+    
+    # Validate all locked fields match incumbent
+    locked_fields = {
+        ('entry', 'short', 'conditions', 0, 'value'): 60.64,
+        ('exit', 'take_profit_pct'): 3.55,
+        ('exit', 'stop_loss_pct'): 2.41,
+        ('exit', 'timeout_hours'): 200,
+    }
+    for field_path, expected in locked_fields.items():
+        # (implement path traversal)
+        if get_nested(parsed, field_path) != expected:
+            return f"rejected: locked field {field_
