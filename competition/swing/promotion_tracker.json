@@ -1,0 +1,24 @@
+{
+  "champion": "solveig",
+  "challenger": "autobotswing",
+  "challenger_wins": 1,
+  "champion_wins": 0,
+  "history": [
+    {
+      "sprint": "swing-20260315-1745",
+      "winner": "gudrid",
+      "autobot_rank": null,
+      "autobot_pnl": null,
+      "top3": false,
+      "processed_at": "2026-03-28T06:38"
+    },
+    {
+      "sprint": "swing-20260322-1810",
+      "winner": "solveig",
+      "autobot_rank": 3,
+      "autobot_pnl": 3.2076,
+      "top3": true,
+      "processed_at": "2026-03-29T08:42"
+    }
+  ]
+}

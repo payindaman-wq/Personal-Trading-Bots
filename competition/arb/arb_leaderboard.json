@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-29T21:25:04.557351+00:00",
+  "generated_at": "2026-04-04T02:38:01.333584+00:00",
   "league": "arb",
   "total_sprints": 3,
   "archived": 2,
@@ -41,11 +41,11 @@
       "sprints_entered": 3,
       "sprint_wins": 0,
       "podiums": 1,
-      "cumulative_pnl_usd": 2.06,
-      "total_trades": 3,
-      "total_wins": 1,
-      "overall_win_rate": 33.3,
-      "avg_pnl_pct_per_sprint": 0.0687,
+      "cumulative_pnl_usd": 4.13,
+      "total_trades": 4,
+      "total_wins": 2,
+      "overall_win_rate": 50.0,
+      "avg_pnl_pct_per_sprint": 0.1377,
       "style": "stat arb"
     },
     {
@@ -54,11 +54,11 @@
       "sprints_entered": 3,
       "sprint_wins": 0,
       "podiums": 1,
-      "cumulative_pnl_usd": 1.9,
-      "total_trades": 5,
+      "cumulative_pnl_usd": 1.55,
+      "total_trades": 6,
       "total_wins": 1,
-      "overall_win_rate": 20.0,
-      "avg_pnl_pct_per_sprint": 0.0633,
+      "overall_win_rate": 16.7,
+      "avg_pnl_pct_per_sprint": 0.0517,
       "style": "stat arb"
     },
     {
@@ -132,11 +132,11 @@
       "sprints_entered": 3,
       "sprint_wins": 0,
       "podiums": 0,
-      "cumulative_pnl_usd": -1.7,
-      "total_trades": 1,
-      "total_wins": 0,
-      "overall_win_rate": 0.0,
-      "avg_pnl_pct_per_sprint": -0.0567,
+      "cumulative_pnl_usd": -0.69,
+      "total_trades": 2,
+      "total_wins": 1,
+      "overall_win_rate": 50.0,
+      "avg_pnl_pct_per_sprint": -0.023,
       "style": "stat arb"
     },
     {
@@ -197,11 +197,11 @@
       "sprints_entered": 3,
       "sprint_wins": 0,
       "podiums": 0,
-      "cumulative_pnl_usd": -17.41,
-      "total_trades": 40,
-      "total_wins": 6,
-      "overall_win_rate": 15.0,
-      "avg_pnl_pct_per_sprint": -0.5803,
+      "cumulative_pnl_usd": -17.13,
+      "total_trades": 41,
+      "total_wins": 7,
+      "overall_win_rate": 17.1,
+      "avg_pnl_pct_per_sprint": -0.571,
       "style": "stat arb"
     }
   ]

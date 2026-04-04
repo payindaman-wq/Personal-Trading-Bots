@@ -9,7 +9,7 @@
   "spread_name": "LINK/AAVE",
   "starting_capital": 1000.0,
   "fee_rate": 0.001,
-  "equity": 998.32,
+  "equity": 997.62,
   "peak_equity": 1000.0,
   "positions": [
     {
@@ -21,20 +21,20 @@
       "entry_z": 3.6053,
       "entry_price_a": 8.5261,
       "entry_price_b": 96.772,
-      "size_usd": 349.53,
-      "opened_at": "2026-03-29T10:00:01.500137+00:00"
+      "size_usd": 349.29,
+      "opened_at": "2026-04-04T02:30:01.840408+00:00"
     }
   ],
   "stats": {
-    "total_trades": 2,
+    "total_trades": 3,
     "wins": 0,
-    "losses": 2,
+    "losses": 3,
     "win_rate": 0.0,
-    "total_pnl_usd": -0.63,
-    "total_pnl_pct": -0.063,
-    "total_fees": 1.7491,
-    "max_drawdown_pct": 0.133,
-    "current_equity": 998.32
+    "total_pnl_usd": -0.98,
+    "total_pnl_pct": -0.098,
+    "total_fees": 2.4479,
+    "max_drawdown_pct": 0.203,
+    "current_equity": 997.62
   },
   "closed_trades": [
     {
@@ -68,6 +68,22 @@
       "reason": "STOP",
       "opened_at": "2026-03-29T09:30:01.925162+00:00",
       "closed_at": "2026-03-29T10:00:01.500100+00:00"
+    },
+    {
+      "pair": "LINK/USD/AAVE/USD",
+      "pair_a": "LINK/USD",
+      "pair_b": "AAVE/USD",
+      "direction": "short",
+      "entry_price_a": 8.5261,
+      "entry_price_b": 96.772,
+      "entry_z": 3.605,
+      "exit_z": 3.605,
+      "size_usd": 349.53,
+      "pnl_pct": -0.0,
+      "net_pnl": -0.35,
+      "reason": "STOP",
+      "opened_at": "2026-03-29T10:00:01.500137+00:00",
+      "closed_at": "2026-04-04T02:30:01.840385+00:00"
     }
   ]
 }

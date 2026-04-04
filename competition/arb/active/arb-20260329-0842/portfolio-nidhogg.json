@@ -9,31 +9,36 @@
   "spread_name": "ETH/BTC",
   "starting_capital": 1000.0,
   "fee_rate": 0.001,
-  "equity": 999.7,
+  "equity": 999.98,
   "peak_equity": 1000.0,
-  "positions": [
+  "positions": [],
+  "stats": {
+    "total_trades": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "total_pnl_usd": 0.28,
+    "total_pnl_pct": 0.028,
+    "total_fees": 0.6,
+    "max_drawdown_pct": 0.002,
+    "current_equity": 999.98
+  },
+  "closed_trades": [
     {
-      "pair": "ETH/USD vs BTC/USD",
-      "direction": "long",
+      "pair": "ETH/USD/BTC/USD",
       "pair_a": "ETH/USD",
       "pair_b": "BTC/USD",
-      "entry_ratio": 0.02994206,
-      "entry_z": -1.5333,
+      "direction": "long",
       "entry_price_a": 1999.8,
       "entry_price_b": 66789.0,
+      "entry_z": -1.533,
+      "exit_z": -1.023,
       "size_usd": 300.0,
-      "opened_at": "2026-03-29T13:30:01.956537+00:00"
+      "pnl_pct": 0.387,
+      "net_pnl": 0.28,
+      "reason": "TIMEOUT",
+      "opened_at": "2026-03-29T13:30:01.956537+00:00",
+      "closed_at": "2026-04-04T02:30:01.834422+00:00"
     }
-  ],
-  "stats": {
-    "total_trades": 0,
-    "wins": 0,
-    "losses": 0,
-    "win_rate": 0.0,
-    "total_pnl_usd": 0.0,
-    "total_pnl_pct": 0.0,
-    "total_fees": 0.3,
-    "max_drawdown_pct": 0.0,
-    "current_equity": 999.7
-  }
+  ]
 }

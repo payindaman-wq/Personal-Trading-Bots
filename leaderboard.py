@@ -174,7 +174,7 @@ def aggregate(sprints):
             b = ensure(name)
             b["sprints_entered"] += 1
             rank = r.get("rank", 99)
-            b["points"] += POINTS_MAP.get(rank, 1)
+            b["points"] += POINTS_MAP.get(rank, 1 if rank <= 8 else 0)
             if rank == 1:
                 b["sprint_wins"] += 1
             if rank <= 3:

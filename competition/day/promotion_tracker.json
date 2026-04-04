@@ -1,0 +1,72 @@
+{
+  "champion": "sigurd",
+  "challenger": "autobotday",
+  "challenger_wins": 1,
+  "champion_wins": 4,
+  "history": [
+    {
+      "sprint": "comp-20260326-0910",
+      "winner": "ragnar",
+      "autobot_rank": 3,
+      "autobot_pnl": 0.0,
+      "top3": true,
+      "processed_at": "2026-03-28T06:38"
+    },
+    {
+      "sprint": "comp-20260327-0910",
+      "winner": "sigurd",
+      "autobot_rank": 11,
+      "autobot_pnl": -0.5479,
+      "top3": false,
+      "processed_at": "2026-03-29T09:00"
+    },
+    {
+      "sprint": "comp-20260328-0910",
+      "winner": "gunnar",
+      "autobot_rank": 2,
+      "autobot_pnl": 0.0,
+      "top3": true,
+      "processed_at": "2026-03-30T09:00"
+    },
+    {
+      "sprint": "comp-20260329-0910",
+      "winner": "autobotday",
+      "autobot_rank": 1,
+      "autobot_pnl": 0.0,
+      "top3": true,
+      "processed_at": "2026-03-31T09:00"
+    },
+    {
+      "sprint": "comp-20260330-0900",
+      "winner": "ragnar",
+      "autobot_rank": 4,
+      "autobot_pnl": 0.0,
+      "top3": false,
+      "processed_at": "2026-04-01T09:00"
+    },
+    {
+      "sprint": "comp-20260331-0910",
+      "winner": "lagertha",
+      "autobot_rank": 9,
+      "autobot_pnl": -0.2549,
+      "top3": false,
+      "processed_at": "2026-04-02T09:00"
+    },
+    {
+      "sprint": "comp-20260401-0900",
+      "winner": "leif",
+      "autobot_rank": 5,
+      "autobot_pnl": 0.0,
+      "top3": false,
+      "processed_at": "2026-04-03T09:00"
+    },
+    {
+      "sprint": "comp-20260402-0910",
+      "winner": "autobotday",
+      "autobot_rank": 1,
+      "autobot_pnl": 0.0,
+      "top3": true,
+      "processed_at": "2026-04-04T00:54"
+    }
+  ]
+}
