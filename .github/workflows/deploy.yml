@@ -26,7 +26,8 @@ jobs:
 
             # Ensure /var/www/dashboard/index.html is a symlink to the workspace file
             # (cp would replace the symlink with a regular file on every deploy)
-            ln -sf /root/.openclaw/workspace/dashboard/index.html /var/www/dashboard/index.html
+            cp /root/.openclaw/workspace/dashboard/index.html /var/www/dashboard/index.html
+            chmod 644 /var/www/dashboard/index.html
 
             # Refresh dashboard data
             python3 /root/.openclaw/workspace/dashboard_data.py
