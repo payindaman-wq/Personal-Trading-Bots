@@ -41,8 +41,11 @@ PERMANENTLY FORBIDDEN VALUES — these will be rejected, discarded without backt
 - `36.68` — hallucinated at Gen 2149, destroyed 7000+ generations of work, not on whitelist
 - `36.56` — Regime B artifact, not on whitelist
 - `34.0` — must be written as `34.00`; also this is the current value, do not keep it unchanged
+- `33.5` — must be written as `33.50`
+- `35.5` — must be written as `35.50`
 - Any value with more or fewer decimal places than shown (e.g. `33.5` not allowed — must be `33.50`)
 - Any value not exactly matching one of the six listed above
+- The current value `34.00` itself — you MUST change it
 
 ---
 
@@ -61,8 +64,9 @@ Read each question carefully against the YAML you are about to output. If ANY an
 9. Are `period_hours` values still `21`, `26`, `21`, `48` in that order? YES/NO
 10. Is the new value NOT in the DO NOT USE list above? YES/NO
 11. Is the new value NOT `36.68` and NOT `36.56`? YES/NO
+12. Is the new value written with EXACTLY two decimal places (e.g. `33.50` not `33.5`)? YES/NO
 
-If ALL 11 answers are YES → output your modified YAML.
+If ALL 12 answers are YES → output your modified YAML.
 If ANY answer is NO → output the FALLBACK YAML exactly as written below.
 
 ---
@@ -185,7 +189,7 @@ These are Regime B artifacts. They are WRONG. The values above are the ONLY corr
 ---
 
 ## ⚠️ FOR ODIN/MIMIR SYSTEM — NOT SHOWN TO LLM
-## ⚠️ ALL ITEMS BELOW ARE MANDATORY. IMPLEMENT BEFORE GEN 9601. NO EXCEPTIONS.
+## ⚠️ ALL ITEMS BELOW ARE MANDATORY. IMPLEMENT BEFORE RESUMING. NO EXCEPTIONS.
 
 ---
 
@@ -217,21 +221,13 @@ Sharpe: 2.9232 | Win rate: 90.0% | Trades: 30
 5. Confirm all locked fields match the table above before resuming
 
 **Regime B history (for the record):**
-- Gen 2149: RSI=36.68 hallucinated (not on whitelist). Trade count 30→345, win rate 90%→53.6%. Sharpe collapsed from 2.92 to 0.88. This single event invalidated Gens 2149–9600.
-- Gens 2149–9600: All "improvements" were Regime B optimization — tuning parameters within a broken RSI regime. All results discarded.
+- Gen 2149: RSI=36.68 hallucinated (not on whitelist). Trade count 30→345, win rate 90%→53.6%. Sharpe collapsed from 2.92 to 0.88. This single event invalidated Gens 2149–9800.
+- Gens 2149–9800: All "improvements" were Regime B optimization — tuning parameters within a broken RSI regime. All results discarded.
 - Current incumbent (RSI=36.56, size_pct=15) is the end state of 7,000+ generations of corrupted optimization.
+- The highest Regime B Sharpe achieved was 2.5317 (Gen 5267, 521 trades, 52.0% win rate). This is arithmetically lower than Gen 2126's 2.9232 and represents a fundamentally inferior strategy firing 17× more trades at 58 percentage points lower win rate. Do not treat Regime B Sharpe values as comparable to Regime A values.
 
 ---
 
-### [CRITICAL — IMPLEMENT NOW] STEP 1: ACCEPTANCE FILTER
+### [CRITICAL — IMPLEMENT NOW] STEP 1: ACCEPTANCE FILTER (HARD BOUNDS)
 
-Add these hard bounds. A result MUST pass ALL checks or it is rejected without updating incumbent.
-Log rejected results as `[regime_b_reject trades=X sharpe=Y]`.
-
-```python
-# Regime A bounds — derived from all valid improvements (Gen 303–2126)
-# Valid range: 21–30 trades, 66–90% win rate, Sharpe 1.5–3.5
-# Regime B signature: >50 trades, <60% win rate — reject all
-
-MIN_TRADES = {"day": 250, "swing": 25}
-MAX_TRADES = {"day": 9999, "swing": 50}  # MAX_TRADES=50 is the critical guard that would have blocked Gen 2149
+Add
