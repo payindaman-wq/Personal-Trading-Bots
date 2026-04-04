@@ -523,17 +523,8 @@ def get_sprint_archive():
             scored_at_raw  = final_score.get("scored_at", meta.get("ended_at", ""))
             duration_hours = meta.get("duration_hours", 0)
 
-            # Compute is_complete: True if end time has passed
-            try:
-                from datetime import datetime, timezone, timedelta as _td
-                _utc = timezone.utc
-                _started = datetime.fromisoformat(started_at_raw.replace("Z", "+00:00")) if started_at_raw else None
-                if _started and duration_hours:
-                    is_complete = datetime.now(_utc) >= _started + _td(hours=duration_hours)
-                else:
-                    is_complete = True  # if we can't determine, assume complete
-            except Exception:
-                is_complete = True
+            # Scored sprints (have final_score.json) are always complete
+            is_complete = True
 
             archive.append({
                 "comp_id":        entry_name,
