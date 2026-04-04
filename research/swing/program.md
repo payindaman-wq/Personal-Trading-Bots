@@ -183,8 +183,16 @@ risk:
 | `position.max_open` | `1` | Gen 2126 optimal |
 | `position.fee_rate` | `0.001` | Gen 2126 optimal |
 
-⚠️ WARNING: A previous session changed size_pct to 15, stop_loss_pct to 2.72, and timeout_hours to 196.
-These are Regime B artifacts. They are WRONG. The values above are the ONLY correct values.
+⚠️ WARNING — REGIME B ARTIFACT FIELDS. These values are WRONG. Never use them:
+- `size_pct: 15` — Regime B artifact (correct value is 30)
+- `stop_loss_pct: 2.72` — Regime B artifact (correct value is 2.41)
+- `timeout_hours: 196` — Regime B artifact (correct value is 200)
+- `value: 36.56` (long RSI) — Regime B artifact (hallucination chain from 36.68)
+- `value: 36.68` (long RSI) — the original hallucinated value that caused the collapse
+
+⚠️ REGIME B REMINDER: Any result with trades > 60 is a Regime B signal. Gen 2126 has 30 trades.
+A result with 300-500 trades at 52% win rate is NOT better than 30 trades at 90% win rate,
+even if the raw Sharpe number appears similar. Reject such results immediately.
 
 ---
 
@@ -219,15 +227,5 @@ Sharpe: 2.9232 | Win rate: 90.0% | Trades: 30
 3. Reset `tested_rsi_values` to empty set `{}`
 4. Reset `duplicate_result_cache` to empty set `{}`
 5. Confirm all locked fields match the table above before resuming
-
-**Regime B history (for the record):**
-- Gen 2149: RSI=36.68 hallucinated (not on whitelist). Trade count 30→345, win rate 90%→53.6%. Sharpe collapsed from 2.92 to 0.88. This single event invalidated Gens 2149–9800.
-- Gens 2149–9800: All "improvements" were Regime B optimization — tuning parameters within a broken RSI regime. All results discarded.
-- Current incumbent (RSI=36.56, size_pct=15) is the end state of 7,000+ generations of corrupted optimization.
-- The highest Regime B Sharpe achieved was 2.5317 (Gen 5267, 521 trades, 52.0% win rate). This is arithmetically lower than Gen 2126's 2.9232 and represents a fundamentally inferior strategy firing 17× more trades at 58 percentage points lower win rate. Do not treat Regime B Sharpe values as comparable to Regime A values.
-
----
-
-### [CRITICAL — IMPLEMENT NOW] STEP 1: ACCEPTANCE FILTER (HARD BOUNDS)
-
-Add
+6. Verify MAX_TRADES hard cap is set to 60 for swing style
+7. Verify MIN_
