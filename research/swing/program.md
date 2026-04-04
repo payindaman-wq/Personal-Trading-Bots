@@ -38,7 +38,7 @@ If all values are listed in DO NOT USE above, output `33.50`.
 If unsure which to pick, output `33.50`.
 
 FORBIDDEN VALUES — these will be rejected and waste a generation:
-- 36.68  (not in the allowed list)
+- 36.68  (not in the allowed list — this value broke the strategy at Gen 2149)
 - 34.0   (must be 34.00 — but also this is the current value, do not keep it unchanged)
 - Any value not exactly matching one of the six above
 
@@ -176,33 +176,45 @@ risk:
 ---
 
 ## ⚠️ FOR ODIN/MIMIR SYSTEM — NOT SHOWN TO LLM
+## ⚠️ ALL ITEMS BELOW ARE MANDATORY. IMPLEMENT BEFORE GEN 9401. NO EXCEPTIONS.
 
 ---
 
-### [CRITICAL — EXECUTE BEFORE GEN 9201] INCUMBENT RESTORE
+### [CRITICAL — IMPLEMENT NOW] STEP 0: INCUMBENT RESTORE
 
-The current incumbent (RSI 36.68, Sharpe 2.50, 479 trades) is a Regime B artifact
-caused by a hallucinated RSI value at Gen 2149. It must be replaced immediately.
+**Execute this before any further backtesting.**
 
-**Restore Gen 2126 as incumbent:**
-```yaml
+The current ODIN incumbent is RSI=36.68, Sharpe≈2.50, ~479 trades.
+This is a Regime B artifact. It must be replaced immediately.
+
+The true all-time best is Gen 2126:
+```
 entry.long.conditions[0].value: 34.00
 entry.short.conditions[0].value: 60.64
 take_profit_pct: 3.55
 stop_loss_pct: 2.41
 timeout_hours: 200
 period_hours: [21, 26, 21, 48]
-# Sharpe: 2.9232 | Win rate: 90.0% | Trades: 30
+Sharpe: 2.9232 | Win rate: 90.0% | Trades: 30
 ```
 
-Gen 2126 is the true all-time best. All Gen 2149–9200 "improvements" are improvements
-within a corrupt regime and must be discarded. The research program resumes from Gen 2126.
+**Action:** Force-set ODIN's incumbent to the Gen 2126 config above.
+Do not backtest it again — just set it directly. Log as `[MIMIR_RESTORE gen=2126]`.
+Reset `tested_rsi_values` to empty set.
+Reset `duplicate_result_cache` to empty set.
+The research program resumes from this incumbent.
+
+**Why Gen 2149 was corrupt:** RSI=36.68 is not on the whitelist. It was a hallucinated value
+that the backtester accepted. It produced 345 trades at 53.6% win rate vs. 30 trades at 90%
+win rate for the true best. Every "improvement" from Gen 2149 to Gen 9400 was optimization
+within a broken parameter regime. All Regime B results are discarded.
 
 ---
 
-### [CRITICAL — EXECUTE BEFORE GEN 9201] ACCEPTANCE FILTER
+### [CRITICAL — IMPLEMENT NOW] STEP 1: ACCEPTANCE FILTER
 
-Add these hard bounds. Both must pass or the result is rejected without updating incumbent:
+Add these hard bounds. A result MUST pass both or it is rejected without updating incumbent.
+Log rejected results as `[regime_b_reject]`.
 
 ```python
 MIN_TRADES = {"day": 250, "swing": 25}
@@ -210,85 +222,76 @@ MAX_TRADES = {"day": 9999, "swing": 50}
 
 def accept_result(trades: int, style: str, sharpe: float) -> bool:
     """
-    Returns True only if trade count is within valid bounds.
-    Regime A (good): 21-30 trades, 66-90% win rate, Sharpe 2.3-2.92
-    Regime B (corrupt): 345-530 trades, 50-53% win rate — REJECT ALL
-    MAX_TRADES=50 would have blocked Gen 2149 and prevented entire Regime B.
+    Regime A (valid):   21–50 trades, 66–90% win rate, Sharpe 1.5–3.5
+    Regime B (corrupt): 345–530 trades, 50–53% win rate — REJECT ALL
+    
+    MAX_TRADES=50 is the critical bound. It would have blocked Gen 2149.
+    MIN_TRADES=25 is consistent with all valid Regime A results (21–30 trades).
+    Note: 21 trades at Gen 303 is slightly below 25 — keep MIN_TRADES=25 as floor
+    but do not reject results between 21–24 if Sharpe > 2.0 (log as [near_floor]).
     """
     if trades < MIN_TRADES[style]:
-        return False   # too few — not enough signal
+        return False   # too few — insufficient statistical signal
     if trades > MAX_TRADES[style]:
-        return False   # regime collapse — RSI too loose, reject hard
+        return False   # regime collapse — RSI threshold too loose
     return True
-
-# DO NOT CHANGE MIN_TRADES[swing] AGAIN.
-# Oscillating it between 10-30 provided zero benefit (see audit log).
-# The real filter gap was always MAX_TRADES. It is now fixed at 50.
-# MIN_TRADES[swing] = 25 is correct and consistent with all Regime A results.
 ```
+
+**DO NOT CHANGE MIN_TRADES[swing] AGAIN.**
+The audit log shows it was changed 8 times between Gen 6400–8800 with zero benefit.
+MIN_TRADES=25 is final. The oscillation was a distraction from the real problem (no MAX_TRADES).
+MAX_TRADES=50 is now enforced. It is also final.
 
 ---
 
-### [CRITICAL — EXECUTE BEFORE GEN 9201] RSI WHITELIST VALIDATOR
+### [CRITICAL — IMPLEMENT NOW] STEP 2: RSI WHITELIST VALIDATOR
 
-Run this check before every backtest. If it fails, discard without backtesting,
-log as [invalid_rsi], and do NOT count as a generation toward the total:
+Run this check BEFORE every backtest. If validation fails:
+- Discard the config without backtesting
+- Log as `[invalid_rsi value=X]`
+- Do NOT count as a generation toward the total
+- Do NOT update any cache or incumbent
 
 ```python
 ALLOWED_RSI_LONG = {"33.00", "33.50", "34.00", "34.50", "35.00", "35.50", "36.00"}
 
 def validate_config(yaml_str: str) -> bool:
-    """
-    Prevents hallucinated values like 36.68 from ever reaching the backtester.
-    Gen 2149's RSI=36.68 caused the entire Regime B collapse. This stops recurrence.
-    """
     raw = extract_field(yaml_str, "entry.long.conditions[0].value")
-    normalized = str(round(float(raw), 2))
+    try:
+        normalized = f"{float(raw):.2f}"
+    except (ValueError, TypeError):
+        log(f"[invalid_rsi] Could not parse value: {raw}")
+        return False
     if normalized not in ALLOWED_RSI_LONG:
         log(f"[invalid_rsi] Rejected value: {raw} (normalized: {normalized})")
         return False
     return True
 ```
 
----
-
-### [CRITICAL — EXECUTE BEFORE GEN 9201] DEDUPLICATION CACHE
-
-The last 20 gens show sharpe=-1.3913 / trades=166 appearing 8 times.
-The LLM is looping. Add a session cache and inject tested values into the prompt:
-
+**Also validate these locked fields before every backtest:**
 ```python
-tested_rsi_values: set[str] = set()   # reset each time incumbent changes
-duplicate_result_cache: set[tuple] = set()  # (sharpe_rounded, trades) pairs
-
-def get_prompt(current_value: str) -> str:
-    already_tested = ", ".join(sorted(tested_rsi_values)) or "none yet"
-    return PROMPT_TEMPLATE.replace("{already_tested}", already_tested)
-
-def record_result(rsi_value: str, sharpe: float, trades: int):
-    tested_rsi_values.add(rsi_value)
-    result_key = (round(sharpe, 4), trades)
-    if result_key in duplicate_result_cache:
-        log(f"[duplicate] RSI={rsi_value} produced duplicate result {result_key} — skipping")
-    duplicate_result_cache.add(result_key)
-
-# When all 6 RSI values are tested, pivot to next parameter (see NEXT PHASE below).
-def rsi_search_exhausted() -> bool:
-    candidates = {"33.00", "33.50", "34.50", "35.00", "35.50", "36.00"}
-    return candidates.issubset(tested_rsi_values)
+def validate_locked_fields(yaml_str: str) -> bool:
+    checks = {
+        "entry.short.conditions[0].value": "60.64",
+        "exit.take_profit_pct": "3.55",
+        "exit.stop_loss_pct": "2.41",
+        "exit.timeout_hours": "200",
+    }
+    for field, expected in checks.items():
+        actual = extract_field(yaml_str, field)
+        if f"{float(actual):.2f}" != expected and str(actual) != expected:
+            log(f"[locked_field_violation] {field}={actual}, expected {expected}")
+            return False
+    return True
 ```
 
 ---
 
-### [ARCHITECTURE] Why Regime A is correct and Regime B is corrupt
+### [CRITICAL — IMPLEMENT NOW] STEP 3: DEDUPLICATION CACHE
 
-| Metric | Regime A (Gen 303–2126) | Regime B (Gen 2149–9200) |
-|--------|------------------------|--------------------------|
-| RSI long threshold | 33–35 range | 36.68 (hallucinated) |
-| Trade count | 21–30 | 345–530 |
-| Win rate | 66–90% | 50–53% |
-| Best Sharpe | **2.9232** | 2.5324 |
-| Nature | Rare, high-confidence entries | Noise-trading at scale |
-| Status | **TRUE BEST** | **DISCARD ALL** |
+The last 20 gens show sharpe=-1.3913/trades=166 appearing ~13 times.
+This loop MUST be broken immediately. Implement the cache NOW — it is not optional.
 
-Regime
+```python
+tested_rsi_values: set[str] = set()       # reset when incumbent changes
+duplicate_result_cache: set[
