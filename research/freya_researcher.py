@@ -508,12 +508,6 @@ def main():
                 log(f"  Gen {gen}: NEW BEST adj={score:.4f} sharpe={metrics['sharpe']:.4f} "
                     f"roi={metrics['roi_pct']:.1f}% win={metrics['win_rate']:.1f}% "
                     f"n={metrics['n_bets']} [{mut_type}]")
-                tg_send(
-                    f"<b>FREYA</b> Gen {gen}: new best\n"
-                    f"adj={score:.4f} sharpe={metrics['sharpe']:.4f} "
-                    f"roi={metrics['roi_pct']:.1f}% n={metrics['n_bets']}\n"
-                    f"cat={candidate.get('category')} edge={candidate.get('min_edge_pts')}"
-                )
             else:
                 update_population(population, candidate, score)
                 append_result(gen, metrics, "no_improvement", desc)
