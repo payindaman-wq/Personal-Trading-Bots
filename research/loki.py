@@ -40,9 +40,9 @@ PM_PERSONAS = {
     "world_events": "You are a global events analyst specializing in predicting world news outcomes.",
 }
 
-ANTHROPIC_SECRET = "/root/.openclaw/secrets/anthropic.json"
-ANTHROPIC_MODEL  = "claude-haiku-4-5-20251001"
-ANTHROPIC_URL    = "https://api.anthropic.com/v1/messages"
+GEMINI_SECRET = "/root/.openclaw/secrets/gemini.json"
+GEMINI_MODEL  = "gemini-2.5-flash-lite"
+GEMINI_BASE   = "https://generativelanguage.googleapis.com/v1beta/models"
 
 TG_BOT_TOKEN     = "8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
 TG_CHAT_ID       = "8154505910"
@@ -97,30 +97,23 @@ def tg_send(text):
         print(f"  [loki] TG send failed: {e}")
 
 
-def load_anthropic_key():
-    with open(ANTHROPIC_SECRET) as f:
-        return json.load(f)["anthropic_api_key"]
+def load_gemini_key():
+    with open(GEMINI_SECRET) as f:
+        data = json.load(f)
+    return data.get("gemini_api_key") or data["gemini_api_keys"][0]
 
 
-def call_haiku(prompt):
-    api_key = load_anthropic_key()
+def call_gemini(prompt):
+    api_key = load_gemini_key()
+    url = f"{GEMINI_BASE}/{GEMINI_MODEL}:generateContent?key={api_key}"
     payload = json.dumps({
-        "model":      ANTHROPIC_MODEL,
-        "max_tokens": 500,
-        "messages":   [{"role": "user", "content": prompt}],
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {"maxOutputTokens": 500, "temperature": 0.1},
     }).encode()
-    req = urllib.request.Request(
-        ANTHROPIC_URL,
-        data=payload,
-        headers={
-            "Content-Type":      "application/json",
-            "x-api-key":         api_key,
-            "anthropic-version": "2023-06-01",
-        },
-    )
+    req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=30) as r:
         data = json.loads(r.read())
-    return data["content"][0]["text"].strip()
+    return data["candidates"][0]["content"]["parts"][0]["text"].strip()
 
 
 # ── State tracking ─────────────────────────────────────────────────────────────
@@ -251,13 +244,13 @@ def classify_code_change(analysis_text, league):
         f'{{"type": "structural", "description": "brief description of structural change needed"}}'
     )
     try:
-        response = call_haiku(prompt)
+        response = call_gemini(prompt)
         match = re.search(r'\{[^{}]*\}', response, re.DOTALL)
         if match:
             return json.loads(match.group())
         return {"type": "none"}
     except Exception as e:
-        print(f"  [loki] Haiku classification error: {e}")
+        print(f"  [loki] Gemini classification error: {e}")
         return {"type": "none"}
 
 
@@ -317,13 +310,13 @@ def classify_freya_change(analysis_text):
         '{"type": "structural", "description": "brief description"}'
     )
     try:
-        response = call_haiku(prompt)
+        response = call_gemini(prompt)
         match = re.search(r'\{[^{}]*\}', response, re.DOTALL)
         if match:
             return json.loads(match.group())
         return {"type": "none"}
     except Exception as e:
-        print(f"  [loki] Haiku PM classification error: {e}")
+        print(f"  [loki] Gemini PM classification error: {e}")
         return {"type": "none"}
 
 
