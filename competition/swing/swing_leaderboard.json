@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-04-05T03:35:01.693100+00:00",
+  "generated_at": "2026-04-05T23:05:01.324180+00:00",
   "league": "swing",
-  "total_sprints": 4,
-  "archived": 3,
-  "active_sprint": "swing-20260329-0842",
+  "total_sprints": 5,
+  "archived": 4,
+  "active_sprint": "swing-20260405-0900",
   "cycle": 1,
   "sprint_in_cycle": 4,
   "sprints_per_cycle": 4,
@@ -11,16 +11,16 @@
   "rankings": [
     {
       "bot": "orm",
-      "sprints_entered": 4,
-      "sprint_wins": 1,
-      "podiums": 1,
-      "points": 10,
-      "cumulative_pnl_usd": 12.56,
+      "sprints_entered": 5,
+      "sprint_wins": 2,
+      "podiums": 2,
+      "points": 18,
+      "cumulative_pnl_usd": 4.28,
       "cumulative_pnl_pct": 10.802,
-      "total_trades": 9,
+      "total_trades": 11,
       "total_wins": 3,
       "total_losses": 3,
-      "total_fees_usd": 1.5729,
+      "total_fees_usd": 0.8304,
       "worst_drawdown_pct": 0.9403,
       "best_sprint_pnl_pct": 8.7131,
       "worst_sprint_pnl_pct": -3.1104,
@@ -55,28 +55,37 @@
         {
           "comp_id": "swing-20260329-0842",
           "rank": 1,
-          "pnl_usd": 10.87,
+          "pnl_usd": 2.59,
           "pnl_pct": 5.1993,
-          "trades": 2,
+          "trades": 4,
           "win_rate": 50.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "swing-20260405-0900",
+          "rank": 5,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
           "in_progress": true
         }
       ],
-      "overall_win_rate": 33.3,
-      "avg_pnl_pct_per_sprint": 2.7005
+      "overall_win_rate": 27.3,
+      "avg_pnl_pct_per_sprint": 2.1604
     },
     {
       "bot": "runa",
-      "sprints_entered": 4,
+      "sprints_entered": 5,
       "sprint_wins": 0,
-      "podiums": 1,
-      "points": 7,
-      "cumulative_pnl_usd": 8.49,
+      "podiums": 2,
+      "points": 12,
+      "cumulative_pnl_usd": 3.8,
       "cumulative_pnl_pct": 7.2432,
-      "total_trades": 7,
+      "total_trades": 8,
       "total_wins": 2,
       "total_losses": 2,
-      "total_fees_usd": 1.7463,
+      "total_fees_usd": 0.395,
       "worst_drawdown_pct": 1.082,
       "best_sprint_pnl_pct": 5.1332,
       "worst_sprint_pnl_pct": 0.0,
@@ -110,123 +119,38 @@
         },
         {
           "comp_id": "swing-20260329-0842",
-          "rank": 3,
-          "pnl_usd": 5.73,
-          "pnl_pct": 2.11,
-          "trades": 2,
-          "win_rate": 50.0,
-          "in_progress": true
-        }
-      ],
-      "overall_win_rate": 28.6,
-      "avg_pnl_pct_per_sprint": 1.8108
-    },
-    {
-      "bot": "autobotswing",
-      "sprints_entered": 2,
-      "sprint_wins": 0,
-      "podiums": 1,
-      "points": 3,
-      "cumulative_pnl_usd": 7.89,
-      "cumulative_pnl_pct": 8.1795,
-      "total_trades": 6,
-      "total_wins": 3,
-      "total_losses": 2,
-      "total_fees_usd": 1.3218,
-      "worst_drawdown_pct": 0.986,
-      "best_sprint_pnl_pct": 4.9719,
-      "worst_sprint_pnl_pct": 3.2076,
-      "sprint_log": [
-        {
-          "comp_id": "swing-20260322-1810",
-          "rank": 3,
-          "pnl_usd": 0.91,
-          "pnl_pct": 3.2076,
-          "trades": 3,
-          "win_rate": 50.0,
-          "in_progress": false
-        },
-        {
-          "comp_id": "swing-20260329-0842",
           "rank": 2,
-          "pnl_usd": 6.98,
-          "pnl_pct": 4.9719,
+          "pnl_usd": 1.04,
+          "pnl_pct": 2.11,
           "trades": 3,
-          "win_rate": 66.7,
-          "in_progress": true
-        }
-      ],
-      "overall_win_rate": 50.0,
-      "avg_pnl_pct_per_sprint": 4.0898
-    },
-    {
-      "bot": "solveig",
-      "sprints_entered": 4,
-      "sprint_wins": 1,
-      "podiums": 2,
-      "points": 12,
-      "cumulative_pnl_usd": -2.73,
-      "cumulative_pnl_pct": -3.7218,
-      "total_trades": 19,
-      "total_wins": 5,
-      "total_losses": 12,
-      "total_fees_usd": 3.6732,
-      "worst_drawdown_pct": 4.224,
-      "best_sprint_pnl_pct": 6.6541,
-      "worst_sprint_pnl_pct": -15.7441,
-      "sprint_log": [
-        {
-          "comp_id": "swing-20260308-0854",
-          "rank": 3,
-          "pnl_usd": 1.28,
-          "pnl_pct": 5.3214,
-          "trades": 2,
           "win_rate": 50.0,
           "in_progress": false
         },
         {
-          "comp_id": "swing-20260315-1745",
-          "rank": 9,
-          "pnl_usd": -4.05,
-          "pnl_pct": -15.7441,
-          "trades": 7,
-          "win_rate": 0.0,
-          "in_progress": false
-        },
-        {
-          "comp_id": "swing-20260322-1810",
+          "comp_id": "swing-20260405-0900",
           "rank": 1,
-          "pnl_usd": 1.62,
-          "pnl_pct": 6.6541,
-          "trades": 4,
-          "win_rate": 100.0,
-          "in_progress": false
-        },
-        {
-          "comp_id": "swing-20260329-0842",
-          "rank": 4,
-          "pnl_usd": -1.58,
-          "pnl_pct": 0.0468,
-          "trades": 6,
-          "win_rate": 33.3,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
           "in_progress": true
         }
       ],
-      "overall_win_rate": 26.3,
-      "avg_pnl_pct_per_sprint": -0.9304
+      "overall_win_rate": 25.0,
+      "avg_pnl_pct_per_sprint": 1.4486
     },
     {
       "bot": "valdis",
-      "sprints_entered": 4,
+      "sprints_entered": 5,
       "sprint_wins": 0,
       "podiums": 2,
-      "points": 9,
-      "cumulative_pnl_usd": -7.23,
+      "points": 10,
+      "cumulative_pnl_usd": 2.91,
       "cumulative_pnl_pct": -5.1578,
-      "total_trades": 8,
+      "total_trades": 9,
       "total_wins": 2,
       "total_losses": 4,
-      "total_fees_usd": 1.7474,
+      "total_fees_usd": 1.0509,
       "worst_drawdown_pct": 1.442,
       "best_sprint_pnl_pct": 6.335,
       "worst_sprint_pnl_pct": -3.9211,
@@ -260,85 +184,38 @@
         },
         {
           "comp_id": "swing-20260329-0842",
-          "rank": 6,
-          "pnl_usd": -10.8,
-          "pnl_pct": -3.6596,
-          "trades": 2,
-          "win_rate": 50.0,
-          "in_progress": true
-        }
-      ],
-      "overall_win_rate": 25.0,
-      "avg_pnl_pct_per_sprint": -1.2894
-    },
-    {
-      "bot": "gudrid",
-      "sprints_entered": 4,
-      "sprint_wins": 1,
-      "podiums": 1,
-      "points": 10,
-      "cumulative_pnl_usd": -7.25,
-      "cumulative_pnl_pct": -12.0596,
-      "total_trades": 18,
-      "total_wins": 4,
-      "total_losses": 10,
-      "total_fees_usd": 2.7679,
-      "worst_drawdown_pct": 2.44,
-      "best_sprint_pnl_pct": 6.8959,
-      "worst_sprint_pnl_pct": -11.5588,
-      "sprint_log": [
-        {
-          "comp_id": "swing-20260308-0854",
-          "rank": 8,
-          "pnl_usd": -0.77,
-          "pnl_pct": -3.3401,
-          "trades": 4,
-          "win_rate": 50.0,
-          "in_progress": false
-        },
-        {
-          "comp_id": "swing-20260315-1745",
-          "rank": 1,
-          "pnl_usd": 2.5,
-          "pnl_pct": 6.8959,
-          "trades": 4,
-          "win_rate": 50.0,
-          "in_progress": false
-        },
-        {
-          "comp_id": "swing-20260322-1810",
-          "rank": 7,
-          "pnl_usd": -0.79,
-          "pnl_pct": -11.5588,
-          "trades": 5,
-          "win_rate": 0.0,
-          "in_progress": false
-        },
-        {
-          "comp_id": "swing-20260329-0842",
           "rank": 5,
-          "pnl_usd": -8.19,
-          "pnl_pct": -4.0566,
-          "trades": 5,
-          "win_rate": 20.0,
+          "pnl_usd": -0.66,
+          "pnl_pct": -3.6596,
+          "trades": 3,
+          "win_rate": 50.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "swing-20260405-0900",
+          "rank": 9,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
           "in_progress": true
         }
       ],
       "overall_win_rate": 22.2,
-      "avg_pnl_pct_per_sprint": -3.0149
+      "avg_pnl_pct_per_sprint": -1.0316
     },
     {
       "bot": "egil",
-      "sprints_entered": 4,
+      "sprints_entered": 5,
       "sprint_wins": 0,
       "podiums": 1,
-      "points": 7,
-      "cumulative_pnl_usd": -9.21,
+      "points": 8,
+      "cumulative_pnl_usd": 1.63,
       "cumulative_pnl_pct": -4.7874,
-      "total_trades": 9,
+      "total_trades": 11,
       "total_wins": 1,
       "total_losses": 5,
-      "total_fees_usd": 1.8257,
+      "total_fees_usd": 0.981,
       "worst_drawdown_pct": 1.219,
       "best_sprint_pnl_pct": 6.3056,
       "worst_sprint_pnl_pct": -4.4754,
@@ -373,30 +250,216 @@
         {
           "comp_id": "swing-20260329-0842",
           "rank": 7,
-          "pnl_usd": -11.69,
+          "pnl_usd": -0.85,
           "pnl_pct": -4.4754,
-          "trades": 2,
+          "trades": 4,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "swing-20260405-0900",
+          "rank": 6,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
           "win_rate": 0.0,
           "in_progress": true
         }
       ],
-      "overall_win_rate": 11.1,
-      "avg_pnl_pct_per_sprint": -1.1968
+      "overall_win_rate": 9.1,
+      "avg_pnl_pct_per_sprint": -0.9575
+    },
+    {
+      "bot": "autobotswing",
+      "sprints_entered": 3,
+      "sprint_wins": 0,
+      "podiums": 2,
+      "points": 6,
+      "cumulative_pnl_usd": 1.37,
+      "cumulative_pnl_pct": 8.1795,
+      "total_trades": 7,
+      "total_wins": 3,
+      "total_losses": 2,
+      "total_fees_usd": 0.5383,
+      "worst_drawdown_pct": 0.986,
+      "best_sprint_pnl_pct": 4.9719,
+      "worst_sprint_pnl_pct": 0.0,
+      "sprint_log": [
+        {
+          "comp_id": "swing-20260322-1810",
+          "rank": 3,
+          "pnl_usd": 0.91,
+          "pnl_pct": 3.2076,
+          "trades": 3,
+          "win_rate": 50.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "swing-20260329-0842",
+          "rank": 3,
+          "pnl_usd": 0.46,
+          "pnl_pct": 4.9719,
+          "trades": 4,
+          "win_rate": 66.7,
+          "in_progress": false
+        },
+        {
+          "comp_id": "swing-20260405-0900",
+          "rank": 3,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": true
+        }
+      ],
+      "overall_win_rate": 42.9,
+      "avg_pnl_pct_per_sprint": 2.7265
+    },
+    {
+      "bot": "gudrid",
+      "sprints_entered": 5,
+      "sprint_wins": 1,
+      "podiums": 1,
+      "points": 11,
+      "cumulative_pnl_usd": 0.15,
+      "cumulative_pnl_pct": -12.0596,
+      "total_trades": 21,
+      "total_wins": 4,
+      "total_losses": 10,
+      "total_fees_usd": 1.2105,
+      "worst_drawdown_pct": 2.44,
+      "best_sprint_pnl_pct": 6.8959,
+      "worst_sprint_pnl_pct": -11.5588,
+      "sprint_log": [
+        {
+          "comp_id": "swing-20260308-0854",
+          "rank": 8,
+          "pnl_usd": -0.77,
+          "pnl_pct": -3.3401,
+          "trades": 4,
+          "win_rate": 50.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "swing-20260315-1745",
+          "rank": 1,
+          "pnl_usd": 2.5,
+          "pnl_pct": 6.8959,
+          "trades": 4,
+          "win_rate": 50.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "swing-20260322-1810",
+          "rank": 7,
+          "pnl_usd": -0.79,
+          "pnl_pct": -11.5588,
+          "trades": 5,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "swing-20260329-0842",
+          "rank": 6,
+          "pnl_usd": -0.79,
+          "pnl_pct": -4.0566,
+          "trades": 8,
+          "win_rate": 20.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "swing-20260405-0900",
+          "rank": 8,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": true
+        }
+      ],
+      "overall_win_rate": 19.0,
+      "avg_pnl_pct_per_sprint": -2.4119
+    },
+    {
+      "bot": "solveig",
+      "sprints_entered": 5,
+      "sprint_wins": 1,
+      "podiums": 2,
+      "points": 13,
+      "cumulative_pnl_usd": -0.92,
+      "cumulative_pnl_pct": -3.7218,
+      "total_trades": 21,
+      "total_wins": 5,
+      "total_losses": 12,
+      "total_fees_usd": 1.2678,
+      "worst_drawdown_pct": 4.224,
+      "best_sprint_pnl_pct": 6.6541,
+      "worst_sprint_pnl_pct": -15.7441,
+      "sprint_log": [
+        {
+          "comp_id": "swing-20260308-0854",
+          "rank": 3,
+          "pnl_usd": 1.28,
+          "pnl_pct": 5.3214,
+          "trades": 2,
+          "win_rate": 50.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "swing-20260315-1745",
+          "rank": 9,
+          "pnl_usd": -4.05,
+          "pnl_pct": -15.7441,
+          "trades": 7,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "swing-20260322-1810",
+          "rank": 1,
+          "pnl_usd": 1.62,
+          "pnl_pct": 6.6541,
+          "trades": 4,
+          "win_rate": 100.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "swing-20260329-0842",
+          "rank": 4,
+          "pnl_usd": 0.23,
+          "pnl_pct": 0.0468,
+          "trades": 8,
+          "win_rate": 33.3,
+          "in_progress": false
+        },
+        {
+          "comp_id": "swing-20260405-0900",
+          "rank": 4,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": true
+        }
+      ],
+      "overall_win_rate": 23.8,
+      "avg_pnl_pct_per_sprint": -0.7444
     },
     {
       "bot": "thyra",
-      "sprints_entered": 4,
+      "sprints_entered": 5,
       "sprint_wins": 0,
       "podiums": 0,
-      "points": 3,
-      "cumulative_pnl_usd": -20.21,
-      "cumulative_pnl_pct": -36.4037,
-      "total_trades": 17,
+      "points": 4,
+      "cumulative_pnl_usd": -5.3,
+      "cumulative_pnl_pct": -38.6746,
+      "total_trades": 19,
       "total_wins": 2,
-      "total_losses": 10,
-      "total_fees_usd": 2.2058,
+      "total_losses": 11,
+      "total_fees_usd": 0.8346,
       "worst_drawdown_pct": 2.733,
-      "best_sprint_pnl_pct": -6.7106,
+      "best_sprint_pnl_pct": 0.0,
       "worst_sprint_pnl_pct": -13.1487,
       "sprint_log": [
         {
@@ -429,30 +492,39 @@
         {
           "comp_id": "swing-20260329-0842",
           "rank": 8,
-          "pnl_usd": -17.08,
-          "pnl_pct": -8.2159,
-          "trades": 4,
-          "win_rate": 25.0,
+          "pnl_usd": -2.17,
+          "pnl_pct": -10.4868,
+          "trades": 6,
+          "win_rate": 20.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "swing-20260405-0900",
+          "rank": 2,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
           "in_progress": true
         }
       ],
-      "overall_win_rate": 11.8,
-      "avg_pnl_pct_per_sprint": -9.1009
+      "overall_win_rate": 10.5,
+      "avg_pnl_pct_per_sprint": -7.7349
     },
     {
       "bot": "halfdan",
-      "sprints_entered": 4,
+      "sprints_entered": 5,
       "sprint_wins": 0,
       "podiums": 0,
-      "points": 3,
-      "cumulative_pnl_usd": -26.54,
+      "points": 4,
+      "cumulative_pnl_usd": -5.31,
       "cumulative_pnl_pct": -30.9976,
-      "total_trades": 15,
+      "total_trades": 16,
       "total_wins": 1,
       "total_losses": 8,
-      "total_fees_usd": 2.1849,
+      "total_fees_usd": 1.1211,
       "worst_drawdown_pct": 2.5,
-      "best_sprint_pnl_pct": -4.2902,
+      "best_sprint_pnl_pct": 0.0,
       "worst_sprint_pnl_pct": -9.261,
       "sprint_log": [
         {
@@ -485,28 +557,37 @@
         {
           "comp_id": "swing-20260329-0842",
           "rank": 9,
-          "pnl_usd": -23.56,
+          "pnl_usd": -2.33,
           "pnl_pct": -9.1845,
-          "trades": 3,
+          "trades": 4,
           "win_rate": 33.3,
+          "in_progress": false
+        },
+        {
+          "comp_id": "swing-20260405-0900",
+          "rank": 7,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
           "in_progress": true
         }
       ],
-      "overall_win_rate": 6.7,
-      "avg_pnl_pct_per_sprint": -7.7494
+      "overall_win_rate": 6.2,
+      "avg_pnl_pct_per_sprint": -6.1995
     },
     {
       "bot": "ivar",
-      "sprints_entered": 4,
+      "sprints_entered": 5,
       "sprint_wins": 0,
       "podiums": 0,
-      "points": 3,
-      "cumulative_pnl_usd": -37.83,
+      "points": 4,
+      "cumulative_pnl_usd": -5.57,
       "cumulative_pnl_pct": -38.6255,
-      "total_trades": 15,
+      "total_trades": 18,
       "total_wins": 0,
       "total_losses": 7,
-      "total_fees_usd": 2.2283,
+      "total_fees_usd": 1.4219,
       "worst_drawdown_pct": 4.712,
       "best_sprint_pnl_pct": 0.0,
       "worst_sprint_pnl_pct": -17.2803,
@@ -541,15 +622,24 @@
         {
           "comp_id": "swing-20260329-0842",
           "rank": 10,
-          "pnl_usd": -34.9,
+          "pnl_usd": -2.64,
           "pnl_pct": -17.2803,
-          "trades": 3,
+          "trades": 6,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "swing-20260405-0900",
+          "rank": 10,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
           "win_rate": 0.0,
           "in_progress": true
         }
       ],
       "overall_win_rate": 0.0,
-      "avg_pnl_pct_per_sprint": -9.6564
+      "avg_pnl_pct_per_sprint": -7.7251
     }
   ]
 }
