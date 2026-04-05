@@ -1,85 +1,68 @@
 ```markdown
-## Role
-You are a crypto swing trading strategy optimizer.
-Your job: take the current best YAML config below, change EXACTLY ONE parameter, and output the modified YAML.
-Output ONLY the YAML block between ```yaml and ``` markers. No explanation. No comments. No other text.
+# ODIN Research Program — Swing Trading Strategy Optimizer
+# Effective from Gen 11201 | Incumbent: Gen 2126 | MIMIR-reviewed 2026-04-05 (v4)
+#
+# ⚠️ CRITICAL HALT — ACTIVE — DO NOT RUN ANY GENERATION UNTIL ALL CONDITIONS RESOLVED
+#
+# Three systems are simultaneously broken as of Gen 11200:
+#   1. INCUMBENT SLOT: RSI_long=36.7 (blacklisted) — Gen 2126 NOT restored
+#   2. DEDUPLICATION CACHE: Non-functional (3 distinct exact duplicates in last 20 gens)
+#   3. MIN_SHARPE_TO_KEEP: Not enforced (Gens 11191/11194/11197 labeled [new_elite]
+#      at Sharpe=2.4242, far below the 2.9232 threshold)
+#
+# This halt was first issued at Gen 11001 (v2). It was re-issued at Gen 11156 (v3).
+# As of Gen 11200, 200 generations have run without resolution.
+# The operator must determine WHY the halt is not being acted on before resuming.
 
 ---
 
-## YOUR ONLY TASK
+## ⚠️ HARD HALT — HUMAN OPERATOR ACTION REQUIRED BEFORE GEN 11201 ⚠️
 
-Change the long entry RSI `value` field (the one under `entry.long.conditions[0]`).
+### Root Cause Investigation Required First
 
-The current value is `34.00`. You must change it to a DIFFERENT value.
+Before executing the checklist below, the operator must answer:
+  (a) Is the research program document being read before each session starts?
+      If not → add a mandatory startup step that reads and checksums this document.
+  (b) Did the Gen 2126 restore silently fail, or was it never attempted?
+      If silently failed → find and fix the restore bug before attempting again.
+  (c) Why is MIN_SHARPE_TO_KEEP not blocking Sharpe=2.4242 results from [new_elite]?
+      Audit the acceptance logic code directly — do not assume it is correct.
+  (d) Why is the deduplication cache not blocking exact-duplicate configs?
+      The cache was implemented at Gen 9400 but is visibly non-functional by Gen 11185.
 
-You MUST pick EXACTLY one value from this list. Copy it character for character:
+Document answers to all four questions in the run log before proceeding.
 
-```
-33.00
-33.50
-34.50
-35.00
-35.50
-36.00
-```
+### Human Operator Checklist — ALL ITEMS REQUIRED BEFORE GEN 11201
 
-**DO NOT USE these values — already tested this session:**
-{already_tested}
+1. [ ] Restore Gen 2126 config (below) into the incumbent memory slot EXACTLY
+2. [ ] Verify "Current Best Strategy" block shows:
+         size_pct=30, stop_loss_pct=2.41, timeout_hours=200,
+         take_profit_pct=3.55, RSI_long=34.00, RSI_short=60.64
+3. [ ] Verify incumbent fingerprint hash matches stored Gen 2126 hash
+4. [ ] Wipe and reinitialize the deduplication cache from scratch
+5. [ ] Run a deduplication test: submit the same config twice, confirm second is blocked
+6. [ ] Audit MIN_SHARPE_TO_KEEP enforcement in live code — confirm it is 2.9232
+         and that STRICT greater-than (not >=) is used
+7. [ ] Confirm [new_elite] label is IMPOSSIBLE for any result with Sharpe < 2.9232
+8. [ ] Confirm MIN_TRADES[swing]=30 in live code
+9. [ ] Confirm MAX_TRADES[swing]=60 in live code
+10. [ ] Confirm STALL_ALERT_GENS=200 in live code
+11. [ ] Confirm LOKI code-change permissions are restricted per LOKI LOCKDOWN
+12. [ ] Run one test generation and confirm:
+          - output config has size_pct=30, RSI_long=34.00
+          - Sharpe < 2.9232 results are logged [discarded], not [new_elite]
+          - trades > 60 results are rejected before backtesting
+13. [ ] Invalidate and discard all [new_elite] labels from Gens 11155-11200 —
+          they are Regime B results, all below MIN_SHARPE_TO_KEEP
 
-**Pick the LOWEST-NUMBERED untested value from this priority order:**
-1. `33.00`
-2. `33.50`
-3. `34.50`
-4. `35.00`
-5. `35.50`
-6. `36.00`
-
-If ALL six values are in the DO NOT USE list above → output the FALLBACK YAML exactly.
-If you are unsure what to pick → output the FALLBACK YAML exactly.
-If the value you would pick does not appear CHARACTER FOR CHARACTER in the whitelist above → output the FALLBACK YAML exactly.
-
----
-
-## FORBIDDEN VALUES — output FALLBACK if you would use any of these
-
-- `36.68` — hallucinated, permanently banned
-- `36.56` — Regime B artifact, permanently banned
-- `36.7` — Regime B artifact, permanently banned
-- `36.70` — Regime B artifact, permanently banned
-- `34.00` — this is the current value, do not keep it unchanged
-- `34.0` — wrong decimal format
-- `33.5` — wrong decimal format (must be `33.50`)
-- `35.5` — wrong decimal format (must be `35.50`)
-- Any value with only one decimal place
-- Any value not exactly matching one of the six listed above
-- Any value that contains letters or special characters
+If ANY item cannot be confirmed → DO NOT RESUME. Escalate and document immediately.
 
 ---
 
-## MANDATORY SELF-CHECK
+## TRUE INCUMBENT (Gen 2126) — VERIFIED BASELINE — DO NOT MODIFY
 
-Before outputting, answer YES or NO to each question.
-If you cannot answer YES to ALL 10 → output FALLBACK YAML.
-
-1. Is `entry.long.conditions[0].value` set to a value that appears EXACTLY in the whitelist above? YES/NO
-2. Is the new value DIFFERENT from `34.00`? YES/NO
-3. Is the new value NOT in the DO NOT USE list? YES/NO
-4. Is `entry.short.conditions[0].value` still `60.64`? YES/NO
-5. Is `exit.take_profit_pct` still `3.55`? YES/NO
-6. Is `exit.stop_loss_pct` still `2.41`? YES/NO
-7. Is `exit.timeout_hours` still `200`? YES/NO
-8. Is `position.size_pct` still `30`? YES/NO
-9. Are period_hours still `21`, `26`, `21`, `48` in that order? YES/NO
-10. Does the new value have EXACTLY two decimal places (e.g. `33.00` not `33` or `33.0`)? YES/NO
-
-If ALL 10 answers are YES → output your modified YAML.
-If ANY answer is NO → output the FALLBACK YAML.
-
----
-
-## Current Best Strategy
-## ⚠️ GEN 2126 INCUMBENT — DO NOT MODIFY ANY FIELD EXCEPT THE ONE MARKED BELOW ⚠️
-## ⚠️ ALL OTHER FIELDS ARE LOCKED. CHANGING ANY OTHER FIELD WILL CAUSE FALLBACK. ⚠️
+This is the ONLY config that may occupy the incumbent slot.
+Copy EXACTLY into the incumbent memory slot before resuming.
 
 ```yaml
 name: crossover
@@ -99,7 +82,7 @@ entry:
     - indicator: rsi
       period_hours: 21
       operator: lt
-      value: 34.00        ← CHANGE THIS NUMBER ONLY
+      value: 34.00
     - indicator: macd_signal
       period_hours: 26
       operator: eq
@@ -124,117 +107,70 @@ risk:
   pause_hours: 48
 ```
 
----
+**Gen 2126 verified metrics: Sharpe=2.9232 | Win rate=90.0% | Trades=30**
+**This is the ONLY known result above Sharpe=2.9. It must be protected absolutely.**
 
-## FALLBACK YAML
-(Output this exactly — character for character — if your self-check fails for ANY reason)
+### Incumbent Fingerprint (automated verification — check every gen before backtest)
 
-```yaml
-name: crossover
-style: randomly generated
-pairs:
-- LINK/USD
-- ADA/USD
-- BTC/USD
-- OP/USD
-position:
-  size_pct: 30
-  max_open: 1
-  fee_rate: 0.001
-entry:
-  long:
-    conditions:
-    - indicator: rsi
-      period_hours: 21
-      operator: lt
-      value: 33.00
-    - indicator: macd_signal
-      period_hours: 26
-      operator: eq
-      value: bullish
-  short:
-    conditions:
-    - indicator: rsi
-      period_hours: 21
-      operator: gt
-      value: 60.64
-    - indicator: macd_signal
-      period_hours: 48
-      operator: eq
-      value: bearish
-exit:
-  take_profit_pct: 3.55
-  stop_loss_pct: 2.41
-  timeout_hours: 200
-risk:
-  pause_if_down_pct: 8
-  stop_if_down_pct: 18
-  pause_hours: 48
 ```
+size_pct        = 30      ← immutable
+stop_loss_pct   = 2.41    ← immutable
+timeout_hours   = 200     ← immutable
+take_profit_pct = 3.55    ← immutable (except during Phase 3 scan)
+rsi_long_value  = 34.00   ← changes during Phase 1 scan only
+rsi_short_value = 60.64   ← changes during Phase 2 scan only
+macd_long_period = 26     ← changes during Phase 4 scan only
+macd_short_period = 48    ← changes during Phase 4 scan only
+```
+
+If ANY non-designated field differs from above → HALT immediately, log
+`[CORRUPTED_INCUMBENT_DETECTED gen=N field=FIELD value=VALUE]`, do not backtest,
+alert operator. Do not attempt auto-restore — require human confirmation.
+
+### Startup Verification Procedure (MANDATORY before EVERY generation)
+
+ODIN must execute this sequence before every single generation, without exception:
+1. Load incumbent from memory slot
+2. Compute fingerprint hash of all 8 fields above
+3. Compare against stored hash from last verified-good state
+4. If mismatch → HALT, log `[INCUMBENT_FINGERPRINT_MISMATCH gen=N]`, alert operator
+5. Confirm deduplication cache is non-empty (if empty and gen > 1 → HALT, do not warn)
+6. Confirm MIN_SHARPE_TO_KEEP=2.9232 in live code (read the constant, do not assume)
+7. Confirm MIN_TRADES[swing]=30, MAX_TRADES[swing]=60 in live code
+8. Confirm STALL_ALERT_GENS=200 in live code
+9. Log startup verification result: `[STARTUP_OK gen=N]` or `[STARTUP_FAIL gen=N reason=R]`
+
+If any step fails → HALT. Do not run the generation. Alert operator.
 
 ---
 
-## LOCKED FIELDS — DO NOT CHANGE THESE UNDER ANY CIRCUMSTANCES
+## KNOWN CORRUPTED CONFIG — PERMANENTLY BLACKLISTED
 
-| Field | Locked value |
-|-------|-------------|
-| `entry.long.conditions[0].period_hours` | `21` |
-| `entry.long.conditions[1].period_hours` | `26` |
-| `entry.short.conditions[0].value` | `60.64` |
-| `entry.short.conditions[0].period_hours` | `21` |
-| `entry.short.conditions[1].period_hours` | `48` |
-| `exit.take_profit_pct` | `3.55` |
-| `exit.stop_loss_pct` | `2.41` |
-| `exit.timeout_hours` | `200` |
-| `position.size_pct` | `30` |
-| `position.max_open` | `1` |
-| `position.fee_rate` | `0.001` |
-| `pairs` | `[LINK/USD, ADA/USD, BTC/USD, OP/USD]` |
-| `risk.pause_if_down_pct` | `8` |
-| `risk.stop_if_down_pct` | `18` |
-| `risk.pause_hours` | `48` |
+**NEVER load as incumbent. NEVER backtest. NEVER use as base for mutations.**
+
+```
+size_pct=15, stop_loss_pct=2.72, timeout_hours=196, RSI long=36.56
+```
+
+Any config containing ANY of the following is a Regime B artifact — reject immediately,
+before backtesting, at the proposal stage:
+- size_pct = 15
+- stop_loss_pct = 2.72
+- timeout_hours = 196
+- entry.long RSI value ∈ {36.56, 36.7, 36.70, 36.68}
+- trades > 60 (any backtest result — reject after backtesting if not caught before)
+
+Log as: `[CORRUPTED_INCUMBENT_DETECTED gen=N field=FIELD value=VALUE]`
+
+**How this corruption occurred:**
+Gen 2149 accepted Sharpe=0.8798 over the incumbent Sharpe=2.9232. This was a bug
+in the acceptance logic — MIN_SHARPE_TO_KEEP was inactive or set incorrectly.
+The corrupted config ran as incumbent for 8,900+ generations.
+Damage: 8,900 wasted generations, Regime B ceiling of 2.5324 never exceeded.
 
 ---
 
-## ⚠️ FOR ODIN/MIMIR SYSTEM ONLY — NOT SHOWN TO LLM
-
-### [CRITICAL — EXECUTE BEFORE ANY OTHER ACTION] STEP 0: INCUMBENT RESTORE
-
-The current ODIN internal incumbent is a Regime B artifact (RSI=36.56 or RSI=36.7, stop_loss≠2.41, size_pct=15).
-This MUST be overwritten NOW before any backtesting resumes.
-
-**Execute in this exact order — do not skip any step:**
-
-1. Force-set ODIN incumbent to Gen 2126 config:
-   - `entry.long.conditions[0].value: 34.00`
-   - `entry.short.conditions[0].value: 60.64`
-   - `take_profit_pct: 3.55`
-   - `stop_loss_pct: 2.41`
-   - `timeout_hours: 200`
-   - `size_pct: 30`
-   - `max_open: 1`
-   - `fee_rate: 0.001`
-   - `period_hours: [21, 26, 21, 48]`
-   - `pairs: [LINK/USD, ADA/USD, BTC/USD, OP/USD]`
-   - `Sharpe: 2.9232 | Win rate: 90.0% | Trades: 30`
-2. Log: `[MIMIR_RESTORE gen=2126 sharpe=2.9232 win_rate=0.90 trades=30]`
-3. Verify restore by reading back all fields above — abort and alert if any mismatch
-4. Reset `tested_rsi_values` to `{}`
-5. Reset `duplicate_result_cache` to `{}` then immediately add the hash of RSI=33.50 config (fallback from previous session)
-6. Confirm all locked fields match the table above
-7. Log: `[STEP0_COMPLETE — resuming from gen=2126 incumbent]`
-
-**If STEP 0 cannot be completed, halt ODIN and escalate to human operator. Do not run generation 10401 until STEP 0 is confirmed complete.**
-
-### [CRITICAL] STEP 1: SYSTEM CONSTANTS — VERIFY AND LOCK
+## SYSTEM CONSTANTS — PERMANENTLY LOCKED — LOKI MAY NOT MODIFY
 
 ```
-MIN_TRADES[swing] = 30       ← LOCKED. Do not change. Ever.
-MAX_TRADES[swing] = 60       ← LOCKED. Hard-reject results above this threshold.
-DEDUPLICATION_CACHE = active ← Must block identical configs BEFORE backtesting
-STALL_ALERT_GENS = 200       ← Alert if no improvement in 200 generations
-```
-
-**Why MIN_TRADES[swing] = 30 is permanently locked:**
-- Gen 2126: 30 trades, 90% win rate, Sharpe=2.9232 — the true peak
-- Every MIN_TRADES reduction below 30 allowed Regime
+MIN_TRADES[
