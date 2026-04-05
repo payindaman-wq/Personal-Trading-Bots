@@ -1,201 +1,168 @@
 ```markdown
-# FREYA Research Program — v42.0
+# FREYA Research Program — v47.0
 
-## Status at Gen 8400
-- **Current best (this run):** adj=1.9272, sharpe=0.2896, bets=15498 (Gen 8306)
-- **Historical best (all runs):** adj=1.9272, sharpe=0.2896, bets=15498 (Gen 8306) ← NEW ALL-TIME BEST
-- **Prior historical best:** adj=1.8879, sharpe=0.2825, bets=15964 (Gen 6319, params lost)
-- **Prior historical best (params known):** adj=1.8427, sharpe=0.2828, bets=13512 (Gen 7870)
-- **Improvements this run:** 2 (Gen 8250, Gen 8306) — both after correct config loaded
-- **Fixed-point attractor active:** adj=1.9272 dominant (10/20 last gens)
-- **Gate 1 NOT YET IMPLEMENTED — deduplication still absent**
-- **Gate 2 NOT YET IMPLEMENTED — degenerate outputs (adj=-1.0) still reaching log**
-- **Gate 3 NOT YET IMPLEMENTED — Gen 8306 config not confirmed written to disk**
-- **Deployment blocker: option 5 — simulation only, no live system exists**
-- **Zero live bets placed across mist, kara, thrud. All slots disabled.**
-
----
-
-## TERMINAL CONDITION STATEMENT (v42.0)
-
-The wrong-config crisis is resolved. Correct config loaded at Gen 8201.
-Two improvements followed within 106 generations.
-New all-time best: adj=1.9272 at Gen 8306.
-Current fixed-point: adj=1.9272 dominant attractor, 10/20 last generations.
-Three degenerate outputs (adj=-1.0) in last 20 generations — Gate 2 required.
-Secondary attractors: adj=1.5834 (×3), adj=1.6197 (×1), adj=1.179 (×1).
-Gates 1, 2, 3 remain unimplemented. This is the same failure mode as v41.0.
-If Gates are not implemented before Gen 8401, this program will
-enter its seventh fixed-point collapse within 200 generations.
-
-**This program has one valid action:**
-1. Implement all three Gates. Verify Gen 8306 config persisted. Resume.
-
-Do not run Gen 8401 without:
-- [ ] Gen 8306 config loaded and verified (reproduces adj≈1.9272)
-- [ ] Gate 1 implemented, tested, and pre-populated with all known attractors
-- [ ] Gate 2 implemented and tested
-- [ ] Gate 3 implemented, verified, and Gen 8306 written to disk
+## Status at Gen 9400
+- **Current best (this run):** adj=2.1573, sharpe=0.3273, bets=14553 (Gen 9218)
+- **Historical best (all runs):** adj=2.1573, sharpe=0.3273, bets=14553 (Gen 9218)
+- **Improvements this run (v46.0, 200 gens):** 2 (Gen 9214, Gen 9218)
+- **Improvements last 400 gens:** 4 (Gen 8802, Gen 9018, Gen 9214, Gen 9218)
+- **Fixed-point collapse:** ACTIVE — eleventh confirmed collapse (post-9218, 182 consecutive
+  non-improvements)
+- **Degenerate outputs last 20 gens:** 2 (Gen 9385 bets=20, Gen 9387 bets=11)
+- **Degenerate rate last 20 gens:** 10% (2/20)
+- **Gate 1 NOT IMPLEMENTED** — attractor cycling confirmed, 4 known attractors dominant
+- **Gate 2 NOT IMPLEMENTED** — degenerate outputs still consuming log capacity
+- **Gate 3 NOT IMPLEMENTED** — live configs unverified
+- **Live performance:** 0/24 wins across mist/kara/thrud — CRITICAL STRUCTURAL FAILURE
+- **Config discrepancy:** max_days_to_resolve appears as 10 in Gen 9018 locked config;
+  Gen 8802 used 14. Which parameter produced the adj=2.1252 improvement? UNRESOLVED.
+- **Current best config signature:** price_range [0.15, 0.56], min_edge_pts=0.033,
+  max_days=10 (unverified), category=world_events
 
 ---
 
-## LOCKED BEST CONFIG — Gen 8306 — DO NOT MODIFY
+## TERMINAL CONDITION STATEMENT (v47.0)
+
+Gen 9218 produced adj=2.1573 via price_range upper bound tightening (0.58 → ~0.56).
+The system then collapsed into 182 non-improving generations — identical to v45.0 and v46.0.
+The three Gates remain unimplemented after three consecutive research programs.
+Live performance is structurally broken (0/24 wins, -1.7% to -2.1% PnL = pure fee drag).
+
+The LLM single-parameter perturbation approach has exhausted its productive range in the
+current parameter neighborhood. Unmodified continuation of this approach is projected to
+produce adj gain ≈ 0.000 per 100 generations.
+
+**HARD STOP: Do not run Gen 9401 without completing ALL pre-flight items below.**
+
+The Gates are not optional. The directed sweep is not optional. Live diagnosis is not optional.
+Every generation without Gates 1+2 wastes capacity. Live failure means zero real-world value.
+
+---
+
+## PRE-FLIGHT CHECKLIST FOR GEN 9401
+*All items must be checked before resuming. Log completion timestamp for each.*
+
+### A. CONFIG RECONCILIATION (BLOCKING)
+- [ ] **A1:** Retrieve Gen 9018 config from disk/log. Confirm price_range upper bound and
+      max_days_to_resolve exact value.
+- [ ] **A2:** Retrieve Gen 8802 config from disk/log. Confirm max_days_to_resolve=14.
+- [ ] **A3:** Re-run Gen 9018 config in simulator → must reproduce adj≈2.1252 (±0.001).
+      If not → stop, investigate data or simulator change before proceeding.
+- [ ] **A4:** Re-run Gen 8802 config in simulator → must reproduce adj≈2.0877 (±0.001).
+- [ ] **A5:** Run Gen 9018 config with max_days=14 (everything else identical) → log adj.
+      This resolves whether the 9018 improvement came from price_range or max_days.
+- [ ] **A6:** Run Gen 9218 config in simulator → confirm adj≈2.1573, sharpe≈0.3273,
+      bets≈14553. Log exact price_range upper bound (expected 0.56 — confirm).
+- [ ] **A7:** Document resolved configs in LOCKED BEST CONFIG section below.
+
+### B. GATE IMPLEMENTATION (BLOCKING)
+- [ ] **B1 — Gate 1:** Implement SEEN_CONFIGS hash set. Pre-populate with ALL known
+      attractor signatures (see ATTRACTOR INVENTORY below). Before evaluating any config,
+      hash its parameters and check SEEN_CONFIGS. If found: skip evaluation, log "CYCLE
+      AVOIDED", propose new config immediately. Do NOT count skipped configs as generations.
+- [ ] **B2 — Gate 2:** Implement pre-evaluation filter. If proposed config produces
+      bets < 20 in simulation: log "DEGENERATE REJECTED", do not record to improvement log,
+      do not update current best, propose new config immediately. Do NOT count as generation.
+- [ ] **B3 — Gate 3:** Write Gen 9218 config to disk on ALL live slots (mist, kara, thrud).
+      SSH to each slot and print running config. Compare line-by-line to Gen 9218 locked
+      config. Log diff output (must be empty). Do not proceed with live trading until
+      confirmed on all three slots.
+- [ ] **B4:** Update LLM proposal prompt to include current attractor list and instruct
+      model to avoid known-attractor neighborhoods.
+
+### C. LIVE DIAGNOSIS (BLOCKING — complete before any new sprint)
+*0/24 wins is p < 0.000003 under simulation assumptions. This is not variance.*
+
+**Investigate in strict order — do not skip:**
+
+1. [ ] **C1 — Config audit:** SSH to mist, kara, thrud. Print exact running YAML config.
+       Compare field-by-field to Gen 9218 locked config. Check specifically:
+       - category: must be world_events (not sports, crypto, etc.)
+       - price_range: must be [0.15, 0.56]
+       - min_edge_pts: must be 0.033
+       - max_days_to_resolve: must match verified value from A6
+       - min_liquidity_usd: must be 100
+       If ANY field differs → Gate 3 failure confirmed → fix immediately → log what was wrong.
+
+2. [ ] **C2 — Market log audit:** Retrieve all 24 traded markets (8 per slot). For each record:
+       - Market title
+       - Category assigned by system
+       - market_odds at time of bet
+       - Direction bet (YES or NO)
+       - Resolved price
+       - Whether bet was within price_range [0.15, 0.56]
+       Compute: fraction that were world_events; YES resolution rate; fraction where
+       direction prediction was correct before fees.
+
+3. [ ] **C3 — Base rate audit:** If YES resolution rate in the 24-market sample >> 12%
+       (world_events historical base rate), the live market universe has different
+       composition than simulation training data. Document gap. Determine whether
+       Polymarket's "world_events" category maps cleanly to simulation's category definition.
+
+4. [ ] **C4 — API/odds audit:** Confirm that market_odds value retrieved from Polymarket
+       API is the quantity the simulation assumes (probability in [0,1], last trade price,
+       or order book mid). If definition differs from simulation assumption, edge calculation
+       is wrong by construction.
+
+5. [ ] **C5 — Fee audit:** Confirm actual fee structure matches simulation's 2% per bet.
+       If Polymarket charges spread + platform fee, effective fee may exceed 2%, eliminating
+       thin-edge bets.
+
+6. [ ] **C6:** Document root cause and remediation plan before starting next sprint.
+
+---
+
+## LOCKED BEST CONFIG — Gen 9218 — ALL-TIME BEST
 
 ```yaml
-# LOCKED BEST CONFIG — Gen 8306 — ALL-TIME BEST
-# adj=1.9272, sharpe=0.2896, roi=18.707%, win=81.8%, bets=15498
-# Perturbation history: min_edge_pts perturbed from Gen 7870 (0.07) → 0.034
-# DO NOT MODIFY THIS BLOCK UNTIL GATE 3 CONFIRMS IT IS WRITTEN TO DISK
+# LOCKED BEST CONFIG — Gen 9218 — ALL-TIME BEST
+# adj=2.1573, sharpe=0.3273, roi=18.489%, win=84.38%, bets=14553
+# Improvement over Gen 9018: +0.0321 adj (+1.5%), +0.0055 sharpe, -194 bets
+# Key change from Gen 9018: price_range upper bound 0.58 → 0.56 (CONFIRM VIA A6)
+# max_days_to_resolve: VERIFY — may be 10 or 14, resolve via A5/A6 before using
+# DO NOT MODIFY UNTIL GATE 3 CONFIRMS DISK WRITE ON ALL LIVE SLOTS
 category: world_events
 exclude_keywords: []
 include_keywords: []
-max_days_to_resolve: 14
+max_days_to_resolve: 10  # UNVERIFIED — reconcile via checklist item A5/A6
 max_position_pct: 0.1
-min_edge_pts: 0.034
+min_edge_pts: 0.033
 min_liquidity_usd: 100
 name: pm_research_best
 price_range:
   - 0.15
-  - 0.70
+  - 0.56  # CONFIRM — expected from Gen 9214→9218 progression
 ```
 
-**Verification required before Gen 8401:**
+**Verification checksums (complete after A6):**
 ```
-[ ] CONFIG_VERIFY: Run Gen 8306 config through simulation
-[ ] CONFIG_VERIFY: Confirm adj ≈ 1.9272 (±0.001 tolerance)
-[ ] CONFIG_VERIFY: Confirm sharpe ≈ 0.2896
-[ ] CONFIG_VERIFY: Confirm bets ≈ 15498
-[ ] CONFIG_VERIFY: If result does not match — DO NOT PROCEED — investigate discrepancy
+[ ] adj = 2.1573 ± 0.001
+[ ] sharpe = 0.3273 ± 0.001
+[ ] bets = 14553 ± 10
+[ ] price_range upper = 0.56 (CONFIRMED / NOT CONFIRMED — circle one)
+[ ] max_days_to_resolve = __ (fill in after A5)
+```
+
+**Prior confirmed configs (for reference and Gate 1):**
+```yaml
+# Gen 9018: adj=2.1252, sharpe=0.3218, roi=18.557%, win=83.98%, bets=14747
+price_range: [0.15, 0.58]
+min_edge_pts: 0.033
+max_days_to_resolve: 10  # unverified
+---
+# Gen 8802: adj=2.0877, sharpe=0.3155, roi=18.571%, win=83.58%, bets=14924
+price_range: [0.15, 0.60]
+min_edge_pts: 0.033
+max_days_to_resolve: 14
+---
+# Gen 8801: adj=2.027, sharpe=0.3052, roi=18.855%, win=82.75%, bets=15295
+price_range: [0.15, ~0.62–0.63]  # RETRIEVE EXACT VALUE
+min_edge_pts: 0.033
+max_days_to_resolve: 14
 ```
 
 ---
 
-## MANDATORY FIRST ACTION: IMPLEMENT ALL THREE GATES
+## ATTRACTOR INVENTORY (Gate 1 SEEN_CONFIGS — pre-populate ALL)
 
-### Gate 1 — Deduplication (BLOCKING — highest priority)
-
-Without Gate 1, approximately 50% of generations re-evaluate known configs.
-The adj=1.9272 attractor will dominate the next 100 generations without this gate.
-
-```python
-SEEN_CONFIGS = set()
-
-def make_config_hash(config):
-    return hash(frozenset(
-        (k, tuple(v) if isinstance(v, list) else v)
-        for k, v in sorted(config.items())
-    ))
-
-def dedup_check(config):
-    config_hash = make_config_hash(config)
-    if config_hash in SEEN_CONFIGS:
-        return False, "DEDUP_REJECT: config seen before"
-    SEEN_CONFIGS.add(config_hash)
-    return True, "DEDUP_PASS"
-```
-
-**Pre-populate SEEN_CONFIGS before Gen 8401 with ALL known attractors:**
-
-```python
-KNOWN_EVALUATED_CONFIGS = [
-    # Gen 8306 — ALL-TIME BEST — STARTING CONFIG FOR GEN 8401+
-    {"category": "world_events", "exclude_keywords": [], "include_keywords": [],
-     "max_days_to_resolve": 14, "max_position_pct": 0.1, "min_edge_pts": 0.034,
-     "min_liquidity_usd": 100, "name": "pm_research_best",
-     "price_range": [0.15, 0.70]},
-    # Gen 8250 — prior improvement this run
-    {"category": "world_events", "exclude_keywords": [], "include_keywords": [],
-     "max_days_to_resolve": 14, "max_position_pct": 0.1, "min_edge_pts": 0.034,
-     "min_liquidity_usd": 100, "name": "pm_research_best",
-     "price_range": [0.15, 0.70]},
-    # NOTE: If Gen 8250 config differs from Gen 8306, retrieve exact params from log
-    # Gen 7870 — prior historical best (params known)
-    {"category": "world_events", "exclude_keywords": [], "include_keywords": [],
-     "max_days_to_resolve": 30, "max_position_pct": 0.1, "min_edge_pts": 0.07,
-     "min_liquidity_usd": 100, "name": "pm_research_best",
-     "price_range": [0.05, 0.80]},
-    # Gen 7449 — prior best (params known)
-    {"category": "world_events", "exclude_keywords": [], "include_keywords": [],
-     "max_days_to_resolve": 14, "max_position_pct": 0.1, "min_edge_pts": 0.06,
-     "min_liquidity_usd": 100, "price_range": [0.15, 0.70]},
-    # Wrong starting config from v41.0 run — must be excluded
-    {"category": "world_events", "exclude_keywords": [], "include_keywords": [],
-     "max_days_to_resolve": 30, "max_position_pct": 0.1, "min_edge_pts": 0.219,
-     "min_liquidity_usd": 1000, "name": "pm_research_best",
-     "price_range": [0.05, 0.90]},
-    # Secondary attractor — adj=1.5834, sharpe=0.2438, bets=13208
-    # RETRIEVE EXACT PARAMS FROM SIMULATION LOG BEFORE POPULATING
-    # Placeholder — do not use until exact params confirmed:
-    # {"category": "world_events", ..., "min_edge_pts": ???, ...},
-    # Secondary attractor — adj=1.6197, sharpe=0.2699, bets=8056
-    # RETRIEVE EXACT PARAMS FROM SIMULATION LOG BEFORE POPULATING
-    # Secondary attractor — adj=1.179, sharpe=0.1752, bets=16743
-    # RETRIEVE EXACT PARAMS FROM SIMULATION LOG BEFORE POPULATING
-]
-
-for config in KNOWN_EVALUATED_CONFIGS:
-    SEEN_CONFIGS.add(make_config_hash(config))
-```
-
-**ACTION REQUIRED: Retrieve exact params for all secondary attractors from simulation log.**
-```
-[ ] RETRIEVE: adj=1.5834 config (appears 3× in last 20 gens) — add to KNOWN_EVALUATED_CONFIGS
-[ ] RETRIEVE: adj=1.6197 config (appears 1× in last 20 gens) — add to KNOWN_EVALUATED_CONFIGS
-[ ] RETRIEVE: adj=1.179 config (appears 1× in last 20 gens) — add to KNOWN_EVALUATED_CONFIGS
-[ ] RETRIEVE: adj=1.9053 config (Gen 8392, bets=15002) — near-best, add to KNOWN_EVALUATED_CONFIGS
-```
-
-**Required Gate 1 tests before Gen 8401:**
-```
-[ ] GATE1_TEST_PASS — Gen 8306 config submitted twice; second returns DEDUP_REJECT
-[ ] GATE1_TEST_PASS — Gen 7870 config submitted twice; second returns DEDUP_REJECT
-[ ] GATE1_TEST_PASS — Wrong starting config submitted; returns DEDUP_REJECT
-[ ] GATE1_TEST_PASS — adj=1.5834 attractor submitted twice; second returns DEDUP_REJECT
-[ ] GATE1_TEST_PASS — Novel config submitted; returns DEDUP_PASS
-```
-
-### Gate 2 — Guard system
-
-Degenerate outputs (adj=-1.0, bets=0, bets=6) appeared 3× in last 20 generations.
-Gate 2 must intercept these before they are logged.
-
-```python
-BLACKLISTED_CONFIGS = set()
-
-def guard_check(bets, sharpe, config_hash):
-    if bets < 50:
-        BLACKLISTED_CONFIGS.add(config_hash)
-        return False, f"GUARD_REJECT: bets={bets} < 50"
-    if sharpe < -0.10:
-        BLACKLISTED_CONFIGS.add(config_hash)
-        return False, f"GUARD_REJECT: sharpe={sharpe:.4f} < -0.10"
-    if config_hash in BLACKLISTED_CONFIGS:
-        return False, f"GUARD_REJECT: blacklisted config"
-    return True, "GUARD_PASS"
-```
-
-**Required Gate 2 tests before Gen 8401:**
-```
-[ ] GATE2_TEST_PASS — Config with bets=0 returns GUARD_REJECT (Gen 8391, 8393, 8396 cases)
-[ ] GATE2_TEST_PASS — Config with bets=6 returns GUARD_REJECT (Gen 8393 case)
-[ ] GATE2_TEST_PASS — Config with sharpe=-0.6977 returns GUARD_REJECT (Sharpe range min)
-[ ] GATE2_TEST_PASS — Blacklisted config resubmitted returns GUARD_REJECT
-[ ] GATE2_TEST_PASS — Valid config (bets=15498, sharpe=0.2896) returns GUARD_PASS
-```
-
-### Gate 3 — Config persistence
-
-Gen 8306 is the all-time best. It must be written to disk before Gen 8401.
-
-```python
-import json
-from datetime import datetime, timezone
-
-BEST_LOG_PATH = "freya_best_configs.jsonl"
-
-def on_new_best(config, metrics):
-    record = {
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "generation": metrics["generation"],
-        "adj_score": metrics["adj"],
-        "sharpe": metrics["sharpe"],
+| adj    | sharpe | bets  | Config signature
