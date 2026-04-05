@@ -77,24 +77,18 @@ BLOCKED_FILES = [
 
 # ── Utilities ─────────────────────────────────────────────────────────────────
 
-def tg_send(text):
-    if DRY_RUN:
-        print(f"[dry-run TG] {text}")
-        return
+def tg_send(text, severity="warning"):
+    """Route to SYN inbox - never directly to Telegram. SYN decides what reaches the user."""
+    inbox = os.path.join(WORKSPACE, "syn_inbox.jsonl")
+    entry = json.dumps({"ts": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
+                        "source": "loki", "severity": severity, "msg": text})
     try:
-        payload = json.dumps({
-            "chat_id":    TG_CHAT_ID,
-            "text":       text,
-            "parse_mode": "HTML",
-        }).encode()
-        req = urllib.request.Request(
-            f"https://api.telegram.org/bot{TG_BOT_TOKEN}/sendMessage",
-            data=payload,
-            headers={"Content-Type": "application/json"},
-        )
-        urllib.request.urlopen(req, timeout=10)
+        with open(inbox, "a") as f:
+            f.write(entry + "\n")
     except Exception as e:
-        print(f"  [loki] TG send failed: {e}")
+        print(f"  [loki] inbox write failed: {e}")
+    if DRY_RUN:
+        print(f"[dry-run SYN-inbox/{severity}] {text}")
 
 
 def load_gemini_key():
@@ -302,9 +296,7 @@ def classify_freya_change(analysis_text):
         "Constants in freya_researcher.py that can be changed:\n"
         "- MIN_BETS = 20  (minimum bets required for valid simulation)\n"
         "- POPULATION_SIZE = 5  (elite population size)\n"
-        "CRITICAL: freya_researcher.py must have ZERO tg_send() call sites. Never suggest adding stall alerts or any Telegram notifications to freya_researcher.py.
-
-"
+        "CRITICAL: freya_researcher.py must have ZERO tg_send() call sites. tg_send() in research scripts routes to SYN inbox only."
         "Does the analysis request changing one of these constants?\n\n"
         "Output ONLY a JSON object:\n"
         '{"type": "none"}\n'

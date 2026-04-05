@@ -40,14 +40,10 @@ PROGRAM_MD      = os.path.join(PM_RESEARCH, "program.md")
 POPULATION_DIR  = os.path.join(PM_RESEARCH, "population")
 RESEARCHER_LOG  = os.path.join(PM_RESEARCH, "researcher.log")
 
-TG_BOT_TOKEN    = "8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
-TG_CHAT_ID      = "8154505910"
-
 POPULATION_SIZE   = 5
 MIMIR_INTERVAL    = 200
 SUSPICIOUS_SHARPE = 8.0
 MIN_BETS          = 20
-STALL_ALERT_GENS  = 300
 PM_FEE_PCT        = 0.02
 
 CATEGORIES = ["sports", "politics", "crypto", "economics", "world_events"]
@@ -58,20 +54,6 @@ def log(msg):
     print(f"[{ts}] {msg}", flush=True)
 
 
-# LOKI: DO NOT call tg_send() anywhere in this file. freya_researcher.py must have zero Telegram alert call sites.
-# If you find yourself adding a tg_send() call, remove it. This has been enforced multiple times (2026-03-30, 2026-04-01, 2026-04-04).
-def tg_send(text):
-    try:
-        payload = json.dumps({
-            "chat_id": TG_CHAT_ID, "text": text, "parse_mode": "HTML",
-        }).encode()
-        req = urllib.request.Request(
-            f"https://api.telegram.org/bot{TG_BOT_TOKEN}/sendMessage",
-            data=payload, headers={"Content-Type": "application/json"},
-        )
-        urllib.request.urlopen(req, timeout=10)
-    except Exception:
-        pass
 
 
 def load_gemini_key():
@@ -503,7 +485,6 @@ def main():
                 best_score    = score
                 best_metrics  = metrics
                 gens_no_best  = 0
-                stall_alerted = False
                 save_strategy(best, BEST_STRATEGY)
                 update_population(population, best, score)
                 append_result(gen, metrics, "new_best", desc)
@@ -525,7 +506,7 @@ def main():
             if os.path.exists(PROGRAM_MD):
                 program_md = open(PROGRAM_MD).read()
 
-        save_gen_state({"gen": gen, "gens_since_best": gens_no_best, "stall_alerted": stall_alerted})
+        save_gen_state({"gen": gen, "gens_since_best": gens_no_best})
 
         if gen % 10 == 0:
             log(f"  Gen {gen}: best adj={best_score:.4f} "

@@ -35,9 +35,6 @@ GEMINI_BASE   = "https://generativelanguage.googleapis.com/v1beta/models"
 
 SUSPICIOUS_SHARPE   = 3.5
 POPULATION_SIZE     = 10
-STALL_ALERT_GENS    = 500
-TG_BOT_TOKEN = "8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
-TG_CHAT_ID   = "8154505910"
 MIN_TRADES = {"day": 250, "swing": 30}
 
 ALL_PAIRS = [
@@ -117,18 +114,6 @@ INDICATORS = {
 # Utilities
 # ----------------------------------------------------------------
 
-def tg_send(msg):
-    try:
-        payload = json.dumps({
-            "chat_id": TG_CHAT_ID, "text": msg, "parse_mode": "HTML",
-        }).encode()
-        req = urllib.request.Request(
-            f"https://api.telegram.org/bot{TG_BOT_TOKEN}/sendMessage",
-            data=payload, headers={"Content-Type": "application/json"},
-        )
-        urllib.request.urlopen(req, timeout=10)
-    except Exception:
-        pass
 
 
 def load_gemini_key(league):

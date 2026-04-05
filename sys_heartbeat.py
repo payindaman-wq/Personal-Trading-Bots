@@ -418,6 +418,30 @@ def main():
             problems.append((key, f"[GEMINI] {problem}"))
     # intentionally not clearing on resolve — quota flickers; let cooldown expire naturally
 
+    # ── SYN inbox — escalations from LOKI/other officers (critical/error only) ──
+    inbox_path = f"{WORKSPACE}/syn_inbox.jsonl"
+    inbox_offset_key = "syn_inbox_offset"
+    inbox_offset = state.get(inbox_offset_key, 0)
+    if os.path.exists(inbox_path):
+        with open(inbox_path) as inbox_f:
+            inbox_lines = inbox_f.readlines()
+        new_lines = inbox_lines[inbox_offset:]
+        state[inbox_offset_key] = len(inbox_lines)
+        for line in new_lines:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                entry = json.loads(line)
+                severity = entry.get("severity", "info")
+                if severity in ("error", "critical"):
+                    source = entry.get("source", "unknown").upper()
+                    msg = entry.get("msg", "")[:200]
+                    key = f"inbox_{entry.get('ts','')}"
+                    problems.append((key, f"[{source}] {msg}"))
+            except Exception:
+                pass
+
     # ── Send alerts ────────────────────────────────────────────────────────
     if problems:
         lines = [f"<b>SYN ALERT</b> — {now_str}", ""]
