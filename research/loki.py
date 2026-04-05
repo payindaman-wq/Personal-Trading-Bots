@@ -59,10 +59,10 @@ CODE_CHANGE_KEYWORDS = [
 
 # Only these constants can be changed automatically (hard whitelist)
 ALLOWED_CONSTANTS      = {"MIN_TRADES", "POPULATION_SIZE", "SUSPICIOUS_SHARPE", "STALL_ALERT_GENS"}
-FREYA_ALLOWED_CONSTS   = {"MIN_BETS", "STALL_ALERT_GENS", "POPULATION_SIZE"}
+FREYA_ALLOWED_CONSTS   = {"MIN_BETS", "POPULATION_SIZE"}  # STALL_ALERT_GENS excluded: freya_researcher.py must never have Telegram stall alerts
 
 PM_CODE_CHANGE_KEYWORDS = [
-    "freya_researcher", "MIN_BETS", "STALL_ALERT_GENS", "POPULATION_SIZE",
+    "freya_researcher", "MIN_BETS", "POPULATION_SIZE",
     "change the constant", "update the constant", "the code should",
     "modify the script", "the researcher script",
 ]
@@ -302,7 +302,9 @@ def classify_freya_change(analysis_text):
         "Constants in freya_researcher.py that can be changed:\n"
         "- MIN_BETS = 20  (minimum bets required for valid simulation)\n"
         "- POPULATION_SIZE = 5  (elite population size)\n"
-        "- STALL_ALERT_GENS = 300  (alert after N consecutive non-improving gens)\n\n"
+        "CRITICAL: freya_researcher.py must have ZERO tg_send() call sites. Never suggest adding stall alerts or any Telegram notifications to freya_researcher.py.
+
+"
         "Does the analysis request changing one of these constants?\n\n"
         "Output ONLY a JSON object:\n"
         '{"type": "none"}\n'

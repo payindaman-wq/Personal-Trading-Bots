@@ -58,6 +58,8 @@ def log(msg):
     print(f"[{ts}] {msg}", flush=True)
 
 
+# LOKI: DO NOT call tg_send() anywhere in this file. freya_researcher.py must have zero Telegram alert call sites.
+# If you find yourself adding a tg_send() call, remove it. This has been enforced multiple times (2026-03-30, 2026-04-01, 2026-04-04).
 def tg_send(text):
     try:
         payload = json.dumps({
@@ -517,12 +519,6 @@ def main():
             append_result(gen, {"sharpe": 0, "win_rate": 0, "roi_pct": 0,
                                 "n_bets": 0, "adj_score": 0}, "error", str(e)[:80])
 
-        if gens_no_best >= STALL_ALERT_GENS and not stall_alerted:
-            stall_alerted = True
-            msg = (f"FREYA: {STALL_ALERT_GENS} gens no improvement "
-                   f"(best adj={best_score:.4f})")
-            log(msg)
-            tg_send(msg)
 
         if gen % MIMIR_INTERVAL == 0:
             trigger_mimir(gen)

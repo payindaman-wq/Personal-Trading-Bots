@@ -422,9 +422,9 @@ def filter_for_bot(markets, strategy, existing_cids):
         title_lower = m["title"].lower()
 
         # Keyword filters (word-boundary to avoid e.g. "war" matching "Delaware")
-        if inc_kw and not any(re.search(r"" + re.escape(k) + r"", title_lower) for k in inc_kw):
+        if inc_kw and not any(re.search(r"" + re.escape(k) + r"", title_lower) for k in inc_kw):
             continue
-        if any(re.search(r"" + re.escape(k) + r"", title_lower) for k in exc_kw):
+        if any(re.search(r"" + re.escape(k) + r"", title_lower) for k in exc_kw):
             continue
 
         # Liquidity
