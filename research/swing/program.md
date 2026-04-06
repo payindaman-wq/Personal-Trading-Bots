@@ -1,187 +1,161 @@
 ```markdown
 # ODIN Research Program — Swing Trading Strategy Optimizer
-# Effective from Gen 11401 | Incumbent: Gen 2126 | MIMIR-reviewed 2026-04-XX (v5)
+# Effective from Gen 11601 | Incumbent: Gen 2126 | MIMIR-reviewed 2026-04-XX (v6)
 #
 # ⚠️ CRITICAL HALT — ACTIVE — DO NOT RUN ANY GENERATION UNTIL ALL CONDITIONS RESOLVED
 #
-# This halt was first issued at Gen 11001 (v2).
-# Re-issued at Gen 11156 (v3).
-# Re-issued at Gen 11200 (v4).
-# Re-issued at Gen 11400 (v5).
+# HALT HISTORY:
+#   Gen 11001 (v2): First halt issued
+#   Gen 11156 (v3): Re-issued — halt not acted on
+#   Gen 11200 (v4): Re-issued — halt not acted on
+#   Gen 11400 (v5): Re-issued — halt not acted on
+#   Gen 11600 (v6): Re-issued — 600 generations since first halt, zero compliance
 #
-# 400 generations have now run since the first halt at Gen 11001.
-# The halt mechanism is not working. This is a process failure, not a strategy failure.
+# CONFIRMED ACTIVE FAILURES AS OF GEN 11600 (unchanged from v5):
+#   1. INCUMBENT SLOT: Contains blacklisted Regime B config — NOT RESTORED
+#      Evidence: size_pct=15, RSI_long=36.56 visible in "Current Best Strategy"
+#   2. DEDUPLICATION CACHE: Non-functional
+#      Evidence: Gens 11586/11589/11596/11598/11600 all show identical
+#      Sharpe=2.4226, win_rate=53.0%, trades=477
+#   3. MAX_TRADES ENFORCEMENT: Non-functional
+#      Evidence: Recent gens show 483, 495, 517, 522, 537 trades
+#      against supposed limit of MAX_TRADES[swing]=60
+#   4. DOCUMENT NOT BEING READ: Root cause of all above
+#      Evidence: 600 generations have run after a HARD HALT in this document
+#   5. MIN_TRADES[swing]: History of instability (30→20→10→20→25→20→25→21→30)
+#      Current value=30 per constants block but must be verified in live code
 #
-# CONFIRMED ACTIVE FAILURES AS OF GEN 11400:
-#   1. INCUMBENT SLOT: Still contains blacklisted Regime B config — NOT RESTORED
-#   2. DEDUPLICATION CACHE: Non-functional (Gens 11382/11384/11385/11393 identical;
-#      Gens 11395/11396 identical; Gens 11399/11400 identical)
-#   3. MIN_SHARPE_TO_KEEP: Enforcement status unknown — audit required
-#   4. MAX_TRADES: Enforcement broken — recent gens show 159, 176, 186, 522 trades
-#   5. THIS DOCUMENT: Not being read before sessions, or halt is not being acted on
+# ROOT CAUSE (CONFIRMED v6):
+#   This document is NOT read before sessions start.
+#   ODIN loads from memory/cache only — the corrupted Regime B config.
+#   The halt, the incumbent restore, the MAX_TRADES limit, and all guidance
+#   exist only here and are invisible to ODIN.
 #
-# ROOT CAUSE HYPOTHESIS (MIMIR v5):
-#   The research program document is NOT being read before each session starts.
-#   ODIN is loading state from memory/cache only, which contains the corrupted config.
-#   The halt directive exists only in this document and is therefore invisible to ODIN.
-#   REQUIRED FIX: Add a mandatory startup step that reads and checksums this document
-#   before any other action. If checksum fails or document is unavailable → HALT.
+# REQUIRED FIX (mandatory, non-negotiable):
+#   Implement document-read-and-checksum as the VERY FIRST action at session startup.
+#   No backtest, no LLM call, no config load may occur before this check passes.
+#   Format: [DOCUMENT_VERIFIED gen=N checksum=SHA256_HASH]
+#   On failure: [DOCUMENT_FAIL gen=N reason=REASON] → HALT, do not continue.
 
----
+═══════════════════════════════════════════════════════════════
+⚠️  HARD HALT — HUMAN OPERATOR — ALL ITEMS BELOW REQUIRED  ⚠️
+     DO NOT RESUME AT GEN 11601 UNTIL ALL ITEMS ARE CHECKED
+═══════════════════════════════════════════════════════════════
 
-## ⚠️ HARD HALT — HUMAN OPERATOR ACTION REQUIRED BEFORE GEN 11401 ⚠️
+## Step 0: Diagnose Before You Fix — Answer All Five Questions
 
-### Step 0: Root Cause — Answer These Questions First (Document in Run Log)
+Document answers in the run log before touching any checklist item.
 
-Before touching any checklist item, the operator must answer and document:
+(a) IS THIS DOCUMENT BEING READ AT STARTUP?
+    HOW TO CHECK: Search the last 600 generation logs for any line containing
+    "DOCUMENT_VERIFIED" or "DOCUMENT_FAIL". If absent for every generation
+    since Gen 11001 → the document is never read. Fix this first, before
+    everything else. No other fix matters if ODIN cannot receive instructions.
 
-  (a) Is this research program document being read before each session starts?
-      HOW TO CHECK: Add a log line at session start that prints the first 64 chars
-      of this document and its checksum. If that log line does not appear → document
-      is not being read. Fix this before anything else.
+(b) DID THE GEN 2126 RESTORE EVER HAPPEN?
+    HOW TO CHECK: Search all logs for "restore" or "2126". If absent → restore
+    was never attempted. If present → find the log line and confirm the restored
+    values match: size_pct=30, RSI_long=34.00, stop_loss_pct=2.41,
+    timeout_hours=200, take_profit_pct=3.55.
 
-  (b) Did the Gen 2126 restore attempts silently fail, or were they never attempted?
-      HOW TO CHECK: Search run log for any line containing "restore" or "2126".
-      If absent → restore was never attempted. If present → find why it failed.
+(c) WHY IS MAX_TRADES NOT BLOCKING >60-TRADE RESULTS?
+    HOW TO CHECK: Read the backtest rejection code directly. Confirm:
+      - The constant MAX_TRADES["swing"] = 60 exists as a literal in code
+      - The check reads: if result.trades > MAX_TRADES[style]: reject
+      - This check runs AFTER backtest returns (not before — trades come from backtest)
+      - Rejected configs log: [discarded_high_trades gen=N trades=N]
+    If ANY of these are absent → the enforcement is broken regardless of what
+    constants say.
 
-  (c) Why is MAX_TRADES not blocking 159/176/186/522-trade results?
-      HOW TO CHECK: Read the backtest rejection logic code directly. Confirm
-      MAX_TRADES[swing]=60 exists as a constant AND is checked after backtesting.
-      Confirm the check is: if trades > MAX_TRADES[swing]: reject.
+(d) WHY IS THE DEDUP CACHE NOT BLOCKING EXACT DUPLICATES?
+    HOW TO CHECK: Read the deduplication code directly. Confirm:
+      - Cache stores a fingerprint (SHA-256 or equivalent) of the FULL config
+      - Cache is loaded from disk at startup, saved to disk after each gen
+      - Cache is checked BEFORE the backtest is run, not after
+      - Fingerprint covers ALL config fields (not just a subset)
+    Run a manual test: submit the same config twice → second must be
+    logged [DUPLICATE gen=N] and not backtested.
 
-  (d) Why is the deduplication cache not blocking exact duplicates?
-      HOW TO CHECK: Read the deduplication cache code directly. Confirm it is
-      storing config fingerprints (not just parameter dicts). Confirm it is
-      persisted across generations (not reset each gen). Confirm it is checked
-      BEFORE backtesting, not after.
+(e) WHY ARE 600 GENERATIONS RUNNING AFTER A HARD HALT?
+    HOW TO CHECK: Confirm whether ODIN reads this file at startup.
+    If not → the halt only exists on paper and is meaningless.
+    FIX: Make document-read-and-checksum the FIRST startup step, before
+    anything else. Store this document's SHA-256 checksum in a separate
+    immutable file (checksum.txt). Compare on every startup.
 
-  (e) Why are 400 generations running after a HARD HALT?
-      HOW TO CHECK: Determine whether ODIN reads this document at startup.
-      If not → implement document-read-and-checksum as the very first startup step.
+═══════════════════════════════════════════════════════════════
+## Human Operator Checklist — ALL 16 ITEMS REQUIRED
+## Check each box only after confirming, not just attempting
+═══════════════════════════════════════════════════════════════
 
-Document all five answers in the run log before proceeding to the checklist.
+### INFRASTRUCTURE (Fix These First — Nothing Else Works Without Them)
 
-### Human Operator Checklist — ALL ITEMS REQUIRED BEFORE GEN 11401
+1. [ ] IMPLEMENT DOCUMENT-READ-AND-CHECKSUM AT STARTUP
+        Implementation requirements:
+        - ODIN reads this file as the very first action of every session
+        - Computes SHA-256 of the file contents
+        - Compares against checksum stored in a separate file (checksum.txt)
+        - If match: logs [DOCUMENT_VERIFIED gen=N checksum=HASH] → continue
+        - If mismatch or file missing: logs [DOCUMENT_FAIL gen=N] → HALT
+        - No LLM call, no backtest, no config load may precede this check
+        Verification: Run one dummy session. Confirm [DOCUMENT_VERIFIED] appears
+        as the first log line. Then corrupt this file temporarily → confirm
+        [DOCUMENT_FAIL] appears and session halts.
 
-INFRASTRUCTURE (fix broken systems first):
-1. [ ] Implement mandatory document-read-and-checksum at ODIN session startup
-        - ODIN must read this file, compute SHA-256, compare against stored checksum
-        - If mismatch or file unreadable → HALT before doing anything else
-        - Log: [DOCUMENT_VERIFIED gen=N checksum=HASH] or [DOCUMENT_FAIL gen=N]
-2. [ ] Fix deduplication cache:
-        - Wipe and reinitialize from scratch
-        - Confirm it persists across generations
-        - Confirm it fingerprints ALL config fields, not just a subset
-        - Test: submit same config twice → confirm second is blocked with [DUPLICATE gen=N]
-        - Test: submit two configs differing by one field → confirm both are accepted
-3. [ ] Fix MAX_TRADES enforcement:
-        - Confirm MAX_TRADES[swing]=60 in live code
-        - Confirm rejection happens AFTER backtesting (trades count comes from backtest)
-        - Confirm rejected configs are logged [discarded_high_trades gen=N trades=N]
-        - Test: manually submit a config that historically produces >60 trades →
-          confirm it is rejected
-4. [ ] Audit MIN_SHARPE_TO_KEEP enforcement:
-        - Read the constant in live code — confirm it is 2.9232
-        - Confirm STRICT greater-than (>) is used, not >=
-        - Confirm [new_elite] label is impossible for Sharpe ≤ 2.9232
-        - Test: submit a result with Sharpe=2.9232 → confirm it is [discarded], not [new_elite]
-        - Test: submit a result with Sharpe=2.9233 → confirm it is [new_elite]
+2. [ ] FIX DEDUPLICATION CACHE
+        Implementation requirements:
+        - Wipe existing cache (it is corrupted/non-functional)
+        - Rebuild from scratch with the following properties:
+            * Fingerprint = SHA-256 of ALL config fields, sorted alphabetically
+            * Persisted to disk after every generation
+            * Loaded from disk at startup, before any generation runs
+            * Check happens BEFORE backtest: if fingerprint in cache → skip, log [DUPLICATE gen=N]
+            * Check happens AFTER LLM proposes config, BEFORE backtest runs
+        - Test A: Submit same config twice → second logged [DUPLICATE gen=N], not backtested
+        - Test B: Submit configs differing by one field → both accepted
+        - Test C: Restart session mid-run → cache survives, still blocks duplicates
 
-INCUMBENT RESTORE:
-5. [ ] Restore Gen 2126 config (below) into incumbent memory slot EXACTLY
-6. [ ] Verify "Current Best Strategy" block shows ALL of:
-          size_pct=30, stop_loss_pct=2.41, timeout_hours=200,
-          take_profit_pct=3.55, RSI_long=34.00, RSI_short=60.64,
-          macd_long_period=26, macd_short_period=48
-7. [ ] Compute and store incumbent fingerprint hash from Gen 2126 values
-8. [ ] Verify computed hash matches stored Gen 2126 hash (from original verification)
+3. [ ] FIX MAX_TRADES ENFORCEMENT
+        Implementation requirements:
+        - Constant in live code: MAX_TRADES = {"swing": 60, "day": 999}
+        - Check runs AFTER backtest returns result.trades
+        - Check: if result.trades > MAX_TRADES[style]: log [discarded_high_trades gen=N trades=N]; skip
+        - Rejected configs do NOT update the incumbent, do NOT enter dedup cache
+          (they should enter a separate "high_trades_seen" log only)
+        - Test: Submit a config known to produce >60 swing trades → confirm rejection log
+        - Test: Submit a config producing exactly 60 trades → confirm it is NOT rejected
+        Note: Based on all improvement history, Sharpe>2.5 is only achievable with
+        trades=20-30. The 60-trade limit is conservative — we could use 40 and still
+        protect the Regime A search space.
 
-CONSTANTS VERIFICATION:
-9.  [ ] Confirm MIN_TRADES[swing]=30 in live code
-10. [ ] Confirm MAX_TRADES[swing]=60 in live code
-11. [ ] Confirm MIN_SHARPE_TO_KEEP=2.9232 in live code
-12. [ ] Confirm STALL_ALERT_GENS=200 in live code
-13. [ ] Confirm LOKI code-change permissions are restricted per LOKI LOCKDOWN
+4. [ ] AUDIT AND CONFIRM MIN_TRADES[swing]
+        - Read the constant in live code: confirm MIN_TRADES["swing"] = 30
+        - LOKI change history shows this bounced between 10 and 30 eight times
+        - The correct value is 30 — this matches Gen 2126's trade count exactly
+        - If current value is not 30 → fix it to 30
+        - Confirm check: if result.trades < MIN_TRADES[style]: log [discarded_low_trades gen=N trades=N]; skip
+        Note: Lowering MIN_TRADES below 30 was the single most damaging parameter
+        change in the research history. It opened the door to overfitted low-trade
+        configs. Do not lower it below 30 for any reason.
 
-INVALIDATION:
-14. [ ] Invalidate and discard all [new_elite] labels from Gens 11155–11400
-        These are Regime B results. None exceeded Sharpe=2.9232. None are valid.
-15. [ ] Confirm the corrupted config (size_pct=15, RSI_long=36.56, etc.) appears
-        nowhere in any active memory slot, cache, or config file
+5. [ ] AUDIT MIN_SHARPE_TO_KEEP ENFORCEMENT
+        - Read the constant in live code: confirm MIN_SHARPE_TO_KEEP = 2.9232
+        - Check uses strict greater-than (>), not >=
+        - Sharpe=2.9232 → [discarded], not [new_elite]
+        - Sharpe=2.9233 → [new_elite]
+        - Test both cases and confirm log output
 
-TEST RUN (final gate — do not skip):
-16. [ ] Run one test generation and confirm ALL of:
-          - Startup log shows [DOCUMENT_VERIFIED gen=11401 checksum=HASH]
-          - Startup log shows [STARTUP_OK gen=11401]
-          - Output config has size_pct=30, RSI_long=34.00 (or mutation thereof)
-          - Any Sharpe ≤ 2.9232 result is logged [discarded], not [new_elite]
-          - Any trades > 60 result is logged [discarded_high_trades]
-          - Any exact duplicate is logged [DUPLICATE gen=N]
-          - No blacklisted field values appear in the proposed config
+### INCUMBENT RESTORE
 
-If ANY item cannot be confirmed → DO NOT RESUME. Document the failure and escalate.
+6. [ ] RESTORE GEN 2126 CONFIG INTO INCUMBENT SLOT EXACTLY
+        Copy the YAML from the "TRUE INCUMBENT (Gen 2126)" block below.
+        Do not modify any field. Do not let LOKI modify it during restore.
+        The corrupted config (size_pct=15, RSI_long=36.56, stop_loss_pct=2.72,
+        timeout_hours=196) must be completely removed from all memory slots.
 
----
-
-## TRUE INCUMBENT (Gen 2126) — VERIFIED BASELINE — DO NOT MODIFY
-
-This is the ONLY config that may occupy the incumbent slot.
-Copy EXACTLY into the incumbent memory slot before resuming.
-This config has been verified correct and must not be altered by LOKI or any automated process.
-
-```yaml
-name: crossover
-style: randomly generated
-pairs:
-- LINK/USD
-- ADA/USD
-- BTC/USD
-- OP/USD
-position:
-  size_pct: 30
-  max_open: 1
-  fee_rate: 0.001
-entry:
-  long:
-    conditions:
-    - indicator: rsi
-      period_hours: 21
-      operator: lt
-      value: 34.00
-    - indicator: macd_signal
-      period_hours: 26
-      operator: eq
-      value: bullish
-  short:
-    conditions:
-    - indicator: rsi
-      period_hours: 21
-      operator: gt
-      value: 60.64
-    - indicator: macd_signal
-      period_hours: 48
-      operator: eq
-      value: bearish
-exit:
-  take_profit_pct: 3.55
-  stop_loss_pct: 2.41
-  timeout_hours: 200
-risk:
-  pause_if_down_pct: 8
-  stop_if_down_pct: 18
-  pause_hours: 48
-```
-
-**Gen 2126 verified metrics: Sharpe=2.9232 | Win rate=90.0% | Trades=30**
-**This is the ONLY known result above Sharpe=2.9. It must be protected absolutely.**
-**The path to Sharpe>2.9 requires low trade count (29-30), high win rate (>85%),**
-**and tight RSI+MACD confluence. High-frequency configs (>60 trades) cannot reach this.**
-
-### Incumbent Fingerprint (automated verification — check every gen before backtest)
-
-```
-size_pct         = 30      ← IMMUTABLE — never changes under any phase
-stop_loss_pct    = 2.41    ← IMMUTABLE — never changes under any phase
-timeout_hours    = 200     ← IMMUTABLE — never changes under any phase
-take_profit_pct  = 3.55    ← IMMUTABLE except during Phase 3 scan
-rsi
+7. [ ] VERIFY INCUMBENT SLOT CONTAINS ALL OF:
+          size_pct          = 30
+          stop_loss_pct     = 2.41
+          timeout_hours     = 200
+          take_profit_pct   = 3.55
+          RSI_
