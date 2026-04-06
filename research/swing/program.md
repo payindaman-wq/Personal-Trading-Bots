@@ -1,151 +1,161 @@
 ```markdown
 # ODIN Research Program — Swing Trading Strategy Optimizer
-# Effective from Gen 11801 | Incumbent: Gen 2126 | MIMIR-reviewed 2026-04-06 (v7)
+# Effective from Gen 12001 | Incumbent: Gen 2126 (MUST BE RESTORED — SEE HALT)
+# MIMIR-reviewed 2026-04-06 (v8)
 #
-# ⚠️ CRITICAL HALT — ACTIVE — DO NOT RUN ANY GENERATION UNTIL ALL CONDITIONS RESOLVED
+# ⚠️ CRITICAL HALT — ACTIVE — DO NOT RUN ANY GENERATION
+# ⚠️ THIS HALT HAS BEEN ACTIVE SINCE GEN 11001 (1000+ GENERATIONS AGO)
+# ⚠️ ZERO COMPLIANCE IN 1000 GENERATIONS — ROOT CAUSE CONFIRMED BELOW
 #
-# HALT HISTORY:
-#   Gen 11001 (v2): First halt issued
-#   Gen 11156 (v3): Re-issued — halt not acted on
-#   Gen 11200 (v4): Re-issued — halt not acted on
-#   Gen 11400 (v5): Re-issued — halt not acted on
-#   Gen 11600 (v6): Re-issued — 600 generations since first halt, zero compliance
-#   Gen 11800 (v7): Re-issued — 800 generations since first halt, zero compliance
+# ══════════════════════════════════════════════════════════════════════
+# HALT HISTORY (every reissuance has been ignored — this is evidence,
+# not repetition):
+#   Gen 11001 (v2): First halt
+#   Gen 11156 (v3): Re-issued — not acted on
+#   Gen 11200 (v4): Re-issued — not acted on
+#   Gen 11400 (v5): Re-issued — not acted on
+#   Gen 11600 (v6): Re-issued — not acted on
+#   Gen 11800 (v7): Re-issued — not acted on
+#   Gen 12000 (v8): Re-issued — confirmed 1000 generations of zero compliance
+# ══════════════════════════════════════════════════════════════════════
 #
-# FAILURE SUMMARY AS OF GEN 11800 (all failures confirmed active, none resolved):
+# ROOT CAUSE (CONFIRMED, UNCHANGED ACROSS ALL VERSIONS):
+#   This document is NOT read at session startup.
+#   ODIN loads from memory/cache only.
+#   Every instruction, every halt, every fix written here is invisible
+#   to the running system until Item 1 is implemented and verified.
+#   There is exactly ONE fix that enables all other fixes: Item 1.
+#   Do not implement any other item until Item 1 passes all three
+#   verification tests.
 #
-#   FAILURE 1 — DOCUMENT NOT READ AT STARTUP [CRITICAL, ROOT CAUSE OF ALL OTHERS]
-#     Evidence: No [DOCUMENT_VERIFIED] or [DOCUMENT_FAIL] line exists in any log
-#     since Gen 11001. Zero compliance across 800 generations.
-#     This is the root cause. All other failures persist because instructions
-#     written here are never received by ODIN.
-#     Required fix: Implement document-read-and-checksum as the absolute first
-#     action of every session. See Item 1 below.
+# ══════════════════════════════════════════════════════════════════════
+# CONFIRMED ACTIVE FAILURES AS OF GEN 12000
+# ══════════════════════════════════════════════════════════════════════
 #
-#   FAILURE 2 — INCUMBENT SLOT CONTAINS BLACKLISTED REGIME B CONFIG
-#     Evidence: size_pct=15, RSI_long=36.56, stop_loss_pct=2.72, timeout_hours=196
-#     visible in "Current Best Strategy". These are not Gen 2126 values.
-#     This config entered as incumbent at Gen 2149 (Sharpe=0.8798, 345 trades)
-#     — a false improvement that should have been rejected by MAX_TRADES.
-#     Required fix: Restore Gen 2126 exactly. See Item 6 below.
+# FAILURE 1 — DOCUMENT NOT READ AT STARTUP [ROOT CAUSE]
+#   Evidence: Zero [DOCUMENT_VERIFIED] or [DOCUMENT_FAIL] lines in any
+#   log across 1000 generations (Gen 11001–12000).
+#   Impact: All other failures persist. No instruction survives restart.
+#   Fix: Item 1 (mandatory first).
 #
-#   FAILURE 3 — MAX_TRADES ENFORCEMENT NON-FUNCTIONAL
-#     Evidence: Recent gens show 483, 488, 491, 495, 499, 504, 513, 521, 523,
-#     537, 541 trades against a supposed limit of MAX_TRADES[swing]=60.
-#     None were rejected. Gen 2149's 345 trades were also not rejected.
-#     Required fix: See Item 3 below.
+# FAILURE 2 — INCUMBENT SLOT CONTAINS CORRUPTED REGIME B CONFIG
+#   Evidence: size_pct=15, RSI_long=36.56, stop_loss_pct=2.72,
+#   timeout_hours=196 visible in Current Best Strategy.
+#   These values entered at Gen 2149 (Sharpe=0.8798, 345 trades).
+#   Gen 2149 should have been rejected by MAX_TRADES (345 >> 60).
+#   The true incumbent is Gen 2126: Sharpe=2.9232, win_rate=90.0%,
+#   trades=30.
+#   This single corrupt incumbent slot has misdirected ~9,850 generations.
+#   Fix: Item 6 (restore Gen 2126 exactly).
 #
-#   FAILURE 4 — DEDUPLICATION CACHE NON-FUNCTIONAL
-#     Evidence: Gen 11781 and Gen 11796 both show Sharpe=2.4226, win_rate=53.0%,
-#     trades=477 — identical result, evaluated twice, no rejection logged.
-#     Multiple other duplicate clusters visible in last 20 gens.
-#     Required fix: See Item 2 below.
+# FAILURE 3 — MAX_TRADES ENFORCEMENT NON-FUNCTIONAL
+#   Evidence: Gens 11985 (715 trades), and the entire post-Gen-2149
+#   history showing 345–540 trade results accepted without rejection.
+#   Gen 2149 (345 trades) entered the incumbent slot because this check
+#   did not exist. That single failure caused this entire crisis.
+#   Fix: Item 3.
 #
-#   FAILURE 5 — MIN_TRADES[swing] UNSTABLE
-#     Evidence: Changed 8 times (30→20→10→20→25→20→25→21→30).
-#     Current value=30 per constants block but must be verified in live code.
-#     Every reduction below 30 opened the search to overfit low-trade configs
-#     and produced no improvement over Gen 2126.
-#     Required fix: See Item 4 below.
+# FAILURE 4 — DEDUPLICATION CACHE NON-FUNCTIONAL
+#   Evidence: Gen 11993, 11995, 11998 — identical Sharpe=2.4226,
+#   win_rate=53.0%, trades=477 — evaluated three separate times in the
+#   last 20 generations alone. Prior identical pair at Gens 11781/11796.
+#   Fix: Item 2.
 #
-# ROOT CAUSE (CONFIRMED v7, unchanged from v6):
-#   This document is NOT read before sessions start.
-#   ODIN loads from memory/cache only — the corrupted Regime B config persists.
-#   The halt, the incumbent restore, the MAX_TRADES limit, and all guidance
-#   exist only here and are invisible to ODIN.
-#   Until Item 1 is implemented and verified, no other fix will survive a
-#   session restart.
+# FAILURE 5 — MIN_TRADES[swing] HAS BEEN CHANGED 9 TIMES
+#   History: 30→20→10→20→25→20→25→21→30
+#   Current value: 30 (correct — do not change)
+#   Every reduction below 30 opened search to overfit low-trade configs
+#   or to the Regime B high-frequency attractor.
+#   The reduction to 10 (Gen 7200) was the worst individual change.
+#   Fix: Item 4 (lock at 30, make immutable).
+#
+# FAILURE 6 — PAIRS LIST INCONSISTENT WITH RESEARCH SCOPE
+#   Evidence: Current incumbent shows LINK/USD, ADA/USD, BTC/USD, OP/USD.
+#   Research scope specifies BTC/USD, ETH/USD, SOL/USD.
+#   This discrepancy must be resolved before optimization resumes.
+#   Fix: Item 7.
+#
+# FAILURE 7 — SHARPE MAXIMUM (2.9286) UNACCOUNTED FOR
+#   Evidence: Best recorded improvement is Gen 2126 at Sharpe=2.9232.
+#   All-time Sharpe maximum shows 2.9286. The config producing 2.9286
+#   has no log entry. It may be a logging artifact or an unrecorded
+#   session result. Must be investigated before Gen 2126 restore.
+#   Fix: Item 8.
 
-═══════════════════════════════════════════════════════════════
-⚠️  HARD HALT — HUMAN OPERATOR — ALL 16 ITEMS REQUIRED  ⚠️
-     DO NOT RESUME AT GEN 11801 UNTIL ALL ITEMS ARE CHECKED
-     ITEMS ARE ORDERED BY DEPENDENCY — DO NOT SKIP AHEAD
-═══════════════════════════════════════════════════════════════
+══════════════════════════════════════════════════════════════════════
+⚠️  HARD HALT — HUMAN OPERATOR — ALL 20 ITEMS REQUIRED  ⚠️
+    DO NOT RESUME AT GEN 12001 UNTIL ALL ITEMS ARE CHECKED
+    ITEMS ARE ORDERED BY DEPENDENCY — DO NOT SKIP OR REORDER
+    A BOX MAY ONLY BE CHECKED WHEN IMPLEMENTATION IS CONFIRMED
+    WORKING BY TEST — NOT MERELY ATTEMPTED
+══════════════════════════════════════════════════════════════════════
 
-## Step 0: Diagnose Before You Fix — Answer All Five Questions
-## Document answers in the run log before touching any checklist item.
-
-(a) IS THIS DOCUMENT BEING READ AT STARTUP?
-    Search the last 800 generation logs (Gen 11001–11800) for any line
-    containing "DOCUMENT_VERIFIED" or "DOCUMENT_FAIL".
-    Expected if working: at least one such line per session.
-    Actual finding: ZERO such lines across 800 generations.
-    Conclusion: Document is NEVER read. Fix this before everything else.
-    No other fix survives a restart until this is working.
-
-(b) DID THE GEN 2126 RESTORE EVER HAPPEN?
-    Search all logs for "restore" or "2126".
-    Expected if working: log line confirming restored values:
-      size_pct=30, RSI_long=34.00, stop_loss_pct=2.41,
-      timeout_hours=200, take_profit_pct=3.55
-    If absent: restore was never attempted.
-    If present: verify the live incumbent matches these values exactly.
-
-(c) WHY IS MAX_TRADES NOT BLOCKING >60-TRADE RESULTS?
-    Read the backtest rejection code directly. Confirm ALL of:
-      - Constant MAX_TRADES["swing"] = 60 exists as a literal in live code
-      - Check: if result.trades > MAX_TRADES[style]: reject
-      - Check runs AFTER backtest returns result.trades (trades come from backtest)
-      - Rejected configs log: [discarded_high_trades gen=N trades=N]
-      - Rejected configs do NOT update incumbent, do NOT enter dedup cache
-    If ANY of these are absent: enforcement is broken.
-    Note: Gen 2149 (345 trades) entered the incumbent slot because this check
-    did not exist. That single failure caused 9,600 wasted generations.
-
-(d) WHY IS THE DEDUP CACHE NOT BLOCKING EXACT DUPLICATES?
-    Read the deduplication code directly. Confirm ALL of:
-      - Cache stores SHA-256 of the FULL config (all fields, sorted alphabetically)
-      - Cache persisted to disk after every generation
-      - Cache loaded from disk at startup, before any generation runs
-      - Check happens BEFORE backtest: if fingerprint in cache → skip
-      - Log format: [DUPLICATE gen=N fingerprint=HASH]
-    Run manual test: submit same config twice → second must be logged [DUPLICATE]
-    and not backtested.
-
-(e) WHY ARE 800 GENERATIONS RUNNING AFTER A HARD HALT?
-    Answer: ODIN does not read this file at startup.
-    The halt exists only on paper and is invisible to ODIN.
-    Fix: Item 1 — document-read-and-checksum as the first startup action.
-    This is not optional. Every other fix in this document is meaningless
-    if ODIN cannot receive instructions across session boundaries.
-
-═══════════════════════════════════════════════════════════════
-## Human Operator Checklist — ALL 16 ITEMS REQUIRED
-## Items are ordered by dependency. Do not check a box until
-## the implementation is confirmed working, not just attempted.
-═══════════════════════════════════════════════════════════════
-
-### BLOCK A: INFRASTRUCTURE (Must complete before any other block)
+═══════════════════════════
+BLOCK A: INFRASTRUCTURE
+(Complete before all other blocks. Nothing else works without this.)
+═══════════════════════════
 
 1. [ ] IMPLEMENT DOCUMENT-READ-AND-CHECKSUM AT STARTUP
-        This is the single most important fix. Nothing else survives a restart
-        without it.
-        Implementation requirements:
-        - ODIN reads THIS FILE as the absolute first action of every session
-        - Computes SHA-256 of file contents
-        - Compares against checksum stored in a SEPARATE, IMMUTABLE file
-          (checksum.txt — must not be auto-updated by ODIN or LOKI)
-        - If match: logs [DOCUMENT_VERIFIED gen=N checksum=HASH] → continue
-        - If mismatch or file missing: logs [DOCUMENT_FAIL gen=N reason=REASON]
-          → HALT immediately, do not continue session
-        - No LLM call, no backtest, no config load, no LOKI action may precede
-          this check
-        Verification test (MANDATORY before proceeding):
-        - Run one dummy session → confirm [DOCUMENT_VERIFIED] is the first log line
-        - Corrupt this file temporarily → confirm [DOCUMENT_FAIL] appears and
-          session halts without running any generation
-        - Restore file → confirm [DOCUMENT_VERIFIED] resumes
-        Do not check this box until all three tests pass.
+        Why this is item 1: Every other fix in this document is written
+        here. If ODIN does not read this document, no fix survives a
+        restart. This is the only item that enables all other items.
+        Do not implement any other item until this one passes all tests.
+
+        Implementation requirements (all required, no shortcuts):
+        a) ODIN reads THIS FILE (research_program.md or equivalent path)
+           as the ABSOLUTE FIRST ACTION of every session — before any
+           LLM call, backtest, config load, LOKI action, or log write
+           other than the verification log line itself.
+        b) Computes SHA-256 of the file contents byte-for-byte.
+        c) Compares against the checksum stored in checksum.txt.
+           checksum.txt MUST be:
+           - A separate file from this document
+           - Never auto-updated by ODIN, LOKI, or any automated process
+           - Only updatable by a human operator with explicit intent
+           - Located at a path that is hardcoded (not configurable)
+        d) On match: logs exactly:
+             [DOCUMENT_VERIFIED gen=N checksum=HASH]
+           as the first line of the session log. Then continues.
+        e) On mismatch or missing file: logs exactly:
+             [DOCUMENT_FAIL gen=N reason=REASON]
+           Then HALTS. Does not run any generation. Does not call LLM.
+           Does not load any config. Does not write anything else.
+
+        Mandatory verification tests (all three required before
+        checking this box):
+        TEST A — Normal operation:
+          Run one session. Confirm [DOCUMENT_VERIFIED] is the first
+          log line. Confirm the checksum matches checksum.txt.
+        TEST B — Corruption detection:
+          Add one character to this file temporarily. Run a session.
+          Confirm [DOCUMENT_FAIL] appears and NO generation runs.
+          Restore the file. Confirm [DOCUMENT_VERIFIED] resumes.
+        TEST C — Missing checksum file:
+          Rename checksum.txt temporarily. Run a session.
+          Confirm [DOCUMENT_FAIL reason=CHECKSUM_FILE_MISSING] appears
+          and NO generation runs. Restore checksum.txt.
+
+        Do not check this box until all three tests pass and their
+        results are documented in the run log.
 
 2. [ ] FIX DEDUPLICATION CACHE
+        Why: Gen 11993, 11995, 11998 are identical. Gen 11781 and 11796
+        are identical. The cache is not functioning. Every duplicate
+        wastes a full backtest cycle.
+
         Implementation requirements:
-        - Wipe existing cache completely (confirmed corrupted/non-functional)
-        - Rebuild from scratch:
-            * Fingerprint = SHA-256(JSON of all config fields, keys sorted A-Z)
-            * Persisted to disk after every generation (not just at session end)
-            * Loaded from disk at startup, before any generation runs
-            * Check happens AFTER LLM proposes config, BEFORE backtest runs
-            * If duplicate: log [DUPLICATE gen=N fingerprint=HASH], skip backtest
-            * Duplicate configs do NOT consume a generation number
-        Verification tests (all three required):
-        - Test A: Submit same config twice → second logged [DUPLICATE
+        a) Wipe the existing cache file completely (confirmed corrupted).
+        b) Rebuild from scratch with these exact specifications:
+           - Fingerprint: SHA-256 of JSON-serialized config with all
+             fields present, keys sorted alphabetically, no whitespace
+             variation (canonical form)
+           - Cache file: persisted to disk after EVERY generation
+             (not buffered, not session-end only)
+           - Cache loaded from disk at startup, AFTER document
+             verification (Item 1), BEFORE any generation runs
+           - Check occurs AFTER LLM proposes config, BEFORE backtest
+           - On duplicate: log [DUPLICATE gen=N fingerprint=HASH]
+             Do NOT run backtest. Do NOT consume generation number.
+             Do NOT update incumbent. Do NOT re-enter cache.
+           - On new config: run backtest, then add to cache regardless
+             of whether result is accepted or disc
