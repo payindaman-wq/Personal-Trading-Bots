@@ -50,6 +50,40 @@ ALL_PAIRS = [
 # Helpers
 # ---------------------------------------------------------------------------
 
+
+TYR_STATE_PATH = "/root/.openclaw/workspace/research/tyr_state.json"
+
+def get_tyr_regime_for_sprint(started_at_iso, ended_at_iso=None):
+    """
+    Returns the dominant TYR regime (NORMAL/CAUTION/DANGER) during a sprint window.
+    Falls back to current regime if no log entries match the window.
+    Returns None if TYR state file is missing.
+    """
+    import json, os
+    if not os.path.exists(TYR_STATE_PATH):
+        return None
+    try:
+        state = json.load(open(TYR_STATE_PATH))
+    except Exception:
+        return None
+    log = state.get("log", [])
+    if not log:
+        return state.get("regime")
+    # Filter log entries that fall within the sprint window
+    matching = [e for e in log if e.get("ts", "") >= started_at_iso
+                and (ended_at_iso is None or e.get("ts", "") <= ended_at_iso)]
+    if not matching:
+        # Sprint predates TYR — use oldest available reading
+        matching = [log[-1]] if log else []
+    if not matching:
+        return state.get("regime")
+    counts = {}
+    for e in matching:
+        r = e.get("regime", "NORMAL")
+        counts[r] = counts.get(r, 0) + 1
+    return max(counts, key=counts.get)
+
+
 def load_strategy(bot_name):
     path = os.path.join(FLEET_DIR, bot_name, "strategy.yaml")
     if not os.path.isfile(path):
@@ -347,6 +381,10 @@ def archive_competition(comp_dir, meta, bots, prices):
     for i, r in enumerate(rankings, 1):
         r["rank"] = i
 
+    tyr_regime = get_tyr_regime_for_sprint(
+        meta.get("started_at", ""),
+        now_iso(),
+    )
     final = {
         "comp_id":        comp_id,
         "league":         "swing",
@@ -355,6 +393,7 @@ def archive_competition(comp_dir, meta, bots, prices):
         "pairs":          meta["pairs"],
         "winner":         rankings[0]["bot"] if rankings else None,
         "rankings":       rankings,
+        "tyr_regime":     tyr_regime,
     }
 
     result_dir = os.path.join(RESULTS_DIR, comp_id)

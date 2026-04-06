@@ -1,0 +1,80 @@
+{
+  "bot": "ivar",
+  "competition_id": "swing-20260329-0842",
+  "league": "swing",
+  "duration_hours": 168,
+  "started_at": "2026-03-29T08:42:38.770631+00:00",
+  "pairs": [
+    "BTC/USD",
+    "ETH/USD",
+    "SOL/USD",
+    "XRP/USD",
+    "DOGE/USD",
+    "AVAX/USD",
+    "LINK/USD",
+    "UNI/USD",
+    "AAVE/USD",
+    "NEAR/USD",
+    "APT/USD",
+    "SUI/USD",
+    "ARB/USD",
+    "OP/USD",
+    "ADA/USD",
+    "POL/USD"
+  ],
+  "starting_capital": 1000.0,
+  "fee_rate": 0.001,
+  "equity": 972.47,
+  "peak_equity": 1000.0,
+  "positions": [],
+  "stats": {
+    "total_trades": 6,
+    "wins": 0,
+    "losses": 3,
+    "win_rate": 0.0,
+    "total_pnl_usd": -26.35,
+    "total_pnl_pct": -17.2803,
+    "total_fees": 1.7847,
+    "max_drawdown_pct": 3.608,
+    "current_equity": 963.92,
+    "sum_losses_usd": -34.9
+  },
+  "closed_trades": [
+    {
+      "pair": "AVAX/USD",
+      "direction": "short",
+      "entry_price": 8.7425,
+      "exit_price": 9.2927,
+      "size_usd": 200.0,
+      "pnl_pct": -6.29,
+      "net_pnl": -12.79,
+      "reason": "SL",
+      "opened_at": "2026-03-29T09:00:17.859194+00:00",
+      "closed_at": "2026-04-01T06:30:07.301088+00:00"
+    },
+    {
+      "pair": "LINK/USD",
+      "direction": "short",
+      "entry_price": 8.5188,
+      "exit_price": 9.0254,
+      "size_usd": 200.0,
+      "pnl_pct": -5.95,
+      "net_pnl": -12.09,
+      "reason": "SL",
+      "opened_at": "2026-03-29T09:00:18.152652+00:00",
+      "closed_at": "2026-04-01T06:30:07.301103+00:00"
+    },
+    {
+      "pair": "ETH/USD",
+      "direction": "long",
+      "entry_price": 2142.8,
+      "exit_price": 2034.8,
+      "size_usd": 194.86,
+      "pnl_pct": -5.04,
+      "net_pnl": -10.02,
+      "reason": "SL",
+      "opened_at": "2026-04-01T06:30:07.588821+00:00",
+      "closed_at": "2026-04-02T10:30:08.549219+00:00"
+    }
+  ]
+}

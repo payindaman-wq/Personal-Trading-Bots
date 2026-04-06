@@ -1,0 +1,56 @@
+{
+  "bot": "magni",
+  "competition_id": "spread-20260329-0842",
+  "league": "spread",
+  "duration_hours": 168,
+  "started_at": "2026-03-29T08:42:38.962706+00:00",
+  "pairs": [
+    "BTC/USD",
+    "ETH/USD",
+    "SOL/USD",
+    "XRP/USD",
+    "DOGE/USD",
+    "AVAX/USD",
+    "LINK/USD",
+    "UNI/USD",
+    "AAVE/USD",
+    "NEAR/USD",
+    "APT/USD",
+    "SUI/USD",
+    "ARB/USD",
+    "OP/USD",
+    "ADA/USD",
+    "POL/USD"
+  ],
+  "starting_capital": 1000.0,
+  "fee_rate": 0.001,
+  "equity": 992.6,
+  "peak_equity": 1000.0,
+  "positions": [],
+  "stats": {
+    "total_trades": 2,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "total_pnl_usd": -6.9,
+    "total_pnl_pct": -5.1836,
+    "total_fees": 0.7466,
+    "max_drawdown_pct": 1.346,
+    "current_equity": 986.29,
+    "sum_losses_usd": -13.21
+  },
+  "closed_trades": [
+    {
+      "pair": "NEAR/USD",
+      "direction": "short",
+      "entry_price": 1.1517,
+      "exit_price": 1.2114,
+      "size_usd": 250.0,
+      "pnl_pct": -5.18,
+      "net_pnl": -13.21,
+      "reason": "SL",
+      "opened_at": "2026-03-29T18:30:07.771477+00:00",
+      "closed_at": "2026-04-04T02:30:07.945943+00:00"
+    }
+  ]
+}

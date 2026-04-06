@@ -1,4 +1,4 @@
-name: autobotday
+name: crossover
 style: momentum_price_change_macd_ema_trend_filter
 pairs:
 - UNI/USD
@@ -13,7 +13,7 @@ pairs:
 - LINK/USD
 position:
   size_pct: 10
-  max_open: 2
+  max_open: 3
   fee_rate: 0.001
 entry:
   long:
@@ -63,10 +63,10 @@ entry:
 exit:
   take_profit_pct: 3.51
   stop_loss_pct: 0.4
-  timeout_minutes: 720
+  timeout_minutes: 706
 risk:
   pause_if_down_pct: 4
   stop_if_down_pct: 10
   pause_minutes: 60
-_sharpe: 0.971
-_trades: 259
+_sharpe: 1.046
+_trades: 292

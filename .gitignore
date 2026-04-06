@@ -78,3 +78,7 @@ research/mimir_log.jsonl
 research/loki_log.jsonl
 *.bak
 *.bak_*
+
+# --- TYR / HEIMDALL runtime state (regenerated every 30 min) ----------------
+research/tyr_state.json
+research/heimdall_state.json

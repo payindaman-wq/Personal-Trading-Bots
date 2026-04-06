@@ -1,0 +1,57 @@
+{
+  "bot": "hati",
+  "competition_id": "arb-20260405-0900",
+  "league": "arb",
+  "duration_hours": 168,
+  "started_at": "2026-04-05T09:00:01.891371+00:00",
+  "pair_a": "DOGE/USD",
+  "pair_b": "BTC/USD",
+  "spread_name": "DOGE/BTC",
+  "starting_capital": 1000.0,
+  "fee_rate": 0.001,
+  "equity": 1001.34,
+  "peak_equity": 1001.64,
+  "positions": [
+    {
+      "pair": "DOGE/USD vs BTC/USD",
+      "direction": "long",
+      "pair_a": "DOGE/USD",
+      "pair_b": "BTC/USD",
+      "entry_ratio": 1.34e-06,
+      "entry_z": -2.0419,
+      "entry_price_a": 0.091369,
+      "entry_price_b": 68284.0,
+      "size_usd": 300.49,
+      "opened_at": "2026-04-05T23:30:01.953079+00:00"
+    }
+  ],
+  "stats": {
+    "total_trades": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "total_pnl_usd": 1.94,
+    "total_pnl_pct": 0.194,
+    "total_fees": 0.9005,
+    "max_drawdown_pct": 0.0,
+    "current_equity": 1001.34
+  },
+  "closed_trades": [
+    {
+      "pair": "DOGE/USD/BTC/USD",
+      "pair_a": "DOGE/USD",
+      "pair_b": "BTC/USD",
+      "direction": "long",
+      "entry_price_a": 0.090622,
+      "entry_price_b": 67567.0,
+      "entry_z": -1.754,
+      "exit_z": 0.27,
+      "size_usd": 300.0,
+      "pnl_pct": 1.492,
+      "net_pnl": 1.94,
+      "reason": "REVERT",
+      "opened_at": "2026-04-05T21:30:01.580972+00:00",
+      "closed_at": "2026-04-05T22:30:01.110130+00:00"
+    }
+  ]
+}

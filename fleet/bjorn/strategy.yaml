@@ -3,22 +3,22 @@ style: ema_trend_continuation
 inspiration: Crypto Tony -- EMA trend direction with MACD momentum, rides pullbacks
   to EMA support
 pairs:
-- BTC/USD
-- ETH/USD
-- SOL/USD
-- XRP/USD
-- DOGE/USD
-- AVAX/USD
-- LINK/USD
-- UNI/USD
-- AAVE/USD
-- NEAR/USD
-- APT/USD
-- SUI/USD
-- ARB/USD
-- OP/USD
-- WIF/USD
-- PEPE/USD
+  - BTC/USD
+  - ETH/USD
+  - SOL/USD
+  - XRP/USD
+  - DOGE/USD
+  - AVAX/USD
+  - LINK/USD
+  - UNI/USD
+  - AAVE/USD
+  - NEAR/USD
+  - APT/USD
+  - SUI/USD
+  - ARB/USD
+  - OP/USD
+  - ADA/USD
+  - POL/USD
 position:
   size_pct: 20
   max_open: 2

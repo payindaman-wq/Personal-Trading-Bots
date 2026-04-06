@@ -1,0 +1,107 @@
+{
+  "sprint_id": "poly-copy-20260329-0839",
+  "started_at": "2026-03-29T08:39:08.634070+00:00",
+  "ended_at": "2026-04-05T08:39:35.336157+00:00",
+  "bots": [
+    {
+      "bot": "sol",
+      "type": "copy",
+      "username": "SecondWindCapital",
+      "sprint_pnl_usd": 174.14,
+      "sprint_pnl_pct": 17.41,
+      "sprint_trades": 2,
+      "sprint_wins": 2,
+      "win_rate": 100.0
+    },
+    {
+      "bot": "freyr",
+      "type": "copy",
+      "username": "beachboy4",
+      "sprint_pnl_usd": 94.18,
+      "sprint_pnl_pct": 9.42,
+      "sprint_trades": 8,
+      "sprint_wins": 4,
+      "win_rate": 50.0
+    },
+    {
+      "bot": "haakon",
+      "type": "copy",
+      "username": "WoofMaster",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "thor",
+      "type": "copy",
+      "username": "majorexploiter",
+      "sprint_pnl_usd": -112.88,
+      "sprint_pnl_pct": -11.29,
+      "sprint_trades": 6,
+      "sprint_wins": 2,
+      "win_rate": 33.3
+    },
+    {
+      "bot": "torkel",
+      "type": "copy",
+      "username": "HorizonSplendidView",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "bragi",
+      "type": "copy",
+      "username": "Blessed-Sunshine",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "heimdall",
+      "type": "copy",
+      "username": "FTWUTB",
+      "sprint_pnl_usd": -552.93,
+      "sprint_pnl_pct": -55.29,
+      "sprint_trades": 36,
+      "sprint_wins": 15,
+      "win_rate": 41.7
+    },
+    {
+      "bot": "baldur",
+      "type": "copy",
+      "username": "UAEVALORANTFAN",
+      "sprint_pnl_usd": 87.15,
+      "sprint_pnl_pct": 8.71,
+      "sprint_trades": 25,
+      "sprint_wins": 15,
+      "win_rate": 60.0
+    },
+    {
+      "bot": "vidar",
+      "type": "copy",
+      "username": "ewelmealt",
+      "sprint_pnl_usd": -222.91,
+      "sprint_pnl_pct": -22.29,
+      "sprint_trades": 5,
+      "sprint_wins": 2,
+      "win_rate": 40.0
+    },
+    {
+      "bot": "hallvard",
+      "type": "copy",
+      "username": "Countryside",
+      "sprint_pnl_usd": -1014.26,
+      "sprint_pnl_pct": -101.43,
+      "sprint_trades": 162,
+      "sprint_wins": 29,
+      "win_rate": 17.9
+    }
+  ]
+}

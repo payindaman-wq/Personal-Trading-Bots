@@ -3,22 +3,22 @@ style: bollinger_squeeze_trend
 inspiration: CryptoCred -- enters during BB compression with trend alignment, positioned
   for expansion
 pairs:
-- BTC/USD
-- ETH/USD
-- SOL/USD
-- XRP/USD
-- DOGE/USD
-- AVAX/USD
-- LINK/USD
-- UNI/USD
-- AAVE/USD
-- NEAR/USD
-- APT/USD
-- SUI/USD
-- ARB/USD
-- OP/USD
-- WIF/USD
-- PEPE/USD
+  - BTC/USD
+  - ETH/USD
+  - SOL/USD
+  - XRP/USD
+  - DOGE/USD
+  - AVAX/USD
+  - LINK/USD
+  - UNI/USD
+  - AAVE/USD
+  - NEAR/USD
+  - APT/USD
+  - SUI/USD
+  - ARB/USD
+  - OP/USD
+  - ADA/USD
+  - POL/USD
 position:
   size_pct: 22
   max_open: 2

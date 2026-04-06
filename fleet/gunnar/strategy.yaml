@@ -16,8 +16,8 @@ pairs:
   - SUI/USD
   - ARB/USD
   - OP/USD
-  - WIF/USD
-  - PEPE/USD
+  - ADA/USD
+  - POL/USD
 position:
   size_pct: 18
   max_open: 3

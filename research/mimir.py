@@ -225,9 +225,48 @@ def summarize_sprints(sprint_results, bot_name):
     return "\n".join(lines)
 
 
+
+def load_tyr_context():
+    """Load TYR macro regime for MIMIR context."""
+    tyr_path = os.path.join(RESEARCH, "tyr_state.json")
+    if not os.path.exists(tyr_path):
+        return None
+    try:
+        return json.load(open(tyr_path))
+    except Exception:
+        return None
+
+
+def format_tyr_context(tyr):
+    """Format TYR state as a concise MIMIR context block."""
+    if not tyr:
+        return "TYR macro data unavailable."
+    regime  = tyr.get("regime", "UNKNOWN")
+    message = tyr.get("message", "")
+    fg      = tyr.get("fear_greed", {})
+    dom     = tyr.get("btc_dominance", {})
+    ts      = tyr.get("ts", "")[:16].replace("T", " ")
+    lines   = [f"Current Regime: {regime} (as of {ts} UTC)"]
+    if fg.get("ok"):
+        lines.append(f"Fear & Greed Index: {fg['value']} ({fg.get('label','')})")
+    if dom.get("ok"):
+        lines.append(f"BTC Dominance: {dom['value']}%")
+    lines.append(f"Directive: {message}")
+    log = tyr.get("log", [])[:10]
+    if log:
+        lines.append("Recent readings (newest first):")
+        for e in log:
+            t   = e.get("ts", "")[:16].replace("T", " ")
+            r   = e.get("regime", "?")
+            fgv = e.get("fear_greed")
+            dv  = e.get("btc_dominance")
+            lines.append(f"  {t}  {r}  F&G={fgv}  BTC_DOM={dv}%")
+    return "\n".join(lines)
+
+
 def build_prompt(league, program_md, best_strategy_yaml,
                  research_summary, sprint_summary, generation,
-                 self_audit=""):
+                 self_audit="", tyr_context=""):
     bot_name  = "AutoBotDay"  if league == "day"   else "AutoBotSwing"
     timeframe = "5-minute (day trading)" if league == "day" else "1-hour (swing trading)"
 
@@ -256,6 +295,11 @@ ODIN works by asking a small LLM (llama-3.1-8b-instant) to propose ONE change to
 ## Live Competition Performance ({bot_name})
 
 {sprint_summary}
+
+---
+## Macro Environment (TYR Risk Officer)
+
+{tyr_context}
 
 ---
 ## Self-Audit: Constants & Your Past Decisions
@@ -504,10 +548,13 @@ def main():
         constants        = load_researcher_constants()
         loki_changes     = load_loki_changes(league)
         self_audit       = format_self_audit(constants, loki_changes)
+        tyr     = load_tyr_context()
+        tyr_ctx = format_tyr_context(tyr)
         prompt = build_prompt(
             league, program_md, best_strategy,
             research_summary, sprint_summary, generation,
             self_audit=self_audit,
+            tyr_context=tyr_ctx,
         )
 
     print(f"  Calling Claude ({ANTHROPIC_MODEL})...")

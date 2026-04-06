@@ -44,6 +44,9 @@ ALL_PAIRS = [
     "ARB/USD",  "OP/USD",   "ADA/USD",  "POL/USD",
 ]
 
+def get_pairs(league):
+    return ALL_PAIRS
+
 DAY_RANGES = {
     "take_profit_pct": (0.8, 6.0),
     "stop_loss_pct": (0.8, 4.0),
@@ -405,7 +408,7 @@ def random_strategy(league):
     short_conds = [random_condition(n, "short", league) for n in chosen]
 
     n_pairs = random.randint(3, 8)
-    pairs = random.sample(ALL_PAIRS, n_pairs)
+    pairs = random.sample(get_pairs(league), n_pairs)
 
     tp = round(random.uniform(*r["take_profit_pct"]), 1)
     sl = round(random.uniform(*r["stop_loss_pct"]), 1)
@@ -609,7 +612,7 @@ def main():
         seed_strat = yaml.safe_load(seed_yaml)
 
         print(f"[odin-v2/{league}] Seeding population from {path}...")
-        baseline = run_backtest(seed_strat, league, ALL_PAIRS)
+        baseline = run_backtest(seed_strat, league, get_pairs(league))
         if "error" in baseline:
             print(f"  ERROR: {baseline['error']}")
             sys.exit(1)
@@ -725,7 +728,7 @@ def main():
 
         # Backtest
         try:
-            result = run_backtest(candidate, league, ALL_PAIRS)
+            result = run_backtest(candidate, league, get_pairs(league))
         except Exception as e:
             print(f"| BT_ERR: {e}")
             log_result(league, gen, {}, "backtest_error", str(e)[:80])

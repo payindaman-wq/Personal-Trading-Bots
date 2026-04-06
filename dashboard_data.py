@@ -32,6 +32,8 @@ POLY_CYCLE_STATE_PATH  = os.path.join(WORKSPACE, "competition", "polymarket", "p
 ARB_CYCLE_STATE_PATH   = os.path.join(WORKSPACE, "competition", "arb", "arb_cycle_state.json")
 SPREAD_CYCLE_STATE_PATH = os.path.join(WORKSPACE, "competition", "spread", "spread_cycle_state.json")
 POLY_LB_PATH   = os.path.join(WORKSPACE, "competition", "polymarket", "polymarket_leaderboard.json")
+TYR_STATE_PATH      = os.path.join(WORKSPACE, "research", "tyr_state.json")
+HEIMDALL_STATE_PATH = os.path.join(WORKSPACE, "research", "heimdall_state.json")
 
 BOT_NAMES = [
     "floki", "bjorn", "lagertha", "ragnar", "leif", "gunnar",
@@ -703,6 +705,26 @@ def get_loki_state():
     return state
 
 
+def get_tyr_state():
+    """Read TYR macro watchdog state for the TYR dashboard tab."""
+    if os.path.exists(TYR_STATE_PATH):
+        try:
+            return json.load(open(TYR_STATE_PATH))
+        except Exception:
+            pass
+    return None
+
+
+def get_heimdall_state():
+    """Read HEIMDALL alpha-hunter state for the Alpha Hunt dashboard tab."""
+    if os.path.exists(HEIMDALL_STATE_PATH):
+        try:
+            return json.load(open(HEIMDALL_STATE_PATH))
+        except Exception:
+            pass
+    return None
+
+
 PM_COLLECTOR_STATE = "/root/.openclaw/workspace/research/polymarket/collector_state.json"
 PM_RESOLVED_FILE   = "/root/.openclaw/workspace/research/polymarket/resolved_markets.jsonl"
 
@@ -958,6 +980,8 @@ def build():
     dashboard["odin_research"]     = get_odin_research()
     dashboard["mimir_state"]       = get_mimir_state()
     dashboard["loki_state"]        = get_loki_state()
+    dashboard["tyr_state"]         = get_tyr_state()
+    dashboard["heimdall_state"]     = get_heimdall_state()
     dashboard["cycle_state"]       = get_cycle_state()
     dashboard["spread_score"]      = get_spread_score()
     dashboard["spread_cycle_state"] = get_spread_cycle_state()
