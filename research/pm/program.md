@@ -1,158 +1,157 @@
 ```markdown
-# FREYA Research Program — v52.0
+# FREYA Research Program — v53.0
 
-## Status at Gen 10400
+## Status at Gen 10600
 - **Current best (this run):** adj=2.2936, sharpe=0.3379, bets=17728 (Gen 9616 — UNCHANGED)
 - **Historical best (all runs):** adj=2.2936, sharpe=0.3379, bets=17728 (Gen 9616)
-- **Improvements this run (v51.0 → v52.0, 200 gens):** 0
+- **Improvements this run (v52.0 → v53.0, 200 gens):** 0
 - **Improvements last 800 gens:** 2 (Gen 9607, Gen 9616 only)
 - **Improvements last 200 gens:** 0
-- **Fixed-point collapse:** TERMINAL — sixteenth confirmed collapse
+- **Fixed-point collapse:** TERMINAL — seventeenth confirmed collapse
   Dominant attractors (last 20 gens):
-    adj=2.2867/bets=17242 [seen 14/20 — primary attractor]
-    adj=2.2936/bets=17728 [seen 1/20 — historical best, not improving]
-    adj=2.1994/bets=14825 [seen 1/20]
-    adj=1.6524/bets=4423  [seen 1/20]
-    adj=1.4921/bets=2482  [seen 1/20]
+    adj=2.2867/bets=17242 [seen 8/20 — primary attractor]
+    adj=2.2936/bets=17728 [seen 3/20 — historical best, not improving]
+    adj=-1.0/bets≤17       [seen 3/20 — degenerate]
+    adj=2.2075-2.2455      [seen 3/20 — sub-optimal basin]
+    adj=1.8854/bets=7627   [seen 1/20]
+    adj=1.0817/bets=19067  [seen 1/20]
+    adj=0.6549/bets=258    [seen 1/20]
   The loop has not produced a new best in 784 generations.
   The search space reachable by single-parameter proposals is exhausted.
-- **Gate 1 NOT IMPLEMENTED** — eighth consecutive program without implementation
-- **Gate 2 NOT IMPLEMENTED** — eighth consecutive program without implementation
-- **v51.0 TERMINAL CONDITION VIOLATED:** Gen 10201 was explicitly prohibited.
-  Gens 10201–10400 ran anyway. Zero improvements resulted.
-  This is the second consecutive violation of an explicit hard stop.
-  A third violation is not acceptable.
+- **Gate 1 NOT IMPLEMENTED** — ninth consecutive program without implementation
+- **Gate 2 NOT IMPLEMENTED** — ninth consecutive program without implementation
+- **HARD STOP VIOLATIONS:** v50.0, v51.0, and v52.0 hard stops all violated.
+  This is the third consecutive violation of an explicit hard stop.
+  200 generations ran in v52.0, produced zero improvements, consumed real compute.
+  A fourth violation is not acceptable under any circumstance.
 - **Live performance:** 0/32 wins across mist/kara/thrud — CRITICAL STRUCTURAL FAILURE
   (mist: 0/8 at -1.7%, kara: 0/8 at -2.1%, thrud: 0/8 at -1.7%)
-  p(0/32 | sim assumptions) < 10⁻²⁴. Root cause not identified. Trading continues.
+  p(0/32 | sim assumptions) < 10⁻²⁴. Root cause not identified.
+  **TRADING MUST BE HALTED until D1 and D2 are complete.**
+  Continued trading at current configuration is provably net-negative.
 - **Config discrepancy:** live min_edge_pts=0.028 vs. simulation best=0.033.
-  Hotfix A0 required since v48.0. Status: NOT EXECUTED after eight programs.
+  Hotfix A0 required since v48.0. Status: NOT EXECUTED after nine programs.
+  NOTE: Do not execute A0 until D1 is complete — if base rate is wrong,
+  changing edge threshold does not fix the underlying problem.
 - **Current best config signature:** price_range=[0.11, 0.55], min_edge_pts=0.033,
   max_days=10 (unverified), category=world_events, keywords=[]
+  **STATUS: CONDITIONALLY INVALID pending D1 result.**
 
 ---
 
-## HARD STOP STATEMENT (v52.0)
+## HARD STOP STATEMENT (v53.0)
 
-**SIMULATION IS SUSPENDED. GEN 10401 MUST NOT RUN.**
+**SIMULATION IS SUSPENDED. GEN 10601 MUST NOT RUN.**
+**LIVE TRADING IS SUSPENDED. NO NEW SPRINT MAY START.**
 
-The v51.0 HARD STOP was violated for the second consecutive version.
-200 generations ran, produced zero improvements, and consumed real compute.
-The root cause of 0/32 live losses remains unidentified.
-The world_events base rate remains unvalidated.
-The live config bug remains unfixed.
+Three consecutive hard stops have been violated.
+Zero improvements have resulted from any generation after Gen 9616.
+The live strategy has lost every single trade across 32 attempts.
+The simulation model's foundational base rate has never been validated.
 
-**This is not a soft recommendation. This is a system record.**
-Running Gen 10401 before completing A0, D1, and D2 is provably net-negative:
-- Expected simulation improvement per generation: ~0 (measured over 800 gens)
-- Expected financial loss per live trade at wrong base rate: systematic, not random
-- Cost of D1 (measure actual base rate): ~1-2 hours
-- Cost of continued simulation without D1: measured at zero improvement
+**The following actions are required before anything else:**
 
-**Enforcement:**
-The human operator must complete items A0, D1, and D2 and record timestamps
-in this document before any simulation runner is started.
-If the runner starts without these timestamps, the output is not valid research.
+1. HALT live trading on mist, kara, and thrud immediately.
+2. Complete D1 (measure actual world_events base rate) — ~2 hours.
+3. Complete D2 (diagnose live trade losses) — ~2 hours.
+4. Based on D1+D2 findings, either:
+   a. Correct the simulation base rate and restart optimization from scratch, OR
+   b. Identify and fix the live implementation bug and validate before resuming.
+5. Record timestamps for all completed items in this document.
+6. Only then may Gen 10601 run or live trading resume.
+
+**Expected value of running Gen 10601 without completing D1:**
+- Simulation improvement probability: ~0 (measured over 784 generations)
+- Additional information gained: 0 (exhausted search space)
+- Financial loss from continued live trading at wrong base rate: systematic
+
+**Expected value of completing D1:**
+- Cost: ~2 hours
+- Information gained: whether the entire simulation framework is valid
+- If base rate is wrong: prevents all future simulation waste
+- If base rate is correct: narrows root cause to implementation bug
+
+**There is no rational argument for running Gen 10601 before completing D1.**
 
 ---
 
-## CRITICAL HYPOTHESIS (must be tested before Gen 10401)
+## CRITICAL HYPOTHESIS (status: UNRESOLVED — must be tested before Gen 10601)
 
-**The strategy may be systematically inverted.**
+**The strategy may be systematically inverted due to incorrect base rate.**
 
 The simulation bets NO on world_events markets where market price > 12% + 0.033.
-This means nearly every world_events market above ~15% is a NO bet.
+This means nearly every world_events market above ~15% receives a NO bet.
 If actual world_events markets on Polymarket resolve YES at a rate materially
 above 12% — say, 17-25% — then:
-  - Every NO bet in the simulation is a losing bet by construction
-  - Higher simulation Sharpe would reflect a historical artifact, not a real edge
+  - Every NO bet is a losing bet by construction
+  - The simulation's high Sharpe reflects a historical artifact, not real edge
   - Live losses of -1.7% to -2.1% per sprint are exactly what this predicts
   - No amount of parameter optimization fixes an inverted base rate
+  - 0/32 live wins is the expected outcome of a structurally inverted strategy
 
 **This hypothesis is testable in 1-2 hours (D1 below).**
-It must be tested before running more simulation.
-If confirmed, the simulation model requires a new base rate before any
-further optimization has meaning.
+**Status: UNRESOLVED after nine program versions.**
+**If not tested before Gen 10601, all simulation results remain meaningless.**
+
+Hypothesis resolution requires D1. Until D1 is complete:
+- All simulation adj_scores are of unknown validity
+- All config parameters derived from simulation are suspect
+- Live trading with any configuration derived from this simulation is high-risk
 
 ---
 
-## LOCKED BEST CONFIG (PARTIALLY UNVERIFIED)
+## DECISION TREE (complete D1 first, then follow appropriate branch)
 
-```yaml
-name: pm_research_best
-category: world_events
-price_range: [0.11, 0.55]        # VERIFIED (Gen 9616 simulation)
-min_edge_pts: 0.033              # VERIFIED (simulation) — LIVE BUG: live=0.028
-                                 # A0 hotfix NOT EXECUTED as of v52.0
-max_days_to_resolve: 10          # UNVERIFIED — ambiguity unresolved since v47.0
-min_liquidity_usd: 100           # ASSUMED — not confirmed from live logs
-max_position_pct: 0.1            # ASSUMED
-include_keywords: []
-exclude_keywords: []
-```
+### Branch A: D1 shows observed_rate > 16% OR CI excludes 12%
+→ Base rate is wrong. Strategy is inverted.
+→ HALT all live trading immediately (if not already halted).
+→ Update simulation base_rates['world_events'] to observed_rate from D1.
+→ Re-run optimization from scratch (Gen 1, not Gen 10601).
+→ Do not use any config parameter from the current best as a starting point.
+→ Before resuming live trading, validate new simulation on holdout data.
+→ Before resuming live trading, verify live bot uses corrected base rate.
 
-**Live config as of v52.0 (WRONG — do not trade with this):**
-```yaml
-min_edge_pts: 0.028              # INCORRECT — must be updated to 0.033
-```
+### Branch B: D1 shows observed_rate ≈ 12% (within CI)
+→ Base rate is approximately correct. Simulation findings are conditionally valid.
+→ Root cause of 0/32 live losses must be an implementation bug.
+→ Complete D2 immediately to identify the bug.
+→ Fix the bug and validate on paper trading before resuming live trading.
+→ A0 hotfix (min_edge_pts=0.033) may then be applied.
+→ Simulation can resume with minor parameter search if D2 bug is unrelated
+   to simulation validity.
 
-**If D1 reveals world_events base rate ≠ 12%, ALL config fields are suspect.**
-Do not treat LOCKED BEST CONFIG as valid until D1 is complete.
-
----
-
-## PRE-FLIGHT CHECKLIST FOR GEN 10401
-*This is the eighth version of this checklist.*
-*Items A0, D1, D2 are CRITICAL PATH. Complete these before any other step.*
-*All items are BLOCKING. No simulation until all items are timestamped.*
-*"Will do next version" is not an acceptable response to any item.*
+### Branch C: D1 is inconclusive (insufficient data, API error, etc.)
+→ Do not assume base rate is correct.
+→ Treat situation as Branch A (halt trading, do not run simulation).
+→ Find alternative data source for world_events resolution rates.
+→ Do not resume until base rate is established with statistical confidence.
 
 ---
 
-### A. IMMEDIATE BUG FIX (do first — estimated 10 minutes)
-
-- [ ] **A0 — LIVE CONFIG HOTFIX (BLOCKING — unfixed since v48.0):**
-      The live YAML shows min_edge_pts=0.028.
-      The simulation best is min_edge_pts=0.033.
-      Every live trade since v48.0 used incorrect edge threshold.
-
-      IF D1 (below) reveals base rate is wrong and strategy is inverted:
-        → HALT ALL LIVE TRADING IMMEDIATELY before touching config.
-        → Do not update to 0.033 if the strategy direction is wrong.
-        → Fix D1 first, then determine correct parameters, then update.
-
-      IF D1 confirms base rate is approximately correct:
-        1. SSH to mist → update min_edge_pts to 0.033 → restart → print config
-        2. SSH to kara → update min_edge_pts to 0.033 → restart → print config
-        3. SSH to thrud → update min_edge_pts to 0.033 → restart → print config
-        4. Verify each slot shows min_edge_pts: 0.033 in running config output
-
-      mist updated: [ ]  Timestamp: ___________  Config output: ___________
-      kara updated: [ ]  Timestamp: ___________  Config output: ___________
-      thrud updated: [ ]  Timestamp: ___________  Config output: ___________
-
-      *If this step cannot be completed for any reason, HALT all live trading.*
+## PRE-FLIGHT CHECKLIST FOR GEN 10601
+*This is the ninth version of this checklist.*
+*Items D1 and D2 are CRITICAL PATH. A0 depends on D1 result.*
+*ALL items are BLOCKING. No simulation and no live trading until timestamped.*
+*"Will do next version" has been the response nine times. It is not acceptable.*
 
 ---
 
-### D. ROOT CAUSE INVESTIGATION (CRITICAL PATH — do before B or C)
-*These items have been listed since v48.0 and never completed.*
-*They are now listed before config and gate items because they block everything.*
-*Until D1 is complete, simulation results have unknown validity.*
+### D. ROOT CAUSE INVESTIGATION (COMPLETE THESE FIRST — EVERYTHING ELSE IS BLOCKED)
 
-- [ ] **D1 — MEASURE ACTUAL WORLD_EVENTS BASE RATE (highest priority item):**
+- [ ] **D1 — MEASURE ACTUAL WORLD_EVENTS BASE RATE (HIGHEST PRIORITY):**
 
       The simulation assumes world_events markets resolve YES at 12.0%.
       This value has never been validated against live Polymarket data.
-      The live strategy bets NO on nearly every world_events market above 15%.
-      If the true rate is materially above 12%, the strategy is directionally wrong.
+      Until this is measured, no simulation result has known validity.
 
       Procedure:
       1. Pull all resolved world_events markets from Polymarket API, last 90 days
-         (or maximum available). Include only markets that resolved YES or NO.
+         (or maximum available). Include only markets resolved YES or NO.
+         API endpoint: GET /markets?category=world_events&resolved=true
+         (adjust to actual Polymarket API structure as needed)
       2. Count: n_yes = markets resolved YES, n_total = all resolved
       3. Compute: observed_rate = n_yes / n_total
-      4. Compute 95% confidence interval: ±1.96 * sqrt(rate*(1-rate)/n)
+      4. Compute 95% CI: ±1.96 × sqrt(rate × (1-rate) / n)
       5. Record:
 
          n_total: _______
@@ -160,76 +159,75 @@ Do not treat LOCKED BEST CONFIG as valid until D1 is complete.
          observed_rate: _______ (%)
          95% CI: [_______, _______]
          Simulation assumed: 12.0%
-         Within CI of 12.0%: [ ] YES / [ ] NO
+         Within CI of 12.0%: [ ] YES  [ ] NO
 
-      6. If observed_rate > 16% or CI excludes 12%:
-         → The simulation base rate is wrong.
-         → Mark simulation results INVALID pending model correction.
-         → Do not run Gen 10401 until base rate is corrected in simulation.
-         → Update CRITICAL HYPOTHESIS status: CONFIRMED / REFUTED
-
-      7. Also compute rate broken down by price range [0.11, 0.55] specifically:
-         (Markets where initial market price was in this range)
-         n_total_range: _______
-         n_yes_range: _______
+      6. Also compute for price range [0.11, 0.55] specifically:
+         n_total_in_range: _______
+         n_yes_in_range: _______
          rate_in_range: _______ (%)
-         This is the most relevant base rate for the current strategy.
+         This is the operationally relevant base rate for the current strategy.
+
+      7. Also compute rate by resolution direction for NO bets specifically:
+         (Markets where market price was above 12% + 0.033 = above ~15%)
+         n_total_above_threshold: _______
+         n_yes_above_threshold: _______
+         rate_above_threshold: _______ (%)
+         (If this rate >> 12%, NO bets in this zone are systematically losing)
+
+      8. Apply Decision Tree above based on result.
 
       Completed: [ ]  Timestamp: ___________
       Result summary: ___________
+      Decision Tree branch selected: [ ] A  [ ] B  [ ] C
       Action required: ___________
 
 - [ ] **D2 — PULL LIVE TRADE LOGS AND DIAGNOSE LOSSES:**
 
-      0/32 trades have been profitable across three slots and multiple sprints.
-      This cannot be variance. There is a systematic cause. Find it.
+      0/32 trades profitable. This is not variance. Find the systematic cause.
 
       Procedure:
       1. Pull complete trade logs from mist, kara, thrud for all sprints.
-      2. For each losing trade, record:
-         - Market name / ID
-         - Market price at time of bet
-         - Bet direction (YES or NO — confirm this matches expected direction)
-         - Resolved outcome (YES or NO)
-         - PnL for that trade
-      3. Identify patterns:
-         a. Are all bets in the same direction? (expect: mostly NO for world_events)
-         b. Did the market resolve against the bet in every case?
-         c. Was the bet direction correct per the simulation model?
-            (i.e., if sim says bet NO at price 0.25 with base rate 0.12, did live
-             bot actually bet NO?)
-         d. Is the fee larger than the edge in practice?
+         Collect: market ID, market price at entry, bet direction, resolved outcome, PnL.
+      2. For each trade, answer:
+         a. Was bet direction NO or YES?
+            (Expected: mostly NO, since nearly all world_events above 15% → NO)
+         b. Did the market resolve against the bet?
+         c. Is the loss consistent with fee drag alone, or is it directional loss?
+            (Fee drag = ~2% per bet. Directional loss = market moves against position.)
+      3. Check implementation correctness:
+         a. Confirm live bot bet direction logic:
+            IF market_price > base_rate + min_edge → bet NO
+            IF market_price < base_rate - min_edge → bet YES
+            Is this implemented correctly? [ ] YES  [ ] NO
+            If NO, describe actual implementation: ___________
+         b. Confirm base rate used in live bot: _______
+            (Should be 12.0% for world_events — confirm this is what the bot uses)
+         c. Confirm price_range filter: [_______, _______]
+            (Should be [0.11, 0.55])
+         d. Confirm min_edge_pts in live bot: _______
+            (Is 0.028, should be 0.033 — but do not fix until D1 complete)
+      4. Summarize findings:
 
-      4. Check for implementation bugs:
-         a. Is the YES/NO bet direction implemented correctly in the live bot?
-            (This is a known failure mode — confirm explicitly)
-         b. Is the base rate used in the live bot the same as the simulation?
-         c. Is the price_range filter applied correctly?
-         d. Are excluded markets actually being excluded?
-
-      Trade log summary:
          Total trades reviewed: _______
          Trades where bet direction = NO: _______
          Trades where bet direction = YES: _______
          Markets that resolved YES: _______
          Markets that resolved NO: _______
-         Apparent implementation bug identified: [ ] YES / [ ] NO
-         Bug description (if yes): ___________
+         Average market price at entry: _______
+         Average PnL per trade: _______
+         Loss type: [ ] Fee drag only  [ ] Directional (markets resolving against bets)
+                    [ ] Mixed  [ ] Unknown
+         Implementation bug identified: [ ] YES  [ ] NO
+         Bug description: ___________
 
       Completed: [ ]  Timestamp: ___________
       Root cause identified: ___________
 
-- [ ] **D3 — RECONCILE SIMULATION HISTORICAL DATA WITH LIVE MARKET UNIVERSE:**
+- [ ] **D3 — RECONCILE SIMULATION DATA WITH LIVE MARKET UNIVERSE:**
 
-      The simulation runs on 300k+ historical resolved markets.
-      Live trading accesses current Polymarket markets.
+      The simulation uses 300k+ historical resolved markets.
+      Live trading uses current Polymarket markets.
       These may not be the same universe.
 
-      Questions to answer:
-      1. What time period does the simulation historical data cover?
-         Answer: ___________
-      2. Has Polymarket's market composition changed since that period?
-         (More politics, fewer world_events, different resolution patterns?)
-         Answer: ___________
-      3. Is the simulation's world_events category defined the same way
-         as Polymarket's
+      Procedure:
+      1. What time period does the simulation historical data cover
