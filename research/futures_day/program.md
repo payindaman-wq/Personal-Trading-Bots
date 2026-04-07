@@ -1,5 +1,5 @@
 ```markdown
-# ODIN Research Program — FUTURES DAY
+# ODIN Research Program — FUTURES DAY (v3)
 
 ## League: futures_day
 Timeframe: 5-minute candles, 24h sprints
@@ -9,188 +9,268 @@ Liquidation: positions force-closed if loss exceeds 45% of margin at 2x leverage
 
 ---
 
-## ⚠️ CRITICAL CONTEXT — READ FIRST
+## ⚠️ CRITICAL SITUATION REPORT — READ EVERY WORD
 
-**The current best strategy has Sharpe = −10.31. This is FAILING, not succeeding.**
-After 108 generations of small tweaks, the search is STUCK. The win rate is locked at
-40–44% and the strategy is losing money on every cohort. You MUST propose structurally
-different approaches — not minor RSI threshold adjustments.
+**After 200 generations, the best Sharpe ever achieved is −6.15. Zero generations have
+reached positive Sharpe. The strategy is fundamentally broken.**
 
-**What has NOT worked (do not repeat these):**
-- Tweaking RSI thresholds by ±2-3 points around 38/42 — exhausted, no improvement
-- Adjusting timeout_minutes by small amounts — no consistent improvement
-- Tightening/loosening stop_loss_pct by 0.1-0.2% alone — not sufficient
-- Adding more pairs without changing entry logic — does not help
+**The current YAML champion (Sharpe −10.31) is WORSE than the research elite cluster.
+The true best-performing configuration discovered so far is Gen 140: Sharpe −6.15,
+623 trades, 41.7% win rate. The key insight from Gen 140: MORE TRADES = BETTER SHARPE,
+even with a LOWER win rate. Do not tighten entry conditions. Loosen them.**
 
-**The entry logic (trend + RSI pullback) is not generating edge at current thresholds.**
-You must either fix the thresholds dramatically or replace the logic entirely.
+**Root cause identified: The timeout exit (60 minutes) is killing profitability.**
+Most trades are not reaching TP or SL — they are timing out at small losses. This
+collapses the real R:R ratio regardless of what the TP/SL parameters say. You MUST
+address timeout exits. Target: timeout ≤ 25 minutes OR increase TP to guarantee
+most winners resolve before timeout.
 
----
-
-## Research Objective
-
-Evolve strategies that are profitable NET of leverage costs and survive real futures
-mechanics. Target: **Sharpe > 0 first, then Sharpe > 1.0, then Sharpe > 1.5**.
-
-We are in ESCAPE MODE: the goal is to find ANY configuration that produces positive
-Sharpe, even modestly. Prefer bold structural changes over conservative tweaks.
-
-Leverage amplifies returns but also amplifies losses. Prefer strategies with:
-- Tight stop losses (max 2% stop for day trading at 2x)
-- High win rate OR strong R:R ratio (not both required, but one must compensate)
-- Limited hold time to minimize funding drag (target: exits within 30-45 minutes)
-- Breakeven analysis: with 0.1% round-trip fees + funding, need win_rate × avg_win >
-  (1 - win_rate) × avg_loss. At 1.15% TP / 0.8% SL, breakeven win rate is ~43.5%.
-  The current strategy achieves 43% — it is BELOW breakeven. Fix this math first.
+**TRADE COUNT REQUIREMENT: ANY strategy producing fewer than 350 trades in backtest
+is statistically unreliable and will be discarded. When proposing changes, bias
+toward MORE entries, not fewer. Wider RSI windows, fewer conditions, more pairs.**
 
 ---
 
-## Macro Environment Warning
+## What Has Been Tried and Failed (Do Not Repeat)
 
-**Current regime: DANGER — Extreme Fear (F&G = 11)**
-- Bias entries toward SHORT side in current market conditions
-- Long entries require STRONGER confirmation than normal
-- Consider adding a regime filter: only trade longs if recent 1h trend is up
-- BTC dominance rising (56.6%) — altcoins underperforming, be cautious on alts
+### Entry Conditions — Exhausted
+- RSI thresholds in the 35–42 range for longs: all tested, no improvement
+- RSI period 14–20 combined with 15-min trend: structural ceiling hit at ~44% WR
+- Adding 3rd entry condition (volume, pivot, etc.): reduces trade count, hurts Sharpe
+- Tightening stop_loss by 0.1–0.2% without other changes: no improvement
+- Reducing pairs from 16 to 8: reduces trade count below 300, hurts Sharpe
 
----
+### Exit Conditions — Partially Explored
+- TP 1.15% / SL 0.8% / timeout 60min: original, Sharpe ≈ −10.3
+- TP 1.5% / SL 0.73% / timeout 60min: current champion, still −10.3 (timeout kills it)
+- The 60-minute timeout is a confirmed problem. Do not keep it.
 
-## Fix the Math First — Priority Changes
-
-Before exploring new indicators, consider fixing the reward:risk imbalance:
-
-**Option A: Improve R:R ratio**
-- Increase take_profit_pct to 1.5–2.0% (current 1.15% is too tight for 2x leverage)
-- Keep stop_loss_pct at 0.8% → R:R becomes 1.875–2.5x → breakeven drops to 29–35%
-- Risk: fewer TP hits, lower trade count
-
-**Option B: Improve win rate via better entry filters**
-- Add volume confirmation: only enter if current volume > 1.5x average volume
-- Add momentum confirmation: require price above/below recent pivot
-- Tighten trend filter: use 5-min trend instead of 15-min for faster confirmation
-- Use RSI divergence: RSI recovering from oversold (not just below threshold)
-
-**Option C: Change the core entry logic entirely**
-- Replace RSI pullback with: breakout above recent high (last 12 candles)
-- Replace RSI pullback with: EMA crossover (fast EMA crosses above slow EMA)
-- Replace RSI pullback with: VWAP reclaim (price crosses back above VWAP)
-- Try pure mean-reversion: large RSI extreme (RSI < 25 long, RSI > 75 short) with
-  tight stops, betting on snap-back within 20-30 minutes
+### Structural Alternatives — NOT YET PROPERLY TESTED
+The small LLM has ignored these suggestions and kept tweaking RSI thresholds.
+The next 100 generations MUST test these. They are listed in priority order.
 
 ---
 
-## Structural Changes to Explore
+## GENERATION ASSIGNMENTS — Follow This Rotation
 
-### Entry Logic Alternatives (try ONE per generation)
+To prevent the small LLM from defaulting to minor tweaks, each generation should
+test ONE specific template from the priority list below. Cycle through them.
 
-**Breakout style:**
-```
-long:
-  - indicator: price_vs_high, period_minutes: 60, operator: breakout_above
-  - indicator: volume, operator: gt, value: 1.5x_avg
-short:
-  - indicator: price_vs_low, period_minutes: 60, operator: breakout_below
-  - indicator: volume, operator: gt, value: 1.5x_avg
-```
+---
 
-**EMA crossover style:**
-```
-long:
-  - indicator: ema_cross, fast: 5, slow: 20, operator: crossed_above
-  - indicator: trend, period_minutes: 30, operator: eq, value: up
-short:
-  - indicator: ema_cross, fast: 5, slow: 20, operator: crossed_below
-  - indicator: trend, period_minutes: 30, operator: eq, value: down
-```
+### PRIORITY 1: Fix the Timeout Problem (Generations 201–220)
 
-**Deep mean-reversion style (high-conviction oversold/overbought):**
-```
-long:
-  - indicator: rsi, period_minutes: 14, operator: lt, value: 25
-  - indicator: rsi, period_minutes: 14, operator: recovering  # RSI rising
-short:
-  - indicator: rsi, period_minutes: 14, operator: gt, value: 75
-  - indicator: rsi, period_minutes: 14, operator: falling
+**The single most important fix is reducing timeout_minutes.**
+
+The current 60-minute timeout means most trades expire at a small loss. Cut it to
+15–20 minutes. This forces faster trade resolution and minimizes funding drag.
+
+**Target configuration (scalp mode):**
+```yaml
+entry:
+  long:
+    conditions:
+    - indicator: trend
+      period_minutes: 15
+      operator: eq
+      value: up
+    - indicator: rsi
+      period_minutes: 14
+      operator: lt
+      value: 42      # slightly wider than 38 to maintain trade count
+  short:
+    conditions:
+    - indicator: trend
+      period_minutes: 15
+      operator: eq
+      value: down
+    - indicator: rsi
+      period_minutes: 14
+      operator: gt
+      value: 58      # symmetric with long threshold
 exit:
-  take_profit_pct: 0.8   # quick scalp
-  stop_loss_pct: 0.5     # very tight
-  timeout_minutes: 20    # fast exit
+  take_profit_pct: 0.8
+  stop_loss_pct: 0.5
+  timeout_minutes: 20
 ```
 
-**Trend-continuation style (higher timeframe aligned):**
-```
-long:
-  - indicator: trend, period_minutes: 60, operator: eq, value: up   # 1h trend
-  - indicator: trend, period_minutes: 15, operator: eq, value: up   # 15m trend
-  - indicator: rsi, period_minutes: 10, operator: gt, value: 50     # momentum
-short:
-  - indicator: trend, period_minutes: 60, operator: eq, value: down
-  - indicator: trend, period_minutes: 15, operator: eq, value: down
-  - indicator: rsi, period_minutes: 10, operator: lt, value: 50
-```
+**Why this works mathematically:**
+- R:R = 0.8/0.5 = 1.6x → breakeven WR = 39.3% after fees
+- Current WR is consistently 40–44% → this is ABOVE breakeven
+- 20-min timeout means fewer timeout losses, more clean TP/SL resolution
+- Smaller TP/SL means faster resolution in volatile conditions
+- Expected trade count: 400–700 (sufficient for reliable Sharpe)
+
+**Variants to explore within Priority 1:**
+- TP 0.7% / SL 0.45% / timeout 15min → R:R 1.56x, breakeven 39.5%
+- TP 0.9% / SL 0.5% / timeout 25min → R:R 1.8x, breakeven 36.4%
+- TP 1.0% / SL 0.55% / timeout 20min → R:R 1.82x, breakeven 35.5%
 
 ---
 
-## Exit Strategy Guidance
+### PRIORITY 2: EMA Crossover Entry (Generations 221–235)
 
-The current exit (TP 1.15% / SL 0.8% / timeout 60min) is marginal. Consider:
+Replace the RSI pullback entry entirely with EMA crossover. This is a trend-momentum
+signal that does not suffer from the RSI threshold calibration problem.
 
-- **Tighter scalp:** TP 0.7–0.9% / SL 0.4–0.5% / timeout 15–25 min
-  → More trades, higher win rate needed, but funding cost minimized
-- **Wider swing:** TP 2.0–3.0% / SL 1.0–1.5% / timeout 90–120 min
-  → Fewer trades, lower win rate acceptable, but liquidation risk rises
-- **Asymmetric:** TP 1.5% / SL 0.6% / timeout 45 min → R:R = 2.5x → need 29% WR
-- **Current setup is the worst of both worlds** — wide enough to hit SL often,
-  tight enough that TP is also frequently missed before timeout
-
----
-
-## Position Sizing and Pairs
-
-Current: 13.64% size, max_open=2, 16 pairs
-- With max_open=2 across 16 pairs, most pairs sit idle — this is fine for safety
-- In DANGER regime: consider reducing to 8 most liquid pairs (BTC, ETH, SOL, BNB,
-  XRP, DOGE, AVAX, LINK) to concentrate signal quality
-- Position size 13.64% at 2x = 27.28% effective exposure per trade — reasonable
-- In Extreme Fear: consider reducing to 8–10% position size (effective 16–20%)
-
----
-
-## What Success Looks Like
-
-| Priority | Target | Notes |
-|----------|--------|-------|
-| Immediate | Sharpe > −5.0 | Meaningfully better than current −10.3 |
-| Short-term | Sharpe > 0.0 | Break-even territory |
-| Medium-term | Sharpe > 1.0 | Viable strategy |
-| Goal | Sharpe > 1.5 | Competition-ready |
-
-**Win rate targets by R:R:**
-- R:R 1.0x (equal TP/SL): need >52% WR after fees
-- R:R 1.44x (current 1.15/0.8): need >43.5% WR — current 43% is FAILING
-- R:R 2.0x (e.g., 1.6/0.8): need >35% WR — much more achievable
-- R:R 2.5x (e.g., 1.5/0.6): need >30% WR — easiest to achieve with tight SL
-
----
-
-## Key Constraints
-
-- MIN_TRADES: 250 (raised from 200 — strategies below this are statistically unreliable)
-- Max stop loss: 2.0% (beyond this, 2x leverage creates liquidation cascade risk)
-- Max hold time: 120 minutes (funding cost becomes significant beyond this)
-- Leverage: fixed at 2x — do not propose leverage changes
-- Fee rate: 0.0005 per side — always include in mental math
-
-## Strategy Format
-
-Propose ONE change per generation. State:
-1. What you are changing and why
-2. Which failure mode you are trying to fix (bad R:R, low win rate, wrong entry logic)
-3. What result you expect (higher WR, better R:R, or more selective entries)
-
-Do NOT make changes that:
-- Adjust RSI thresholds by only 1-3 points without other changes
-- Modify timeout by only 5-10 minutes without other changes
-- Add a 4th condition that is highly correlated with existing conditions
-- Reduce trade count below 250 (too few samples for reliable Sharpe)
+**Target configuration:**
+```yaml
+entry:
+  long:
+    conditions:
+    - indicator: ema_cross
+      fast: 5
+      slow: 20
+      operator: crossed_above
+  short:
+    conditions:
+    - indicator: ema_cross
+      fast: 5
+      slow: 20
+      operator: crossed_below
+exit:
+  take_profit_pct: 0.9
+  stop_loss_pct: 0.5
+  timeout_minutes: 20
 ```
+
+**Why try this:** EMA crossovers on 5-min data in high-volatility conditions (VIX 26+)
+generate clean momentum signals. The fast/slow ratio (5/20) captures short-term momentum
+without the lag of longer EMAs. No RSI threshold calibration needed.
+
+**Variants:**
+- fast=3, slow=15 → faster signals, more trades
+- fast=8, slow=21 → slower signals, higher quality
+- Add trend filter: only cross_above if 30-min trend = up
+
+---
+
+### PRIORITY 3: Deep Mean Reversion (Generations 236–250)
+
+Use extreme RSI values (not the moderate 38/42 range that has failed). RSI < 25 or
+RSI > 75 captures genuinely oversold/overbought conditions with snap-back potential.
+
+**Target configuration:**
+```yaml
+entry:
+  long:
+    conditions:
+    - indicator: rsi
+      period_minutes: 14
+      operator: lt
+      value: 25
+  short:
+    conditions:
+    - indicator: rsi
+      period_minutes: 14
+      operator: gt
+      value: 75
+exit:
+  take_profit_pct: 0.8
+  stop_loss_pct: 0.5
+  timeout_minutes: 20
+```
+
+**Important:** RSI < 25 is rare — check that trade count stays above 350. If it drops
+below 350, loosen to RSI < 28 for longs, RSI > 72 for shorts.
+
+**In Extreme Fear regime (current):** RSI < 25 on a 5-min chart during fear conditions
+often signals a local capitulation bottom — high probability snap-back within 15–20 min.
+This is one of the highest-probability setups available right now.
+
+---
+
+### PRIORITY 4: Breakout Style (Generations 251–265)
+
+Price breakout above recent high with volume confirmation. Captures momentum breakouts
+which are common in high-volatility regimes (VIX 26+).
+
+**Target configuration:**
+```yaml
+entry:
+  long:
+    conditions:
+    - indicator: price_vs_high
+      period_minutes: 60
+      operator: breakout_above
+    - indicator: volume
+      operator: gt
+      value: 1.5x_avg
+  short:
+    conditions:
+    - indicator: price_vs_low
+      period_minutes: 60
+      operator: breakout_below
+    - indicator: volume
+      operator: gt
+      value: 1.5x_avg
+exit:
+  take_profit_pct: 1.2
+  stop_loss_pct: 0.6
+  timeout_minutes: 30
+```
+
+**Note:** Breakouts often generate fewer signals. If trade count drops below 350,
+reduce period_minutes to 30 or remove the volume condition.
+
+---
+
+### PRIORITY 5: Trend Continuation Multi-Timeframe (Generations 266–280)
+
+Align 60-min and 15-min trend, enter on RSI momentum confirmation. Higher conviction
+entries but fewer of them — only viable if TP is wide enough.
+
+**Target configuration:**
+```yaml
+entry:
+  long:
+    conditions:
+    - indicator: trend
+      period_minutes: 60
+      operator: eq
+      value: up
+    - indicator: trend
+      period_minutes: 15
+      operator: eq
+      value: up
+    - indicator: rsi
+      period_minutes: 10
+      operator: gt
+      value: 50
+  short:
+    conditions:
+    - indicator: trend
+      period_minutes: 60
+      operator: eq
+      value: down
+    - indicator: trend
+      period_minutes: 15
+      operator: eq
+      value: down
+    - indicator: rsi
+      period_minutes: 10
+      operator: lt
+      value: 50
+exit:
+  take_profit_pct: 2.0
+  stop_loss_pct: 1.0
+  timeout_minutes: 45
+```
+
+**Warning:** This 3-condition entry will reduce trade count. Only accept if trades ≥ 350.
+The wide TP (2.0%) compensates for lower win rate: R:R = 2.0x, breakeven = 35% WR.
+
+---
+
+## Macro Environment Adaptation
+
+**Current Regime: DANGER — Extreme Fear (F&G = 11), VIX 26.86**
+
+This is not purely a risk-off signal. High volatility creates opportunity:
+- Intraday price swings are LARGER → TP targets hit more often
+- Mean reversion snaps are MORE violent → deep RSI setups work better
+- Breakouts are MORE decisive → breakout entries have cleaner follow-through
+
+**Regime adaptations:**
+- SHORT bias: in Extreme Fear, short setups have historically higher win rates
+- For asymmetric testing, try short-only versions
