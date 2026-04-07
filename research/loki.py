@@ -255,6 +255,9 @@ def apply_constant_change(constant, subkey, new_value):
     """
     if constant not in ALLOWED_CONSTANTS:
         return False, f"{constant} not in LOKI allowed-constants whitelist"
+    # Item 4: SWING_MIN_TRADES is immutable - block any swing subkey change
+    if constant == "MIN_TRADES" and subkey == "swing":
+        return False, "[LOKI_BLOCKED] MIN_TRADES[swing] is immutable — modify SWING_MIN_TRADES in code directly"
 
     with open(RESEARCHER) as f:
         content = f.read()

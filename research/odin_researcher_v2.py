@@ -13,6 +13,7 @@ Usage:
   python3 odin_researcher_v2.py --league swing
 """
 import argparse
+import hashlib
 import copy
 import json
 import math
@@ -35,7 +36,10 @@ GEMINI_BASE   = "https://generativelanguage.googleapis.com/v1beta/models"
 
 SUSPICIOUS_SHARPE   = 3.5
 POPULATION_SIZE     = 10
-MIN_TRADES = {"day": 250, "swing": 30, "futures_day": 200, "futures_swing": 25}
+MIN_TRADES = {"day": 250, "futures_day": 200, "futures_swing": 25}
+SWING_MIN_TRADES    = 30   # IMMUTABLE - DO NOT MODIFY via LOKI (Item 4)
+SWING_MAX_TRADES    = 60   # swing hard upper bound (Item 3)
+SWING_ALLOWED_PAIRS = frozenset({"BTC/USD", "ETH/USD", "SOL/USD"})  # Item 7
 
 ALL_PAIRS = [
     "BTC/USD",  "ETH/USD",  "SOL/USD",  "XRP/USD",
@@ -246,18 +250,21 @@ class Population:
         self.save()
 
     def best_sharpe(self):
-        return self.elites[0][0] if self.elites else 0.0
+        """Best RAW sharpe across all elites (Item 8 - not adj_score)."""
+        if not self.elites:
+            return 0.0
+        return max(s.get("_sharpe", 0.0) for _, s, _ in self.elites)
 
-    def worst_sharpe(self):
+    def worst_adj(self):
         return self.elites[-1][0] if self.elites else -999.0
 
     def try_insert(self, strategy_dict, strategy_yaml, sharpe, trades):
-        """Returns (inserted, is_new_best). Compares on adj_score, not raw sharpe."""
+        """Returns (inserted, is_new_best). is_new_best uses raw Sharpe (Item 8)."""
         strategy_dict["_sharpe"] = sharpe
         strategy_dict["_trades"] = trades
         score = adj_score(sharpe, trades)
         entry = (score, strategy_dict, strategy_yaml)
-        is_new_best = score > self.best_sharpe() if self.elites else True
+        is_new_best = sharpe > self.best_sharpe() if self.elites else True
 
         if len(self.elites) < POPULATION_SIZE:
             self.elites.append(entry)
@@ -267,7 +274,7 @@ class Population:
                 self._save_fleet(strategy_yaml)
             return True, is_new_best
 
-        if score > self.worst_sharpe():
+        if score > self.worst_adj():
             self.elites[-1] = entry
             self.elites.sort(key=lambda x: x[0], reverse=True)
             self.save()
@@ -656,13 +663,14 @@ def main():
         gen = len(results_history) + 1
         gens_since_best = 0
 
-    min_t = MIN_TRADES.get(league, 30)
+    min_t = SWING_MIN_TRADES if league == "swing" else MIN_TRADES.get(league, 30)  # Item 4
 
     print(f"[odin-v2/{league}] Pop: {len(pop.elites)} elites, best_adj={pop.best_sharpe():.4f}")
     print(f"  Gen {gen}, stall={gens_since_best}, sleep={args.sleep}s")
     print()
 
     consec_429 = 0
+    seen_configs = set()  # Item 2: dedup cache
 
     while True:
         # ── Program halt check — Python-enforced, cannot be overridden by LLM ──────
@@ -701,6 +709,24 @@ def main():
         candidate_yaml = None
         description = mutation_type
 
+        # Item 7: pairs whitelist for swing
+        if league == "swing" and candidate is not None:
+            _bad = set(candidate.get("pairs", [])) - SWING_ALLOWED_PAIRS
+            if _bad:
+                print(f"| [PAIRS_REJECT pairs={sorted(_bad)}]")
+                log_result(league, gen, {}, "pairs_reject", f"bad={sorted(_bad)}")
+                gen += 1
+                time.sleep(args.sleep)
+                continue
+        # Item 2: dedup check
+        if candidate_yaml:
+            _h = hashlib.md5(candidate_yaml.encode()).hexdigest()
+            if _h in seen_configs:
+                print(f"| [DEDUP_REJECT]")
+                log_result(league, gen, {}, "dedup_reject", "duplicate config")
+                gen += 1
+                time.sleep(args.sleep)
+                continue
         if mutation_type == "llm":
             _, best_strat, _ = pop.elites[0]
             clean = copy.deepcopy(best_strat)
@@ -795,6 +821,16 @@ def main():
             time.sleep(args.sleep)
             continue
 
+        # Item 3: MAX_TRADES for swing
+        if league == "swing" and trades > SWING_MAX_TRADES:
+            print(f"| [MAX_TRADES_REJECT trades={trades}]")
+            log_result(league, gen, {}, "max_trades_reject", f"trades={trades}>{SWING_MAX_TRADES}")
+            gen += 1
+            time.sleep(args.sleep)
+            continue
+        # Item 2: add to dedup cache after successful backtest
+        if candidate_yaml:
+            seen_configs.add(hashlib.md5(candidate_yaml.encode()).hexdigest())
         # Population insertion
         inserted, is_new_best = pop.try_insert(candidate, candidate_yaml, sharpe, trades)
 
