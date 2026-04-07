@@ -1,0 +1,56 @@
+name: kveldulf
+style: aggressive_momentum
+inspiration: "High-aggression momentum \u2014 short timeframes, high frequency, high\
+  \ turnover"
+league: futures_day
+leverage: 2
+pairs:
+- BTC/USD
+- ETH/USD
+- SOL/USD
+- XRP/USD
+- DOGE/USD
+- AVAX/USD
+- LINK/USD
+- UNI/USD
+- AAVE/USD
+- NEAR/USD
+- APT/USD
+- SUI/USD
+- ARB/USD
+- OP/USD
+- ADA/USD
+- POL/USD
+position:
+  size_pct: 15
+  max_open: 4
+  fee_rate: 0.0005
+entry:
+  long:
+    conditions:
+    - indicator: trend
+      period_minutes: 10
+      operator: eq
+      value: up
+    - indicator: rsi
+      period_minutes: 10
+      operator: lt
+      value: 62
+  short:
+    conditions:
+    - indicator: trend
+      period_minutes: 10
+      operator: eq
+      value: down
+    - indicator: rsi
+      period_minutes: 10
+      operator: gt
+      value: 38
+exit:
+  take_profit_pct: 1.0
+  stop_loss_pct: 0.6
+  timeout_minutes: 30
+risk:
+  pause_if_down_pct: 6
+  pause_minutes: 20
+  stop_if_down_pct: 15

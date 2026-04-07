@@ -324,10 +324,17 @@ def run_backtest(strategy, league, pairs=None):
     Returns dict with: sharpe, win_rate_pct, total_pnl_pct, total_trades,
                        max_drawdown_pct, final_equity, suspicious, suspicious_reason
     """
-    interval_minutes = 5 if league == "day" else 60
-    vwap_window      = 288 if league == "day" else 24
-    interval_label   = "5m" if league == "day" else "1h"
-    max_history_min  = 10_200 if league == "swing" else 400
+    is_futures       = league.startswith("futures_")
+    base_league      = "day" if "day" in league else "swing"
+    interval_minutes = 5 if base_league == "day" else 60
+    vwap_window      = 288 if base_league == "day" else 24
+    interval_label   = "5m" if base_league == "day" else "1h"
+    max_history_min  = 10_200 if base_league == "swing" else 400
+    leverage         = float(strategy.get("leverage", 1.0)) if is_futures else 1.0
+    FUNDING_RATE_8H  = 0.0001  # 0.01% per 8h default
+    funding_ticks    = (8 * 60) // interval_minutes  # ticks per 8h funding period
+    MAINTENANCE_MARGIN = 0.05
+    liq_threshold    = (1.0 / leverage) * (1 - MAINTENANCE_MARGIN) if is_futures else 999.0
 
     test_pairs = pairs or strategy.get("pairs", ["BTC/USD"])
 
@@ -359,14 +366,14 @@ def run_backtest(strategy, league, pairs=None):
         timeout_min = float(exit_cfg.get("timeout_minutes", 120))
     size_pct  = float(pos_cfg.get("size_pct", 20))
     max_open  = int(float(pos_cfg.get("max_open", 1)))
-    stop_pct  = float(strategy.get("risk", {}).get("stop_if_down_pct", 15))
+    stop_pct  = float(strategy.get("risk", {}).get("stop_if_down_pct", 12 if is_futures else 15))
     entry_rules = strategy.get("entry", {})
 
     portfolio = make_portfolio()
     history   = {pair: [] for pair in test_pairs}
     prices    = {}
     ts_iso    = ""
-    snap_every = 12 if league == "day" else 1
+    snap_every = 12 if base_league == "day" else 1
 
     for tick_i, ts_ms in enumerate(all_ts):
         ts_iso = datetime.fromtimestamp(ts_ms / 1000, tz=timezone.utc).isoformat()
@@ -404,7 +411,9 @@ def run_backtest(strategy, league, pairs=None):
             age_min   = (datetime.fromisoformat(ts_iso) - opened_dt).total_seconds() / 60
             pnl_r     = (current - entry) / entry if direction == "long" else (entry - current) / entry
             reason = None
-            if pnl_r >= tp_pct:
+            if is_futures and pnl_r <= -liq_threshold:
+                reason = "liquidated"
+            elif pnl_r >= tp_pct:
                 reason = "target"
             elif pnl_r <= -sl_pct:
                 reason = "stop"
@@ -412,6 +421,17 @@ def run_backtest(strategy, league, pairs=None):
                 reason = "timeout"
             if reason:
                 close_pos(portfolio, pair, current, reason, ts_iso)
+                if is_futures:
+                    # Apply leverage to the last closed trade P&L
+                    if portfolio["closed_trades"]:
+                        t = portfolio["closed_trades"][-1]
+                        age_h = age_min / 60
+                        funding_cost = FUNDING_RATE_8H * leverage * t.get("cost_basis", 0) * int(age_h / 8)
+                        lev_gain = t["pnl_usd"] * (leverage - 1)
+                        t["pnl_usd"] = round(t["pnl_usd"] * leverage - funding_cost, 4)
+                        t["won"] = t["pnl_usd"] > 0
+                        # Correct portfolio cash
+                        portfolio["cash"] = round(portfolio["cash"] + lev_gain - funding_cost, 4)
 
         # Entries
         open_pairs = {pos["pair"] for pos in portfolio["positions"]}

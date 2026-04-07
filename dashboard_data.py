@@ -32,6 +32,12 @@ POLY_CYCLE_STATE_PATH  = os.path.join(WORKSPACE, "competition", "polymarket", "p
 ARB_CYCLE_STATE_PATH   = os.path.join(WORKSPACE, "competition", "arb", "arb_cycle_state.json")
 SPREAD_CYCLE_STATE_PATH = os.path.join(WORKSPACE, "competition", "spread", "spread_cycle_state.json")
 POLY_LB_PATH   = os.path.join(WORKSPACE, "competition", "polymarket", "polymarket_leaderboard.json")
+FUTURES_DAY_LB_PATH   = os.path.join(WORKSPACE, "competition", "futures_day", "futures_day_leaderboard.json")
+FUTURES_SWING_LB_PATH = os.path.join(WORKSPACE, "competition", "futures_swing", "futures_swing_leaderboard.json")
+FUTURES_DAY_RESULTS_DIR   = os.path.join(WORKSPACE, "competition", "futures_day", "results")
+FUTURES_SWING_RESULTS_DIR = os.path.join(WORKSPACE, "competition", "futures_swing", "results")
+FUTURES_DAY_CYCLE_PATH    = os.path.join(WORKSPACE, "competition", "futures_day", "cycle_state.json")
+FUTURES_SWING_CYCLE_PATH  = os.path.join(WORKSPACE, "competition", "futures_swing", "cycle_state.json")
 TYR_STATE_PATH      = os.path.join(WORKSPACE, "research", "tyr_state.json")
 HEIMDALL_STATE_PATH = os.path.join(WORKSPACE, "research", "heimdall_state.json")
 
@@ -145,6 +151,10 @@ def get_live_sprint(league, active_sprint_id):
         active_dir = os.path.join(WORKSPACE, "competition", "arb", "active", active_sprint_id)
     elif league == "spread":
         active_dir = os.path.join(WORKSPACE, "competition", "spread", "active", active_sprint_id)
+    elif league == "futures_day":
+        active_dir = os.path.join(WORKSPACE, "competition", "futures_day", "active", active_sprint_id)
+    elif league == "futures_swing":
+        active_dir = os.path.join(WORKSPACE, "competition", "futures_swing", "active", active_sprint_id)
     else:
         active_dir = os.path.join(WORKSPACE, "competition", "swing", "active", active_sprint_id)
 
@@ -588,6 +598,22 @@ def get_cycle_state():
         return {"cycle": 1, "sprint_in_cycle": 0, "sprints_per_cycle": 7, "status": "active"}
 
 
+def get_futures_day_cycle_state():
+    try:
+        with open(FUTURES_DAY_CYCLE_PATH) as f:
+            return json.load(f)
+    except Exception:
+        return {"cycle": 1, "sprint_in_cycle": 0, "sprints_per_cycle": 7, "status": "active"}
+
+
+def get_futures_swing_cycle_state():
+    try:
+        with open(FUTURES_SWING_CYCLE_PATH) as f:
+            return json.load(f)
+    except Exception:
+        return {"cycle": 1, "sprint_in_cycle": 0, "sprints_per_cycle": 4, "status": "active"}
+
+
 def get_spread_score():
     """Import and run the spread strategy scoring script."""
     try:
@@ -611,9 +637,11 @@ def get_spread_score():
 
 
 
-ODIN_DAY_RESULTS   = "/root/.openclaw/workspace/research/day/results.tsv"
-ODIN_SWING_RESULTS = "/root/.openclaw/workspace/research/swing/results.tsv"
-FREYA_PM_RESULTS   = "/root/.openclaw/workspace/research/pm/results.tsv"
+ODIN_DAY_RESULTS          = "/root/.openclaw/workspace/research/day/results.tsv"
+ODIN_SWING_RESULTS        = "/root/.openclaw/workspace/research/swing/results.tsv"
+FREYA_PM_RESULTS          = "/root/.openclaw/workspace/research/pm/results.tsv"
+ODIN_FUTURES_DAY_RESULTS  = "/root/.openclaw/workspace/research/futures_day/results.tsv"
+ODIN_FUTURES_SWING_RESULTS= "/root/.openclaw/workspace/research/futures_swing/results.tsv"
 
 
 
@@ -899,9 +927,11 @@ def get_odin_research():
         return result
 
     return {
-        "day":   parse_league(ODIN_DAY_RESULTS,   "odin_day.service"),
-        "swing": parse_league(ODIN_SWING_RESULTS, "odin_swing.service"),
-        "pm":    parse_freya(),
+        "day":          parse_league(ODIN_DAY_RESULTS,           "odin_day.service"),
+        "swing":        parse_league(ODIN_SWING_RESULTS,         "odin_swing.service"),
+        "futures_day":  parse_league(ODIN_FUTURES_DAY_RESULTS,   "odin_futures_day.service"),
+        "futures_swing":parse_league(ODIN_FUTURES_SWING_RESULTS, "odin_futures_swing.service"),
+        "pm":           parse_freya(),
     }
 
 
@@ -910,12 +940,16 @@ def build():
     swing_lb = load_json(SWING_LB_PATH)
     arb_lb    = load_json(ARB_LB_PATH)
     spread_lb = load_json(SPREAD_LB_PATH)
+    futures_day_lb   = load_json(FUTURES_DAY_LB_PATH)
+    futures_swing_lb = load_json(FUTURES_SWING_LB_PATH)
     funded   = load_json("/var/www/dashboard/api/funded.json") or []
 
-    day_active_id   = day_lb.get("active_sprint")   if day_lb   else None
-    swing_active_id = swing_lb.get("active_sprint") if swing_lb else None
-    arb_active_id    = arb_lb.get("active_sprint")    if arb_lb    else None
-    spread_active_id = spread_lb.get("active_sprint") if spread_lb else None
+    day_active_id         = day_lb.get("active_sprint")         if day_lb         else None
+    swing_active_id       = swing_lb.get("active_sprint")       if swing_lb       else None
+    arb_active_id         = arb_lb.get("active_sprint")         if arb_lb         else None
+    spread_active_id      = spread_lb.get("active_sprint")      if spread_lb      else None
+    futures_day_active_id   = futures_day_lb.get("active_sprint")   if futures_day_lb   else None
+    futures_swing_active_id = futures_swing_lb.get("active_sprint") if futures_swing_lb else None
 
     dashboard = {
         "generated_at":  datetime.now(timezone.utc).isoformat(),
@@ -976,6 +1010,32 @@ def build():
             "live_sprint":           get_live_sprint("spread", spread_active_id),
         }
 
+    if futures_day_lb:
+        dashboard["leagues"]["futures_day"] = {
+            "label":                 "Futures Day League",
+            "sprint_duration_hours": 24,
+            "leverage":              2,
+            "active_sprint":         futures_day_active_id,
+            "total_sprints":         futures_day_lb.get("total_sprints", 0),
+            "archived_sprints":      futures_day_lb.get("archived", 0),
+            "sprint_in_cycle":       futures_day_lb.get("sprint_in_cycle", 0),
+            "cumulative_rankings":   futures_day_lb.get("rankings", []),
+            "live_sprint":           get_live_sprint("futures_day", futures_day_active_id),
+        }
+
+    if futures_swing_lb:
+        dashboard["leagues"]["futures_swing"] = {
+            "label":                 "Futures Swing League",
+            "sprint_duration_hours": 168,
+            "leverage":              2,
+            "active_sprint":         futures_swing_active_id,
+            "total_sprints":         futures_swing_lb.get("total_sprints", 0),
+            "archived_sprints":      futures_swing_lb.get("archived", 0),
+            "sprint_in_cycle":       futures_swing_lb.get("sprint_in_cycle", 0),
+            "cumulative_rankings":   futures_swing_lb.get("rankings", []),
+            "live_sprint":           get_live_sprint("futures_swing", futures_swing_active_id),
+        }
+
     dashboard["pm_research"]        = get_pm_research()
     dashboard["odin_research"]     = get_odin_research()
     dashboard["mimir_state"]       = get_mimir_state()
@@ -984,9 +1044,11 @@ def build():
     dashboard["heimdall_state"]     = get_heimdall_state()
     dashboard["cycle_state"]       = get_cycle_state()
     dashboard["spread_score"]      = get_spread_score()
-    dashboard["spread_cycle_state"] = get_spread_cycle_state()
-    dashboard["swing_cycle_state"] = get_swing_cycle_state()
-    dashboard["poly_cycle_state"]  = get_poly_cycle_state()
+    dashboard["spread_cycle_state"]       = get_spread_cycle_state()
+    dashboard["swing_cycle_state"]        = get_swing_cycle_state()
+    dashboard["poly_cycle_state"]         = get_poly_cycle_state()
+    dashboard["futures_day_cycle_state"]  = get_futures_day_cycle_state()
+    dashboard["futures_swing_cycle_state"]= get_futures_swing_cycle_state()
     poly_lb = load_json(POLY_LB_PATH) if os.path.exists(POLY_LB_PATH) else None
     if poly_lb:
         dashboard["poly_cumulative_rankings"] = poly_lb.get("rankings", [])

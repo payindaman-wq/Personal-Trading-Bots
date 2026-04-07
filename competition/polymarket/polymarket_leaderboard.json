@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-06T08:40:01.462477+00:00",
+  "generated_at": "2026-04-07T00:40:01.468628+00:00",
   "total_sprints": 3,
   "cycle": 2,
   "sprint_in_cycle": 4,
@@ -35,6 +35,20 @@
       "rank": 2
     },
     {
+      "bot": "baldur",
+      "type": "copy",
+      "username": "UAEVALORANTFAN",
+      "sprints_entered": 1,
+      "sprint_wins": 0,
+      "podiums": 1,
+      "points": 3,
+      "cumulative_pnl_usd": 161.1,
+      "total_trades": 52,
+      "total_wins": 31,
+      "overall_win_rate": 59.6,
+      "rank": 3
+    },
+    {
       "bot": "bragi",
       "type": "copy",
       "username": "Blessed-Sunshine",
@@ -46,35 +60,7 @@
       "total_trades": 1,
       "total_wins": 1,
       "overall_win_rate": 100.0,
-      "rank": 3
-    },
-    {
-      "bot": "tora",
-      "type": "sports",
-      "username": "",
-      "sprints_entered": 1,
-      "sprint_wins": 0,
-      "podiums": 0,
-      "points": 1,
-      "cumulative_pnl_usd": 108.51,
-      "total_trades": 1,
-      "total_wins": 1,
-      "overall_win_rate": 100.0,
       "rank": 4
-    },
-    {
-      "bot": "baldur",
-      "type": "copy",
-      "username": "UAEVALORANTFAN",
-      "sprints_entered": 1,
-      "sprint_wins": 0,
-      "podiums": 1,
-      "points": 3,
-      "cumulative_pnl_usd": 96.31,
-      "total_trades": 51,
-      "total_wins": 30,
-      "overall_win_rate": 58.8,
-      "rank": 5
     },
     {
       "bot": "hlin",
@@ -84,11 +70,11 @@
       "sprint_wins": 0,
       "podiums": 0,
       "points": 1,
-      "cumulative_pnl_usd": 62.08,
-      "total_trades": 7,
-      "total_wins": 1,
-      "overall_win_rate": 14.3,
-      "rank": 6
+      "cumulative_pnl_usd": 112.15,
+      "total_trades": 8,
+      "total_wins": 2,
+      "overall_win_rate": 25.0,
+      "rank": 5
     },
     {
       "bot": "kara",
@@ -102,7 +88,7 @@
       "total_trades": 9,
       "total_wins": 1,
       "overall_win_rate": 11.1,
-      "rank": 7
+      "rank": 6
     },
     {
       "bot": "mist",
@@ -116,7 +102,7 @@
       "total_trades": 9,
       "total_wins": 1,
       "overall_win_rate": 11.1,
-      "rank": 8
+      "rank": 7
     },
     {
       "bot": "thrud",
@@ -130,7 +116,7 @@
       "total_trades": 9,
       "total_wins": 1,
       "overall_win_rate": 11.1,
-      "rank": 9
+      "rank": 8
     },
     {
       "bot": "skadi",
@@ -144,7 +130,7 @@
       "total_trades": 2,
       "total_wins": 0,
       "overall_win_rate": 0.0,
-      "rank": 10
+      "rank": 9
     },
     {
       "bot": "hermod",
@@ -158,7 +144,7 @@
       "total_trades": 2,
       "total_wins": 0,
       "overall_win_rate": 0.0,
-      "rank": 11
+      "rank": 10
     },
     {
       "bot": "njal",
@@ -172,6 +158,20 @@
       "total_trades": 3,
       "total_wins": 0,
       "overall_win_rate": 0.0,
+      "rank": 11
+    },
+    {
+      "bot": "tora",
+      "type": "sports",
+      "username": "",
+      "sprints_entered": 1,
+      "sprint_wins": 0,
+      "podiums": 0,
+      "points": 1,
+      "cumulative_pnl_usd": 9.15,
+      "total_trades": 2,
+      "total_wins": 1,
+      "overall_win_rate": 50.0,
       "rank": 12
     },
     {
@@ -245,6 +245,20 @@
       "rank": 17
     },
     {
+      "bot": "vidar",
+      "type": "copy",
+      "username": "ewelmealt",
+      "sprints_entered": 1,
+      "sprint_wins": 0,
+      "podiums": 0,
+      "points": 1,
+      "cumulative_pnl_usd": -194.59,
+      "total_trades": 11,
+      "total_wins": 5,
+      "overall_win_rate": 45.5,
+      "rank": 18
+    },
+    {
       "bot": "thor",
       "type": "copy",
       "username": "majorexploiter",
@@ -256,7 +270,7 @@
       "total_trades": 12,
       "total_wins": 4,
       "overall_win_rate": 33.3,
-      "rank": 18
+      "rank": 19
     },
     {
       "bot": "torkel",
@@ -270,20 +284,6 @@
       "total_trades": 6,
       "total_wins": 1,
       "overall_win_rate": 16.7,
-      "rank": 19
-    },
-    {
-      "bot": "vidar",
-      "type": "copy",
-      "username": "ewelmealt",
-      "sprints_entered": 1,
-      "sprint_wins": 0,
-      "podiums": 0,
-      "points": 1,
-      "cumulative_pnl_usd": -445.82,
-      "total_trades": 10,
-      "total_wins": 4,
-      "overall_win_rate": 40.0,
       "rank": 20
     },
     {
@@ -326,7 +326,7 @@
       "sprint_trades": 13,
       "sprint_wins": 7,
       "win_rate": 53.8,
-      "active_positions": 0,
+      "active_positions": 3,
       "rank": 1,
       "points": 8
     },
@@ -345,6 +345,20 @@
       "points": 5
     },
     {
+      "bot": "hlin",
+      "type": "sports",
+      "username": "",
+      "sprint_id": "poly-auto-20260405-1000",
+      "sprint_pnl_usd": 120.6286,
+      "sprint_pnl_pct": 12.06,
+      "sprint_trades": 2,
+      "sprint_wins": 2,
+      "win_rate": 100.0,
+      "active_positions": 8,
+      "rank": 3,
+      "points": 3
+    },
+    {
       "bot": "sol",
       "type": "copy",
       "username": "SecondWindCapital",
@@ -355,34 +369,20 @@
       "sprint_wins": 2,
       "win_rate": 100.0,
       "active_positions": 6,
-      "rank": 3,
-      "points": 3
-    },
-    {
-      "bot": "tora",
-      "type": "sports",
-      "username": "",
-      "sprint_id": "poly-auto-20260405-1000",
-      "sprint_pnl_usd": 108.5107,
-      "sprint_pnl_pct": 10.85,
-      "sprint_trades": 1,
-      "sprint_wins": 1,
-      "win_rate": 100.0,
-      "active_positions": 0,
       "rank": 4,
       "points": 1
     },
     {
-      "bot": "hlin",
-      "type": "sports",
-      "username": "",
-      "sprint_id": "poly-auto-20260405-1000",
-      "sprint_pnl_usd": 70.5645,
-      "sprint_pnl_pct": 7.06,
-      "sprint_trades": 1,
-      "sprint_wins": 1,
-      "win_rate": 100.0,
-      "active_positions": 8,
+      "bot": "baldur",
+      "type": "copy",
+      "username": "UAEVALORANTFAN",
+      "sprint_id": "poly-20260405-0839",
+      "sprint_pnl_usd": 73.9511,
+      "sprint_pnl_pct": 7.4,
+      "sprint_trades": 27,
+      "sprint_wins": 16,
+      "win_rate": 59.3,
+      "active_positions": 0,
       "rank": 5,
       "points": 1
     },
@@ -429,17 +429,31 @@
       "points": 1
     },
     {
-      "bot": "baldur",
+      "bot": "vidar",
       "type": "copy",
-      "username": "UAEVALORANTFAN",
+      "username": "ewelmealt",
       "sprint_id": "poly-20260405-0839",
-      "sprint_pnl_usd": 9.1649,
-      "sprint_pnl_pct": 0.92,
-      "sprint_trades": 26,
-      "sprint_wins": 15,
-      "win_rate": 57.7,
-      "active_positions": 0,
+      "sprint_pnl_usd": 28.3248,
+      "sprint_pnl_pct": 2.83,
+      "sprint_trades": 6,
+      "sprint_wins": 3,
+      "win_rate": 50.0,
+      "active_positions": 3,
       "rank": 9,
+      "points": 1
+    },
+    {
+      "bot": "tora",
+      "type": "sports",
+      "username": "",
+      "sprint_id": "poly-auto-20260405-1000",
+      "sprint_pnl_usd": 9.1507,
+      "sprint_pnl_pct": 0.92,
+      "sprint_trades": 2,
+      "sprint_wins": 1,
+      "win_rate": 50.0,
+      "active_positions": 1,
+      "rank": 10,
       "points": 1
     },
     {
@@ -453,7 +467,7 @@
       "sprint_wins": 0,
       "win_rate": 0.0,
       "active_positions": 0,
-      "rank": 10,
+      "rank": 11,
       "points": 1
     },
     {
@@ -467,7 +481,7 @@
       "sprint_wins": 0,
       "win_rate": 0.0,
       "active_positions": 0,
-      "rank": 11,
+      "rank": 12,
       "points": 1
     },
     {
@@ -481,7 +495,7 @@
       "sprint_wins": 0,
       "win_rate": 0.0,
       "active_positions": 0,
-      "rank": 12,
+      "rank": 13,
       "points": 1
     },
     {
@@ -494,8 +508,8 @@
       "sprint_trades": 0,
       "sprint_wins": 0,
       "win_rate": 0.0,
-      "active_positions": 0,
-      "rank": 13,
+      "active_positions": 1,
+      "rank": 14,
       "points": 1
     },
     {
@@ -509,7 +523,7 @@
       "sprint_wins": 0,
       "win_rate": 0.0,
       "active_positions": 0,
-      "rank": 14,
+      "rank": 15,
       "points": 1
     },
     {
@@ -523,7 +537,7 @@
       "sprint_wins": 0,
       "win_rate": 0.0,
       "active_positions": 0,
-      "rank": 15,
+      "rank": 16,
       "points": 1
     },
     {
@@ -537,7 +551,7 @@
       "sprint_wins": 0,
       "win_rate": 0.0,
       "active_positions": 0,
-      "rank": 16,
+      "rank": 17,
       "points": 1
     },
     {
@@ -551,7 +565,7 @@
       "sprint_wins": 0,
       "win_rate": 0.0,
       "active_positions": 0,
-      "rank": 17,
+      "rank": 18,
       "points": 1
     },
     {
@@ -564,20 +578,6 @@
       "sprint_trades": 6,
       "sprint_wins": 2,
       "win_rate": 33.3,
-      "active_positions": 0,
-      "rank": 18,
-      "points": 1
-    },
-    {
-      "bot": "vidar",
-      "type": "copy",
-      "username": "ewelmealt",
-      "sprint_id": "poly-20260405-0839",
-      "sprint_pnl_usd": -222.91,
-      "sprint_pnl_pct": -22.29,
-      "sprint_trades": 5,
-      "sprint_wins": 2,
-      "win_rate": 40.0,
       "active_positions": 0,
       "rank": 19,
       "points": 1

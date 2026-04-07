@@ -1,11 +1,11 @@
 {
-  "total": 589950,
+  "total": 613831,
   "by_source": {
     "polymarket": 14826,
-    "kalshi": 569454,
-    "manifold": 5670
+    "kalshi": 593320,
+    "manifold": 5685
   },
-  "last_run": "2026-04-06T08:00:01.791079+00:00",
-  "new_this_run": 8757,
+  "last_run": "2026-04-07T00:00:01.324618+00:00",
+  "new_this_run": 8879,
   "researcher_ready": true
 }

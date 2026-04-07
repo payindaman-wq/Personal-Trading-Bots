@@ -35,7 +35,7 @@ GEMINI_BASE   = "https://generativelanguage.googleapis.com/v1beta/models"
 
 SUSPICIOUS_SHARPE   = 3.5
 POPULATION_SIZE     = 10
-MIN_TRADES = {"day": 250, "swing": 30}
+MIN_TRADES = {"day": 250, "swing": 30, "futures_day": 200, "futures_swing": 25}
 
 ALL_PAIRS = [
     "BTC/USD",  "ETH/USD",  "SOL/USD",  "XRP/USD",
@@ -60,6 +60,22 @@ SWING_RANGES = {
     "timeout_hours": (48, 240),
     "size_pct": (15, 30),
     "max_open": (1, 3),
+}
+FUTURES_DAY_RANGES = {
+    "take_profit_pct": (0.8, 5.0),
+    "stop_loss_pct":   (0.5, 3.0),
+    "timeout_minutes": (30, 480),
+    "size_pct":        (8, 20),
+    "max_open":        (1, 4),
+    "leverage":        (1.5, 3.0),
+}
+FUTURES_SWING_RANGES = {
+    "take_profit_pct": (3.0, 10.0),
+    "stop_loss_pct":   (1.5, 4.0),
+    "timeout_hours":   (48, 192),
+    "size_pct":        (10, 25),
+    "max_open":        (1, 3),
+    "leverage":        (1.5, 3.0),
 }
 
 INDICATORS = {
@@ -164,10 +180,16 @@ def get_fleet_path(league):
         return os.path.join(WORKSPACE, "fleet", "autobotday", "strategy.yaml")
     elif league == "swing":
         return os.path.join(WORKSPACE, "fleet", "swing", "autobotswing", "strategy.yaml")
+    elif league == "futures_day":
+        return os.path.join(WORKSPACE, "fleet", "futures_day", "autobotdayfutures", "strategy.yaml")
+    elif league == "futures_swing":
+        return os.path.join(WORKSPACE, "fleet", "futures_swing", "autobotswingfutures", "strategy.yaml")
     return None
 
 
 def get_ranges(league):
+    if league == "futures_day":   return FUTURES_DAY_RANGES
+    if league == "futures_swing": return FUTURES_SWING_RANGES
     return DAY_RANGES if league == "day" else SWING_RANGES
 
 
@@ -317,7 +339,7 @@ def perturb(strategy, league):
     params = []
     params.append(("tp", ex, "take_profit_pct", r["take_profit_pct"]))
     params.append(("sl", ex, "stop_loss_pct", r["stop_loss_pct"]))
-    to_key = "timeout_minutes" if league == "day" else "timeout_hours"
+    to_key = "timeout_minutes" if league in ("day", "futures_day") else "timeout_hours"
     params.append(("to", ex, to_key, r[to_key]))
     params.append(("sz", ps, "size_pct", r["size_pct"]))
     params.append(("mo", ps, "max_open", r["max_open"]))
@@ -412,7 +434,7 @@ def random_strategy(league):
 
     tp = round(random.uniform(*r["take_profit_pct"]), 1)
     sl = round(random.uniform(*r["stop_loss_pct"]), 1)
-    to_key = "timeout_minutes" if league == "day" else "timeout_hours"
+    to_key = "timeout_minutes" if league in ("day", "futures_day") else "timeout_hours"
     to_val = int(random.uniform(*r[to_key]))
     sz = int(random.uniform(*r["size_pct"]))
     mo = random.randint(*r["max_open"])
@@ -428,8 +450,8 @@ def random_strategy(league):
         },
         "exit": {"take_profit_pct": tp, "stop_loss_pct": sl, to_key: to_val},
         "risk": {
-            "pause_if_down_pct": 4 if league == "day" else 8,
-            "stop_if_down_pct": 10 if league == "day" else 18,
+            "pause_if_down_pct": 5 if league in ("day", "futures_day") else 8,
+            "stop_if_down_pct": 12 if league in ("day", "futures_day") else 18,
         },
     }
     if league == "day":
@@ -575,7 +597,7 @@ def log_result(league, gen, result, status, description=""):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--league", choices=["day", "swing"], required=True)
+    parser.add_argument("--league", choices=["day", "swing", "futures_day", "futures_swing"], required=True)
     parser.add_argument("--sleep", type=int, default=60)
     parser.add_argument("--seed", default=None, help="Seed strategy YAML path")
     parser.add_argument("--offset", type=int, default=0)

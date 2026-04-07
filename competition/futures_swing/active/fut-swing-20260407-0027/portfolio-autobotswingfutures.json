@@ -1,0 +1,60 @@
+{
+  "bot": "autobotswingfutures",
+  "competition_id": "fut-swing-20260407-0027",
+  "duration_hours": 168,
+  "started_at": "2026-04-07T00:27:26.437301+00:00",
+  "pairs": [
+    "BTC/USD",
+    "ETH/USD",
+    "SOL/USD",
+    "XRP/USD",
+    "DOGE/USD",
+    "AVAX/USD",
+    "LINK/USD",
+    "UNI/USD",
+    "AAVE/USD",
+    "NEAR/USD",
+    "APT/USD",
+    "SUI/USD",
+    "ARB/USD",
+    "OP/USD",
+    "ADA/USD",
+    "POL/USD"
+  ],
+  "starting_capital": 1000.0,
+  "fee_rate": 0.0005,
+  "cash": 700.0,
+  "positions": [
+    {
+      "pair": "BTC/USD",
+      "direction": "long",
+      "entry_price": 68920.0,
+      "quantity": 0.00435287,
+      "cost_basis": 150.0,
+      "leverage": 2.0,
+      "opened_at": "2026-04-07T00:33:54.420788+00:00"
+    },
+    {
+      "pair": "ETH/USD",
+      "direction": "long",
+      "entry_price": 2113.7,
+      "quantity": 0.14193121,
+      "cost_basis": 150.0,
+      "leverage": 2.0,
+      "opened_at": "2026-04-07T00:33:54.430020+00:00"
+    }
+  ],
+  "closed_trades": [],
+  "stats": {
+    "total_trades": 0,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "total_pnl_usd": 0.0,
+    "total_pnl_pct": 0.0,
+    "total_fees": 0.0,
+    "max_drawdown_pct": 0.0,
+    "current_equity": 1000.0,
+    "peak_equity": 1000.0
+  }
+}

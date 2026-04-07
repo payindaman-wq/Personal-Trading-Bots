@@ -1,7 +1,7 @@
 {
   "champion": "sigurd",
   "challenger": "autobotday",
-  "challenger_wins": 1,
+  "challenger_wins": 2,
   "champion_wins": 4,
   "history": [
     {
@@ -67,6 +67,14 @@
       "autobot_pnl": 0.0,
       "top3": true,
       "processed_at": "2026-04-04T00:54"
+    },
+    {
+      "sprint": "comp-20260404-0900",
+      "winner": "autobotday",
+      "autobot_rank": 1,
+      "autobot_pnl": 0.1799,
+      "top3": true,
+      "processed_at": "2026-04-06T09:00"
     }
   ]
 }

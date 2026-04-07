@@ -1,0 +1,55 @@
+name: hakon
+style: multi_timeframe
+inspiration: "Multi-timeframe \u2014 short term entry aligned with medium term trend"
+league: futures_day
+leverage: 2
+pairs:
+- BTC/USD
+- ETH/USD
+- SOL/USD
+- XRP/USD
+- DOGE/USD
+- AVAX/USD
+- LINK/USD
+- UNI/USD
+- AAVE/USD
+- NEAR/USD
+- APT/USD
+- SUI/USD
+- ARB/USD
+- OP/USD
+- ADA/USD
+- POL/USD
+position:
+  size_pct: 12
+  max_open: 2
+  fee_rate: 0.0005
+entry:
+  long:
+    conditions:
+    - indicator: trend
+      period_minutes: 240
+      operator: eq
+      value: up
+    - indicator: macd_signal
+      period_minutes: 30
+      operator: eq
+      value: bullish
+  short:
+    conditions:
+    - indicator: trend
+      period_minutes: 240
+      operator: eq
+      value: down
+    - indicator: macd_signal
+      period_minutes: 30
+      operator: eq
+      value: bearish
+exit:
+  take_profit_pct: 2.2
+  stop_loss_pct: 1.1
+  timeout_minutes: 180
+risk:
+  pause_if_down_pct: 5
+  pause_minutes: 60
+  stop_if_down_pct: 12

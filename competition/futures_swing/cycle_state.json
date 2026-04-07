@@ -1,0 +1,10 @@
+{
+  "cycle": 1,
+  "sprint_in_cycle": 1,
+  "sprints_per_cycle": 4,
+  "status": "active",
+  "sprints": [
+    "fut-swing-20260407-0027"
+  ],
+  "cycle_started_at": "2026-04-07T00:27:26.437301+00:00"
+}

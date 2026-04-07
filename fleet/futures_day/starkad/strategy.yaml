@@ -1,0 +1,55 @@
+name: starkad
+style: breakout_hunter
+inspiration: "Breakout hunter \u2014 enters on MACD crossover with trend confirmation"
+league: futures_day
+leverage: 2
+pairs:
+- BTC/USD
+- ETH/USD
+- SOL/USD
+- XRP/USD
+- DOGE/USD
+- AVAX/USD
+- LINK/USD
+- UNI/USD
+- AAVE/USD
+- NEAR/USD
+- APT/USD
+- SUI/USD
+- ARB/USD
+- OP/USD
+- ADA/USD
+- POL/USD
+position:
+  size_pct: 12
+  max_open: 3
+  fee_rate: 0.0005
+entry:
+  long:
+    conditions:
+    - indicator: macd_signal
+      period_minutes: 30
+      operator: eq
+      value: bullish
+    - indicator: trend
+      period_minutes: 60
+      operator: eq
+      value: up
+  short:
+    conditions:
+    - indicator: macd_signal
+      period_minutes: 30
+      operator: eq
+      value: bearish
+    - indicator: trend
+      period_minutes: 60
+      operator: eq
+      value: down
+exit:
+  take_profit_pct: 2.0
+  stop_loss_pct: 1.0
+  timeout_minutes: 120
+risk:
+  pause_if_down_pct: 6
+  pause_minutes: 60
+  stop_if_down_pct: 14

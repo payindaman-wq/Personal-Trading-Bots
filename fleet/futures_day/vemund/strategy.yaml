@@ -1,0 +1,63 @@
+name: vemund
+style: hybrid_scalper
+inspiration: "Hybrid scalper \u2014 VWAP-aware entry with RSI and trend"
+league: futures_day
+leverage: 2
+pairs:
+- BTC/USD
+- ETH/USD
+- SOL/USD
+- XRP/USD
+- DOGE/USD
+- AVAX/USD
+- LINK/USD
+- UNI/USD
+- AAVE/USD
+- NEAR/USD
+- APT/USD
+- SUI/USD
+- ARB/USD
+- OP/USD
+- ADA/USD
+- POL/USD
+position:
+  size_pct: 10
+  max_open: 3
+  fee_rate: 0.0005
+entry:
+  long:
+    conditions:
+    - indicator: trend
+      period_minutes: 30
+      operator: eq
+      value: up
+    - indicator: rsi
+      period_minutes: 15
+      operator: lt
+      value: 55
+    - indicator: price_change_pct
+      period_minutes: 15
+      operator: lt
+      value: -0.3
+  short:
+    conditions:
+    - indicator: trend
+      period_minutes: 30
+      operator: eq
+      value: down
+    - indicator: rsi
+      period_minutes: 15
+      operator: gt
+      value: 45
+    - indicator: price_change_pct
+      period_minutes: 15
+      operator: gt
+      value: 0.3
+exit:
+  take_profit_pct: 1.2
+  stop_loss_pct: 0.7
+  timeout_minutes: 45
+risk:
+  pause_if_down_pct: 5
+  pause_minutes: 30
+  stop_if_down_pct: 12

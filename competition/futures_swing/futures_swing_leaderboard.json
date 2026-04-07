@@ -1,0 +1,283 @@
+{
+  "generated_at": "2026-04-07T00:37:50.689154+00:00",
+  "league": "futures_swing",
+  "total_sprints": 1,
+  "archived": 0,
+  "active_sprint": "fut-swing-20260407-0027",
+  "cycle": 1,
+  "sprint_in_cycle": 1,
+  "sprints_per_cycle": 4,
+  "cycle_status": "active",
+  "rankings": [
+    {
+      "bot": "andvari",
+      "sprints_entered": 1,
+      "sprint_wins": 0,
+      "podiums": 0,
+      "points": 0,
+      "cumulative_pnl_usd": 0.0,
+      "cumulative_pnl_pct": 0.0,
+      "total_trades": 0,
+      "total_wins": 0,
+      "total_losses": 0,
+      "best_sprint_pnl_pct": 0.0,
+      "worst_sprint_pnl_pct": 0.0,
+      "sprint_log": [
+        {
+          "comp_id": "fut-swing-20260407-0027",
+          "rank": 1,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": true
+        }
+      ],
+      "overall_win_rate": 0.0,
+      "avg_pnl_pct_per_sprint": 0.0
+    },
+    {
+      "bot": "atli",
+      "sprints_entered": 1,
+      "sprint_wins": 0,
+      "podiums": 0,
+      "points": 0,
+      "cumulative_pnl_usd": 0.0,
+      "cumulative_pnl_pct": 0.0,
+      "total_trades": 0,
+      "total_wins": 0,
+      "total_losses": 0,
+      "best_sprint_pnl_pct": 0.0,
+      "worst_sprint_pnl_pct": 0.0,
+      "sprint_log": [
+        {
+          "comp_id": "fut-swing-20260407-0027",
+          "rank": 2,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": true
+        }
+      ],
+      "overall_win_rate": 0.0,
+      "avg_pnl_pct_per_sprint": 0.0
+    },
+    {
+      "bot": "audun",
+      "sprints_entered": 1,
+      "sprint_wins": 0,
+      "podiums": 0,
+      "points": 0,
+      "cumulative_pnl_usd": 0.0,
+      "cumulative_pnl_pct": 0.0,
+      "total_trades": 0,
+      "total_wins": 0,
+      "total_losses": 0,
+      "best_sprint_pnl_pct": 0.0,
+      "worst_sprint_pnl_pct": 0.0,
+      "sprint_log": [
+        {
+          "comp_id": "fut-swing-20260407-0027",
+          "rank": 3,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": true
+        }
+      ],
+      "overall_win_rate": 0.0,
+      "avg_pnl_pct_per_sprint": 0.0
+    },
+    {
+      "bot": "autobotswingfutures",
+      "sprints_entered": 1,
+      "sprint_wins": 0,
+      "podiums": 0,
+      "points": 0,
+      "cumulative_pnl_usd": 0.0,
+      "cumulative_pnl_pct": 0.0,
+      "total_trades": 0,
+      "total_wins": 0,
+      "total_losses": 0,
+      "best_sprint_pnl_pct": 0.0,
+      "worst_sprint_pnl_pct": 0.0,
+      "sprint_log": [
+        {
+          "comp_id": "fut-swing-20260407-0027",
+          "rank": 4,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": true
+        }
+      ],
+      "overall_win_rate": 0.0,
+      "avg_pnl_pct_per_sprint": 0.0
+    },
+    {
+      "bot": "grimolf",
+      "sprints_entered": 1,
+      "sprint_wins": 0,
+      "podiums": 0,
+      "points": 0,
+      "cumulative_pnl_usd": 0.0,
+      "cumulative_pnl_pct": 0.0,
+      "total_trades": 0,
+      "total_wins": 0,
+      "total_losses": 0,
+      "best_sprint_pnl_pct": 0.0,
+      "worst_sprint_pnl_pct": 0.0,
+      "sprint_log": [
+        {
+          "comp_id": "fut-swing-20260407-0027",
+          "rank": 5,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": true
+        }
+      ],
+      "overall_win_rate": 0.0,
+      "avg_pnl_pct_per_sprint": 0.0
+    },
+    {
+      "bot": "hogni",
+      "sprints_entered": 1,
+      "sprint_wins": 0,
+      "podiums": 0,
+      "points": 0,
+      "cumulative_pnl_usd": 0.0,
+      "cumulative_pnl_pct": 0.0,
+      "total_trades": 0,
+      "total_wins": 0,
+      "total_losses": 0,
+      "best_sprint_pnl_pct": 0.0,
+      "worst_sprint_pnl_pct": 0.0,
+      "sprint_log": [
+        {
+          "comp_id": "fut-swing-20260407-0027",
+          "rank": 6,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": true
+        }
+      ],
+      "overall_win_rate": 0.0,
+      "avg_pnl_pct_per_sprint": 0.0
+    },
+    {
+      "bot": "regin",
+      "sprints_entered": 1,
+      "sprint_wins": 0,
+      "podiums": 0,
+      "points": 0,
+      "cumulative_pnl_usd": 0.0,
+      "cumulative_pnl_pct": 0.0,
+      "total_trades": 0,
+      "total_wins": 0,
+      "total_losses": 0,
+      "best_sprint_pnl_pct": 0.0,
+      "worst_sprint_pnl_pct": 0.0,
+      "sprint_log": [
+        {
+          "comp_id": "fut-swing-20260407-0027",
+          "rank": 7,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": true
+        }
+      ],
+      "overall_win_rate": 0.0,
+      "avg_pnl_pct_per_sprint": 0.0
+    },
+    {
+      "bot": "sigmund",
+      "sprints_entered": 1,
+      "sprint_wins": 0,
+      "podiums": 0,
+      "points": 0,
+      "cumulative_pnl_usd": 0.0,
+      "cumulative_pnl_pct": 0.0,
+      "total_trades": 0,
+      "total_wins": 0,
+      "total_losses": 0,
+      "best_sprint_pnl_pct": 0.0,
+      "worst_sprint_pnl_pct": 0.0,
+      "sprint_log": [
+        {
+          "comp_id": "fut-swing-20260407-0027",
+          "rank": 8,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": true
+        }
+      ],
+      "overall_win_rate": 0.0,
+      "avg_pnl_pct_per_sprint": 0.0
+    },
+    {
+      "bot": "sinfjotli",
+      "sprints_entered": 1,
+      "sprint_wins": 0,
+      "podiums": 0,
+      "points": 0,
+      "cumulative_pnl_usd": 0.0,
+      "cumulative_pnl_pct": 0.0,
+      "total_trades": 0,
+      "total_wins": 0,
+      "total_losses": 0,
+      "best_sprint_pnl_pct": 0.0,
+      "worst_sprint_pnl_pct": 0.0,
+      "sprint_log": [
+        {
+          "comp_id": "fut-swing-20260407-0027",
+          "rank": 9,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": true
+        }
+      ],
+      "overall_win_rate": 0.0,
+      "avg_pnl_pct_per_sprint": 0.0
+    },
+    {
+      "bot": "thorolf",
+      "sprints_entered": 1,
+      "sprint_wins": 0,
+      "podiums": 0,
+      "points": 0,
+      "cumulative_pnl_usd": 0.0,
+      "cumulative_pnl_pct": 0.0,
+      "total_trades": 0,
+      "total_wins": 0,
+      "total_losses": 0,
+      "best_sprint_pnl_pct": 0.0,
+      "worst_sprint_pnl_pct": 0.0,
+      "sprint_log": [
+        {
+          "comp_id": "fut-swing-20260407-0027",
+          "rank": 10,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": true
+        }
+      ],
+      "overall_win_rate": 0.0,
+      "avg_pnl_pct_per_sprint": 0.0
+    }
+  ]
+}

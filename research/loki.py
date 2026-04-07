@@ -476,6 +476,7 @@ def process_entry(entry):
     if league == "pm":
         process_pm_entry(entry)
         return
+    # futures leagues handled same as spot leagues below
 
     ts              = entry.get("ts", "")
     gen             = entry.get("generation", "?")

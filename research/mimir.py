@@ -25,7 +25,9 @@ ANTHROPIC_URL     = "https://api.anthropic.com/v1/messages"
 MIMIR_LOG         = os.path.join(RESEARCH, "mimir_log.jsonl")
 
 DAY_RESULTS_DIR   = os.path.join(WORKSPACE, "competition", "results")
-SWING_RESULTS_DIR = os.path.join(WORKSPACE, "competition", "swing", "results")
+SWING_RESULTS_DIR         = os.path.join(WORKSPACE, "competition", "swing", "results")
+FUTURES_DAY_RESULTS_DIR   = os.path.join(WORKSPACE, "competition", "futures_day", "results")
+FUTURES_SWING_RESULTS_DIR = os.path.join(WORKSPACE, "competition", "futures_swing", "results")
 PM_RESULTS_DIR    = os.path.join(WORKSPACE, "competition", "polymarket", "auto_results")
 PM_RESEARCH       = os.path.join(RESEARCH, "pm")
 
@@ -182,7 +184,10 @@ def summarize_research(rows):
 
 
 def load_sprint_results(league, bot_name, n=10):
-    results_dir = DAY_RESULTS_DIR if league == "day" else SWING_RESULTS_DIR
+    if league == "day":              results_dir = DAY_RESULTS_DIR
+    elif league == "futures_day":    results_dir = FUTURES_DAY_RESULTS_DIR
+    elif league == "futures_swing":  results_dir = FUTURES_SWING_RESULTS_DIR
+    else:                            results_dir = SWING_RESULTS_DIR
     if not os.path.isdir(results_dir):
         return []
 
@@ -267,8 +272,11 @@ def format_tyr_context(tyr):
 def build_prompt(league, program_md, best_strategy_yaml,
                  research_summary, sprint_summary, generation,
                  self_audit="", tyr_context=""):
-    bot_name  = "AutoBotDay"  if league == "day"   else "AutoBotSwing"
-    timeframe = "5-minute (day trading)" if league == "day" else "1-hour (swing trading)"
+    if league == "day":              bot_name = "AutoBotDay";    timeframe = "5-minute (day trading)"
+    elif league == "swing":          bot_name = "AutoBotSwing";  timeframe = "1-hour (swing trading)"
+    elif league == "futures_day":    bot_name = "AutoBotDayFutures";   timeframe = "5-minute (futures day, 2x leverage)"
+    elif league == "futures_swing":  bot_name = "AutoBotSwingFutures"; timeframe = "1-hour (futures swing, 2x leverage)"
+    else:                            bot_name = "AutoBot";       timeframe = "unknown"
 
     return f"""You are MIMIR, a senior crypto trading strategy analyst. You are analyzing {generation} generations of automated research from ODIN, a strategy optimization loop.
 
@@ -509,7 +517,7 @@ def parse_response(response):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--league",      choices=["day", "swing", "pm"], required=True)
+    parser.add_argument("--league",      choices=["day", "swing", "pm", "futures_day", "futures_swing"], required=True)
     parser.add_argument("--generation",  type=int,                       required=True)
     parser.add_argument("--model",       default=None, help="Override Claude model (e.g. claude-opus-4-6)")
     args = parser.parse_args()
@@ -536,7 +544,11 @@ def main():
         prompt = build_pm_prompt(program_md, best_strategy,
                                  research_summary, sprint_summary, generation)
     else:
-        bot_name      = "autobotday" if league == "day" else "autobotswing"
+        if league == "day":             bot_name = "autobotday"
+        elif league == "swing":         bot_name = "autobotswing"
+        elif league == "futures_day":   bot_name = "autobotdayfutures"
+        elif league == "futures_swing": bot_name = "autobotswingfutures"
+        else:                           bot_name = "autobotday"
         program_path  = os.path.join(RESEARCH, league, "program.md")
         best_path     = os.path.join(RESEARCH, league, "best_strategy.yaml")
         program_md    = open(program_path).read()  if os.path.exists(program_path) else ""

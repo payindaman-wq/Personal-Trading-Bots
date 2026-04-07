@@ -1,0 +1,56 @@
+name: brandr
+style: momentum_scalper
+inspiration: "Aggressive momentum scalper with 2x leverage \u2014 rides strong trends,\
+  \ exits fast"
+league: futures_day
+leverage: 2
+pairs:
+- BTC/USD
+- ETH/USD
+- SOL/USD
+- XRP/USD
+- DOGE/USD
+- AVAX/USD
+- LINK/USD
+- UNI/USD
+- AAVE/USD
+- NEAR/USD
+- APT/USD
+- SUI/USD
+- ARB/USD
+- OP/USD
+- ADA/USD
+- POL/USD
+position:
+  size_pct: 12
+  max_open: 3
+  fee_rate: 0.0005
+entry:
+  long:
+    conditions:
+    - indicator: trend
+      period_minutes: 15
+      operator: eq
+      value: up
+    - indicator: rsi
+      period_minutes: 20
+      operator: lt
+      value: 58
+  short:
+    conditions:
+    - indicator: trend
+      period_minutes: 15
+      operator: eq
+      value: down
+    - indicator: rsi
+      period_minutes: 20
+      operator: gt
+      value: 42
+exit:
+  take_profit_pct: 1.5
+  stop_loss_pct: 0.8
+  timeout_minutes: 60
+risk:
+  pause_if_down_pct: 5
+  pause_minutes: 30
+  stop_if_down_pct: 12

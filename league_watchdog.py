@@ -39,6 +39,16 @@ LEAGUES = [
         "active_dir": os.path.join(WORKSPACE, "competition", "spread", "active"),
         "start_cmd":  ["python3", os.path.join(WORKSPACE, "spread_competition_start.py")],
     },
+    {
+        "name":       "futures_day",
+        "active_dir": os.path.join(WORKSPACE, "competition", "futures_day", "active"),
+        "start_cmd":  ["python3", os.path.join(WORKSPACE, "futures_day_restart.py")],
+    },
+    {
+        "name":       "futures_swing",
+        "active_dir": os.path.join(WORKSPACE, "competition", "futures_swing", "active"),
+        "start_cmd":  ["python3", os.path.join(WORKSPACE, "futures_swing_restart.py")],
+    },
 ]
 
 

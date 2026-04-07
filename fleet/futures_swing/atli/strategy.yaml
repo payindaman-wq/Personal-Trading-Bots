@@ -1,0 +1,55 @@
+name: atli
+style: mean_reversion
+inspiration: "Swing mean reversion \u2014 buys oversold multi-day dips"
+league: futures_swing
+leverage: 2
+pairs:
+- BTC/USD
+- ETH/USD
+- SOL/USD
+- XRP/USD
+- DOGE/USD
+- AVAX/USD
+- LINK/USD
+- UNI/USD
+- AAVE/USD
+- NEAR/USD
+- APT/USD
+- SUI/USD
+- ARB/USD
+- OP/USD
+- ADA/USD
+- POL/USD
+position:
+  size_pct: 15
+  max_open: 2
+  fee_rate: 0.0005
+entry:
+  long:
+    conditions:
+    - indicator: rsi
+      period_hours: 24
+      operator: lt
+      value: 35
+    - indicator: price_change_pct
+      period_hours: 48
+      operator: lt
+      value: -8.0
+  short:
+    conditions:
+    - indicator: rsi
+      period_hours: 24
+      operator: gt
+      value: 65
+    - indicator: price_change_pct
+      period_hours: 48
+      operator: gt
+      value: 8.0
+exit:
+  take_profit_pct: 4.0
+  stop_loss_pct: 2.5
+  timeout_hours: 72
+risk:
+  pause_if_down_pct: 8
+  pause_minutes: 120
+  stop_if_down_pct: 18

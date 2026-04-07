@@ -313,4 +313,10 @@ try:
 except Exception as e:
     print("  [POLYMARKET] Error: " + str(e))
 
+print("[weekly] Restarting futures swing league...")
+import subprocess as _sp, sys as _sys
+_r = _sp.run([_sys.executable, os.path.join(WORKSPACE, "futures_swing_restart.py")],
+             capture_output=True, text=True, cwd=WORKSPACE)
+print(_r.stdout or _r.stderr or "  (no output)")
+
 print("Done.")
