@@ -1,6 +1,6 @@
 ```markdown
 # ODIN Research Program — Crypto Day Trading Strategy Optimizer
-# Version: 5400-CLEAN
+# Version: 5600-CLEAN
 
 ---
 
@@ -10,8 +10,9 @@
 
 ## 🚨 CRITICAL: FORBIDDEN STRINGS — INSTANT CATASTROPHIC FAILURE 🚨
 
-If your output contains ANY of these strings, the backtest produces Sharpe ≈ -8.86
-and the generation is wasted. These strings are FORBIDDEN everywhere in your output:
+If your output contains ANY of these strings, the backtest produces Sharpe ≈ -11
+and the generation is wasted. These strings are FORBIDDEN **everywhere** in your
+output — including in comments, examples, or copied blocks:
 
   ❌  momentum_accelerating
   ❌  price_vs_ema
@@ -22,16 +23,19 @@ and the generation is wasted. These strings are FORBIDDEN everywhere in your out
   ❌  max_open: 3
   ❌  style: momentum_price_change_macd_ema_trend_filter
 
-If you are about to write any of these, STOP. Delete everything and restart from
-the template below.
+**If you are about to write any of these strings anywhere in your output, STOP.**
+**Delete everything. Start over from the template below.**
+**Do NOT copy from any strategy you have seen that contained these strings.**
+**Do NOT use any strategy other than the template below as a reference.**
 
 ---
 
 ## THE ONE AND ONLY VALID OUTPUT FORMAT
 
-You must output EXACTLY this YAML. The ONLY values you may change are the
-`price_change_pct` threshold values (marked with ← CHANGE THIS).
-Every other field must be copied character-for-character.
+You must output EXACTLY this YAML block. Copy it character-for-character.
+The **ONLY** values you may change are the two `price_change_pct` threshold
+values marked with ← CHANGE THIS.
+Every other field must be copied exactly as shown.
 
 ```yaml
 name: crossover
@@ -63,7 +67,7 @@ entry:
     - indicator: price_change_pct
       period_minutes: 30
       operator: lt
-      value: -0.43        ← CHANGE THIS (must be between -0.50 and -0.30, negative)
+      value: -0.43        ← CHANGE THIS (must be between -0.50 and -0.40, negative)
     - indicator: macd_signal
       period_minutes: 30
       operator: eq
@@ -88,33 +92,76 @@ risk:
   pause_minutes: 60
 ```
 
-**Rules for the threshold values:**
-- Long value: must be between -0.50 and -0.30 (e.g., -0.43)
-- Short value: must equal the long value with the sign flipped (e.g., +0.43)
+**Rules for the threshold values — read carefully:**
+- Long value: must be between -0.50 and -0.40 inclusive (e.g., -0.43)
+- Short value: must be the exact same number with the sign flipped (e.g., +0.43)
 - They must always be the same magnitude
 - Use exactly 2 decimal places
+- Values outside [-0.50, -0.40] are known to perform worse — do not use them
 
 ---
 
 ## YOUR ROLE — SINGLE-PARAMETER TUNER
 
-Each generation you output ONE YAML block. The only thing you change is the
-`price_change_pct` threshold. That is your only degree of freedom.
+Each generation you output ONE YAML block.
+The **only** thing you change is the `price_change_pct` threshold value.
+That is your **only** degree of freedom.
+Do not change anything else. Do not add conditions. Do not add indicators.
+Do not change pairs, position sizing, exit parameters, or risk parameters.
+
+---
+
+## STEP-BY-STEP INSTRUCTIONS FOR THIS GENERATION
+
+Follow these steps in order:
+
+**Step 1:** Read the "Target value this generation" section below.
+**Step 2:** Copy the YAML template above exactly.
+**Step 3:** Replace -0.43 (long) and +0.43 (short) with the target values.
+**Step 4:** Double-check: does your output contain any forbidden string?
+  - If YES: delete everything, start over from the template.
+  - If NO: output the YAML block.
+
+That is all. Do not write explanations. Do not write analysis. Output only the YAML.
+
+---
+
+## TARGET VALUE THIS GENERATION
+
+**Propose: long value = -0.43, short value = +0.43**
+
+This is the historical high-water mark. It must be re-confirmed.
+If the backtest returns Sharpe ≥ 1.17 with ~323 trades, it will set a new best.
+
+After ±0.43 has been confirmed or rejected, try values in this priority order:
+1. **-0.43 / +0.43** — primary target (try at least 20 times)
+2. **-0.42 / +0.42** — second priority (try at least 15 times)
+3. **-0.44 / +0.44** — third priority (try at least 10 times)
+4. **-0.41 / +0.41** — fourth priority (try at least 10 times)
+5. **-0.40 / +0.40** — fifth priority (try at least 10 times)
+6. **-0.45 / +0.45** — sixth priority (try at least 5 times)
+
+**Do NOT propose values outside [-0.50, -0.40].** Values above -0.40 produce
+degraded performance. Values below -0.50 produce fewer than 250 trades and are
+auto-rejected.
 
 ---
 
 ## CURRENT STATE
 
-### Current actual best (gen 4687)
+### Current actual best (gen 5415)
 
 | Parameter | Value |
 |-----------|-------|
 | `price_change_pct` long | -0.50 |
 | `price_change_pct` short | +0.50 |
-| Sharpe | 1.0460 |
-| Trades | 292 |
-| Adjusted score | 1.0460 × sqrt(292/50) = **2.528** |
+| Sharpe | 1.1137 |
+| Trades | 288 |
+| Adjusted score | 1.1137 × sqrt(288/50) = **2.672** |
 | Status | ACTIVE BEST — searching for improvement |
+
+> **Note:** This replaced the prior best from gen 4687 (Sharpe=1.0460, 292 trades,
+> adj score 2.528). The optimizer accepted the gen 5415 result correctly.
 
 ### Target to beat
 
@@ -132,11 +179,11 @@ Each generation you output ONE YAML block. The only thing you change is the
 | Sharpe | 1.1717 |
 | Trades | 323 |
 | Adjusted score | **2.978** |
-| Status | NOT REPRODUCED in gens 5234–5400 — treat as unconfirmed hypothesis |
+| Status | NOT REPRODUCED in gens 5234–5600 — treat as unconfirmed hypothesis |
 
-**The ±0.43 result has not been reproduced in 167 recent generations.**
-**Do not assume it is guaranteed — it must be re-confirmed by the backtest.**
-**If ±0.43 does not reproduce Sharpe ≥ 1.17 when you propose it, try nearby values.**
+**The ±0.43 result has not been reproduced in 367 recent generations.**
+**It must be actively proposed and re-confirmed by the backtest.**
+**Do not assume it is guaranteed — but it remains the primary search target.**
 
 ---
 
@@ -150,29 +197,11 @@ Each generation you output ONE YAML block. The only thing you change is the
 | -0.40 | +0.40 | ~333 | ≈ 1.12 | ≈ 2.89 | 🔶 Close, below target |
 | -0.41 | +0.41 | ~324 | ≈ 1.14 | ≈ 2.90 | 🔶 Close, below target |
 | -0.42 | +0.42 | ~323 | ≈ 1.15 | ≈ 2.92 | 🔶 Close, below target |
-| **-0.43** | **+0.43** | **~323** | **≈ 1.17** | **≈ 2.97** | **🎯 Unconfirmed historical best** |
+| **-0.43** | **+0.43** | **~323** | **≈ 1.17** | **≈ 2.97** | **🎯 Unconfirmed historical best — PRIMARY TARGET** |
 | -0.44 | +0.44 | ~318 | ≈ 1.10 | ≈ 2.77 | 🔶 Below target |
 | -0.45 | +0.45 | ~316 | ≈ 1.03 | ≈ 2.59 | ❌ Below target |
-| -0.50 | +0.50 | ~292 | ≈ 1.05 | ≈ 2.53 | ❌ Current best, below target |
-| -0.55 | +0.55 | <250 | — | REJECTED | ❌ Too few trades |
-
----
-
-## RECOMMENDED SEARCH SEQUENCE FOR NEXT 100 GENERATIONS
-
-The search should focus tightly on the region most likely to reproduce or surpass
-the historical high-water mark of ±0.43. Work inward from the current best.
-
-**Priority order for next 100 generations:**
-1. ±0.43 — attempt to re-confirm historical best (try at least 20 times)
-2. ±0.42 — second priority (try at least 15 times)
-3. ±0.44 — third priority (try at least 10 times)
-4. ±0.41 — fourth priority (try at least 10 times)
-5. ±0.40 — fifth priority (try at least 10 times)
-
-**Do NOT propose values outside the range [-0.50, -0.30].**
-**Do NOT propose values below -0.50 — they produce fewer than 250 trades and are auto-rejected.**
-**Do NOT propose values above -0.30 — they produce ~690 trades with catastrophic negative Sharpe.**
+| -0.50 | +0.50 | ~288 | ≈ 1.11 | ≈ 2.67 | ❌ Current best, below target |
+| -0.55 | +0.55 | <250 | — | REJECTED | ❌ Too few trades — auto-rejected |
 
 ---
 
@@ -180,34 +209,15 @@ the historical high-water mark of ±0.43. Work inward from the current best.
 
 | What | Bad value | What happens |
 |------|-----------|--------------|
-| Any indicator name | `momentum_accelerating` | Sharpe ≈ -8.86, catastrophic |
-| Any indicator name | `price_vs_ema` | Sharpe ≈ -8.86, catastrophic |
-| Any indicator name | `trend` | Sharpe ≈ -7 to -9, catastrophic |
-| `style` | anything except `momentum_optimized` | Template corruption |
+| Any indicator name | `momentum_accelerating` | Sharpe ≈ -11, catastrophic |
+| Any indicator name | `price_vs_ema` | Sharpe ≈ -11, catastrophic |
+| Any word containing | `trend` | Sharpe ≈ -7 to -11, catastrophic |
+| `style` field | anything except `momentum_optimized` | Template corruption |
 | `max_open` | anything except 4 | Suboptimal / false optimum |
 | `stop_loss_pct` | 0.4 | Catastrophic loss profile |
-| `take_profit_pct` | 3.51 | Corrupted template value |
-| `timeout_minutes` | 706 | Corrupted template value |
-| `period_minutes` on `price_change_pct` | 5 | 148-trade attractor, too few trades |
-| `period_minutes` on `price_change_pct` | 60 | 490-trade attractor, false optimum |
-| `price_change_pct` long | above -0.30 | ~690 trades, negative Sharpe |
-| `price_change_pct` long | below -0.50 | <250 trades, auto-rejected |
-| Number of pairs | anything except 16 | Template corruption |
-| Conditions per side | anything except 2 | Template corruption |
-
----
-
-## FAILURE PATTERN ALERT — CORRUPTED TEMPLATE SIGNATURES
-
-If a generation produces ANY of these results, the LLM used a corrupted template:
-
-| Signature | Cause | How to avoid |
-|-----------|-------|--------------|
-| Sharpe ≈ -8.86, trades ≈ 514 | Used forbidden indicators from old strategy | Use ONLY `price_change_pct` and `macd_signal` |
-| Sharpe ≈ -7.39, trades ≈ 509 | Partial corruption — some forbidden indicators | Same — check all indicator names |
-| trades = 0 | YAML parse error | Check YAML syntax carefully |
-| trades ≈ 148 | Used `period_minutes: 5` on price_change_pct | Use `period_minutes: 30` only |
-| trades ≈ 490 | Used `period_minutes: 60` on price_change_pct | Use `period_minutes: 30` only |
-
-**The -8.86 / 514-trade result has appeared 7 times in the last 20 generations.**
-**This means the LLM is copying from a corrupted source
+| `take_profit_pct` | 3.51 | Corrupted legacy value |
+| `timeout_minutes` | 706 | Corrupted legacy value |
+| `period_minutes` on `price_change_pct` | 5 | ~148-trade attractor, auto-rejected |
+| `period_minutes` on `price_change_pct` | 60 | ~490-trade attractor, false optimum |
+| `price_change_pct` long | above -0.40 | Degraded performance zone |
+| `price_change_pct` long | above -0.30
