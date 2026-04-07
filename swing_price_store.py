@@ -98,6 +98,7 @@ def save_history(pair, candles):
     import tempfile
     path = history_path(pair)
     dir_ = os.path.dirname(path)
+    os.makedirs(dir_, exist_ok=True)
     fd, tmp = tempfile.mkstemp(dir=dir_, suffix='.tmp')
     try:
         with os.fdopen(fd, "w") as f:

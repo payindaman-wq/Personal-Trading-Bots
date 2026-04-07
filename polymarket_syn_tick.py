@@ -1290,8 +1290,10 @@ def run_tick(state, strategies, secrets, tick_count):
 
 def main():
     if not os.path.exists(AUTO_STATE_FILE):
-        log.error(f"State not found: {AUTO_STATE_FILE} — run polymarket_syn_init.py first")
-        return
+        log.warning(f"State not found: {AUTO_STATE_FILE} — auto-initializing fresh sprint")
+        import subprocess as _sp, sys as _sys
+        _sp.run([_sys.executable, os.path.join(WORKSPACE, "polymarket_syn_init.py")], check=True)
+        log.info("Auto-init complete.")
 
     log.info(f"SYN polymarket orchestrator starting — {POLL_SEC}s ticks")
     secrets    = load_secrets()
