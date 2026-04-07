@@ -1895,3 +1895,9 @@ gen	sharpe	win_rate	roi_pct	n_bets	adj_score	status	description	ts
 11112	0.3265	80.8	20.661	11862	2.0851	no_improvement	perturb:min_edge_pts|world_events|kw=0	2026-04-07T00:38
 11113	-0.441	15.0	-55.335	20	-0.3057	no_improvement	random_restart|economics|kw=0	2026-04-07T00:39
 11114	0.3379	85.6	18.226	17728	2.2936	no_improvement	llm|world_events|kw=0	2026-04-07T00:40
+11135	0.3084	84.4	17.331	5245	1.7188	no_improvement	perturb:min_liquidity_usd|world_events|kw=0	2026-04-07T01:02
+11136	0.3379	85.6	18.226	17728	2.2936	no_improvement	perturb:max_position_pct|world_events|kw=0	2026-04-07T01:03
+11137	0.3382	85.31	18.451	17242	2.2867	no_improvement	llm|world_events|kw=0	2026-04-07T01:04
+11138	0.2488	83.33	13.773	258	0.6549	no_improvement	perturb:min_liquidity_usd|world_events|kw=0	2026-04-07T01:05
+11139	0.2325	80.2	17.249	19908	1.6054	no_improvement	perturb:price_range_max|world_events|kw=0	2026-04-07T01:06
+11140	0.3246	78.21	22.217	9320	1.9952	no_improvement	perturb:min_edge_pts|world_events|kw=0	2026-04-07T01:07
