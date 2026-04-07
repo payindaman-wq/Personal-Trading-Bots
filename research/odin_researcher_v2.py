@@ -665,6 +665,14 @@ def main():
     consec_429 = 0
 
     while True:
+        # ── Program halt check — Python-enforced, cannot be overridden by LLM ──────
+        _prog = load_program_md(league)
+        if "CRITICAL HALT" in _prog and "ACTIVE" in _prog:
+            _ts = datetime.now(timezone.utc).strftime("%H:%M:%S")
+            print(f"[{_ts}] Gen {gen} | ODIN HALTED — program.md has active CRITICAL HALT — sleeping 60s", flush=True)
+            time.sleep(60)
+            continue
+
         ts = datetime.now(timezone.utc).strftime("%H:%M:%S")
         best_s = pop.best_sharpe()
 
