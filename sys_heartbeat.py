@@ -284,6 +284,42 @@ def check_odin_health(league):
             pass
     return None
 
+
+def check_odin_backtest_errors(league):
+    """Alert if 3+ of the last 5 generations are backtest_error (fast data failure detection)."""
+    results_path = f"{WORKSPACE}/research/{league}/results.tsv"
+    if not os.path.exists(results_path):
+        return None
+    try:
+        with open(results_path) as f:
+            lines = [l.strip() for l in f if l.strip() and not l.startswith("gen")]
+        recent = lines[-5:]
+        if len(recent) < 3:
+            return None
+        errors = [l for l in recent if len(l.split("	")) > 5 and "error" in l.split("	")[5]]
+        if len(errors) >= 3:
+            parts = errors[-1].split("	")
+            msg = parts[6][:100] if len(parts) > 6 else "backtest_error"
+            return f"{len(errors)}/5 recent gens are backtest_error: {msg} — address with Claude Code"
+    except Exception:
+        pass
+    return None
+
+
+def check_program_halt(league):
+    """Alert if program.md contains an active CRITICAL HALT directive."""
+    prog_path = f"{WORKSPACE}/research/{league}/program.md"
+    if not os.path.exists(prog_path):
+        return None
+    try:
+        with open(prog_path) as f:
+            content = f.read()
+        if "CRITICAL HALT" in content and "ACTIVE" in content:
+            return "program.md has active CRITICAL HALT — address with Claude Code"
+    except Exception:
+        pass
+    return None
+
 def check_polymarket_syn_freshness():
     """Check syn_tick.log freshness — service being 'active' doesn't mean it's ticking."""
     log = f"{WORKSPACE}/competition/polymarket/syn_tick.log"
@@ -389,6 +425,27 @@ def main():
         else:
             if key in state["last_alerted"]:
                 resolved.append(key)
+            clear_alert(state, key)
+
+
+    # ── Odin backtest error storm — alert within 1-2 heartbeats of sustained failures ──
+    for vleague in ["day", "swing"]:
+        key     = f"odin_{vleague}_backtest_errors"
+        problem = check_odin_backtest_errors(vleague)
+        if problem:
+            if should_alert(state, key, cooldown_min=120):
+                problems.append((key, f"[ODIN/{vleague.upper()}] {problem}"))
+        else:
+            clear_alert(state, key)
+
+    # ── Program HALT directive — alert once per day if active ─────────────────
+    for vleague in ["day", "swing"]:
+        key     = f"odin_{vleague}_program_halt"
+        problem = check_program_halt(vleague)
+        if problem:
+            if should_alert(state, key):
+                problems.append((key, f"[ODIN/{vleague.upper()}] {problem}"))
+        else:
             clear_alert(state, key)
 
     # ── Polymarket SYN tick freshness ──────────────────────────────────────
