@@ -1,0 +1,6 @@
+gen	sharpe	win_rate	pnl_pct	trades	status	description	ts
+1	1.0218	41.0	62.20	822	new_best	llm	2026-04-07T07:50
+2	-1.3607	33.1	-18.22	175	new_elite	llm	2026-04-07T07:53
+3	0.5432	39.6	24.36	895	new_elite	llm	2026-04-07T07:55
+4	-1.3607	33.1	-18.22	175	new_elite	llm	2026-04-07T07:56
+5	0.3857	43.8	14.18	728	new_elite	perturb sl: 2.5->3.09	2026-04-07T07:58

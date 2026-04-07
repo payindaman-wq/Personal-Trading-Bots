@@ -1,0 +1,55 @@
+name: autobotswingfutures
+style: swing_momentum
+inspiration: "ODIN-injected champion \u2014 updated at each sprint reset"
+league: futures_swing
+leverage: 2
+pairs:
+- BTC/USD
+- ETH/USD
+- SOL/USD
+- XRP/USD
+- DOGE/USD
+- AVAX/USD
+- LINK/USD
+- UNI/USD
+- AAVE/USD
+- NEAR/USD
+- APT/USD
+- SUI/USD
+- ARB/USD
+- OP/USD
+- ADA/USD
+- POL/USD
+position:
+  size_pct: 15
+  max_open: 2
+  fee_rate: 0.0005
+entry:
+  long:
+    conditions:
+    - indicator: trend
+      period_hours: 48
+      operator: eq
+      value: up
+    - indicator: rsi
+      period_hours: 24
+      operator: lt
+      value: 40
+  short:
+    conditions:
+    - indicator: trend
+      period_hours: 48
+      operator: eq
+      value: down
+    - indicator: rsi
+      period_hours: 24
+      operator: gt
+      value: 60
+exit:
+  take_profit_pct: 5.0
+  stop_loss_pct: 2.5
+  timeout_hours: 96
+risk:
+  pause_if_down_pct: 8
+  pause_minutes: 120
+  stop_if_down_pct: 18

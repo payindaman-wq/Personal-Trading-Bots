@@ -662,6 +662,7 @@ def main():
     else:
         gen = len(results_history) + 1
         gens_since_best = 0
+        last_mimir_gen = 0
 
     min_t = SWING_MIN_TRADES if league == "swing" else MIN_TRADES.get(league, 30)  # Item 4
 

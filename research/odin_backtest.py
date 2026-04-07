@@ -283,7 +283,7 @@ def close_pos(p, pair, price, reason, ts_iso):
         net   = gross - fee
         p["cash"] += cost + net
         p["positions"] = [x for x in p["positions"] if x["pair"] != pair]
-        p["closed_trades"].append({"pnl_pct": net / cost * 100, "won": net > 0})
+        p["closed_trades"].append({"pnl_pct": net / cost * 100, "won": net > 0, "pnl_usd": net, "cost_basis": cost})
         return net / cost * 100
     return None
 

@@ -1,0 +1,11 @@
+gen	sharpe	win_rate	pnl_pct	trades	status	description	ts
+1	-10.7746	44.4	-11.99	394	new_best	llm	2026-04-07T07:50
+2	-28.6336	40.4	-12.36	317	new_elite	crossover(A_entry+B_exit)	2026-04-07T07:50
+3	-28.6336	40.4	-12.36	317	new_elite	perturb mo: 3->3	2026-04-07T07:51
+4	-15.5154	43.2	-12.07	435	new_best	perturb cond_long_1: 58->48	2026-04-07T07:52
+5	-21.2975	38.1	-12.03	365	new_elite	perturb sl: 0.8->0.62	2026-04-07T07:53
+6	-16.3145	39.7	-12.01	350	new_elite	llm	2026-04-07T07:54
+7	-25.8461	32.6	-12.10	181	low_trades	trades=181	2026-04-07T07:55
+8	-24.3147	42.8	-12.08	369	new_elite	llm	2026-04-07T07:56
+9	-19.1450	38.8	-12.03	335	new_elite	llm	2026-04-07T07:58
+10	-21.5540	36.6	-11.94	216	new_elite	perturb sz: 12->13.64	2026-04-07T07:59
