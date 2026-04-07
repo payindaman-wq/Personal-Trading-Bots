@@ -7,7 +7,7 @@ Identical to competition_tick.py but with futures mechanics:
   - Funding rate cost deducted every 8h on open positions (from TYR)
   - Liquidation: force-close if adverse move > 1/leverage - maintenance_margin
 """
-import sys, os, json, yaml, urllib.request, fcntl
+import sys, os, json, yaml, fcntl
 from datetime import datetime, timezone, timedelta
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)),
@@ -18,6 +18,7 @@ from indicators import evaluate_entry
 WORKSPACE      = os.environ.get('WORKSPACE', '/root/.openclaw/workspace')
 FLEET_DIR      = os.path.join(WORKSPACE, 'fleet', 'futures_day')
 ACTIVE_DIR     = os.path.join(WORKSPACE, 'competition', 'futures_day', 'active')
+DAY_ACTIVE_DIR = os.path.join(WORKSPACE, 'competition', 'active')  # spot day — shared price source
 RESULTS_DIR    = os.path.join(WORKSPACE, 'competition', 'futures_day', 'results')
 TYR_STATE_PATH = os.path.join(WORKSPACE, 'research', 'tyr_state.json')
 LOCK_FILE      = '/tmp/futures_day_tick.lock'
@@ -104,20 +105,7 @@ def find_active():
     return comp_id, json.load(open(meta_path)), comp_dir
 
 
-def fetch_prices(pairs):
-    kraken_pairs = [KRAKEN_PAIR_MAP.get(p, p.replace('/', '')) for p in pairs]
-    url = f"https://api.kraken.com/0/public/Ticker?pair={','.join(kraken_pairs)}"
-    with urllib.request.urlopen(url, timeout=10) as r:
-        data = json.loads(r.read())
-    if data.get('error'):
-        raise RuntimeError(str(data['error']))
-    result = {}
-    for k, v in data['result'].items():
-        label = KRAKEN_KEY_MAP.get(k, k)
-        result[label] = {'last': float(v['c'][0]), 'bid': float(v['b'][0]),
-                         'ask': float(v['a'][0])}
-    return result
-
+from kraken_price_cache import get_prices as fetch_prices  # shared cache, avoids duplicate Kraken calls
 
 def load_strategy(bot):
     path = os.path.join(FLEET_DIR, bot, 'strategy.yaml')

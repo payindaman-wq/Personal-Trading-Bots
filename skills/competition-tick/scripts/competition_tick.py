@@ -16,6 +16,7 @@ import urllib.request
 from datetime import datetime, timezone, timedelta
 
 sys.path.insert(0, os.path.dirname(__file__))
+sys.path.insert(0, os.environ.get("WORKSPACE", "/root/.openclaw/workspace"))  # for kraken_price_cache
 from price_store import append_prices, get_current_price
 from indicators import evaluate_entry
 
@@ -75,25 +76,12 @@ def find_active_competition():
     return comp_id, meta, comp_dir
 
 
+from kraken_price_cache import get_prices as _get_cached_prices  # shared cache
+
+
 def fetch_kraken_prices(pairs):
-    kraken_pairs = [KRAKEN_PAIR_MAP.get(p, p.replace("/", "")) for p in pairs]
-    url = f"https://api.kraken.com/0/public/Ticker?pair={','.join(kraken_pairs)}"
-    with urllib.request.urlopen(url, timeout=10) as resp:
-        data = json.loads(resp.read())
-    if data.get("error"):
-        raise RuntimeError(f"Kraken API error: {data['error']}")
-    prices = {}
-    for kraken_key, info in data["result"].items():
-        label = KRAKEN_KEY_MAP.get(kraken_key, kraken_key)
-        prices[label] = {
-            "last": float(info["c"][0]),
-            "bid": float(info["b"][0]),
-            "ask": float(info["a"][0]),
-            "vwap": float(info["p"][0]) if "p" in info else None,
-        }
-    return prices
-
-
+    """Fetch prices via shared cache (avoids duplicate Kraken calls when multiple ticks run)."""
+    return _get_cached_prices(pairs)
 def load_strategy(bot_name):
     path = os.path.join(FLEET_DIR, bot_name, "strategy.yaml")
     if not os.path.exists(path):
