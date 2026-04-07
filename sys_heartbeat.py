@@ -433,7 +433,7 @@ def main():
         key     = f"odin_{vleague}_backtest_errors"
         problem = check_odin_backtest_errors(vleague)
         if problem:
-            if should_alert(state, key, cooldown_min=120):
+            if should_alert(state, key):
                 problems.append((key, f"[ODIN/{vleague.upper()}] {problem}"))
         else:
             clear_alert(state, key)
