@@ -9,7 +9,7 @@ Auto-fix (no approval needed): service restarts, Odin restart when Ollama stuck.
 Everything else: Telegram alert directing Chris to address with Claude Code.
 After any file change: git commit + push to origin/master.
 """
-import json, os, subprocess, urllib.request, time, glob
+import json, os, subprocess, urllib.request, time, glob, hashlib
 from datetime import datetime, timezone, timedelta
 from zoneinfo import ZoneInfo
 
@@ -494,8 +494,9 @@ def main():
                 if severity in ("error", "critical"):
                     source = entry.get("source", "unknown").upper()
                     msg = entry.get("msg", "")[:200]
-                    key = f"inbox_{entry.get('ts','')}"
-                    problems.append((key, f"[{source}] {msg}"))
+                    key = "inbox_" + hashlib.md5(f"{source}:{msg}".encode()).hexdigest()[:12]
+                    if should_alert(state, key):
+                        problems.append((key, f"[{source}] {msg}"))
             except Exception:
                 pass
 
