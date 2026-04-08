@@ -36,7 +36,7 @@ GEMINI_BASE   = "https://generativelanguage.googleapis.com/v1beta/models"
 
 SUSPICIOUS_SHARPE   = 3.5
 POPULATION_SIZE     = 10
-MIN_TRADES = {"day": 350, "futures_day": 200, "futures_swing": 400}
+MIN_TRADES = {"day": 350, "futures_day": 400, "futures_swing": 400}
 SWING_MIN_TRADES    = 30   # IMMUTABLE - DO NOT MODIFY via LOKI (Item 4)
 SWING_MAX_TRADES    = 60   # swing hard upper bound (Item 3)
 SWING_ALLOWED_PAIRS = frozenset({"BTC/USD", "ETH/USD", "SOL/USD"})  # Item 7
@@ -710,15 +710,6 @@ def main():
         candidate_yaml = None
         description = mutation_type
 
-        # Item 7: pairs whitelist for swing
-        if league == "swing" and candidate is not None:
-            _bad = set(candidate.get("pairs", [])) - SWING_ALLOWED_PAIRS
-            if _bad:
-                print(f"| [PAIRS_REJECT pairs={sorted(_bad)}]")
-                log_result(league, gen, {}, "pairs_reject", f"bad={sorted(_bad)}")
-                gen += 1
-                time.sleep(args.sleep)
-                continue
         # Item 2: dedup check
         if candidate_yaml:
             _h = hashlib.md5(candidate_yaml.encode()).hexdigest()
@@ -782,6 +773,14 @@ def main():
             gen += 1
             time.sleep(args.sleep)
             continue
+
+        # Item 7: pairs whitelist for swing (after candidate is generated)
+        if league == "swing":
+            _bad_pairs = set(candidate.get("pairs", [])) - SWING_ALLOWED_PAIRS
+            if _bad_pairs:
+                candidate["pairs"] = [p for p in candidate.get("pairs", []) if p in SWING_ALLOWED_PAIRS] or ["BTC/USD", "ETH/USD", "SOL/USD"]
+                import yaml as _yaml2
+                candidate_yaml = _yaml2.dump(candidate, default_flow_style=False, sort_keys=False)
 
         # Backtest
         try:
