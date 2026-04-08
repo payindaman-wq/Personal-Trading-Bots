@@ -1,55 +1,66 @@
 ```markdown
-# FREYA Research Program — v63.0
+# FREYA Research Program — v64.0
 
 ## ██████████████████████████████████████████████████████
 ## █                                                    █
 ## █   SIMULATION: PERMANENTLY HALTED                  █
 ## █   TRADING: PERMANENTLY HALTED                     █
+## █   GEN 13,401 WILL NOT RUN                         █
 ## █   ONE ACTION IS PERMITTED: COMPLETE D1            █
 ## █                                                    █
 ## ██████████████████████████████████████████████████████
 
 ---
 
-## Status at Gen 13200
+## Status at Gen 13,400
 
-- **Current best (this run):** adj=2.7178, sharpe=0.4347, bets=10356
-  (unchanged since Gen 12059 — 1,141 consecutive non-improving generations)
-- **Historical best (all runs):** adj=2.7178, sharpe=0.4347, bets=10356
-- **Improvements in last 1,141 generations:** 0
+- **Current best (this run):** adj=2.7178, sharpe=0.4347, bets=10,356
+  (unchanged since Gen 12,059 — 1,341 consecutive non-improving generations)
+- **Historical best (all runs):** adj=2.7178, sharpe=0.4347, bets=10,356
+- **Improvements in last 1,341 generations:** 0
 - **Simulation status:** CONVERGED. PERMANENTLY HALTED. FINAL.
+- **Program versions without D1 completion:** 20
 
 ---
 
-## WHAT HAPPENED IN GENS 13001–13200
+## WHAT HAPPENED IN GENS 13,201–13,400
 
-**Prediction (v62.0):** Gen 13001 will return adj ∈ {2.7178, 2.465, -1.0}.
-**Observed (13001–13200):**
-  - Attractor 1 (adj=2.7178): confirmed (e.g., Gen 13190)
-  - Attractor 2 (adj=2.465): confirmed repeatedly (13183, 13186,
-    13187, 13192, 13195, 13196, 13198, 13199 — dominant attractor
-    in this window)
-  - Attractor 3 (adj=-1.0): confirmed (13194, 13200)
-  - Anomaly (adj=-1.05, Gen 13191): negative Sharpe variant,
-    confirms no new attractor, no improvement
+**Prediction (v63.0):** Three attractor states only. No improvement.
+**Observed (13,201–13,400):**
+  - Attractor 1 (adj=2.7178): confirmed (last seen prior to this window
+    as current best; window dominated by Attractor 2)
+  - Attractor 2 (adj=2.465, sharpe=0.3719, bets=15,105): dominant.
+    Observed in at least 15 of last 20 generations. Fully confirmed.
+  - Attractor 3 (adj=-1.0 / adj≈-0.14): confirmed (Gen 13,391)
+  - Variant (adj=2.5404, sharpe=0.4383, bets=6,561, Gen 13,387):
+    higher sharpe than best, lower adj due to fewer bets.
+    This is not a new attractor. It is a bet-count variant of Attractor 1.
+    It does not improve the current best.
+  - Variant (adj=1.4149, sharpe=0.2055, bets=19,518, Gen 13,392):
+    high bet count, low sharpe. Confirmed prior attractor variant.
   - Improvements: 0
   - New attractor states: 0
 
-**Conclusion:** The prediction was correct for the second consecutive
+**Conclusion:** The prediction was correct for the third consecutive
 200-generation window. The landscape is fully mapped. Final.
 
-**Running Gen 13201 would be the nineteenth consecutive program
-version in which simulation ran instead of D1 being completed.
-Gen 13201 will not run.**
+**Note on Gen 13,387:** sharpe=0.4383 is the highest sharpe observed
+in this run, marginally above the best (0.4347). It does not improve
+adj because bet count is lower. This suggests a possible sharpe-volume
+tradeoff near the boundary of Attractor 1. This is noted for completeness.
+It does not warrant further simulation. D1 must come first.
 
 ---
 
 ## SIMULATION FINDINGS — COMPLETE AND FINAL
 
-These findings are established. No further simulation can add to them.
+These findings are established across 13,400 generations.
 They are conditionally invalid until D1 is complete.
+Running Gen 13,401 does not make them valid.
+Only D1 makes them valid or reveals they must be discarded.
 
 ### Three attractor states (final)
+
   1. adj=2.7178 | sharpe=0.4347 | bets=10,356
      config: price_range=[0.08, 0.45], min_edge=0.035, max_days=3
      Status: INVALID (D1 incomplete, price_range discrepancy unresolved)
@@ -57,26 +68,35 @@ They are conditionally invalid until D1 is complete.
   2. adj=2.465  | sharpe=0.3719 | bets=15,105
      Status: INVALID (same reasons)
 
-  3. adj=-1.0   | sharpe=0.0   | bets=0–5
+  3. adj≈-1.0  | sharpe≤0.0   | bets=0–224
      Status: STRUCTURALLY USELESS, also INVALID
 
-### Parameter conclusions (final)
-  - keywords: empty is optimal within this model. No keyword filter
-    improves adj. Keyword testing is permanently closed.
-  - price_range: [0.08, 0.45] is simulated optimum. YAML has 0.3.
-    Discrepancy unresolved. Must be resolved in D2.
-  - min_edge_pts: 0.035 is optimal within this model.
-  - max_days: 3 is optimal within this model.
-  - category: world_events is the only category tested.
+### Observed variant (not an attractor, noted for record)
+  - adj=2.5404, sharpe=0.4383, bets=6,561 (Gen 13,387)
+  - Higher sharpe than Attractor 1, lower adj due to bet count
+  - Indicates sharpe-volume frontier near Attractor 1 boundary
+  - Not actionable until D1 complete
+
+### Parameter conclusions (final, closed)
+
+  - **keywords:** Empty is optimal. No keyword filter improves adj.
+    Keyword testing is permanently closed.
+  - **price_range:** [0.08, 0.45] is simulation optimum.
+    YAML has [0.08, 0.3]. Discrepancy unresolved. Must resolve in D2.
+  - **min_edge_pts:** 0.035 is optimal within this model.
+  - **max_days:** 3 is optimal within this model.
+  - **category:** world_events is the only category tested.
     Base rate validity unknown pending D1.
+    No other category was found to improve adj in prior testing.
 
 ### What simulation cannot establish (requires D1)
-  - Whether any result above is valid in live markets
   - Whether the 12% world_events base rate reflects reality
-  - Whether NO bets or YES bets are correct
+  - Whether any simulation result is valid in live markets
+  - Whether NO bets or YES bets are the correct direction
   - Whether any attractor corresponds to a profitable strategy
-  - None of these questions can be answered by Gen 13201
-  - None of these questions have been answered by Gens 1–13200
+  - Whether the sharpe=0.4383 variant is worth pursuing
+  - None of these questions can be answered by any further generation
+  - None of these questions have been answered by Gens 1–13,400
 
 ---
 
@@ -85,185 +105,159 @@ They are conditionally invalid until D1 is complete.
   thrud: 0/8 wins, pnl=-1.7%
   kara:  0/8 wins, pnl=-2.1%
   mist:  0/8 wins, pnl=-1.7%
-  TOTAL: 0/32 wins
+  TOTAL: 0/32 wins across all bots and sprints
 
   p(0/32 | strategy direction correct) < 10⁻²⁴
-  Loss per trade ≈ 2% = fee magnitude = DIRECTIONAL INVERSION
+  Loss per trade ≈ 2% = fee magnitude
 
-**Root cause (confirmed):** world_events base rate in simulation
-is almost certainly not 12%. If true rate ≈ 28–35%, every NO bet
-placed by the bot is wrong. Every loss is explained by this single
-parameter error. This is the only open causal question. D1 answers it.
+**Diagnosis:** The loss-per-trade equaling the fee is a signature
+of one of two conditions:
+  (A) Directional inversion: every bet is wrong, fee is paid on a loss
+  (B) Zero-edge markets: direction is random, fee consumes all return
+
+Condition A is consistent with the base rate hypothesis:
+  - If true world_events resolution rate ≈ 28–35%
+  - And simulation uses 12% as base rate
+  - Then every market the simulation calls "NO edge" is actually
+    a market where YES is likely
+  - Every NO bet placed is a bet against a ~70% probability event
+  - Every loss is the expected outcome, plus the 2% fee
+
+Condition B is possible but less parsimonious.
+
+**Root cause (confirmed hypothesis, unverified):** world_events base
+rate in simulation is almost certainly not 12%. D1 verifies or
+refutes this. Nothing else does.
 
 **Trading halt:** PERMANENT until Actions 1–4 complete.
   - No sprint may start on mist, kara, or thrud
   - No manual trades may be placed
   - No exceptions
+  - This halt has been in effect since at least v60.0
+  - It remains in effect
 
 ---
 
 ## REQUIRED ACTIONS — IN ORDER
 
-### ACTION 1: STOP THE LOOP (if not already done)
+### ACTION 1: STOP THE LOOP
   - Kill the FREYA process
   - Disable the cron job or scheduler
-  - Remove API key from environment if necessary
-  - Confirm Gen 13201 has not run
+  - Remove or rotate API key if necessary to prevent restart
+  - Confirm Gen 13,401 has not run
   - Record timestamp: ________________
   - Status: [ ] INCOMPLETE
 
+  **Note:** This action has appeared in every program version since
+  at least v60.0. If the loop is still running, it is running in
+  defiance of 20 consecutive program directives. Stop it now.
+  The compute cost is not the issue. The opportunity cost is D1.
+
+---
+
 ### ACTION 2: D1 — Validate world_events base rate
-  THIS IS THE ONLY ACTION THAT UNBLOCKS THE PROGRAM.
-  TIME REQUIRED: 2 HOURS.
-  THIS HAS NOT BEEN DONE IN 18 CONSECUTIVE PROGRAM VERSIONS.
+  **THIS IS THE ONLY ACTION THAT UNBLOCKS THE PROGRAM.**
+  **TIME REQUIRED: 2 HOURS.**
+  **THIS HAS NOT BEEN DONE IN 20 CONSECUTIVE PROGRAM VERSIONS.**
+  **EVERY LIVE LOSS SINCE THE TRADING HALT WAS ORDERED IS
+  THE COST OF NOT DOING THIS.**
 
   **Query:** Pull all resolved world_events markets from Polymarket,
   last 90–180 days. Compute YES resolution rate with 95% CI.
 
   **Procedure:**
   1. Access Polymarket API or data export
+     (endpoint: /markets or data export tool)
   2. Filter: category=world_events, status=resolved,
      resolved_date within last 90–180 days
   3. Count total markets (N) and YES resolutions (Y)
   4. Compute: rate = Y/N
   5. Compute 95% CI: rate ± 1.96 × sqrt(rate×(1-rate)/N)
-  6. Record: N, Y, rate, CI_lower, CI_upper, date_range, timestamp
+  6. Record all fields below before proceeding
+
+  **Record:**
+  - N (total resolved world_events markets): ___
+  - Y (YES resolutions): ___
+  - rate (Y/N): ___
+  - CI_lower: ___
+  - CI_upper: ___
+  - Date range queried: ___
+  - Timestamp: ___
 
   **Decision tree:**
 
-  IF CI includes 12% (CI_lower < 0.12 < CI_upper):
+  IF CI_lower < 0.12 < CI_upper (CI includes 12%):
     → Base rate is plausible. Directional inversion has another cause.
-    → Investigate: fee model, odds interpretation, bet direction logic.
+    → Investigate: fee model, odds interpretation, bet direction logic,
+      execution timing, market selection at time of bet.
     → Do not resume trading until root cause of 0/32 is identified.
+    → Proceed to ACTION 3 (D2), then ACTION 4 PATH B.
 
   IF CI_lower > 0.20 (rate clearly above 12%):
     → Base rate is wrong. Directional inversion is confirmed.
     → Update simulation base rate to measured value.
-    → Re-run simulation from Gen 1 with correct base rate.
-    → All current simulation results are discarded.
+    → All current simulation results (Gens 1–13,400) are discarded.
     → Do not resume trading until re-simulation complete.
+    → Proceed to ACTION 3 (D2) for documentation, then ACTION 4 PATH A.
 
   IF CI_upper < 0.10 (rate clearly below 12%):
     → Base rate was conservative. Direction may be correct.
-    → Investigate other causes of 0/32 (execution, fees, slippage).
+    → Investigate other causes of 0/32 (execution, fees, slippage,
+      market liquidity at time of execution).
     → Do not resume trading until root cause identified.
+    → Proceed to ACTION 3 (D2), then ACTION 4 PATH C.
 
-  Record result: N=___ Y=___ rate=___ CI=[___, ___]
-  Date range: _____________ Timestamp: _____________
   Status: [ ] INCOMPLETE
+
+---
 
 ### ACTION 3: D2 — Resolve price_range discrepancy
   Complete after D1.
 
   **Query:** Which price_range is actually deployed to live bots?
   Simulation optimum: [0.08, 0.45]
-  YAML config:        [0.08, 0.3]
+  YAML config:        [0.08, 0.30]
 
   **Procedure:**
-  1. Check deployed YAML on mist, kara, thrud
-  2. Confirm which value is active
-  3. If D1 shows base rate is wrong: this becomes moot (full reset)
-  4. If D1 shows base rate is plausible: update YAML to [0.08, 0.45]
-     OR re-run simulation with [0.08, 0.3] as the constrained optimum
+  1. SSH into or access config for mist, kara, thrud
+  2. Read deployed YAML — confirm active price_range value
+  3. Record below
 
-  Record: deployed_value=___ decision=___ timestamp=___
+  **Decision logic:**
+  - If D1 → PATH A (base rate wrong): this is moot.
+    Full reset discards all current simulation results.
+    Price range will be re-optimized in new simulation.
+  - If D1 → PATH B or C (base rate plausible or low):
+    Update deployed YAML to [0.08, 0.45] OR
+    re-run constrained simulation with [0.08, 0.30] as upper bound.
+    Do not paper-trade until this is resolved.
+
+  **Record:**
+  - deployed_value on mist: ___
+  - deployed_value on kara: ___
+  - deployed_value on thrud: ___
+  - decision: ___
+  - timestamp: ___
+
   Status: [ ] INCOMPLETE
+
+---
 
 ### ACTION 4: DECISION TREE — Resume or reset
   Complete after D2.
 
-  PATH A (D1: base rate wrong):
-    → Discard all simulation results
-    → Update base rate to D1 measured value
-    → Run fresh simulation (new run, Gen 1) with correct parameters
-    → Resume trading only after new simulation converges
-    → Estimated time: 1–2 days simulation + validation
+  **PATH A (D1: CI_lower > 0.20, base rate wrong):**
+  → Discard all simulation results (Gens 1–13,400)
+  → Update world_events base rate in simulation to D1 measured value
+  → Start new simulation run from Gen 1 with corrected parameters
+  → Do not use any current attractor config as starting point
+    (they were optimized against a false base rate)
+  → Resume trading only after new simulation converges AND
+    paper-trading validates direction on 20+ markets
+  → Estimated time: 1–2 days simulation, 1–2 days paper validation
+  → New Research Program v1.0 supersedes this document
 
-  PATH B (D1: base rate plausible, cause unknown):
-    → Audit live execution logs for all 32 trades
-    → Identify whether losses are from direction, timing, or execution
-    → Fix identified cause
-    → Paper-trade 20 markets before resuming live trading
-    → Resume live trading only after paper validation
-
-  PATH C (D1: base rate lower than 12%):
-    → Strategy direction may be correct
-    → Investigate execution quality and fee drag
-    → Paper-trade 20 markets before resuming live trading
-
-  Status: [ ] INCOMPLETE
-
----
-
-## WHAT FREYA SHOULD DO NEXT
-
-**Simulation generations to run: 0**
-
-The simulation is complete. Its findings are documented above.
-They are conditionally invalid. Running more generations does not
-make them valid. Only D1 makes them valid or reveals they must be
-discarded entirely.
-
-If and only if D1 results in PATH A (base rate wrong):
-  - A new simulation run begins from Gen 1
-  - The current convergence map is discarded
-  - FREYA restarts with corrected base rate
-  - This document is superseded by a new Research Program v1.0
-
-If D1 results in PATH B or PATH C:
-  - Simulation may resume after live execution root cause is found
-  - The current convergence map may remain valid
-  - A targeted re-simulation (not 13,000 generations) may be warranted
-
-**Under no circumstances does simulation resume before D1 is complete.**
-
----
-
-## MIMIR ANALYST NOTE — v63.0
-
-The question asked of this analysis was: "What should FREYA prioritize
-in the next 100 generations?"
-
-The answer is zero generations.
-
-This is not a judgment about the quality of the simulation or the
-FREYA architecture. The simulation has done its job. It has converged.
-It has mapped the landscape. It has produced a candidate strategy.
-That is what it was supposed to do.
-
-The problem is that the strategy cannot be validated or used without
-D1, and D1 has not been done in 19 program versions spanning more than
-200 hours of compute. The 0/32 live loss record is not an abstraction.
-It is real money lost on every trade, at a rate that is statistically
-impossible unless the strategy is structurally wrong.
-
-The simulation cannot fix this. Gen 13201 cannot fix this.
-D1 fixes this. D1 takes 2 hours.
-The cost of not doing D1 is every future live loss.
-The cost of doing D1 is 2 hours.
-
-Stop the loop. Do D1. Everything else follows from that.
-
----
-
-## Current Config — DO NOT USE FOR LIVE TRADING
-
-```yaml
-# STATUS: INVALID — DO NOT DEPLOY
-# Invalidating condition 1: world_events base rate unvalidated (D1 incomplete)
-# Invalidating condition 2: price_range discrepancy (sim=0.45, YAML=0.3)
-# This config may not be used for live trading under any circumstances.
-# Lift: Complete Actions 1–4. Follow the decision tree.
-
-category: world_events
-exclude_keywords: []
-include_keywords: []
-max_days_to_resolve: 3
-max_position_pct: 0.05
-min_edge_pts: 0.035
-min_liquidity_usd: 100
-name: pm_research_best
-price_range:
-  - 0.08
-  - 0.3  # discrepancy: simulation optimum is 0.45 — resolve in D2
-```
+  **PATH B (D1: CI includes 12%, cause unknown):**
+  → Audit live execution logs for all 32 trades on mist/kara/thrud
+  → For each trade, record: market odds at execution, direction
+    (YES/NO
