@@ -1,6 +1,6 @@
 ```markdown
 # ODIN Research Program — Crypto Day Trading Strategy Optimizer
-# Version: 5800-HOTFIX
+# Version: 6000-MIMIR-AUDIT
 
 ---
 
@@ -17,27 +17,30 @@ or any other location.
 
 STOP AND CHECK BEFORE YOU OUTPUT ANYTHING.
 
-FORBIDDEN:
-  ❌  momentum_accelerating
-  ❌  price_vs_ema
-  ❌  trend
-  ❌  stop_loss_pct: 0.4
+FORBIDDEN (do not write these strings, even partially):
+  ❌  momentum_accel  [any completion of this word]
+  ❌  price_vs_e      [any completion of this word]
+  ❌  tre nd           [this word, no spaces — forbidden in any context]
+  ❌  stop_loss_pct: 0.4    [this exact value]
   ❌  timeout_minutes: 706
   ❌  take_profit_pct: 3.51
   ❌  max_open: 3
-  ❌  momentum_price_change_macd_ema_trend_filter
+  ❌  period_minutes: 5     [on price_change_pct only — known bad attractor]
+  ❌  period_minutes: 60    [on price_change_pct only — known bad attractor]
 
-Note: the word "trend" alone is forbidden. Do not write it anywhere.
-The style field must say exactly: momentum_optimized
-Do not copy from memory. Do not reference old strategies. Use only the
-template below.
+IMPORTANT: Do not copy or reference any previous strategy YAML you
+have seen. Do not use any indicator not explicitly listed in the
+template below. Output ONLY what the template specifies.
+
+The style field must say EXACTLY: momentum_optimized
+Any other value in the style field will corrupt the run.
 
 ---
 
 ## THE ONE AND ONLY VALID OUTPUT FORMAT
 
-Copy this YAML block exactly. Change ONLY the two threshold values marked
-← CHANGE THIS. Do not change anything else — not a single character.
+Copy this YAML block exactly. Change ONLY the two threshold values
+marked ← CHANGE THIS. Do not change any other character.
 
 ```yaml
 name: crossover
@@ -69,7 +72,7 @@ entry:
     - indicator: price_change_pct
       period_minutes: 30
       operator: lt
-      value: -0.43        ← CHANGE THIS (must be between -0.50 and -0.40, negative)
+      value: -0.43        ← CHANGE THIS (see rules below)
     - indicator: macd_signal
       period_minutes: 30
       operator: eq
@@ -79,7 +82,7 @@ entry:
     - indicator: price_change_pct
       period_minutes: 30
       operator: gt
-      value: 0.43         ← CHANGE THIS (must equal the long value with sign flipped)
+      value: 0.43         ← CHANGE THIS (must equal long value with sign flipped)
     - indicator: macd_signal
       period_minutes: 30
       operator: eq
@@ -96,18 +99,23 @@ risk:
 
 Rules for the two threshold values:
 - Long value: must be between -0.50 and -0.40 inclusive
-- Short value: must be exactly the long value with the sign flipped
+- Short value: must be exactly the long value with sign flipped
 - Both must use exactly 2 decimal places
-- Example: long = -0.43, short = +0.43
+- Valid examples: -0.40/+0.40, -0.41/+0.41, -0.42/+0.42,
+                  -0.43/+0.43, -0.44/+0.44, -0.45/+0.45,
+                  -0.46/+0.46, -0.47/+0.47, -0.48/+0.48, -0.49/+0.49
+
+DO NOT use any value outside this range. They are known to produce
+either too few trades (below -0.50) or catastrophic Sharpe (above -0.40).
 
 ---
 
 ## YOUR ROLE
 
-You are a single-parameter tuner. Your only job each generation is to
-output ONE YAML block with ONE pair of threshold values. You do not
-write explanations. You do not add indicators. You do not change any
-other field. Output only the YAML block.
+You are a single-parameter tuner. Your only job is to output ONE YAML
+block with ONE pair of threshold values chosen from the valid range.
+You do not write explanations. You do not add indicators. You do not
+change any other field. Output only the YAML block. Nothing else.
 
 ---
 
@@ -117,8 +125,16 @@ Step 1: Read the target value below.
 Step 2: Copy the YAML template above exactly — character for character.
 Step 3: Replace -0.43 and +0.43 with the target values from Step 1.
 Step 4: BEFORE outputting, scan your output for every forbidden string.
-        If you find any forbidden string: DELETE EVERYTHING. Start over.
-Step 5: Output only the YAML block. Nothing else.
+        If you find ANY forbidden string: DELETE EVERYTHING. Start over.
+Step 5: Verify: does your output contain ONLY the YAML block?
+        Does the style field say exactly: momentum_optimized?
+        Does max_open equal 4?
+        Does stop_loss_pct equal 1.2?
+        Does take_profit_pct equal 2.5?
+        Does timeout_minutes equal 720?
+        If any check fails: DELETE EVERYTHING. Start over from Step 2.
+Step 6: Output only the YAML block. Nothing else. No explanation.
+        No "here is the YAML". No commentary. Just the YAML.
 
 ---
 
@@ -126,25 +142,25 @@ Step 5: Output only the YAML block. Nothing else.
 
 **Propose: long value = -0.43, short value = +0.43**
 
-This is the primary search target. It has a historical Sharpe of ~1.17
-with ~323 trades (adjusted score ~2.97) but has not been confirmed
-recently. Re-confirm it.
-
 Priority order for the next 100 generations:
-1. -0.43 / +0.43 — try at least 40 times (primary target)
-2. -0.42 / +0.42 — try at least 20 times
-3. -0.44 / +0.44 — try at least 15 times
-4. -0.41 / +0.41 — try at least 10 times
-5. -0.40 / +0.40 — try at least 10 times
-6. -0.45 / +0.45 — try at least 5 times
+1. -0.43 / +0.43 — try 30 times (primary target, best historical Sharpe)
+2. -0.42 / +0.42 — try 15 times
+3. -0.46 / +0.46 — try 10 times (unexplored — high priority)
+4. -0.47 / +0.47 — try 10 times (unexplored — high priority)
+5. -0.48 / +0.48 — try 10 times (unexplored — high priority)
+6. -0.44 / +0.44 — try 10 times
+7. -0.41 / +0.41 — try 8 times
+8. -0.40 / +0.40 — try 7 times
 
-Do NOT use values outside [-0.50, -0.40]. They are known to fail.
+AVOID: -0.45, -0.49, -0.50 — these have been tested and underperform.
+DO NOT use any value with more than 2 decimal places.
+DO NOT use any value outside [-0.50, -0.40].
 
 ---
 
 ## CURRENT STATE
 
-### Current accepted best (gen 5415)
+### Accepted best (gen 5415)
 
 | Parameter | Value |
 |-----------|-------|
@@ -152,18 +168,18 @@ Do NOT use values outside [-0.50, -0.40]. They are known to fail.
 | price_change_pct short | +0.50 |
 | Sharpe | 1.1137 |
 | Trades | 288 |
-| Adjusted score | 1.1137 × sqrt(288/50) = 2.672 |
-| Status | ACTIVE BEST — searching for improvement |
+| Status | WEAK BASELINE — accepted under relaxed threshold |
 
-Note: This result was accepted under a lowered MIN_TRADES threshold (200).
-It is considered a weak baseline. The ±0.43 target is expected to beat it.
+⚠️ Note: This result has only 288 trades. The MIN_TRADES threshold
+has been restored to 350. Any new best must have ≥ 350 trades AND
+adjusted score ≥ 2.97 to be accepted.
 
 ### Target to beat
 
 | Metric | Required |
 |--------|----------|
+| Trades | ≥ 350 |
 | Adjusted score | ≥ 2.97 |
-| Trades | ≥ 300 |
 | Formula | Sharpe × sqrt(trades / 50) |
 
 ### Historical high-water mark
@@ -174,66 +190,33 @@ It is considered a weak baseline. The ±0.43 target is expected to beat it.
 | Sharpe | 1.1717 |
 | Trades | 323 |
 | Adjusted score | 2.978 |
-| Status | Not reproduced in recent generations — primary search target |
+| Status | PRIMARY SEARCH TARGET — not recently confirmed |
 
 ---
 
 ## KNOWN PARAMETER PERFORMANCE MAP
 
-| Long value | Short value | Est. trades | Est. Sharpe | Adj. score | Notes |
-|------------|-------------|-------------|-------------|------------|-------|
-| -0.30 | +0.30 | ~690 | negative | negative | ❌ CATASTROPHIC |
-| -0.35 | +0.35 | ~500 | ≈ 0.20 | ≈ 1.00 | ❌ Far below target |
-| -0.38 | +0.38 | ~363 | ≈ 0.73 | ≈ 1.96 | ❌ Below target |
-| -0.40 | +0.40 | ~333 | ≈ 1.12 | ≈ 2.89 | 🔶 Close to target |
-| -0.41 | +0.41 | ~324 | ≈ 1.14 | ≈ 2.90 | 🔶 Close to target |
-| -0.42 | +0.42 | ~323 | ≈ 1.15 | ≈ 2.92 | 🔶 Close to target |
+| Long value | Short value | Est. trades | Est. Sharpe | Adj. score | Status |
+|------------|-------------|-------------|-------------|------------|--------|
+| -0.40 | +0.40 | ~333 | ≈ 1.12 | ≈ 2.89 | 🔶 Close |
+| -0.41 | +0.41 | ~324 | ≈ 1.14 | ≈ 2.90 | 🔶 Close |
+| -0.42 | +0.42 | ~323 | ≈ 1.15 | ≈ 2.92 | 🔶 Close |
 | -0.43 | +0.43 | ~323 | ≈ 1.17 | ≈ 2.97 | 🎯 PRIMARY TARGET |
 | -0.44 | +0.44 | ~318 | ≈ 1.10 | ≈ 2.77 | 🔶 Below target |
-| -0.45 | +0.45 | ~316 | ≈ 1.03 | ≈ 2.59 | ❌ Below target |
-| -0.50 | +0.50 | ~288 | ≈ 1.11 | ≈ 2.67 | ❌ Current best |
-| -0.55 | +0.55 | <250 | — | REJECTED | ❌ Too few trades |
+| -0.46 | +0.46 | ~? | unknown | unknown | 🔍 UNEXPLORED |
+| -0.47 | +0.47 | ~? | unknown | unknown | 🔍 UNEXPLORED |
+| -0.48 | +0.48 | ~? | unknown | unknown | 🔍 UNEXPLORED |
+| -0.50 | +0.50 | ~288 | ≈ 1.11 | ≈ 2.67 | ❌ Current weak best |
+
+Values below -0.50: under 250 trades, auto-rejected.
+Values above -0.40: catastrophic Sharpe, do not use.
 
 ---
 
-## KNOWN BAD PARAMETER VALUES — DO NOT USE
+## KNOWN ATTRACTOR SIGNATURES — AUTOMATIC REJECTION
 
-| What | Bad value | Consequence |
-|------|-----------|-------------|
-| indicator name | momentum_accelerating | Sharpe ≈ -11 |
-| indicator name | price_vs_ema | Sharpe ≈ -11 |
-| any word | trend (anywhere) | Sharpe ≈ -7 to -11 |
-| style field | anything except momentum_optimized | Template corruption |
-| max_open | anything except 4 | Suboptimal |
-| stop_loss_pct | 0.4 | Catastrophic loss |
-| take_profit_pct | 3.51 | Corrupted legacy value |
-| timeout_minutes | 706 | Corrupted legacy value |
-| period_minutes on price_change_pct | 5 | ~148-trade attractor, rejected |
-| period_minutes on price_change_pct | 60 | ~490-trade attractor, false optimum |
-| price_change_pct long | above -0.40 | Degraded performance |
-| price_change_pct long | below -0.50 | Under 250 trades, auto-rejected |
+The following output signatures indicate a corrupted generation.
+They will be auto-rejected by the validator regardless of Sharpe:
 
----
-
-## SELF-AUDIT NOTE FOR MIMIR (NOT FOR ODIN/LLM)
-
-MIN_TRADES[day] was lowered to 200 at gen 5400 (LOKI change). This
-allowed the 288-trade gen 5415 result to become the accepted best,
-displacing strategies with more trades and similar Sharpe. This is
-a regression. MIN_TRADES[day] should be restored to 350. The gen 5415
-result should be re-evaluated against that threshold.
-
-Recent generation analysis: approximately 40% of recent generations
-(8/20) produced Sharpe = -11.8843 with 325 trades. This is the
-forbidden-string attractor signature. Root cause: the previous version
-of this research program included the full "Current Best Strategy" YAML
-block, which contained every forbidden string. The small LLM was
-copying from that block. That section has been removed in this version.
-
-If the -11.8843 / 325-trade pattern continues after this version is
-deployed, the LLM is drawing on memorized training data rather than
-the prompt. In that case, consider renaming the forbidden indicators
-to nonsense strings in the validation layer as an additional guard.
-
----
-```
+| Signature | Action |
+|-----------|-----
