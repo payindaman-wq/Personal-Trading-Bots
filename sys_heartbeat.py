@@ -60,6 +60,22 @@ LEAGUES = [
         "stale_mul":  3,
         "error_lines": 30,
     },
+    {
+        "name":       "futures_day",
+        "tick_log":   f"{WORKSPACE}/competition/futures_day/tick.log",
+        "active_dir": f"{WORKSPACE}/competition/futures_day/active",
+        "interval":   5,
+        "stale_mul":  3,
+        "error_lines": 30,
+    },
+    {
+        "name":       "futures_swing",
+        "tick_log":   f"{WORKSPACE}/competition/futures_swing/tick.log",
+        "active_dir": f"{WORKSPACE}/competition/futures_swing/active",
+        "interval":   30,
+        "stale_mul":  3,
+        "error_lines": 30,
+    },
 ]
 
 SERVICES = [
