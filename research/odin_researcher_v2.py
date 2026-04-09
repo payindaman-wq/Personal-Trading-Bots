@@ -654,16 +654,18 @@ def main():
     # Load state
     results_history = load_results(league)
     state_path = os.path.join(league_dir(league), "gen_state.json")
+    gen = len(results_history) + 1
+    gens_since_best = 0
+    last_mimir_gen = 0
     if os.path.exists(state_path):
-        with open(state_path) as f:
-            gs = json.load(f)
-        gen = gs.get("gen", len(results_history) + 1)
-        gens_since_best = gs.get("gens_since_best", 0)
-        last_mimir_gen = gs.get("last_mimir_gen", 0)
-    else:
-        gen = len(results_history) + 1
-        gens_since_best = 0
-        last_mimir_gen = 0
+        try:
+            with open(state_path) as f:
+                gs = json.load(f)
+            gen = gs.get("gen", gen)
+            gens_since_best = gs.get("gens_since_best", 0)
+            last_mimir_gen = gs.get("last_mimir_gen", 0)
+        except Exception:
+            pass
 
     min_t = SWING_MIN_TRADES if league == "swing" else MIN_TRADES.get(league, 30)  # Item 4
 

@@ -317,6 +317,30 @@ def main():
         check_entries(portfolio, strategy, prices, bot_leverage)
         save_portfolio(comp_dir, bot, portfolio)
 
+        # Update live MTM equity
+        # cash = starting - deployed_margins + realized_pnl; add margins back + unrealized
+        portfolio = load_portfolio(comp_dir, bot)
+        starting = portfolio.get('starting_capital', meta.get('starting_capital', 1000.0))
+        cash = portfolio.get('cash', starting)
+        unrealized = 0.0
+        margin_deployed = 0.0
+        for pos in portfolio.get('positions', []):
+            cp = prices.get(pos['pair'])
+            if cp:
+                ep = pos['entry_price']
+                qty = pos.get('quantity', 0)
+                cost = pos.get('cost_basis', 0)
+                margin_deployed += cost
+                if pos['direction'] == 'long':
+                    unrealized += (cp - ep) * qty
+                else:
+                    unrealized += (ep - cp) * qty
+        live_eq = cash + margin_deployed + unrealized
+        portfolio.setdefault('stats', {})['live_equity_mtm'] = round(live_eq, 2)
+        portfolio['stats']['live_pnl_usd'] = round(live_eq - starting, 2)
+        portfolio['stats']['live_pnl_pct'] = round((live_eq - starting) / starting * 100, 4)
+        save_portfolio(comp_dir, bot, portfolio)
+
     print('  Done.')
 
 
