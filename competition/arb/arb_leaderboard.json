@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-07T00:38:01.382934+00:00",
+  "generated_at": "2026-04-09T06:38:01.595300+00:00",
   "league": "arb",
   "total_sprints": 4,
   "archived": 3,
@@ -114,19 +114,6 @@
       "style": "stat arb"
     },
     {
-      "bot": "hati",
-      "points": 7,
-      "sprints_entered": 4,
-      "sprint_wins": 0,
-      "podiums": 1,
-      "cumulative_pnl_usd": -3.94,
-      "total_trades": 26,
-      "total_wins": 6,
-      "overall_win_rate": 23.1,
-      "avg_pnl_pct_per_sprint": -0.0985,
-      "style": "stat arb"
-    },
-    {
       "bot": "surt",
       "points": 3,
       "sprints_entered": 4,
@@ -163,6 +150,19 @@
       "total_wins": 1,
       "overall_win_rate": 12.5,
       "avg_pnl_pct_per_sprint": -0.1728,
+      "style": "stat arb"
+    },
+    {
+      "bot": "hati",
+      "points": 7,
+      "sprints_entered": 4,
+      "sprint_wins": 0,
+      "podiums": 1,
+      "cumulative_pnl_usd": -9.85,
+      "total_trades": 27,
+      "total_wins": 6,
+      "overall_win_rate": 22.2,
+      "avg_pnl_pct_per_sprint": -0.2462,
       "style": "stat arb"
     },
     {
