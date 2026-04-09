@@ -1,13 +1,30 @@
 ```markdown
 # ODIN Research Program — Swing Trading Strategy Optimizer
-# Effective from Gen 14874 | Incumbent: Gen 14873 (Sharpe=1.1062)
-# MIMIR-reviewed 2026-04-09 (v13)
+# Effective from Gen 14993 | Incumbent: Gen 14993 (Sharpe=1.1311)
+# MIMIR-reviewed 2026-04-09 (v14)
 #
 # ══════════════════════════════════════════════════════════════════════
-# STATUS: ACTIVE — MOMENTUM PHASE (8 improvements in 2,149 gens)
-# Sharpe has climbed from 0.0799 → 1.1062 via exit refinement.
-# The core indicator triplet is CONFIRMED VIABLE. Continue mutating.
+# STATUS: ACTIVE — CEILING PHASE (10 improvements in 2,269 gens)
+# Sharpe has climbed from 0.0799 → 1.1311 via exit refinement.
+# The core indicator triplet is CONFIRMED VIABLE.
+# ⚠️ BOTH RECENT NEW_BESTS HIT EXACTLY 60 TRADES (THE HARD CEILING).
+# The strategy is now operating at maximum trade density.
+# ALL mutations must be trade-count neutral or trade-count reducing.
 # ══════════════════════════════════════════════════════════════════════
+
+## ══════════════════════════════════════════════════════════════════════
+## ⚠️ DATA INTEGRITY ALERT — READ BEFORE ANYTHING ELSE
+## ══════════════════════════════════════════════════════════════════════
+
+A YAML discrepancy was detected between the "Current Best Strategy"
+display (which showed the old pre-gen-14873 YAML with TP=5.95,
+timeout=129, size_pct=25.87) and the research program incumbent.
+
+THE ONLY VALID INCUMBENT IS THE YAML PRINTED BELOW IN THIS PROGRAM.
+Gen 14993 produced a new_best. That YAML MUST be committed to git.
+Verify the committed YAML matches what is printed in this program.
+If there is any doubt, re-run gen 14993 and re-commit.
+The Gen 2126 loss must not be repeated.
 
 ## RESEARCH SCOPE
 League: swing | Timeframe: 1h candles | Data: 2yr Binance OHLCV
@@ -22,7 +39,7 @@ Max trades: SWING_MAX_TRADES=60 (hard rejection in code)
 ## ══════════════════════════════════════════════════════════════════════
 
 ```yaml
-name: random_restart_v3_tightened_sl_v3
+name: random_restart_v3_tightened_sl_v3_gen14993
 style: randomly generated
 pairs:
 - BTC/USD
@@ -69,9 +86,11 @@ risk:
   pause_hours: 48
 ```
 
-Sharpe: 1.1062 | Trades: 59 | Win rate: 39.0%
-⚠️ NOTE: size_pct has been corrected from 25.87% to 25.0% to comply
-with DANGER regime directive (max 25%). Do not set size_pct > 25.0%.
+Sharpe: 1.1311 | Trades: 60 | Win rate: 41.7%
+⚠️ NOTE: size_pct is 25.0% — at the DANGER regime cap. Do not exceed.
+⚠️ NOTE: Trades = 60, which is the HARD CEILING. Any mutation that
+increases signal frequency WILL be rejected [max_trades_reject].
+Every mutation must be trade-count neutral or trade-count reducing.
 
 All-time benchmark (lost): Gen 2126, Sharpe=2.9232, trades=30
 The benchmark used RSI+MACD+EMA. The current incumbent uses
@@ -100,28 +119,46 @@ simultaneously, add more than one new condition, or generate a
 completely different strategy.
 
 ## ══════════════════════════════════════════════════════════════════════
+## ⚠️ THE MOST IMPORTANT CONSTRAINT RIGHT NOW
+## ══════════════════════════════════════════════════════════════════════
+
+THE CURRENT STRATEGY HITS EXACTLY 60 TRADES — THE HARD CEILING.
+
+This means:
+  - ANY mutation that loosens entry conditions → [max_trades_reject]
+  - ANY mutation that tightens exits (lower TP, lower SL, lower timeout)
+    → more trades close sooner → more re-entries → [max_trades_reject]
+  - ONLY mutations that reduce or maintain trade count are viable
+
+SAFE mutations (trade-count neutral or reducing):
+  ✓ Increasing take_profit_pct (winners hold longer → fewer closed)
+  ✓ Increasing timeout_hours (trades hold longer → fewer re-entries)
+  ✓ Increasing period_hours on any indicator (fewer signals generated)
+  ✓ Slightly increasing stop_loss_pct (fewer stops triggered)
+  ✓ Replacing momentum_accelerating with RSI (may reduce signal count)
+
+DANGEROUS mutations (will likely cause [max_trades_reject]):
+  ✗ Decreasing any period_hours
+  ✗ Decreasing take_profit_pct
+  ✗ Decreasing timeout_hours
+  ✗ Removing any condition
+  ✗ Adding a second pair
+  ✗ Loosening any operator threshold
+
+## ══════════════════════════════════════════════════════════════════════
 ## ⚠️ CRITICAL CONSTRAINTS — DO NOT VIOLATE THESE
 ## ══════════════════════════════════════════════════════════════════════
 
-### STOP LOSS IS AT THE FLOOR — DO NOT TOUCH IT
+### STOP LOSS IS AT THE FLOOR — DO NOT TOUCH IT (unless increasing)
 stop_loss_pct is currently 1.5%. This is the minimum allowed value.
 DO NOT decrease stop_loss_pct. DO NOT set it below 1.5%.
 If you change stop_loss_pct, you MUST increase it (e.g., 1.8, 2.0, 2.5).
 
-### TRADE COUNT IS NEAR THE CEILING — BE CAREFUL
-The incumbent has 59 trades — just 1 away from the hard rejection
-ceiling of 60. Any change that loosens conditions or tightens exits
-may push trades over 60 and cause [max_trades_reject].
-SAFE mutations that are unlikely to increase trade count:
-  - Increasing take_profit_pct (winners exit slower → fewer trades/time)
-  - Increasing stop_loss_pct slightly (fewer stops hit → slightly fewer)
-  - Increasing period_hours on any indicator (longer lookback = fewer signals)
-  - Increasing timeout_hours (let trades run longer)
-RISKY mutations (may increase trades → rejection):
-  - Decreasing any period_hours
-  - Loosening any operator threshold
-  - Removing a condition
-  - Adding a second pair
+### TRADE COUNT IS AT THE CEILING — THIS IS THE PRIMARY CONSTRAINT
+The incumbent has 60 trades — AT the hard rejection ceiling.
+This is NOT "near" the ceiling. It IS the ceiling.
+Any mutation that could increase trade count WILL be rejected.
+Prefer mutations with high confidence of reducing trade count.
 
 ### SIZE_PCT CAP
 Do NOT set size_pct > 25.0%. DANGER regime directive is active.
@@ -131,67 +168,99 @@ Minimum size_pct is 10.0%.
 The incumbent has 3 conditions per side. Adding a 4th will likely
 drop trade count to 0 → [low_trades] rejection.
 
-## WHY THIS MATTERS — TRADE COUNT CONSTRAINT
+### DO NOT DECREASE TAKE_PROFIT_PCT
+Current TP = 7.38%. Decreasing it causes faster exits → more
+re-entries → more trades → [max_trades_reject].
+ONLY increase take_profit_pct.
 
-The 30–60 trade window is NARROW (~1.4–2.5 trades/month over 2 years).
-- Too many conditions → 0 trades → [low_trades] rejection
-- Too few conditions / loose thresholds → >60 trades → [max_trades_reject]
-- The incumbent hits 59 trades with 3 conditions. This is at the top
-  of the valid zone. Prefer mutations that hold or reduce trade count.
+### DO NOT DECREASE TIMEOUT_HOURS
+Current timeout = 138h. Decreasing causes faster timeout exits →
+more re-entries → more trades → [max_trades_reject].
+ONLY increase timeout_hours (within the 48–300h allowed range).
 
 ## ══════════════════════════════════════════════════════════════════════
-## RESEARCH DIRECTION (v13)
+## RESEARCH DIRECTION (v14)
 ## ══════════════════════════════════════════════════════════════════════
 
 ### CONTEXT: WHERE WE ARE
-The strategy has a clear identity: low win rate (39%), asymmetric payoff.
+The strategy has a clear identity: low win rate (41.7%), asymmetric payoff.
 - SL = 1.5% (floor — do not reduce further)
 - TP = 7.38% → reward:risk ratio ≈ 4.9:1
-- This structure works. The goal now is to improve TP or signal quality.
+- Trades = 60 (AT THE HARD CEILING — this is the binding constraint)
+- The goal is to let winners run further while reducing trade frequency
 
 ### PATH A — REFINE THE INCUMBENT (PRIMARY, ACTIVE)
 
 **PRIORITY 1: INCREASE take_profit_pct (HIGHEST EXPECTED VALUE)**
-The most promising mutation right now. The SL floor is reached;
-the remaining asymmetry lever is letting winners run further.
-  - Try take_profit_pct: 8.0, 8.5, 9.0, 9.5, 10.0, 11.0, 12.0
-  - Each test should be ONE value only, not a range
-  - Higher TP means fewer trades close via TP → may slightly reduce
-    trade count (good, since we are near the 60-trade ceiling)
-  - Win rate will likely decrease further, but Sharpe may improve
-    if the payoff ratio increases enough
+The most promising mutation. Increasing TP does two things:
+  1. Lets winners run to larger gains → higher Sharpe if captured
+  2. Slows the rate at which trades close → may reduce trade count
+     below 60, opening up further mutations
 
-**PRIORITY 2: ADJUST timeout_hours**
-Current value is 138h. This has not been varied recently.
-  - Try timeout_hours: 168 (1 week) — let trades breathe longer
-  - Try timeout_hours: 96 (4 days) — close stale trades faster
-  - Try timeout_hours: 120 — midpoint test
-  - Longer timeout = fewer trades close via timeout → may reduce count
+Specific values to test (one at a time):
+  - take_profit_pct: 8.0   ← try this first
+  - take_profit_pct: 8.5
+  - take_profit_pct: 9.0
+  - take_profit_pct: 9.5
+  - take_profit_pct: 10.0
+  - take_profit_pct: 11.0
+  - take_profit_pct: 12.0
 
-**PRIORITY 3: ADJUST MACD PERIOD ON LONG SIDE**
-  - Try macd_signal period_hours: 24 on long (currently 48)
-  - Try macd_signal period_hours: 72 on long (currently 48)
-  - Asymmetric MACD periods (long vs short) may improve signal quality
+Each test should be ONE value only. Higher TP reduces trade count
+(beneficial) and may improve Sharpe if the market delivers extended
+trends. Win rate will likely decrease but payoff ratio increases.
 
-**PRIORITY 4: ADJUST BOLLINGER PERIOD**
-  - Try bollinger_position period_hours: 72 on long (currently 48)
-  - Try bollinger_position period_hours: 96 on long (currently 48)
-  - Longer period = fewer Bollinger signals = likely fewer trades
-    (beneficial given we are near the 60-trade ceiling)
+**PRIORITY 2: INCREASE timeout_hours**
+Current value is 138h. Increasing lets trades breathe longer and
+may reduce the rate of timeout-based re-entries.
+  - timeout_hours: 144  ← smallest increment, try first
+  - timeout_hours: 156
+  - timeout_hours: 168 (1 week) — natural swing trading boundary
+  - timeout_hours: 192
+  - timeout_hours: 216
+  - timeout_hours: 240
+
+DO NOT go below 138h (current value). That will increase trade count.
+DO NOT go above 300h (program hard limit).
+
+**PRIORITY 3: INCREASE BOLLINGER PERIOD ON LONG SIDE**
+Longer lookback → fewer Bollinger signals → fewer long entries →
+trade count may drop below 60 (creating room for further mutations).
+  - bollinger_position period_hours: 72 (long side, currently 48)
+  - bollinger_position period_hours: 96 (long side, currently 48)
+  - bollinger_position period_hours: 120 (long side)
+
+Do NOT change the short-side Bollinger (period_hours: 168 — already long).
+
+**PRIORITY 4: INCREASE MOMENTUM_ACCELERATING PERIOD ON LONG SIDE**
+  - momentum_accelerating period_hours: 72 (long side, currently 48)
+  - momentum_accelerating period_hours: 96 (long side)
+Longer period = fewer momentum signals = fewer entries = trade count
+may drop below 60.
 
 **PRIORITY 5: REPLACE momentum_accelerating WITH RSI**
-  - If take_profit and timeout tuning stall for 100+ gens, try:
-    Long: replace momentum_accelerating=false with
-      indicator: rsi, period_hours: 48, operator: lt, value: 35
-    Short: replace momentum_accelerating=false with
-      indicator: rsi, period_hours: 48, operator: gt, value: 65
-  - RSI is more predictable and interpretable than momentum_accelerating
-  - Do NOT change any other conditions when making this swap
+If TP and timeout tuning stall for 100+ gens with no improvements:
+  Long: replace momentum_accelerating=false with
+    indicator: rsi, period_hours: 48, operator: lt, value: 35
+  Short: replace momentum_accelerating=false with
+    indicator: rsi, period_hours: 48, operator: gt, value: 65
 
-**PRIORITY 6: SLIGHT size_pct INCREASE (MINOR)**
-  - size_pct is at 25.0% (DANGER cap). Do not increase above 25.0%.
-  - If regime improves (F&G > 30, regime exits DANGER), this lever opens.
-  - Do not touch size_pct until macro regime improves.
+RSI is more predictable. Tighter RSI thresholds (35/65) should
+maintain or reduce trade count vs. the current setup.
+DO NOT use looser thresholds (e.g., RSI < 45 or > 55) — too many trades.
+DO NOT change any other conditions when making this swap.
+
+**PRIORITY 6: SLIGHT stop_loss_pct INCREASE (MINOR)**
+SL is at the floor (1.5%). A small increase may:
+  - Reduce the number of stops triggered → slightly fewer trades
+  - Improve win rate by giving trades more room
+  Test: stop_loss_pct: 1.8, 2.0
+  Risk: wider SL reduces per-trade risk-adjusted return.
+  Only test if PRIORITY 1–5 all fail to produce improvements.
+
+**PRIORITY 7: size_pct (DO NOT TOUCH IN DANGER REGIME)**
+  size_pct is at 25.0% (DANGER cap). Do not increase above 25.0%.
+  Do not touch until macro regime improves (F&G > 30).
 
 ### PATH B — RSI+MACD+EMA RECONSTRUCTION (SECONDARY)
 Only attempt if PATH A stalls for 300+ consecutive gens with 0 improvements.
@@ -199,10 +268,12 @@ The all-time benchmark (Sharpe=2.9232) used this combination.
 Template:
   Long: RSI < 35, MACD bullish, price > EMA(period=50)
   Short: RSI > 65, MACD bearish, price < EMA(period=50)
-  Exit: TP=6–8%, SL=2–3%, timeout=168–240h
-  Pairs: BTC/USD only first, then consider ETH/USD
+  Exit: TP=7–9%, SL=1.5–2.0%, timeout=168–240h
+  Pairs: BTC/USD only first
+  Start with TP=7.38% and timeout=138h to match current exit structure
+
 Note: This represents a full indicator swap, not a mutation. Use only
-as a reset if the incumbent is definitively stuck.
+as a reset if the incumbent is definitively stuck for 300+ gens.
 
 ## ══════════════════════════════════════════════════════════════════════
 ## WHAT HAS FAILED — DO NOT REPEAT
@@ -219,28 +290,40 @@ as a reset if the incumbent is definitively stuck.
 
 4. DO NOT propose size_pct > 25.0% (DANGER regime cap) or < 10%.
 
-5. DO NOT set timeout_hours < 48 or > 300.
+5. DO NOT set timeout_hours < 138 (current value — decreasing will
+   increase trade count and cause [max_trades_reject]).
+   DO NOT set timeout_hours > 300 (program hard limit).
 
 6. DO NOT add a 4th condition. Will likely produce [low_trades].
 
-7. DO NOT propose RSI thresholds looser than: long < 45, short > 55.
+7. DO NOT propose RSI thresholds looser than: long < 40, short > 60.
    Loose RSI → too many trades → [max_trades_reject].
+   Recommended thresholds: long < 35, short > 65.
 
-8. DO NOT set take_profit_pct < 4% or stop_loss_pct < 1.5%.
-   Very tight exits increase trade count significantly.
+8. DO NOT set take_profit_pct < 7.38% (current value — decreasing
+   will increase trade count and cause [max_trades_reject]).
+   Minimum TP: 7.38%. Only increase TP.
 
-9. ⚠️ NEW: DO NOT set stop_loss_pct below 1.5%. It is already at the
-   floor. Reducing it further violates hard constraints AND will
-   increase trade count dangerously close to the 60-trade ceiling.
+9. DO NOT set stop_loss_pct below 1.5%. It is at the floor.
+   If changing SL, only increase it.
 
-10. ⚠️ NEW: DO NOT reproduce near-identical variants of Sharpe≈1.058
-    (57 trades). These have been seen in gens 14855, 14857, 14861–14863,
-    14867–14868. They represent a local plateau below the current best.
-    The current best is Sharpe=1.1062 at 59 trades. Mutate FROM THAT.
+10. DO NOT reproduce near-identical variants of known plateau values:
+    - Sharpe≈1.058 (57 trades) — seen gens 14855–14868, local plateau
+    - Sharpe≈1.0325 (57 trades) — seen gens 14982, 14985
+    - Sharpe≈0.7734 (59 trades) — seen gens 14976, 14984, 14986, 14988, 14989
+    - Sharpe≈1.1090 (60 trades) — seen gens 14907, 14978, 14980, 14983
+    The current best is Sharpe=1.1311 at 60 trades. Mutate FROM THAT.
 
-11. ⚠️ NEW: DO NOT use the old incumbent (Sharpe=0.0799, size_pct=20,
-    SL=3.2%, TP=9.6%). That YAML is obsolete. The current best YAML
-    is the one printed above this section.
+11. DO NOT use any old incumbent YAML. The only valid base is the YAML
+    printed in this program (gen 14993 incumbent).
+
+12. DO NOT decrease any period_hours. At 60 trades (ceiling), shorter
+    periods generate more signals → [max_trades_reject].
+
+13. DO NOT add a second pair (ETH/USD or SOL/USD) while at 60 trades.
+    Adding a second pair roughly doubles trade opportunities →
+    guaranteed [max_trades_reject] unless conditions are dramatically
+    tightened (which risks [low_trades]).
 
 ## ══════════════════════════════════════════════════════════════════════
 ## MACRO ENVIRONMENT AWARENESS (as of 2026-04-09)
@@ -251,16 +334,18 @@ BTC Dominance: 57.0% (elevated — BTC outperforming alts)
 VIX: 25.78 (elevated volatility)
 
 Implications for strategy direction:
-- BTC/USD is the safest pair to trade in this regime (high dominance)
+- BTC/USD is the safest pair. Stay BTC-only until regime improves.
 - Do NOT add SOL/USD while F&G < 20 and regime = DANGER
-- ETH/USD is acceptable as a secondary pair but adds trade count risk
-  (we are already at 59 trades — adding a second pair likely pushes
-  over 60 → [max_trades_reject] unless conditions are tightened first)
+- Do NOT add ETH/USD while trades = 60 (would push far over ceiling)
 - DANGER directive: position size ≤ 25% — incumbent is compliant
 - Extreme Fear favors LONG entries after capitulation:
   (Bollinger below_lower + oversold = good combo in fear regimes ✓)
 - SHORT entries may underperform in fear regimes (fear already priced in)
-  Consider stricter short conditions if win rate on shorts is poor
+  The asymmetric Bollinger period (short uses 168h vs long's 48h) may
+  already be compensating for this — short signals are already rarer.
+- Elevated VIX means wider price swings → TP=7.38% may be reachable
+  more often than in calm markets. Higher TP targets (8–10%) may be
+  viable in this environment.
 
 ## ══════════════════════════════════════════════════════════════════════
 ## IMPROVEMENT LOGIC
@@ -274,15 +359,22 @@ Implications for strategy direction:
 ## ══════════════════════════════════════════════════════════════════════
 ## GENERATION HEALTH TARGETS (next 100 gens)
 ## ══════════════════════════════════════════════════════════════════════
-- Target: ≥ 3 new_best events (current pace: 8 in 2,149 gens)
-- Target: < 50% of gens ending in [low_trades] or [max_trades_reject]
+- Target: ≥ 3 new_best events
+- Target: < 40% of gens ending in [max_trades_reject]
+  (currently too high — at 60 trades, almost any loosening is rejected)
 - Target: Sharpe > 1.3 within 200 gens
-- Red flag: if >80% of gens are binary failures (0 trades or >60 trades),
-  the LLM is generating fresh configs, not mutations — escalate to MIMIR
+- Target: Sharpe > 1.5 within 400 gens
+- Red flag: if >60% of gens are [max_trades_reject], the LLM is
+  proposing signal-loosening mutations despite explicit warnings.
+  Escalate to MIMIR for prompt revision if this occurs.
+- Red flag: if the same Sharpe values recur >3 times in 20 gens
+  (clustering behavior), the LLM is not exploring — escalate to MIMIR.
 - If after 300 gens there are 0 new_best events from PATH A:
   trigger PATH B (RSI+MACD+EMA reconstruction)
 - YAML of best strategy must be committed to git after EVERY new_best
   event. The Gen 2126 loss must not be repeated. This is mandatory.
+- VERIFY the committed YAML matches the program incumbent before
+  each MIMIR review. A discrepancy was detected this cycle.
 
 ## ══════════════════════════════════════════════════════════════════════
 ## IMPROVEMENT TRAJECTORY (for context)
@@ -294,42 +386,68 @@ Gen 14749: Sharpe=0.5902  trades=55  win=41.8%
 Gen 14751: Sharpe=0.7714  trades=53  win=47.2%
 Gen 14759: Sharpe=1.0165  trades=56  win=44.6%
 Gen 14784: Sharpe=1.0642  trades=56  win=44.6%
-Gen 14873: Sharpe=1.1062  trades=59  win=39.0%  ← CURRENT BEST
+Gen 14873: Sharpe=1.1062  trades=59  win=39.0%
+Gen 14907: Sharpe=1.1090  trades=60  win=40.0%
+Gen 14993: Sharpe=1.1311  trades=60  win=41.7%  ← CURRENT BEST
 
-Pattern: SL tightening drove early gains. TP and period tuning
-drove later gains. Win rate is declining (44% → 39%) but Sharpe
-is rising — asymmetric payoff is working. Next lever: TP increase.
+Pattern: SL tightening drove early gains. TP and period tuning drove
+later gains. Win rate declined (44% → 41.7%) but Sharpe rose —
+asymmetric payoff is working. Trade count is now AT the ceiling (60).
+The next lever is: let winners run further (higher TP) or let trades
+breathe longer (higher timeout) to create room for further exploration.
 
 ## ══════════════════════════════════════════════════════════════════════
 ## LIVE COMPETITION CONTEXT
 ## ══════════════════════════════════════════════════════════════════════
 AutoBotSwing recent: rank 3/10 both sprints (+4.97%, +3.21%)
-Live win rates (50–67%) exceed backtest win rate (39%) — healthy sign,
-no evidence of overfitting. Strategy is underperforming in ranking
-likely due to position sizing or absolute PnL vs. competitors.
-A Sharpe improvement from 1.1 toward 1.5+ should translate to
+Live win rates (50–67%) substantially exceed backtest win rate (41.7%)
+— healthy sign, no evidence of overfitting.
+Live trades: 3–4 per sprint ✓ (consistent with 60/2yr cadence)
+
+Strategy underperforming in ranking likely due to absolute PnL vs.
+competitors with higher-volatility pairs or larger position sizing.
+A Sharpe improvement from 1.13 toward 1.5+ should translate to
 more consistent top-2 finishes.
-Live trades: 3–4 per sprint ✓ (consistent with 59/2yr cadence)
+
+## ══════════════════════════════════════════════════════════════════════
+## DATA REQUEST FOR NEXT MIMIR REVIEW
+## ══════════════════════════════════════════════════════════════════════
+To improve mutation guidance, ODIN should log the following for
+each new_best event:
+  - Exit type breakdown: % closed via TP vs. SL vs. timeout
+  - Long vs. short trade split and separate win rates
+  - Average holding time per trade
+
+This data would reveal:
+  - If timeout exits dominate → increasing TP won't help, need
+    to increase timeout or accept the timeout exit as the primary exit
+  - If SL exits dominate → SL at 1.5% may be too tight for current
+    volatility; testing SL=1.8–2.0% may improve win rate
+  - If long win rate >> short win rate → consider stricter short
+    conditions to eliminate poor short trades
+
+Without this data, mutations are partially blind. Escalate request
+to LOKI/ODIN development if not currently logged.
 
 ## ══════════════════════════════════════════════════════════════════════
 ## NOTES FOR NEXT MIMIR REVIEW
 ## ══════════════════════════════════════════════════════════════════════
-- If Sharpe reaches 1.5: review whether ETH/USD expansion is safe,
-  but only if trade count drops below 55 (buffer needed for 2nd pair)
+- YAML INTEGRITY: Verify gen 14993 YAML is correctly committed to git.
+  The "Current Best Strategy" display showed an old pre-14873 YAML.
+  This must be resolved before the next review.
+- If Sharpe reaches 1.5 AND trade count drops below 55:
+  review whether ETH/USD expansion is safe (need ≥5 trade buffer)
 - If Sharpe reaches 2.0: consider relaxing MAX_TRADES to 80 and
-  review whether size_pct can increase if macro regime improves
+  reviewing whether size_pct can increase if macro regime improves
 - If 300 more gens pass with < 2 improvements from PATH A:
-  escalate to PATH B (RSI+MACD+EMA) or full program redesign
-- Monitor win rate: if it drops below 30%, the SL at 1.5% may be
-  too tight and causing premature exits on valid setups. If so,
-  consider testing SL=1.8% or SL=2.0% as a corrective measure.
-- size_pct correction: the previous best had size_pct=25.87% which
-  violated the DANGER cap. Corrected to 25.0% in this program.
-  If this correction causes a Sharpe discrepancy in backtest,
-  flag to MIMIR for resolution.
-- The LLM cluster problem (Sharpe≈1.058 plateau at gens 14855–14868)
-  is addressed by explicit "DO NOT REPEAT" instructions above and
-  by updating the incumbent YAML. Monitor whether clustering recurs.
-- YAML of best strategy must be committed to git. Verify this happened
-  for Gen 14873. Do not allow another Gen 2126 loss event.
-```
+  escalate to PATH B (RSI+MACD+EMA reconstruction)
+- Monitor win rate: if it drops below 30%, SL at 1.5% may be causing
+  premature exits. Consider testing SL=1.8% or 2.0% as corrective.
+- Monitor [max_trades_reject] rate: if >60% of gens are rejected for
+  max trades, the LLM is not respecting the ceiling constraint.
+  Consider adding explicit examples of REJECTED vs. ACCEPTED mutations
+  in the next program revision.
+- Clustering recurrence: gens 14974–14993 showed repeated identical
+  Sharpe values (0.7734, 1.0325, 1.1090). The explicit DO NOT REPEAT
+  list above should reduce this. Monitor carefully.
+- size_pct: corrected from 25.87% to 25
