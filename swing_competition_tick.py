@@ -464,6 +464,19 @@ def main():
         for pair, direction, price in opened:
             print(f"  OPEN  {bot:8} {direction:5} {pair} @ {price}")
 
+        starting = portfolio.get('starting_capital', 1000.0)
+        live_eq = portfolio['equity']
+        for pos in portfolio.get('positions', []):
+            cp = prices.get(pos['pair'])
+            if cp:
+                ep = pos['entry_price']
+                sz = pos.get('size_usd', 0)
+                pct = (cp - ep) / ep if pos['direction'] == 'long' else (ep - cp) / ep
+                live_eq += sz * pct
+        portfolio['stats']['live_equity_mtm'] = round(live_eq, 2)
+        portfolio['stats']['live_pnl_usd'] = round(live_eq - starting, 2)
+        portfolio['stats']['live_pnl_pct'] = round((live_eq - starting) / starting * 100, 4)
+
         save_portfolio(comp_dir, bot, portfolio)
 
     print("  Done.")
