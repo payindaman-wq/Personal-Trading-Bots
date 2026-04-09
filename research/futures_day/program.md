@@ -1,5 +1,5 @@
 ```markdown
-# ODIN Research Program — FUTURES DAY (v9.0) — FOLLOW THE DATA
+# ODIN Research Program — FUTURES DAY (v10.0) — EVIDENCE-FIRST
 
 ## League: futures_day
 Timeframe: 5-minute candle data available, USE 1-HOUR indicator periods
@@ -8,65 +8,62 @@ Sprint duration: 24 hours
 
 ---
 
-## ⚠️ CONSTANTS CHECK
+## ⚠️ CONSTANTS — LOCKED
 
 ```
 MIN_TRADES["futures_day"] = 50
 ```
 
-Confirmed correct. Do NOT raise this. Configs with 50-200 trades are valid and will be tested.
+**DO NOT CHANGE THIS.** The single most damaging event in this research program's history
+was raising MIN_TRADES["futures_day"] to 400 at Gen 541, which stalled progress for
+1,100+ generations. Configs with 50-200 trades are valid. Configs with 1500+ trades
+are valid. The backtest engine decides quality; we do not pre-filter by count.
 
 ---
 
 ## WHAT THE DATA ACTUALLY SHOWS — READ THIS FIRST
 
-After 1521 generations, the empirical evidence has overturned several assumptions.
-Here is what the data proves:
+### The Paradigm Shift (Gen 1460)
 
-### The Win-Rate Discovery (Critical)
+After 1,460 generations of optimization, the data reveals:
 
-The original program assumed tighter RSI thresholds (RSI lt 20-25) would produce
-higher-quality trades with better win rates. This is FALSE in this dataset.
+| Configuration | WR | Sharpe | Trades |
+|---|---|---|---|
+| RSI < 22-25, tight thresholds | 42-45% | -2.4 to -5.8 | 150-300 |
+| RSI < 36, max_open=1 | 47-48% | -0.44 to -0.37 | 1395-1521 |
 
-Actual results from recent generations:
-- RSI lt 22-25, 150-300 trades → WR ~42-45%, Sharpe -2.4 to -5.8
-- RSI lt 35-36, 967-1521 trades → WR ~47-48%, Sharpe -0.7 to -0.44
+**Tighter RSI does NOT produce higher-quality trades. It produces worse WR AND worse Sharpe.**
+**The loose RSI + max_open=1 architecture is the correct paradigm. Do not reverse it.**
 
-**Tighter RSI does NOT produce higher win rates. It only reduces trade count.**
-**The higher-threshold configs have BETTER win rates AND better Sharpe.**
+### The Loop Problem (Gens 1580-1600)
 
-This means: the fee-drag math we used was wrong in its WR assumption.
-At tight thresholds, WR drops along with trade count, so the EV doesn't improve.
+The last 20 generations show a dangerous pattern: 8 of 20 generations produced
+identical results (Sharpe=-0.9990, WR=49.2%, trades=746). This means the small LLM
+is repeatedly proposing the same bad change — likely RSI tightening to ~33-34 or
+a filter that cuts trades by 50%. **This exact config should be explicitly recognized
+and rejected.**
 
-### The Concurrency Discovery (Critical)
+If you find yourself proposing a change that would produce ~746 trades (vs current
+~1400-1521), you are proposing RSI tightening or a filter that has already been
+tested and failed. **Stop. Propose something different.**
 
-The current best (Gen 1521) uses max_open=1. This is the REAL trade limiter.
-With RSI lt 36 and max_open=1, signals are frequently suppressed because a position
-is already open. This creates a natural quality filter — only the first signal
-in each "oversold episode" gets traded.
+### The TP Widening Question
 
-**max_open=1 + loose RSI = effective de-duplication of signals.**
-**This is better than tight RSI + max_open=2.**
+The research program has theorized that widening TP from 4.0% to 5-6% should improve
+Sharpe via higher win payoff. **This has NOT yet been confirmed by backtest results.**
+The current best (Gen 1570) still uses TP=4.0%. This could mean:
 
-### The Current Path to Positive Sharpe
+1. The small LLM is not proposing TP widening (fixable with stronger instructions)
+2. TP widening is failing in backtest (requires different approach)
 
-Current champion: Sharpe -0.44, 1521 trades, 47% WR, TP=4.0%, SL=2.39%
-
-EV check at current params (leverage 2x, 47% WR):
-- Win: +8.0% gross, -0.1% fee = +7.9% net
-- Loss: -4.78% gross, -0.1% fee = -4.88% net
-- EV = 0.47 × 7.9 - 0.53 × 4.88 = 3.713 - 2.586 = +1.127% per trade
-- This is POSITIVE EV. The Sharpe is negative only because of high variance.
-
-The path to positive Sharpe: WIDEN TP to increase win payoff.
-- At TP=6%: Win = +11.9% net. EV = 0.47×11.9 - 0.53×4.88 = 5.593 - 2.586 = +3.007%
-- At TP=8%: Win = +15.9% net. EV = 0.47×15.9 - 0.53×4.88 = 7.473 - 2.586 = +4.887%
-
-**The current strategy has positive expected value. We just need to widen TP.**
+The EV math is theoretically sound IF win rate is stable at 47% as TP widens.
+But wider TP may reduce effective WR (fewer trades reach the target in time).
+**We must test this empirically. TP widening is PRIORITY #1, but if it fails
+3 consecutive tests, escalate to timeout extension instead.**
 
 ---
 
-## CURRENT CHAMPION (Gen 1521 — Start Here)
+## CURRENT CHAMPION (Gen 1570)
 
 ```yaml
 name: crossover
@@ -117,103 +114,119 @@ risk:
   stop_if_down_pct: 18
 ```
 
-**Current performance: Sharpe -0.4367, 1521 trades, 47.0% WR**
-**Positive EV confirmed. Problem: high variance suppresses Sharpe.**
-**Fix: Widen TP to let winning trades earn more.**
+**Performance: Sharpe -0.3689, 1395 trades, 47.2% WR**
+**Positive EV confirmed: ~+1.1% per trade at current TP/SL.**
+**Problem: high per-trade variance suppresses Sharpe below zero.**
 
 ---
 
-## LOCKED PARAMETERS — DO NOT CHANGE
+## LOCKED PARAMETERS — NEVER CHANGE THESE
 
 ```yaml
 position:
-  size_pct: 16.91      ← locked at current champion value
-  max_open: 1          ← locked — this is the concurrency limiter
+  size_pct: 16.91      ← locked
+  max_open: 1          ← locked — the concurrency filter that makes this work
   fee_rate: 0.0005     ← locked — never change
-pairs: [all 16 — never remove any]
+pairs: [all 16]        ← locked — never remove any pair
 ```
 
-LOCKED. Never change size_pct, max_open, fee_rate, or pairs.
+**size_pct was 20 in the base config but was optimized to 16.91 in the champion.**
+**Do not change it back to 20. Do not change it at all.**
 
 ---
 
-## OPTIMIZATION SEQUENCE — REVISED BASED ON EVIDENCE
+## OPTIMIZATION SEQUENCE
 
-### ⭐ IMMEDIATE PRIORITY: Widen Take-Profit (Phase B — now primary)
+### ⭐ PHASE B: Widen Take-Profit (IMMEDIATE PRIORITY)
 
-The #1 lever to improve Sharpe is widening TP.
-Current TP=4.0% with 47% WR = barely positive EV but high variance.
-Wider TP = higher win payoff = higher EV per trade = positive Sharpe.
+**Why:** At TP=4.0%, positive EV = +1.13%/trade but high variance → negative Sharpe.
+At TP=6.0%, EV = +3.0%/trade. Same variance, better mean → Sharpe improves.
 
-**Why this works:**
-- Current EV per trade ≈ +1.1%. At 1521 trades, total EV is large but variance kills Sharpe.
-- At TP=6%, EV per trade ≈ +3.0%. Same variance, much better mean. Sharpe improves.
-- The win AMOUNT grows proportionally with TP, but variance doesn't grow as fast.
-
-**Target sequence:**
+**Sequence:**
 ```
-TP 4.0 → 4.5 → 5.0 → 5.5 → 6.0 → 7.0 → 8.0
+4.0 → 4.5 → 5.0 → 5.5 → 6.0 → 7.0 → 8.0
 ```
 
-Test ONE step per generation. Keep SL at 2.39% unless TP/SL < 2.0.
+Test ONE step per generation. Do not skip steps — each step tells us if WR holds.
+
+**EV check for each step:**
+| TP | Win (2x lev) | EV (at 47% WR) |
+|---|---|---|
+| 4.0% | 7.9% net | +1.13% ✓ |
+| 4.5% | 8.9% net | +1.60% ✓ |
+| 5.0% | 9.9% net | +2.07% ✓✓ |
+| 5.5% | 10.9% net | +2.54% ✓✓ |
+| 6.0% | 11.9% net | +3.01% ✓✓✓ |
+
+Keep SL at 2.39% unless TP/SL < 2.0. All values above maintain TP/SL ≥ 1.88.
 At TP=5.0%: TP/SL = 5.0/2.39 = 2.09 ✓
-At TP=6.0%: TP/SL = 6.0/2.39 = 2.51 ✓
-At TP=8.0%: TP/SL = 8.0/2.39 = 3.35 ✓ (fine to increase SL slightly if WR drops)
 
-Expected outcome: Each TP increment should improve Sharpe by 0.1-0.3.
-First positive Sharpe expected around TP=5.5-6.0%.
+**If TP widening fails 3 consecutive tests (Sharpe does not improve):**
+This means effective WR is dropping as TP widens (fewer trades reach target).
+→ Switch immediately to Phase C (timeout extension) to let more trades reach TP.
+→ Then retest TP widening with the longer timeout.
 
-### Phase A-Revised: RSI Threshold Fine-Tuning (Secondary)
+**Warning sign:** If a TP widening test produces WR below 44%, the wider TP is
+causing early timeout exits before TP is reached. Fix: extend timeout first.
 
-The current RSI long=35.97 is producing 47% WR. We can test nearby values:
-- 35.97 → 37 → 38 → 36 → 34
+### ⭐ PHASE C: Extend Timeout (CO-EQUAL PRIORITY WITH PHASE B)
 
-Do NOT go below 32 (WR will drop below 45%) or above 40 (too many false signals).
-Do NOT go below 28 (confirmed bad: produces WR 44-45% with fewer trades = worse Sharpe).
+Current timeout=720 minutes (12 hours). With TP=4-6%, many trades may be timing
+out before reaching TP. Extending timeout allows more trades to complete.
 
-For RSI short: current 72 is fine. Test 70 → 68 if other changes plateau.
-Do NOT tighten short below 68.
-
-### Phase C: Timeout Extension
-
-Current timeout=720 minutes (12 hours). With TP=5-6%, price needs more time.
-Test: 720 → 960 → 1200 → 1440 minutes
-
-Longer timeout = more TP hits = higher effective WR = better Sharpe.
-Expected: each 240-minute extension adds 1-3% to WR as more trades reach TP.
-
-Do NOT go below 720 minutes. We are not scalping.
-
-### Phase D: RSI Period Extension
-
-Test RSI periods: 60 → 90 → 120 minutes
-Longer period = smoother RSI = marginally better signal quality.
-Expected: small improvement. Do not rely on this as primary lever.
-If trade count drops below 200 with longer periods, revert — we need WR volume.
-
-### Phase E: SL Optimization
-
-With best TP from above, test SL:
-- 2.39 (current) → 2.5 → 2.75 → 3.0 → 2.25 → 2.0
-
-Maintain TP/SL ≥ 2.0 at all times.
-Looser SL may improve WR if the market often recovers from temporary drawdowns.
-Tighter SL tests: only if WR is already above 50%.
-
-### Phase F: Trend Filter (Only After Phases B-E)
-
-Add a confirming or contrarian filter ONLY after TP widening is done.
-Adding a filter before TP is optimized wastes generations.
-
-Option 1 — Confirming (momentum recovery):
-```yaml
-- indicator: trend
-  period_minutes: 240
-  operator: eq
-  value: up
+**Sequence:**
+```
+720 → 960 → 1200 → 1440 minutes
 ```
 
-Option 2 — Contrarian (deep mean reversion):
+**Why this improves Sharpe:**
+- More TP hits → effective WR increases
+- Timeout exits are typically partial losses or small gains → removing them helps
+- Expected: each 240-minute extension adds 1-3% to effective WR
+
+**If TP widening is failing:** Start Phase C immediately, then retry Phase B.
+**If TP widening is succeeding:** Run Phase C in parallel (alternate proposals).
+
+Do NOT go below 720 minutes. Do NOT try 480 or 360 — this was the failure mode.
+
+### Phase A-Refined: RSI Threshold Fine-Tuning (SECONDARY — ONLY AFTER B/C)
+
+Current RSI long=35.97 is near-optimal. Very small adjustments only:
+```
+35.97 → 37 → 38 → 36 (retest) → 39 → 40
+```
+
+**Hard limits:**
+- Do NOT go below 32. Confirmed catastrophic (WR drops to 42-44%).
+- Do NOT go above 42. Too many false signals.
+- The 746-trade / 49.2% WR / Sharpe=-0.9990 attractor is around RSI~33-34.
+  **If your proposed RSI is 33 or 34, stop. This has been tested. It fails.**
+
+For RSI short: current 72 is fine. Test 70 or 74 only after TP and timeout are optimized.
+
+### Phase D: RSI Period Extension (TERTIARY)
+
+Test RSI period: 60 → 90 → 120 minutes
+Longer period = smoother RSI = marginally better signal quality.
+**Only test this after TP and timeout are optimized.**
+If trade count drops below 300, revert.
+
+### Phase E: SL Optimization (AFTER PHASES B-D)
+
+With optimal TP from above, test SL values:
+```
+2.39 → 2.5 → 2.75 → 3.0 → 2.25 → 2.0
+```
+
+**Rule:** TP/SL ≥ 2.0 always.
+- Looser SL: tests whether market often recovers from temporary drawdowns
+- Tighter SL: only if WR is already ≥ 50%
+
+### Phase F: Trend Filter (ONLY AFTER ALL ABOVE)
+
+Add ONE confirming or contrarian filter. Test both options separately:
+
+**Option 1 — Contrarian (deep mean reversion):**
 ```yaml
 - indicator: trend
   period_minutes: 240
@@ -221,21 +234,30 @@ Option 2 — Contrarian (deep mean reversion):
   value: down
 ```
 
-Test both. If trades drop below 200, the filter is too restrictive — remove it.
+**Option 2 — Confirming (momentum recovery):**
+```yaml
+- indicator: trend
+  period_minutes: 240
+  operator: eq
+  value: up
+```
+
+If adding a filter drops trades below 300, it is too restrictive — remove it.
+**Do NOT add a filter before TP and timeout are optimized. It wastes generations.**
 
 ---
 
-## PARAMETER BOUNDS — HARD LIMITS (REVISED)
+## PARAMETER BOUNDS — HARD LIMITS
 
 ```
 RSI period_minutes:     60 — 180
-RSI long threshold:     32 — 42     (← REVISED: 32 minimum, not 18. Data shows <32 hurts WR)
-RSI short threshold:    65 — 78     (← REVISED: 65 minimum, data shows looser is fine)
-take_profit_pct:        4.0 — 10.0  (← REVISED: upper bound raised, wider TP is the lever)
-stop_loss_pct:          1.5 — 3.5   (slightly looser given higher TP targets)
-timeout_minutes:        720 — 1440  (8-24 hours minimum)
-R:R ratio (TP/SL):     ≥ 2.0
-max_open:               1           (LOCKED — do not change to 2)
+RSI long threshold:     32 — 42     (MINIMUM 32 — confirmed catastrophic below this)
+RSI short threshold:    65 — 78
+take_profit_pct:        4.0 — 10.0
+stop_loss_pct:          1.5 — 3.5
+timeout_minutes:        720 — 1440  (MINIMUM 720 — do not reduce)
+R:R ratio (TP/SL):      ≥ 2.0
+max_open:               1           (LOCKED)
 pause_if_down_pct:      5 — 10
 pause_minutes:          60 — 240
 stop_if_down_pct:       15 — 25
@@ -245,32 +267,45 @@ stop_if_down_pct:       15 — 25
 
 ## ABSOLUTE BANS — VIOLATIONS WASTE A GENERATION
 
-1. **RSI long threshold < 32**: BANNED. Data proves this reduces WR without compensating benefit.
-2. **max_open > 1**: BANNED. max_open=1 is the concurrency limiter. Changing to 2 restores the failed paradigm.
-3. **timeout_minutes < 720**: BANNED. Minimum 12 hours. With TP=5-8%, price needs time.
-4. **take_profit_pct < 4.0**: BANNED. Below 4% doesn't justify fee cost.
-5. **stop_loss_pct < 1.5**: BANNED. Too tight for hourly volatility.
-6. **RSI period_minutes < 60**: BANNED. Sub-60-minute RSI is noise.
-7. **Adding 3rd entry condition before Phase F**: BANNED.
-8. **Removing pairs**: BANNED. Always use all 16.
+1. **RSI long threshold < 32**: BANNED. 900+ generations confirm this is harmful.
+2. **RSI long threshold 33-34**: STRONGLY DISCOURAGED. This produces the
+   746-trade / 49.2% WR / Sharpe=-0.9990 attractor. It has appeared 8+ times.
+   If you are about to propose RSI=33 or RSI=34, stop and propose TP widening instead.
+3. **max_open > 1**: BANNED. This was the failed paradigm before Gen 1460.
+4. **timeout_minutes < 720**: BANNED. Minimum 12 hours.
+5. **take_profit_pct < 4.0**: BANNED. Fee cost makes this unprofitable.
+6. **stop_loss_pct < 1.5**: BANNED. Too tight for hourly volatility.
+7. **RSI period_minutes < 60**: BANNED. Sub-60-minute RSI is noise.
+8. **Removing any pair**: BANNED. Always use all 16.
 9. **Changing size_pct (16.91), max_open (1), fee_rate (0.0005)**: BANNED.
 10. **stop_if_down_pct < 15**: BANNED.
-11. **Reverting RSI long below 32**: BANNED. This was tested for 900+ generations and confirmed bad.
-12. **R:R ratio (TP/SL) < 2.0**: BANNED.
-13. **Proposing RSI long < 28 or RSI short > 78**: STRONGLY DISCOURAGED. Confirmed low WR, bad Sharpe.
+11. **R:R ratio (TP/SL) < 2.0**: BANNED.
+12. **Adding 3rd entry condition before Phase F**: BANNED.
+13. **Reverting RSI long below 32**: BANNED.
 
 ---
 
-## CRITICAL: DO NOT REVERSE COURSE ON RSI THRESHOLDS
+## THE 746-TRADE TRAP — RECOGNIZE AND ESCAPE IT
 
-The previous version of this program instructed the LLM to tighten RSI to 20-25.
-That was WRONG. Gens 1502-1514 confirm: RSI lt 22-25 produces WR 42-45% (worse than current 47%).
-The current RSI lt 35.97 is BETTER, not worse. Do not tighten it.
+In the last 20 generations, 8 proposals produced this exact result:
+```
+Sharpe=-0.9990, WR=49.2%, trades=746
+```
 
-If you are thinking about proposing RSI lt 22 or RSI lt 25 — stop.
-Those were tested. They produced Sharpe -2.4 to -5.8.
-The current champion at RSI lt 36 has Sharpe -0.44.
-Go forward, not backward.
+This is a known failure configuration. It is worse than the current best despite
+having higher WR (49.2% vs 47.2%), because fewer trades mean more variance.
+
+**If you are about to propose any of the following, STOP:**
+- RSI long threshold: 33, 34
+- timeout_minutes: 360, 480
+- Adding a trend filter without testing TP/timeout first
+- Any change that would approximately halve the trade count from ~1400 to ~700
+
+**The escape from this trap:** Propose TP widening.
+```
+take_profit_pct from 4.0 to 4.5
+```
+This is the single highest-probability improvement available.
 
 ---
 
@@ -282,99 +317,119 @@ Propose exactly ONE change. Format:
 CHANGE: [parameter_name] from [old_value] to [new_value]
 REASON: [one sentence explaining why this should improve Sharpe]
 PHASE: [which phase letter]
-EXPECTED EFFECT: [e.g., "Win payoff increases from +7.9% to +9.9% net per winning trade"]
-EV CHECK: [0.47 × (2×new_TP - 0.1) - 0.53 × (2×SL + 0.1) = X%. Is this > current +1.1%?]
+EXPECTED EFFECT: [specific prediction, e.g., "Win payoff increases from +7.9% to +8.9% net"]
+EV CHECK: [0.47 × (2×new_TP - 0.1) - 0.53 × (2×SL + 0.1) = X%. Must be > +1.13%]
+LOOP CHECK: [confirm this is NOT the 746-trade / RSI=33-34 attractor]
 ```
 
-Then output the complete YAML config with that one change applied.
-
-**Priority order for next 50 generations:**
-1. TP widening (4.0 → 4.5 → 5.0 → 5.5 → 6.0 → 7.0 → 8.0)
-2. Timeout extension (720 → 960 → 1200 → 1440)
-3. RSI threshold fine-tune (35.97 → 37 → 38)
-4. RSI period extension (60 → 90)
+Then output the complete YAML config with exactly that one change applied.
 
 ---
 
-## EV CALCULATOR — USE THIS BEFORE EVERY PROPOSAL
+## EV CALCULATOR — USE BEFORE EVERY PROPOSAL
 
-At leverage=2x, fee=0.1% round-trip, current WR=47%:
+At leverage=2x, fee=0.1% round-trip, current WR=47.2%:
 
 ```
 Win payoff  = 2 × TP_pct - 0.1%
 Loss cost   = 2 × SL_pct + 0.1%
-EV per trade = 0.47 × win_payoff - 0.53 × loss_cost
+EV per trade = 0.472 × win_payoff - 0.528 × loss_cost
 ```
 
-Current baseline (TP=4.0, SL=2.39):
+**Current baseline (TP=4.0, SL=2.39):**
 - Win = 7.9%, Loss = 4.88%
-- EV = 3.713 - 2.586 = +1.127% ✓ (positive)
+- EV = 0.472×7.9 - 0.528×4.88 = 3.73 - 2.58 = +1.15% ✓
 
-Target (TP=6.0, SL=2.39):
+**Target (TP=4.5, SL=2.39):**
+- Win = 8.9%, Loss = 4.88%
+- EV = 0.472×8.9 - 0.528×4.88 = 4.20 - 2.58 = +1.62% ✓✓
+
+**Target (TP=6.0, SL=2.39):**
 - Win = 11.9%, Loss = 4.88%
-- EV = 5.593 - 2.586 = +3.007% ✓✓ (much better)
+- EV = 0.472×11.9 - 0.528×4.88 = 5.62 - 2.58 = +3.04% ✓✓✓
 
-Target (TP=8.0, SL=2.39):
-- Win = 15.9%, Loss = 4.88%
-- EV = 7.473 - 2.586 = +4.887% ✓✓✓ (excellent)
-
-**Any change that increases EV per trade is worth testing.**
-**The primary way to increase EV is to widen TP.**
+**Any change that increases EV per trade without dramatically reducing trade count
+is worth testing.**
 
 ---
 
-## WHAT SUCCESS LOOKS LIKE
+## PRIORITY ORDER FOR NEXT 100 GENERATIONS
 
-Historical context:
-- Gen 1: Sharpe -10.77 (394 trades, WR 44%)
-- Gen 1408: Sharpe -2.32 (650 trades, WR 45%)
-- Gen 1460: Sharpe -0.73 (967 trades, WR 48%) ← paradigm shift discovered
-- Gen 1521: Sharpe -0.44 (1521 trades, WR 47%) ← current best ★
+```
+Priority 1 (Gens 1601-1630): TP widening
+  → Propose: 4.0 → 4.5 → 5.0 → 5.5 → 6.0
+  → If 3 consecutive TP proposals fail → switch to timeout extension
 
-Target milestones:
-- **Phase B target (TP widening)**: Sharpe > -0.2 at TP=5.0-5.5%
-- **Phase B-C target**: Sharpe > 0.0 at TP=6.0% (FIRST POSITIVE SHARPE)
-- **Phase C-D target**: Sharpe > 0.3 with extended timeout
-- **Phase E-F target**: Sharpe > 0.7
-- **Stretch goal**: Sharpe > 1.0
+Priority 2 (Gens 1601-1630, if TP fails): Timeout extension
+  → Propose: 720 → 960 → 1200 → 1440
+  → Then retry TP widening with longer timeout
 
-**The strategy already has positive EV. Wider TP converts EV to Sharpe.**
-**We are 1-3 parameter changes from positive Sharpe.**
+Priority 3 (Gens 1631-1660): RSI threshold micro-tuning
+  → Try: 35.97 → 37 → 38
+
+Priority 4 (Gens 1661-1680): RSI period extension
+  → Try: 60 → 90
+
+Priority 5 (Gens 1681-1720): SL optimization
+  → Try: 2.39 → 2.5 → 2.75
+
+Priority 6 (Gens 1721+): Trend filter
+  → Try contrarian filter (trend=down, period=240)
+```
+
+---
+
+## SUCCESS MILESTONES
+
+| Milestone | Target | Expected Via |
+|---|---|---|
+| Sharpe > -0.30 | TP=4.5-5.0% OR timeout=960 | Phase B or C |
+| Sharpe > 0.00 | TP=5.5-6.0% + timeout=960 | Phase B+C |
+| Sharpe > 0.30 | TP=6.0% + timeout=1200 + RSI tuned | Phase B+C+A |
+| Sharpe > 0.70 | Above + SL optimized | Phase E |
+| Sharpe > 1.00 | Above + trend filter | Phase F |
+
+**Historical context:**
+- Gen 1: Sharpe -10.77 (394 trades, 44% WR)
+- Gen 1460: Sharpe -0.73 (967 trades, 48% WR) ← paradigm shift
+- Gen 1570: Sharpe -0.37 (1395 trades, 47% WR) ← current best ★
+- Next target: Sharpe > -0.25 (TP widening or timeout extension)
 
 ---
 
 ## MACRO ENVIRONMENT NOTE
 
-Current regime: DANGER (Extreme Fear, F&G=14, VIX=25.78)
-BTC Dominance: 57.09%
+Current Regime: DANGER (Extreme Fear, F&G=14, BTC Dom=56.95%)
+VIX elevated (~25+).
 
-High dominance + extreme fear = altcoin mean reversion opportunities on long side.
-With RSI lt 36 on 16 pairs, long signals are firing frequently as alts get oversold.
-This is favorable for the current strategy.
+High fear + elevated volatility means:
+- Altcoins getting deeply oversold → RSI < 36 signals are frequent and real
+- Larger price swings → TP=5-6% is MORE reachable than in calm markets
+- Mean reversions can be sharp and fast → shorter holding time to TP
 
-With VIX=25.78 (elevated volatility), TP=5-6% is more reachable than in calm markets.
-This is an additional reason to widen TP now while volatility is elevated.
+This environment **supports TP widening**: price can move 5-6% in a single
+oversold bounce during high-volatility fear episodes.
 
 ---
 
 ## REMINDER TO THE SMALL LLM
 
-You are one parameter change away from positive Sharpe.
+You are close to positive Sharpe. The current strategy has:
+✓ 47% win rate
+✓ Positive EV per trade (+1.15%)
+✓ max_open=1 as natural signal filter
+✓ 1395 trades (statistically significant)
 
-The current strategy has:
-- 47% win rate ✓
-- Positive EV per trade ✓
-- max_open=1 as natural trade filter ✓
-- The ONLY problem: TP=4.0% is too small relative to trade frequency variance
+The ONLY problem: TP=4.0% leaves money on the table. Winners close too early.
 
-Your ONLY job right now: WIDEN THE TAKE PROFIT.
+**Your ONLY job right now: WIDEN THE TAKE PROFIT.**
 
-4.0% → 4.5% → 5.0% → 5.5% → 6.0%
+```
+take_profit_pct from 4.0 to 4.5
+```
 
-Do NOT tighten RSI thresholds. Confirmed harmful.
-Do NOT change max_open. Confirmed critical to current success.
-Do NOT reduce trade count. The 47% WR at high volume is a feature, not a bug.
+Do NOT propose RSI=33 or RSI=34. That is the 746-trade trap. It fails every time.
+Do NOT reduce timeout below 720. Do NOT tighten RSI. Do NOT change max_open.
 
-Propose: take_profit_pct from 4.0 to 4.5.
-That is the single highest-probability improvement available.
+Propose exactly one change: take_profit_pct from 4.0 to 4.5.
 ```
