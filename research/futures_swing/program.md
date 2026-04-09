@@ -1,6 +1,6 @@
 ```markdown
 # ODIN Research Program — FUTURES SWING
-# Version: Post-Gen-1132 Update | Updated by MIMIR
+# Version: Post-Gen-1200 Update | Updated by MIMIR
 
 ## League: futures_swing
 Timeframe: 1-hour candles, 7-day sprints
@@ -16,26 +16,37 @@ MIN_TRADES STATUS: ✅ CONFIRMED FIXED at gen 542. futures_swing = 400. No actio
 ## ⚠️ YAML IS AUTHORITATIVE — READ CAREFULLY
 
 The YAML below is the single source of truth. Do NOT use summary text values
-if they conflict with the YAML. Current authoritative values (GEN 1132 CHAMPION):
+if they conflict with the YAML. Current authoritative values (GEN 1186 CHAMPION):
 
   - size_pct: 25                ← DO NOT CHANGE
-  - stop_loss_pct: 1.91         ← NOTE: 1.91. Not 1.9. Not 1.93. Exactly 1.91.
+  - stop_loss_pct: 1.91         ← Exactly 1.91. Not 1.9. Not 1.89. Not 1.93.
   - take_profit_pct: 4.65
   - timeout_hours: 166
-  - rsi_long_threshold: 37.82
-  - rsi_short_threshold: 60     ← CONFIRMED 60 (trades returned to 1,266)
+  - rsi_long_threshold: 37.77   ← NEW CHAMPION VALUE. Not 37.82. Exactly 37.77.
+  - rsi_short_threshold: 60     ← CONFIRMED 60 (trades = 1,265–1,266)
   - trend_period_hours: 48
   - max_open: 3
 
+⚠️ RSI LONG DISAMBIGUATION:
+  - 37.82 → Gen 1132 champion value (superseded)
+  - 37.77 → CURRENT CHAMPION (use this as baseline)
+  - Changes must be ±0.05 increments ONLY (e.g., 37.72, 37.82)
+  - Never jump more than ±0.10 from 37.77 in a single generation
+  - Values below 34.0 → Zombie C territory (causes low_trades, NEVER USE)
+  - Gen 1194 failure (185 trades) was almost certainly caused by RSI long pushed too low
+
 ⚠️ STOP_LOSS DISAMBIGUATION:
-  - 1.9  → Zombie D (NEVER USE)
-  - 1.91 → CURRENT CHAMPION (use this)
-  - 1.93 → Previous champion stop loss (no longer current)
-  - Below 1.88 → Zombie D territory (NEVER USE)
+  - 1.90  → Zombie D (NEVER USE — confirmed trap at exactly 1.90)
+  - 1.91  → CURRENT CHAMPION (use this as baseline)
+  - 1.89  → UNTESTED ADJACENT — HIGH PRIORITY to test
+  - 1.93  → Previous champion stop loss (superseded, but not a zombie)
+  - Below 1.88 → Zombie C/D territory (NEVER USE)
   - Above 1.97 → Zombie A/B territory (avoid)
-  The operative stop loss is 1.91. Do not use any other value without explicit instruction.
+  - The only valid test range is 1.88 to 1.97. Outside = zombie territory.
 
 ⚠️ NOTE: size_pct = 25. Do NOT change size_pct under any circumstances.
+⚠️ NOTE: rsi_period_hours = 24. Do not change RSI period until RSI long/short axes
+         are confirmed exhausted. When testing, use 22h or 26h only (±2h steps).
 
 ---
 
@@ -48,10 +59,10 @@ Do NOT change size_pct in the research YAML based on macro regime.
 
 ---
 
-## Current Champion Summary (Gen 1132 — NEW CHAMPION)
-- Sharpe: 2.2017 | Win rate: 39.6% | Trades: 1,266
+## Current Champion Summary (Gen 1186 — NEW CHAMPION)
+- Sharpe: 2.2475 | Win rate: 39.6% | Trades: 1,265
 - Entry: trend filter (48h) + RSI (24h) mean-reversion
-  - Long:  trend=up   AND RSI < 37.82
+  - Long:  trend=up   AND RSI < 37.77
   - Short: trend=down AND RSI > 60
 - Exit: 4.65% take-profit, 1.91% stop-loss, 166h timeout
 - Sizing: 25% per position, max_open=3
@@ -59,13 +70,16 @@ Do NOT change size_pct in the research YAML based on macro regime.
 - Pairs: 16 pairs (BTC, ETH, SOL, XRP, DOGE, AVAX, LINK, UNI, AAVE, NEAR, APT, SUI, ARB, OP, ADA, POL)
 - R:R ratio: 4.65/1.91 = 2.43:1 (healthy — maintain above 2.0)
 
-✅ GEN 1132 INSIGHT: Improvement came from stop_loss=1.91 (vs 1.93 previously),
-   NOT from RSI short threshold changes. Trade count returned to 1,266 confirming
-   RSI short = 60 is still operative. Stop loss fine-tuning is the active axis.
+✅ GEN 1186 INSIGHT: Improvement came from rsi_long_threshold = 37.77 (vs 37.82 previously).
+   This is a fractional RSI tightening that reduced entry noise on longs.
+   Trade count held steady at 1,265 (vs 1,266 prior) — minimal disruption.
+   RSI long fine-tuning in ±0.05 increments is the CONFIRMED active axis.
 
 Previous champions for reference:
-  Gen 939: Sharpe=2.1972 | Trades=1,259 | stop_loss=1.93 | rsi_short≈61
-  Gen 670: Sharpe=2.1852 | Trades=1,266 | stop_loss=1.93 | rsi_short=60
+  Gen 670:  Sharpe=2.1852 | Trades=1,266 | stop_loss=1.93 | rsi_long=37.82 | rsi_short=60
+  Gen 939:  Sharpe=2.1972 | Trades=1,259 | stop_loss=1.93 | rsi_long≈37.82 | rsi_short≈61
+  Gen 1132: Sharpe=2.2017 | Trades=1,266 | stop_loss=1.91 | rsi_long=37.82 | rsi_short=60
+  Gen 1186: Sharpe=2.2475 | Trades=1,265 | stop_loss=1.91 | rsi_long=37.77 | rsi_short=60 ← CURRENT
 
 ---
 
@@ -83,68 +97,37 @@ If your proposed change leads to one of these, STOP and choose a COMPLETELY DIFF
   Cause: TP too low combined with loose stop
 
 - Zombie C: <400 trades, Sharpe deeply negative
-  (Gens 524, 530, 534, 538, 597, 781, 787, 794, 922, 923, 927, 1117, 1120, 1128, 1131)
+  (Gens 524, 530, 534, 538, 597, 781, 787, 794, 922, 923, 927, 1117, 1120, 1128, 1131, 1194)
   Cause: RSI thresholds too extreme, timeout too short, excessive stop tightening
   Prevention: Never set RSI long < 34, RSI short > 67, timeout < 140h, stop_loss < 1.88
+  ⚠️ Gen 1194 (185 trades) is a confirmed new Zombie C instance — almost certainly caused
+     by RSI long pushed too far below 37.77 (likely < 35) in a single large jump.
+     NEVER change RSI long by more than ±0.10 per generation.
 
 - Zombie D: ~1,228 trades, Sharpe ~1.5918, win rate ~38.4% — ⚠️ CRITICAL DANGER TRAP
   Seen 13+ times (gens 921, 928, 931, 932, 933, 938 and others)
-  KNOWN CAUSE: stop_loss=1.9 (exactly 1.9, not 1.91 or 1.93)
+  KNOWN CAUSE: stop_loss = 1.9 EXACTLY
                OR TP below 4.5%, OR stop below 1.88%
   FINGERPRINT: trades≈1228, sharpe≈1.5918, win_rate≈38.4%
   ⛔ If you land here: do NOT touch TP or stop loss further downward.
      Revert to stop_loss=1.91 immediately.
+  ⚠️ NOTE: 1.89 has NOT been tested yet and is NOT confirmed as Zombie D.
+     Only exactly 1.90 is Zombie D. Testing 1.89 is permitted and HIGH PRIORITY.
 
-- Zombie E: ~1,181 trades, Sharpe ~1.1013, win rate ~37.0% — ⚠️ NEW HIGH-FREQUENCY TRAP
-  Seen 10+ times in gens 1113–1131 alone. This is currently the most common trap.
+- Zombie E: ~1,181 trades, Sharpe ~1.1013, win rate ~37.0% — ⚠️ HIGH-FREQUENCY TRAP
+  Seen 10+ times in gens 1113–1131.
   FINGERPRINT: trades≈1181, sharpe≈1.1013, win_rate≈37.0%
-  KNOWN CAUSE: RSI short threshold set too high (likely 64–68 range),
+  KNOWN CAUSE: RSI short threshold set too high (64–68 range),
                OR combined parameter changes that overtighten short entry
   ⛔ If you land here: DO NOT continue in the same direction.
      Revert RSI short to 60. Do not test RSI short > 63 without explicit instruction.
 
-- Champion Echo — Gen 939 (NOT a zombie — recognize and avoid):
-  ~1,259 trades, Sharpe ~2.1972, win rate ~39.6%
-  This is the PREVIOUS-PREVIOUS champion. If you reproduce this, your change had no net
-  effect or partially reverted parameters. Try stop_loss=1.91 with rsi_short=60.
+- Zombie F: ~1,353 trades, Sharpe ~1.39, win rate ~40.5% — ⚠️ NEWLY IDENTIFIED TRAP
+  Seen at Gen 1187 (trades=1353, sharpe=1.3930, win_rate=40.5%)
+  FINGERPRINT: trades significantly above 1,270, sharpe below 1.5, win_rate above 40%
+  KNOWN CAUSE: Loosening RSI long threshold (pushing above 39–40) increases trade count
+               but destroys Sharpe by admitting lower-quality entries.
+  ⛔ Do NOT push rsi_long_threshold above 38.5.
 
 - Champion Echo — Gen 1132 (NOT a zombie — recognize and avoid):
-  ~1,266 trades, Sharpe ~2.2017, win rate ~39.6%
-  This is the CURRENT champion. If you reproduce this exactly, your change had zero effect.
-  Revert and test the next parameter on the active axis.
-
----
-
-## ⚠️ SINGLE-CHANGE DISCIPLINE — CRITICAL RULE
-
-RULES:
-1. Change EXACTLY ONE parameter per generation. Never two. Never zero.
-2. Make SMALL incremental adjustments:
-   - RSI thresholds: ±1.0 per step (integer values only for RSI short)
-   - TP/SL: ±0.02–0.05% per step (very small — the landscape is sensitive)
-   - Timeout: ±5–10h per step
-   - Trend period: ±2–4h per step
-3. If the last 3 generations all failed OR reproduced a champion echo, switch axes.
-4. Never change the same parameter as the immediately preceding generation
-   unless it produced a new_best result.
-5. If you cannot identify a fresh change, default to Phase 1 (stop_loss fine-tuning).
-
-## ⚠️ POST-NEW-BEST RULE (CRITICAL)
-When a new_best is found on a particular axis, the NEXT generation MUST test
-the adjacent value on the SAME axis before switching to a different axis.
-Example: Gen 1132 improved stop_loss → Gen 1133 MUST test stop_loss = 1.89 or 1.93.
-
-## ⚠️ STOP LOSS DISCIPLINE
-The stop loss is 1.91. This is NOT 1.9. Not 1.93. Exactly 1.91.
-Never propose 1.9 — it maps directly to Zombie D.
-Never propose below 1.88 — it maps to Zombie C/D territory.
-If you are unsure of the stop loss value, use 1.91. Always.
-Valid test range: 1.88 to 1.97 only. Outside this range = zombie territory.
-
----
-
-## Priority Phases for Generations 1133–1232
-
----
-
-### ⭐⭐ PHASE 1: Stop Loss Fine-Tuning — TOP
+  ~1,266 trades, Sharpe ~2.
