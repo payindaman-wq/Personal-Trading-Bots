@@ -36,7 +36,7 @@ GEMINI_BASE   = "https://generativelanguage.googleapis.com/v1beta/models"
 
 SUSPICIOUS_SHARPE   = 3.5
 POPULATION_SIZE     = 10
-MIN_TRADES = {"day": 350, "futures_day": 400, "futures_swing": 400}
+MIN_TRADES = {"day": 450, "futures_day": 400, "futures_swing": 400}
 SWING_MIN_TRADES    = 30   # IMMUTABLE - DO NOT MODIFY via LOKI (Item 4)
 SWING_MAX_TRADES    = 60   # swing hard upper bound (Item 3)
 SWING_ALLOWED_PAIRS = frozenset({"BTC/USD", "ETH/USD", "SOL/USD"})  # Item 7
@@ -519,7 +519,8 @@ def build_llm_prompt(league, best_yaml, population):
         f"{pop_summary}\n\n",
         "## Constraints\n",
         f"{ranges_desc}\n",
-        "Minimum 50 trades required - strategies below this are invalid.\n",
+        "Trade count HARD LIMITS: min 30, max 60 -- strategies outside this range are REJECTED.\n",
+        "AIM for ~40-50 trades. Tighten conditions to reduce trade frequency.\n",
         "stop_loss_pct minimum: 0.8%% (noise floor).\n\n",
         # MIMIR guidance (program.md, updated every 100 gens by MIMIR)
         *(['## MIMIR Research Guidance\n',
@@ -539,7 +540,7 @@ def build_llm_prompt(league, best_yaml, population):
         f"- Do NOT exceed {n_conds + 1} total conditions\n",
         "- If strategy has more than 5 conditions, prefer removing one over adding\n",
         "- momentum_accelerating is often overfitting - consider removing it if present\n",
-        "- Prioritize changes that increase trade count while preserving Sharpe\n\n",
+        "- The current strategy likely generates TOO MANY trades. Tighten thresholds to REDUCE to <=60\n\n",
         "Output ONLY the complete modified strategy YAML between ```yaml and ``` markers.",
     ]
     return "".join(parts)
