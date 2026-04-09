@@ -45,22 +45,6 @@ LEAGUES = [
         "error_lines": 30,
     },
     {
-        "name":       "arb",
-        "tick_log":   f"{WORKSPACE}/competition/arb/tick.log",
-        "active_dir": f"{WORKSPACE}/competition/arb/active",
-        "interval":   30,
-        "stale_mul":  3,
-        "error_lines": 30,
-    },
-    {
-        "name":       "spread",
-        "tick_log":   f"{WORKSPACE}/competition/spread/tick.log",
-        "active_dir": f"{WORKSPACE}/competition/spread/active",
-        "interval":   30,
-        "stale_mul":  3,
-        "error_lines": 30,
-    },
-    {
         "name":       "futures_day",
         "tick_log":   f"{WORKSPACE}/competition/futures_day/tick.log",
         "active_dir": f"{WORKSPACE}/competition/futures_day/active",
