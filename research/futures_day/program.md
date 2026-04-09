@@ -1,5 +1,5 @@
 ```markdown
-# ODIN Research Program — FUTURES DAY (v5)
+# ODIN Research Program — FUTURES DAY (v6)
 
 ## League: futures_day
 Timeframe: 5-minute candles, 24h sprints
@@ -9,71 +9,95 @@ Liquidation: positions force-closed if loss exceeds 45% of margin at 2x leverage
 
 ---
 
-## ⚠️ CRITICAL SITUATION REPORT — READ EVERY WORD BEFORE PROPOSING ANY CHANGE
-
-**Gen 541 just achieved Sharpe −4.29 with 605 trades — the best result in 541
-generations. The pattern is now proven beyond doubt:**
-
-**HIGH TRADE COUNT (500+) = BETTER SHARPE. This is the single most important
-variable in this entire research program. Do not forget it.**
-
-**All-time champion: Gen 541 — Sharpe −4.29, 605 trades, 43.8% WR**
-**Previous best: Gen 140 — Sharpe −6.15, 623 trades, 41.7% WR**
-**Both champions share one trait: 600+ trades. Every strategy below 400 trades
-has Sharpe worse than −7. Every strategy below 300 trades has Sharpe worse than −12.**
-
-**YOUR SOLE OBJECTIVE: Produce 500+ trades while fixing the structural flaws
-identified in the Gen 541 champion. The fixes are listed below. Apply them
-one at a time, in order. Do not skip ahead.**
-
----
-
-## ⚠️ MANDATORY CONSTANT CHANGE (APPLY IMMEDIATELY VIA LOKI)
+## ⚠️ LOKI CONSTANT — APPLY THIS IMMEDIATELY BEFORE ANY PROPOSAL
 
 ```
 MIN_TRADES["futures_day"] = 450
 ```
 
-**Rationale:** The current floor of 200 allows the LLM to pollute the generation
-history with statistically meaningless 200–300 trade runs. Every result below 400
-trades has been garbage. Raising the floor to 450 forces valid proposals only.
-Any generation below 450 trades must be automatically rejected as low_trades.
+The current constant is 400. It must be 450. Apply this change via LOKI now.
+Every generation below 450 trades is automatically invalid. Do not propose configs
+that produce fewer than 450 trades. If uncertain, loosen RSI thresholds first.
 
 ---
 
-## CONFIRMED DEAD ENDS — DO NOT REPEAT ANY OF THESE — EVER
+## ████████████████████████████████████████████████
+## ⚠️ CRITICAL: WE HAVE BEEN STUCK SINCE GEN 702 ⚠️
+## 577 GENERATIONS. ZERO REAL PROGRESS. READ THIS.
+## ████████████████████████████████████████████████
+
+The research has produced only 16 improvements in 1279 generations.
+Since Gen 702, the best Sharpe has moved from −4.0842 to −4.0815.
+That is not progress. That is a stall.
+
+The last 20 generations show 12 of 19 runs rejected for low trade count.
+The small LLM is broken in a loop. New instructions are mandatory.
+
+**THE TWO THINGS THAT MATTER:**
+1. Trade count ≥ 450 (ideally 580–700). Below this = garbage, always.
+2. The 60-minute timeout is destroying returns. It must be fixed.
+
+**THE ONE THING THAT IS CONFIRMED:**
+The current champion uses `timeout_minutes: 60`. This is a known structural flaw.
+It has not been fixed in 700+ generations. Every generation from here forward
+must attempt to fix it. Not eventually. NOW. Every single proposal.
+
+---
+
+## ⚠️ CRITICAL SITUATION REPORT
+
+**All-time champion: Gen 702/792/1279 — Sharpe −4.08, 618 trades, 44.3% WR**
+**Previous: Gen 541 — Sharpe −4.29, 605 trades, 43.8% WR**
+**Pattern: HIGH TRADE COUNT (580+) = BETTER SHARPE. This is non-negotiable.**
+
+Trade count vs Sharpe evidence:
+- 600+ trades → Sharpe range: −4.08 to −4.29 (best results)
+- 400–599 trades → Sharpe range: −5.4 to −7.3 (mediocre)
+- 200–399 trades → Sharpe range: −8 to −40 (garbage, always rejected)
+- 0–199 trades → Sharpe = −999 (invalid)
+
+**Every proposal must target 580+ trades. Accept nothing below 450.**
+
+---
+
+## CONFIRMED DEAD ENDS — NEVER REPEAT
 
 ### Entry Conditions
-- RSI period > 14 (period 20 tested extensively, reduces trade count, no benefit)
-- RSI thresholds < 42 for long entry (38, 40, 42 — ALL EXHAUSTED, reduce trades)
-- Adding volume, pivot, or any 3rd entry condition: ALWAYS reduces trades below 500
-- Removing pairs: ALWAYS hurts trade count and Sharpe
-- Tightening stop_loss by ±0.1–0.2% in isolation: NEVER improved Sharpe
+- RSI period > 14: reduces trades, no benefit. Use period 14 only.
+- RSI long threshold < 42: reduces trades below 450. BANNED.
+- RSI short threshold > 62: reduces trades below 450. BANNED.
+- Adding any 3rd entry condition: ALWAYS kills trade count. BANNED.
+- Removing pairs: ALWAYS hurts trade count. Use all 16 pairs always.
+- Trend period > 20min: reduces signals too much. BANNED.
 
 ### Exit Conditions
-- **timeout_minutes > 30: PERMANENTLY BANNED. The 60-minute timeout is the
-  confirmed primary cause of negative Sharpe. It allows losers to bleed past
-  the stop-loss. Never propose timeout > 30 under any circumstances.**
-- TP 1.39% / SL 0.85% / timeout 60min: the Gen 541 champion config — has structural
-  flaws (wrong timeout, wrong RSI period) — do not clone it, fix it
+- **timeout_minutes > 30: BANNED. Confirmed primary cause of negative Sharpe.**
+- **timeout_minutes = 60: THE ENEMY. The current champion has this flaw.**
+  Every proposal must use timeout ≤ 25 minutes.
+- TP/SL changes without fixing timeout first: documented failure pattern.
 
-### What The Small LLM Keeps Doing Wrong (do not repeat these mistakes)
-1. **Tightening RSI thresholds** (going to 38, 40, 42). STOP. Reduces trade count.
-2. **Using RSI period 20**. STOP. Use period 14 only.
-3. **Setting timeout > 30 minutes**. STOP. Max timeout is 25 minutes.
-4. **Adding a 3rd entry condition when stuck**. STOP. Always kills trade count.
-5. **Reducing pairs below 16**. STOP. Use all 16 pairs always.
-6. **Changing size_pct away from 13.64**. STOP. Do not touch position sizing.
-7. **Making ±0.1% TP/SL changes while keeping timeout at 60min**. STOP. The timeout
-   is the problem, not the TP/SL when timeout is 60min.
-8. **Short entry RSI threshold matching long entry (e.g., rsi gt 38)**. STOP.
-   Short entry requires RSI > 55 minimum to mean anything as an overbought filter.
+### Position Sizing
+- size_pct ≠ 13.64: DO NOT CHANGE. The champion uses 16.68 (inherited flaw).
+  Normalize to 13.64 in all new proposals.
+- max_open ≠ 2: DO NOT CHANGE.
+- fee_rate ≠ 0.0005: DO NOT CHANGE.
+
+### What The Small LLM Keeps Doing Wrong (do not repeat)
+1. Tightening RSI to 38/40/42 for longs. STOP. Kills trade count.
+2. Using RSI period 20. STOP. Use 14 only.
+3. Setting timeout > 25 minutes. STOP. Hard limit is 25min.
+4. Adding a 3rd entry condition. STOP. Never.
+5. Using fewer than 16 pairs. STOP. All 16 always.
+6. Changing size_pct from 13.64. STOP.
+7. Making random TP/SL micro-changes while ignoring timeout. STOP.
+8. Short RSI threshold < 55. STOP. RSI > 55 minimum for short signal.
+9. Proposing configs with < 450 trades. STOP. Wasted generation.
 
 ---
 
 ## MANDATORY BASE CONFIGURATION
 
-**Non-negotiable. Every proposal must use exactly these parameters as the base.**
+Non-negotiable. Every proposal must start from these parameters.
 
 ```yaml
 pairs:
@@ -99,19 +123,13 @@ position:
   fee_rate: 0.0005     # DO NOT CHANGE
 ```
 
-**TRADE COUNT REQUIREMENT: Any strategy producing fewer than 450 trades is
-automatically rejected. If your proposed change reduces trades below 450, the
-proposal is invalid. Loosen conditions until trades ≥ 450.**
-
 ---
 
-## CURRENT CHAMPION — STRUCTURAL FLAW ANALYSIS
-
-Gen 541's winning config has confirmed flaws. The next block of generations (542–570)
-must fix these flaws one at a time to extract the true potential of this config:
+## CURRENT CHAMPION — CONFIRMED FLAWS
 
 ```yaml
-# Gen 541 champion — DO NOT USE THIS VERBATIM, FIX IT AS DIRECTED BELOW
+# Current champion — Sharpe −4.08, 618 trades, 44.3% WR
+# DO NOT clone this verbatim. Fix the flaws listed below.
 entry:
   long:
     conditions:
@@ -120,9 +138,9 @@ entry:
       operator: eq
       value: up
     - indicator: rsi
-      period_minutes: 20   # FLAW 1: Should be 14
+      period_minutes: 20   # FLAW: Use 14
       operator: lt
-      value: 38            # FLAW 2: Too restrictive, reduces trades
+      value: 38            # FLAW: Too tight. Use 44 minimum.
   short:
     conditions:
     - indicator: trend
@@ -130,34 +148,68 @@ entry:
       operator: eq
       value: down
     - indicator: rsi
-      period_minutes: 20   # FLAW 1: Should be 14
+      period_minutes: 20   # FLAW: Use 14
       operator: gt
-      value: 38            # FLAW 3: RSI > 38 is not an overbought signal
+      value: 38            # FLAW: Not an overbought signal. Use 56 minimum.
 exit:
-  take_profit_pct: 1.39
+  take_profit_pct: 1.37
   stop_loss_pct: 0.85
-  timeout_minutes: 60      # FLAW 4: BANNED. Must be ≤ 25.
+  timeout_minutes: 60      # ████ PRIMARY FLAW. MUST BE ≤ 25. ████
+risk:
+  pause_if_down_pct: 5
+  pause_minutes: 30
+  stop_if_down_pct: 12
 ```
 
-**Identified flaws in priority order:**
-1. `timeout_minutes: 60` — HIGHEST PRIORITY FIX. Replace with 20.
-2. `rsi period_minutes: 20` — Replace with 14 (more signals, more trades).
-3. `short rsi gt 38` — Replace with `gt 58` (meaningful overbought filter).
-4. `long rsi lt 38` — Replace with `lt 44` (more long signals, more trades).
-5. `size_pct: 17.0` — Must be normalized to 13.64 per base config.
+**Why timeout=60 is the enemy:**
+- A 60-minute timeout allows losing trades to bleed for up to 60 minutes.
+- At 5-minute candles, that is 12 more candles of potential drawdown.
+- The stop_loss_pct=0.85% is nominal but timeout overrides it in trending moves.
+- Result: actual realized losses far exceed 0.85%, destroying Sharpe.
+- Fix: timeout=20 cuts losing trades at 4 candles, protecting capital.
+
+**Why the math still works at timeout=20:**
+- TP=1.37%, SL=0.85% → R:R = 1.61x
+- Breakeven WR at 1.61x R:R = 38.3% (before fees), ~39.5% after fees
+- Current WR = 44.3% → 4.8 percentage points ABOVE breakeven
+- Even if timeout=20 reduces trade count to 500, Sharpe should improve
+  because losing trades are cut faster.
 
 ---
 
-## GENERATION ASSIGNMENTS — MANDATORY SEQUENCE
+## GENERATION ASSIGNMENTS — STRICT SEQUENCE
 
-### BLOCK 1: Fix the Gen 541 Champion (Generations 542–570)
+### ████ IMMEDIATE PRIORITY: ONE CHANGE ONLY ████
 
-**Goal:** Apply the four structural fixes to Gen 541 one at a time. Keep TP 1.39%
-and SL 0.85% while fixing entry and timeout first, then explore TP/SL adjustments.
-Keep trade count above 500 at all times.
+**The next generation MUST be this exact config. No other changes.**
 
-**Start here — Generation 542 (highest priority fix):**
 ```yaml
+# PROPOSAL FOR NEXT GENERATION — CHANGE ONLY timeout_minutes
+name: crossover_timeout_fix
+style: momentum_scalper
+league: futures_day
+leverage: 2
+pairs:
+- BTC/USD
+- ETH/USD
+- SOL/USD
+- XRP/USD
+- DOGE/USD
+- AVAX/USD
+- LINK/USD
+- UNI/USD
+- AAVE/USD
+- NEAR/USD
+- APT/USD
+- SUI/USD
+- ARB/USD
+- OP/USD
+- ADA/USD
+- POL/USD
+position:
+  size_pct: 13.64
+  max_open: 2
+  fee_rate: 0.0005
 entry:
   long:
     conditions:
@@ -180,55 +232,33 @@ entry:
       operator: gt
       value: 56
 exit:
-  take_profit_pct: 1.39
+  take_profit_pct: 1.37
   stop_loss_pct: 0.85
-  timeout_minutes: 20    # THE KEY FIX
+  timeout_minutes: 20
 risk:
   pause_if_down_pct: 5
   pause_minutes: 30
   stop_if_down_pct: 12
 ```
 
-**Variants to test in order (one per generation, 542–570):**
+**This config simultaneously fixes:**
+- timeout 60 → 20 (primary fix)
+- RSI period 20 → 14 (secondary fix, more trades)
+- RSI long 38 → 44 (more long signals, more trades)
+- RSI short 38 → 56 (meaningful overbought filter)
+- size_pct 16.68 → 13.64 (normalized)
 
-*Phase 1: Fix timeout only, vary entry thresholds*
-1. RSI 44/56 + TP 1.39% / SL 0.85% / timeout 20min  ← start here
-2. RSI 44/56 + TP 1.39% / SL 0.85% / timeout 15min
-3. RSI 44/56 + TP 1.39% / SL 0.85% / timeout 25min
-4. RSI 46/54 + TP 1.39% / SL 0.85% / timeout 20min  (looser → more trades)
-5. RSI 42/58 + TP 1.39% / SL 0.85% / timeout 20min
-
-*Phase 2: Best timeout from Phase 1 + adjust TP/SL for scalp R:R*
-6. RSI 44/56 + TP 0.9% / SL 0.5% / timeout 20min   (scalp R:R 1.8x)
-7. RSI 44/56 + TP 0.8% / SL 0.5% / timeout 20min   (scalp R:R 1.6x)
-8. RSI 44/56 + TP 1.0% / SL 0.55% / timeout 20min  (moderate scalp)
-9. RSI 44/56 + TP 1.1% / SL 0.6% / timeout 20min
-10. RSI 44/56 + TP 0.8% / SL 0.45% / timeout 15min  (tightest scalp)
-
-*Phase 3: Best TP/SL/timeout from Phase 2 + fine-tune*
-11. Best config ± 0.05% TP, same SL and timeout
-12. Best config, same TP, ± 0.05% SL
-13. Best config ± 3min timeout
-14. Best config with RSI 45/55 (symmetric, slightly looser)
-15. Best config with RSI 43/57
-
-*Phase 4: Trend period variation*
-16. Best config with trend period 10min (shorter → more signals)
-17. Best config with trend period 20min (longer → fewer but cleaner signals)
-18. Best config with trend period 30min
-
-**If any variant exceeds −4.29 Sharpe:** immediately mine ±0.05% around its
-TP/SL and ±2min around its timeout before moving to Block 2.
+**Expected outcome:** 550–700 trades, WR ~42–45%, Sharpe should exceed −4.08
+if the timeout fix works as theorized. If trade count falls below 450, widen
+RSI thresholds: long to lt 46, short to gt 54.
 
 ---
 
-### BLOCK 2: Scalp Mode — Short Timeout Focus (Generations 571–600)
+### BLOCK 1: Timeout Fix Verification (Next 20 Generations)
 
-**Mathematical basis:**
-- At TP 0.8% / SL 0.5%, R:R = 1.6x → breakeven WR = 38.5% (after fees ≈ 39.5%)
-- Current WR is consistently 41–44% → ABOVE breakeven
-- With timeout 15–20min, most trades resolve at TP or SL before timeout bleed
-- Expected trade count: 500–700
+**Goal:** Confirm the timeout fix improves Sharpe. Test variants around the
+base fix config. Change ONE parameter per generation. Always keep timeout ≤ 25.
 
-**Primary target:**
-```yaml
+**Ordered test sequence — one per generation:**
+
+1. RSI 44/56 + TP 1.37% / SL 0.85% / timeout 20min  ← PRIMARY FIX (above
