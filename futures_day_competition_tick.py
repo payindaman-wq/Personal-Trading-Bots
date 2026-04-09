@@ -370,11 +370,13 @@ def main():
         exits = check_exits(portfolio, strategy, prices, leverage)
         for a in exits:
             log(f'  [{bot}] CLOSE {a["pair"]} [{a["reason"]}]', comp_dir)
+        save_portfolio(comp_dir, bot, portfolio)
 
         portfolio = load_portfolio(comp_dir, bot)
         entries = check_entries(portfolio, strategy, history, prices, leverage)
         for a in entries:
             log(f'  [{bot}] OPEN {a["direction"].upper()} {a["pair"]}', comp_dir)
+        save_portfolio(comp_dir, bot, portfolio)
 
         portfolio = load_portfolio(comp_dir, bot)
         starting = meta.get('starting_capital', 1000.0)
