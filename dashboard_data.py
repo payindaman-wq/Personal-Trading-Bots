@@ -289,6 +289,7 @@ def _load_cycle_sprint_ids(league):
         "arb":           ARB_CYCLE_STATE_PATH,
         "spread":        SPREAD_CYCLE_STATE_PATH,
         "futures_swing": FUTURES_SWING_CYCLE_PATH,
+        "futures_day":   FUTURES_DAY_CYCLE_PATH,
     }
     try:
         state = load_json(paths[league])
@@ -307,7 +308,11 @@ def _archived_portfolio_dir(league, sprint_id):
         "arb":           ARB_RESULTS_DIR,
         "spread":        SPREAD_RESULTS_DIR,
         "futures_swing": FUTURES_SWING_RESULTS_DIR,
+        "futures_day":   FUTURES_DAY_RESULTS_DIR,
     }
+    if league in ("futures_day", "futures_swing"):
+        # Futures leagues archive portfolios directly in results/<sprint_id>/
+        return os.path.join(results[league], sprint_id)
     return os.path.join(results[league], sprint_id + "_portfolios")
 
 
@@ -385,7 +390,7 @@ def _scan_portfolios(league, portfolio_dir, events, open_only=False):
                 })
 
 
-def get_activity_feed(day_active_id, swing_active_id, arb_active_id=None, spread_active_id=None, futures_swing_active_id=None):
+def get_activity_feed(day_active_id, swing_active_id, arb_active_id=None, spread_active_id=None, futures_swing_active_id=None, futures_day_active_id=None):
     """Open positions from active sprint + closed trades from entire current cycle."""
     events = []
 
@@ -395,14 +400,16 @@ def get_activity_feed(day_active_id, swing_active_id, arb_active_id=None, spread
         "arb":           os.path.join(WORKSPACE, "competition", "arb",           "active"),
         "spread":        os.path.join(WORKSPACE, "competition", "spread",        "active"),
         "futures_swing": os.path.join(WORKSPACE, "competition", "futures_swing", "active"),
+        "futures_day":   os.path.join(WORKSPACE, "competition", "futures_day",   "active"),
     }
     ACTIVE_IDS = {
         "day": day_active_id, "swing": swing_active_id,
         "arb": arb_active_id, "spread": spread_active_id,
         "futures_swing": futures_swing_active_id,
+        "futures_day":   futures_day_active_id,
     }
 
-    for league in ["day", "swing", "arb", "spread", "futures_swing"]:
+    for league in ["day", "swing", "arb", "spread", "futures_swing", "futures_day"]:
         active_id = ACTIVE_IDS[league]
 
         # ── Open positions: active sprint only ──
@@ -554,6 +561,48 @@ def get_sprint_archive():
                 "pairs":          meta.get("pairs", []),
                 "rankings":       rankings,
                 "is_complete":    is_complete,
+            })
+
+    # Futures Day and Futures Swing archives
+    # Score files live as results/<sprint_id>_score.json alongside results/<sprint_id>/
+    for fl, fl_results_dir in [("futures_day", FUTURES_DAY_RESULTS_DIR), ("futures_swing", FUTURES_SWING_RESULTS_DIR)]:
+        if not os.path.isdir(fl_results_dir):
+            continue
+        for fname in sorted(os.listdir(fl_results_dir)):
+            if not fname.endswith("_score.json"):
+                continue
+            sprint_id  = fname[:-len("_score.json")]
+            score_path = os.path.join(fl_results_dir, fname)
+            meta_path  = os.path.join(fl_results_dir, sprint_id, "meta.json")
+            score = load_json(score_path)
+            meta  = load_json(meta_path)
+            if not score or not meta:
+                continue
+            raw_scores = score.get("scores", [])
+            if len(raw_scores) < 2:
+                continue
+            raw_scores_sorted = sorted(raw_scores, key=lambda r: r.get("final_equity", 0), reverse=True)
+            rankings = []
+            for rank_i, r in enumerate(raw_scores_sorted, 1):
+                rankings.append({
+                    "rank":          rank_i,
+                    "bot":           r.get("bot", ""),
+                    "final_equity":  round(r.get("final_equity", 1000.0), 2),
+                    "total_pnl_usd": round(r.get("final_equity", 1000.0) - 1000.0, 2),
+                    "total_pnl_pct": round(r.get("total_pnl_pct", 0.0), 4),
+                    "total_trades":  r.get("total_trades", 0),
+                    "win_rate":      round(r.get("win_rate", 0.0), 2),
+                })
+            archive.append({
+                "comp_id":        sprint_id,
+                "league":         fl,
+                "winner":         rankings[0]["bot"] if rankings else "",
+                "duration_hours": meta.get("duration_hours", 24),
+                "started_at":     meta.get("started_at", ""),
+                "scored_at":      score.get("ended_at", ""),
+                "pairs":          meta.get("pairs", []),
+                "rankings":       rankings,
+                "is_complete":    True,
             })
 
     # Sort newest first by comp_id (lexicographic on timestamp-based IDs)
@@ -963,7 +1012,7 @@ def build():
         "funded_bots":   funded,
         "system_health": get_system_health(day_lb, swing_lb, arb_lb, spread_lb),
         "fleet_roster":  get_fleet_roster(day_lb, swing_lb, arb_lb, spread_lb),
-        "activity_feed": get_activity_feed(day_active_id, swing_active_id, arb_active_id, spread_active_id, futures_swing_active_id),
+        "activity_feed": get_activity_feed(day_active_id, swing_active_id, arb_active_id, spread_active_id, futures_swing_active_id, futures_day_active_id),
         "sprint_archive": get_sprint_archive(),
     }
 
