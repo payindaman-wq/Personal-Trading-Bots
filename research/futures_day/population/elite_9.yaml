@@ -1,0 +1,58 @@
+name: crossover
+style: momentum_scalper
+inspiration: "ODIN-injected champion \u2014 updated at each sprint reset. Focus on\
+  \ improving win rate by tightening RSI entry for longs."
+league: futures_day
+leverage: 2
+pairs:
+- BTC/USD
+- ETH/USD
+- SOL/USD
+- XRP/USD
+- DOGE/USD
+- AVAX/USD
+- LINK/USD
+- UNI/USD
+- AAVE/USD
+- NEAR/USD
+- APT/USD
+- SUI/USD
+- ARB/USD
+- OP/USD
+- ADA/USD
+- POL/USD
+position:
+  size_pct: 16.68
+  max_open: 2
+  fee_rate: 0.0005
+entry:
+  long:
+    conditions:
+    - indicator: trend
+      period_minutes: 15
+      operator: eq
+      value: up
+    - indicator: rsi
+      period_minutes: 20
+      operator: lt
+      value: 38
+  short:
+    conditions:
+    - indicator: trend
+      period_minutes: 15
+      operator: eq
+      value: down
+    - indicator: rsi
+      period_minutes: 20
+      operator: gt
+      value: 38
+exit:
+  take_profit_pct: 1.37
+  stop_loss_pct: 0.85
+  timeout_minutes: 60
+risk:
+  pause_if_down_pct: 5
+  pause_minutes: 30
+  stop_if_down_pct: 12
+_sharpe: -4.0815
+_trades: 618

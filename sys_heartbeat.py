@@ -314,11 +314,58 @@ def check_program_halt(league):
     try:
         with open(prog_path) as f:
             content = f.read()
-        if "CRITICAL HALT" in content and "ACTIVE" in content:
+        if "CRITICAL HALT — ACTIVE" in content:
             return "program.md has active CRITICAL HALT — address with Claude Code"
     except Exception:
         pass
     return None
+
+
+def check_research_stall(league):
+    """Alert when a league research is structurally stuck with no viable progress.
+
+    Fires if BOTH:
+      - gens_since_best > 500 (500 gens without any improvement)
+      - best Sharpe across all time is still negative
+    This indicates a paradigm failure, not a tuning issue.
+    """
+    state_path   = f"{WORKSPACE}/research/{league}/gen_state.json"
+    results_path = f"{WORKSPACE}/research/{league}/results.tsv"
+    if not os.path.exists(state_path) or not os.path.exists(results_path):
+        return None
+    try:
+        import json as _json
+        state = _json.load(open(state_path))
+        gens_since_best = state.get("gens_since_best", 0)
+        total_gen       = state.get("gen", 0)
+    except Exception:
+        return None
+    if gens_since_best < 500:
+        return None
+    # Check if best Sharpe ever achieved is still negative
+    try:
+        best_sharpe = -999.0
+        with open(results_path) as f:
+            for line in f:
+                if not line.strip() or line.startswith("gen"):
+                    continue
+                parts = line.strip().split("	")
+                if len(parts) >= 2:
+                    try:
+                        s = float(parts[1])
+                        if s > best_sharpe:
+                            best_sharpe = s
+                    except ValueError:
+                        pass
+    except Exception:
+        return None
+    if best_sharpe >= 0:
+        return None  # at least one positive Sharpe achieved — not a paradigm failure
+    return (
+        f"{gens_since_best} gens since last improvement — "
+        f"best Sharpe ever: {best_sharpe:.2f} (never positive after {total_gen} gens) — "
+        f"paradigm failure, consult Claude Code for full research rewrite"
+    )
 
 def check_polymarket_syn_freshness():
     """Check syn_tick.log freshness — service being 'active' doesn't mean it's ticking."""
@@ -416,7 +463,7 @@ def main():
             clear_alert(state, key)
 
     # ── Odin researcher health — alert if no successful generation in >6h ─────────
-    for vleague in ["day", "swing"]:
+    for vleague in ["day", "swing", "futures_day", "futures_swing"]:
         key     = f"odin_{vleague}_health"
         problem = check_odin_health(vleague)
         if problem:
@@ -429,7 +476,7 @@ def main():
 
 
     # ── Odin backtest error storm — alert within 1-2 heartbeats of sustained failures ──
-    for vleague in ["day", "swing"]:
+    for vleague in ["day", "swing", "futures_day", "futures_swing"]:
         key     = f"odin_{vleague}_backtest_errors"
         problem = check_odin_backtest_errors(vleague)
         if problem:
@@ -439,12 +486,22 @@ def main():
             clear_alert(state, key)
 
     # ── Program HALT directive — alert once per day if active ─────────────────
-    for vleague in ["day", "swing"]:
+    for vleague in ["day", "swing", "futures_day", "futures_swing"]:
         key     = f"odin_{vleague}_program_halt"
         problem = check_program_halt(vleague)
         if problem:
             if should_alert(state, key):
                 problems.append((key, f"[ODIN/{vleague.upper()}] {problem}"))
+        else:
+            clear_alert(state, key)
+
+    # ── Research paradigm stall — alert when a league has never achieved positive Sharpe ──
+    for vleague in ["day", "swing", "futures_day", "futures_swing"]:
+        key     = f"odin_{vleague}_research_stall"
+        problem = check_research_stall(vleague)
+        if problem:
+            if should_alert(state, key, cooldown_min=1440):  # once per day max
+                problems.append((key, f"[ODIN/{vleague.upper()}] [RESEARCH_STALL] {problem}"))
         else:
             clear_alert(state, key)
 

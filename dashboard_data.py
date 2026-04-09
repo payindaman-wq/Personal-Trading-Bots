@@ -284,10 +284,11 @@ def get_fleet_roster(day_lb, swing_lb, arb_lb=None, spread_lb=None):
 def _load_cycle_sprint_ids(league):
     """Return the list of completed sprint IDs in the current cycle for a league."""
     paths = {
-        "day":    CYCLE_STATE_PATH,
-        "swing":  SWING_CYCLE_STATE_PATH,
-        "arb":    ARB_CYCLE_STATE_PATH,
-        "spread": SPREAD_CYCLE_STATE_PATH,
+        "day":           CYCLE_STATE_PATH,
+        "swing":         SWING_CYCLE_STATE_PATH,
+        "arb":           ARB_CYCLE_STATE_PATH,
+        "spread":        SPREAD_CYCLE_STATE_PATH,
+        "futures_swing": FUTURES_SWING_CYCLE_PATH,
     }
     try:
         state = load_json(paths[league])
@@ -302,9 +303,10 @@ def _archived_portfolio_dir(league, sprint_id):
         # Day archives portfolios directly in results/<sprint_id>/
         return os.path.join(DAY_RESULTS_DIR, sprint_id)
     results = {
-        "swing":  SWING_RESULTS_DIR,
-        "arb":    ARB_RESULTS_DIR,
-        "spread": SPREAD_RESULTS_DIR,
+        "swing":         SWING_RESULTS_DIR,
+        "arb":           ARB_RESULTS_DIR,
+        "spread":        SPREAD_RESULTS_DIR,
+        "futures_swing": FUTURES_SWING_RESULTS_DIR,
     }
     return os.path.join(results[league], sprint_id + "_portfolios")
 
@@ -364,9 +366,10 @@ def _scan_portfolios(league, portfolio_dir, events, open_only=False):
                     "entry_price": ep, "exit_price": xp,
                     "quantity": qty, "cost_basis": cb,
                     "entry_z": ez, "exit_z": exz,
-                    "net_pnl": ct.get("net_pnl", 0),
+                    "net_pnl": ct.get("net_pnl", ct.get("pnl_usd", 0)),
                     "pnl_pct": ct.get("pnl_pct", 0),
                     "reason":  ct.get("reason", ""),
+                    "leverage": ct.get("leverage"),
                     "timestamp": ct.get("closed_at"),
                 })
 
@@ -377,26 +380,29 @@ def _scan_portfolios(league, portfolio_dir, events, open_only=False):
                     "type": "position_open", "league": league, "bot": bot,
                     "pair": pair, "direction": pos.get("direction", "long"),
                     "entry_price": ep, "quantity": qty, "cost_basis": cb,
-                    "entry_z": ez, "timestamp": pos.get("opened_at"),
+                    "entry_z": ez, "leverage": pos.get("leverage"),
+                    "timestamp": pos.get("opened_at"),
                 })
 
 
-def get_activity_feed(day_active_id, swing_active_id, arb_active_id=None, spread_active_id=None):
+def get_activity_feed(day_active_id, swing_active_id, arb_active_id=None, spread_active_id=None, futures_swing_active_id=None):
     """Open positions from active sprint + closed trades from entire current cycle."""
     events = []
 
     ACTIVE_DIRS = {
-        "day":    os.path.join(WORKSPACE, "competition", "active"),
-        "swing":  os.path.join(WORKSPACE, "competition", "swing",  "active"),
-        "arb":    os.path.join(WORKSPACE, "competition", "arb",    "active"),
-        "spread": os.path.join(WORKSPACE, "competition", "spread", "active"),
+        "day":           os.path.join(WORKSPACE, "competition", "active"),
+        "swing":         os.path.join(WORKSPACE, "competition", "swing",         "active"),
+        "arb":           os.path.join(WORKSPACE, "competition", "arb",           "active"),
+        "spread":        os.path.join(WORKSPACE, "competition", "spread",        "active"),
+        "futures_swing": os.path.join(WORKSPACE, "competition", "futures_swing", "active"),
     }
     ACTIVE_IDS = {
         "day": day_active_id, "swing": swing_active_id,
         "arb": arb_active_id, "spread": spread_active_id,
+        "futures_swing": futures_swing_active_id,
     }
 
-    for league in ["day", "swing", "arb", "spread"]:
+    for league in ["day", "swing", "arb", "spread", "futures_swing"]:
         active_id = ACTIVE_IDS[league]
 
         # ── Open positions: active sprint only ──
@@ -957,7 +963,7 @@ def build():
         "funded_bots":   funded,
         "system_health": get_system_health(day_lb, swing_lb, arb_lb, spread_lb),
         "fleet_roster":  get_fleet_roster(day_lb, swing_lb, arb_lb, spread_lb),
-        "activity_feed": get_activity_feed(day_active_id, swing_active_id, arb_active_id, spread_active_id),
+        "activity_feed": get_activity_feed(day_active_id, swing_active_id, arb_active_id, spread_active_id, futures_swing_active_id),
         "sprint_archive": get_sprint_archive(),
     }
 

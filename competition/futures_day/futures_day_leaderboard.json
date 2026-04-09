@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-04-07T00:44:02.068110+00:00",
+  "generated_at": "2026-04-09T05:44:01.242746+00:00",
   "league": "futures_day",
   "total_sprints": 1,
   "archived": 0,
-  "active_sprint": "fut-day-20260407-0027",
+  "active_sprint": "fut-day-20260408-0900",
   "cycle": 1,
-  "sprint_in_cycle": 1,
+  "sprint_in_cycle": 2,
   "sprints_per_cycle": 7,
   "cycle_status": "active",
   "rankings": [
@@ -24,7 +24,7 @@
       "worst_sprint_pnl_pct": 0.0,
       "sprint_log": [
         {
-          "comp_id": "fut-day-20260407-0027",
+          "comp_id": "fut-day-20260408-0900",
           "rank": 1,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
@@ -51,7 +51,7 @@
       "worst_sprint_pnl_pct": 0.0,
       "sprint_log": [
         {
-          "comp_id": "fut-day-20260407-0027",
+          "comp_id": "fut-day-20260408-0900",
           "rank": 2,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
@@ -78,7 +78,7 @@
       "worst_sprint_pnl_pct": 0.0,
       "sprint_log": [
         {
-          "comp_id": "fut-day-20260407-0027",
+          "comp_id": "fut-day-20260408-0900",
           "rank": 3,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
@@ -105,7 +105,7 @@
       "worst_sprint_pnl_pct": 0.0,
       "sprint_log": [
         {
-          "comp_id": "fut-day-20260407-0027",
+          "comp_id": "fut-day-20260408-0900",
           "rank": 4,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
@@ -132,7 +132,7 @@
       "worst_sprint_pnl_pct": 0.0,
       "sprint_log": [
         {
-          "comp_id": "fut-day-20260407-0027",
+          "comp_id": "fut-day-20260408-0900",
           "rank": 5,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
@@ -159,7 +159,7 @@
       "worst_sprint_pnl_pct": 0.0,
       "sprint_log": [
         {
-          "comp_id": "fut-day-20260407-0027",
+          "comp_id": "fut-day-20260408-0900",
           "rank": 6,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
@@ -186,7 +186,7 @@
       "worst_sprint_pnl_pct": 0.0,
       "sprint_log": [
         {
-          "comp_id": "fut-day-20260407-0027",
+          "comp_id": "fut-day-20260408-0900",
           "rank": 7,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
@@ -213,7 +213,7 @@
       "worst_sprint_pnl_pct": 0.0,
       "sprint_log": [
         {
-          "comp_id": "fut-day-20260407-0027",
+          "comp_id": "fut-day-20260408-0900",
           "rank": 8,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
@@ -240,7 +240,7 @@
       "worst_sprint_pnl_pct": 0.0,
       "sprint_log": [
         {
-          "comp_id": "fut-day-20260407-0027",
+          "comp_id": "fut-day-20260408-0900",
           "rank": 9,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
@@ -267,7 +267,7 @@
       "worst_sprint_pnl_pct": 0.0,
       "sprint_log": [
         {
-          "comp_id": "fut-day-20260407-0027",
+          "comp_id": "fut-day-20260408-0900",
           "rank": 10,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
@@ -294,7 +294,7 @@
       "worst_sprint_pnl_pct": 0.0,
       "sprint_log": [
         {
-          "comp_id": "fut-day-20260407-0027",
+          "comp_id": "fut-day-20260408-0900",
           "rank": 11,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
@@ -321,7 +321,7 @@
       "worst_sprint_pnl_pct": 0.0,
       "sprint_log": [
         {
-          "comp_id": "fut-day-20260407-0027",
+          "comp_id": "fut-day-20260408-0900",
           "rank": 12,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
@@ -348,7 +348,7 @@
       "worst_sprint_pnl_pct": 0.0,
       "sprint_log": [
         {
-          "comp_id": "fut-day-20260407-0027",
+          "comp_id": "fut-day-20260408-0900",
           "rank": 13,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
