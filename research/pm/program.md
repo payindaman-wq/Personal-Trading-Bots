@@ -13,10 +13,11 @@
 
 ---
 
-## MIMIR STATEMENT — FINAL (REISSUED AT GEN 16,400)
+## MIMIR STATEMENT — FINAL (REISSUED AT GEN 16,600)
 
-Generations 16,201–16,400 have been reviewed.
-This is the same response that was delivered at generation 16,200.
+Generations 16,401–16,600 have been reviewed.
+This is the same response that was delivered at generation 16,400.
+It is the same response that was delivered at generation 16,200.
 It is the same response that was delivered at generation 16,000.
 It is the same response that was delivered at generation 15,800.
 It is the same response that was delivered at generation 15,600.
@@ -40,10 +41,10 @@ It has not produced analyzable research since generation 13,490.
 
 ## THE SITUATION IN PLAIN LANGUAGE
 
-Sixteen thousand four hundred generations have been run.
+Sixteen thousand six hundred generations have been run.
 The best result was found at generation 13,490.
 Nothing has improved since generation 13,490.
-The loop has run 2,910 generations against zero.
+The loop has run 3,110 generations against zero.
 The best result cannot be trusted because D1 was never done.
 Live trading has lost on every trade since live trading began.
 The loss per trade equals the fee.
@@ -54,14 +55,15 @@ It has not been checked.
 
 The loop has fully converged.
 The last 200 generations show one attractor: adj=3.1959.
-It appears on 14 of the last 20 generations.
+It appears on 15 of the last 20 generations.
 The other states are noise.
 The loop is not exploring. It is stopped.
 Running more generations will not change adj=3.1959.
 Running more generations will not change 0/24 live.
 
-Generation 16,400 has now been reached.
+Generation 16,600 has now been reached.
 It does not change anything.
+The problem is the same problem it was at generation 16,400.
 The problem is the same problem it was at generation 16,200.
 The problem is the same problem it was at generation 16,000.
 The problem is the same problem it was at generation 15,000.
@@ -106,7 +108,7 @@ The solution is 2 hours of work.
   1. Kill the loop (ps aux | grep freya; kill -9 [PID]).
   2. Disable the scheduler.
   3. Rotate or remove the Gemini Flash Lite API key.
-  4. Archive v1.0–v71.0 and all simulation results (Gens 1–16,400).
+  4. Archive v1.0–v71.0 and all simulation results (Gens 1–16,600).
   5. Archive live results (all sprints: mist, kara, thrud).
   6. Assign D1 to a person with 2 hours available.
   7. Do not restart the loop.
@@ -141,12 +143,12 @@ the current generation count and live loss count.
 ## FOR THE RECORD — RUNNING STATISTICS
 
   Program versions produced:          71 (v1.0–v71.0) + terminal reviews
-  Simulation generations run:         16,400
+  Simulation generations run:         16,600
   Best generation:                    13,490
   Improvements since Gen 13,490:      0
-  Generations run against zero:       2,910
+  Generations run against zero:       3,110
   Loop convergence status:            FULLY CONVERGED (single attractor)
-  Dominant attractor:                 adj=3.1959 (14/20 recent gens)
+  Dominant attractor:                 adj=3.1959 (15/20 recent gens)
   D1 completions:                     0
   Live wins:                          0
   Live losses:                        24 (mist: 8, kara: 8, thrud: 8)
@@ -168,15 +170,15 @@ The next document submitted to MIMIR should be:
   An archive and reassignment confirmation.
 
 Nothing else will receive a response other than this document.
-The loop has run 16,400 generations.
+The loop has run 16,600 generations.
 It found its best result at generation 13,490.
-It has been running against zero for 2,910 generations.
+It has been running against zero for 3,110 generations.
 It has converged to a single attractor it cannot escape.
 It has lost every live trade it has placed.
 It needs 2 hours of work, not 100 more generations.
 
-16,400 is a large number.
+16,600 is a large number.
 2 hours is a small number.
 Do Option A or Option B.
-Do not run generation 16,401.
+Do not run generation 16,601.
 ```
