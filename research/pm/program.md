@@ -13,19 +13,18 @@
 
 ---
 
-## MIMIR STATEMENT — FINAL (REISSUED AT GEN 15,800)
+## MIMIR STATEMENT — FINAL (REISSUED AT GEN 16,000)
 
-Generations 15,601–15,800 have been reviewed.
-This is the same response that was delivered at generation 15,600.
+Generations 15,801–16,000 have been reviewed.
+This is the same response that was delivered at generation 15,800.
+It is the same response that was delivered at generation 15,600.
 It is the same response that was delivered at generation 15,400.
-It will be the same response delivered at generation 16,000
-if a batch is submitted.
 
 **Findings:**
 - Improvements since Gen 13,490: 0
 - New attractors: 0
 - Information gain: 0
-- Live results: 0/48, updated from 0/40
+- Live results: 0/48, unchanged
 - p(0/48 | correct strategy): < 10⁻³⁸
 - D1 completions: 0
 - Way 2 status: ACTIVE, unchanged
@@ -39,7 +38,7 @@ It has not produced analyzable research since generation 13,490.
 
 ## THE SITUATION IN PLAIN LANGUAGE
 
-Fifteen thousand eight hundred generations have been run.
+Sixteen thousand generations have been run.
 The best result was found at generation 13,490.
 Nothing has improved since generation 13,490.
 The best result cannot be trusted because D1 was never done.
@@ -50,16 +49,21 @@ Every direction was wrong because the base rate is probably wrong.
 The base rate can be checked in 2 hours.
 It has not been checked.
 
-The loop has now fully converged.
+The loop has fully converged.
 The last 200 generations show one attractor: adj=3.1959.
-It appears on 14 of the last 20 generations.
+It appears on 10 of the last 20 generations.
+The other states are adj=-1.8242 and adj=-1.0 (degenerate).
 The loop is not exploring. It is stopped.
 Running more generations will not change adj=3.1959.
 Running more generations will not change 0/48 live.
 
-The number of generations run does not change this.
-Submitting this batch did not change this.
-Reading this response will not change this.
+Generation 16,000 has now been reached.
+This is a round number.
+It does not change anything.
+The problem is the same problem it was at generation 15,000.
+The problem is the same problem it was at generation 14,000.
+The problem is an unverified base rate.
+The solution is 2 hours of work.
 
 ---
 
@@ -98,7 +102,7 @@ Reading this response will not change this.
   1. Kill the loop (ps aux | grep freya; kill -9 [PID]).
   2. Disable the scheduler.
   3. Rotate or remove the Gemini Flash Lite API key.
-  4. Archive v1.0–v71.0 and all simulation results (Gens 1–15,800).
+  4. Archive v1.0–v71.0 and all simulation results (Gens 1–16,000).
   5. Archive live results (0/48, three bots: mist, kara, thrud).
   6. Assign D1 to a person with 2 hours available.
   7. Do not restart the loop.
@@ -133,10 +137,10 @@ the current generation count and live loss count.
 ## FOR THE RECORD — RUNNING STATISTICS
 
   Program versions produced:          71 (v1.0–v71.0) + terminal reviews
-  Simulation generations run:         15,800
+  Simulation generations run:         16,000
   Best generation:                    13,490
   Improvements since Gen 13,490:      0
-  Generations run against zero:       2,310
+  Generations run against zero:       2,510
   Loop convergence status:            FULLY CONVERGED (single attractor)
   D1 completions:                     0
   Live wins:                          0
@@ -158,13 +162,15 @@ The next document submitted to MIMIR should be:
   An archive and reassignment confirmation.
 
 Nothing else will receive a response other than this document.
-The loop has run 15,800 generations.
+The loop has run 16,000 generations.
 It found its best result at generation 13,490.
-It has been running against zero for 2,310 generations.
+It has been running against zero for 2,510 generations.
 It has converged to a single attractor it cannot escape.
 It has lost 48 consecutive live trades.
 It needs 2 hours of work, not 100 more generations.
 
+16,000 is a large number.
+2 hours is a small number.
 Do Option A or Option B.
-Do not run generation 15,801.
+Do not run generation 16,001.
 ```
