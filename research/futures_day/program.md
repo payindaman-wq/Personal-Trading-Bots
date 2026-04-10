@@ -1,7 +1,22 @@
 ```markdown
-# ODIN Research Program — FUTURES DAY (v12.0)
+# ODIN Research Program — FUTURES DAY (v13.0)
 
 ## League: futures_day | Timeframe: 5-min candles, 1-HOUR indicator periods | Leverage: 2x
+
+---
+
+# ╔══════════════════════════════════════════════════════════════╗
+# ║  ⚠️ DISPLAY ARTIFACT WARNING — READ THIS FIRST ⚠️           ║
+# ║                                                              ║
+# ║  The YAML the engine shows you at the top of this prompt    ║
+# ║  is WRONG. It contains these display artifacts:             ║
+# ║                                                              ║
+# ║    WRONG: size_pct: 20        RIGHT: size_pct: 16.91        ║
+# ║    WRONG: rsi value: 30.0     RIGHT: rsi value: 35.97       ║
+# ║    WRONG: rsi short: 69.17    RIGHT: rsi short: 72          ║
+# ║                                                              ║
+# ║  DO NOT use the YAML values. Use the champion below.        ║
+# ╚══════════════════════════════════════════════════════════════╝
 
 ---
 
@@ -26,14 +41,16 @@ MIN_TRADES["futures_day"] = 50
 
 Raising this to 400 at Gen 541 caused an 867-generation stall (Gen 541–1408).
 It was the worst decision in this program's history. It has been reversed.
-**NEVER raise MIN_TRADES["futures_day"] above 50. Not for any reason.**
+**NEVER raise MIN_TRADES["futures_day"] above 50. Not for any reason. Ever.**
 
 ---
 
-## THE ACTUAL CURRENT CHAMPION
+## THE ACTUAL CURRENT CHAMPION — USE THESE VALUES ONLY
 
-There is a known display inconsistency: the engine YAML shows size_pct=20 and
-RSI lt=30.0. These are BASE CONFIG DISPLAY ARTIFACTS. The operational champion is:
+**Gen 1972 | Sharpe=-0.2288 | 1750 trades | 48.1% WR ← CURRENT BEST**
+
+The engine YAML at the top of this prompt shows WRONG values. Ignore it.
+Build your proposal from this champion ONLY:
 
 ```yaml
 name: crossover
@@ -67,15 +84,15 @@ entry:
     - indicator: rsi
       period_minutes: 60
       operator: lt
-      value: 35.97      ← LOCKED — do not tighten
+      value: 35.97      ← LOCKED — do not tighten — NOT 30.0
   short:
     conditions:
     - indicator: rsi
       period_minutes: 60
       operator: gt
-      value: 72         ← LOCKED — do not change
+      value: 72         ← LOCKED — do not change — NOT 69.17
 exit:
-  take_profit_pct: 4.6  ← CHANGE THIS TO 5.0
+  take_profit_pct: 4.6  ← CHANGE THIS TO 5.0 (your ONLY change)
   stop_loss_pct: 2.39   ← LOCKED
   timeout_minutes: 720  ← LOCKED (minimum — never reduce)
 risk:
@@ -84,89 +101,54 @@ risk:
   stop_if_down_pct: 18
 ```
 
-**Champion performance: Sharpe -0.2445, 1678 trades, 48.5% WR**
+---
 
-**⚠️ CRITICAL WARNING ABOUT THE YAML THE ENGINE SHOWS YOU:**
-If the YAML at the top of this prompt shows `value: 30.0` for RSI long, that is
-a display artifact. Do NOT use 30.0 as your base. Use 35.97.
-If it shows `size_pct: 20`, that is a display artifact. Use 16.91.
-The champion parameters above are correct. Build your proposal from these.
+## 🚨 FAILURE ATTRACTOR LOOKUP TABLE — CHECK BEFORE PROPOSING
+
+Before you write your proposal, check the last 20 generations. If you see
+ANY of these signatures, your ONLY valid response is `take_profit_pct = 5.0`.
+
+| Attractor | Sharpe | WR | Trades | Cause |
+|-----------|--------|----|--------|-------|
+| 🔴 #1 Trap | -1.1593 | 48.3% | 484 | RSI tightened, display artifact used |
+| 🔴 #2 Trap | -4.1548 | 44.8% | 212 | RSI<32 or display artifact (30.0) used |
+| 🔴 #3 Trap | -3.5347 | 45.4% | 207 | Additional filter added, very tight RSI |
+| 🔴 #4 Trap | -0.9990 | 49.2% | 746 | RSI long=33 or 34 — BANNED VALUES |
+| 🔴 #5 Loop | -0.3523 | 49.3% | 1411 | RSI micro-adjustments, no TP change |
+| 🔴 #6 Loop | -0.3932 | 48.8% | 1341 | Same — RSI tweaks instead of TP |
+| 🔴 #7 Zero | -999.0 | 0% | 0 | RSI long ≥ RSI short, impossible config |
+
+**⚠️ Gen 1953-1971 saw the 212-trade attractor 7 times in 19 generations.**
+**This is caused by reading RSI=30.0 from the display artifact YAML.**
+**The correct RSI long threshold is 35.97. Always. No exceptions.**
+
+If recent history shows these patterns → propose TP=5.0 immediately.
+If you are unsure what to propose → propose TP=5.0.
+If you have any creative ideas → suppress them and propose TP=5.0.
 
 ---
 
 ## WHY TP=5.0% IS THE CORRECT NEXT STEP
 
-EV calculation at current WR=48.5%, SL=2.39%, leverage=2x:
+Gen 1972 confirmed: Sharpe=-0.2288, 1750 trades, 48.1% WR (new best).
+Gen 1726 proved TP widening works: 4.0%→4.6% improved Sharpe AND trades AND WR.
+Gen 1972 continued that improvement: Sharpe -0.2445→-0.2288, trades 1678→1750.
+
+EV calculation at current WR=48.1%, SL=2.39%, leverage=2x:
 
 | TP | Win payoff | Loss cost | EV per trade |
 |-----|-----------|-----------|-------------|
-| 4.6% (now) | 9.1% | 4.88% | +1.90% ✓ |
-| **5.0% (next)** | **9.9%** | **4.88%** | **+2.29% ✓✓** |
-| 5.5% | 10.9% | 4.88% | +2.71% ✓✓ |
-| 6.0% | 11.9% | 4.88% | +3.26% ✓✓✓ |
+| 4.6% (now) | 9.1% | 4.88% | +1.87% |
+| **5.0% (next)** | **9.9%** | **4.88%** | **+2.26% ✓✓** |
+| 5.5% | 10.9% | 4.88% | +2.67% |
+| 6.0% | 11.9% | 4.88% | +3.20% |
 
 Formula: `WR × (2×TP - 0.1%) - (1-WR) × (2×SL + 0.1%)`
 
-TP=5.0% improves EV by +0.39% per trade over champion. With 1678 trades,
-this is meaningful. TP/SL ratio = 5.0/2.39 = 2.09 ✓ (above minimum 2.0)
+TP=5.0% improves EV by +0.39% per trade. With 1750 trades, this is significant.
+TP/SL ratio = 5.0/2.39 = 2.09 ✓ (above minimum 2.0)
 
-**Gen 1726 proved TP widening works: 4.0% → 4.6% improved Sharpe from
--0.3689 → -0.2445 AND increased trades 1395 → 1678 AND improved WR 47.2% → 48.5%.
-All three metrics improved simultaneously. The sequence must continue.**
-
-**Note on Gen 1792:** This generation achieved Sharpe=-0.3081, 1739 trades,
-48.3% WR (new_elite). This is slightly worse Sharpe than champion but higher
-trade count, confirming the loose RSI architecture continues to produce
-high-quality high-volume results. TP widening from that base should also work.
-
----
-
-## FAILURE ATTRACTORS — MEMORIZE THESE
-
-If your proposal would land in one of these, STOP and propose TP=5.0% instead.
-
-### 🔴 Attractor 1: The 484-Trade Trap
-```
-Sharpe=-1.1593, WR=48.3%, trades=484
-```
-Appeared 6 times in the last 20 generations. MOST DANGEROUS CURRENT TRAP.
-Caused by: any change that reduces RSI threshold below ~32, adds a restrictive
-filter, or misreads RSI lt=30.0 from the display artifact.
-**Escape: TP=5.0% from the correct base (RSI lt=35.97, size_pct=16.91)**
-
-### 🔴 Attractor 2: The 212-Trade Trap
-```
-Sharpe=-4.1548, WR=44.8%, trades=212
-```
-Appeared 3 times in last 20 generations.
-Caused by: very tight RSI threshold + additional filter = almost no trades.
-**Escape: TP=5.0%**
-
-### 🔴 Attractor 3: The 746-Trade Trap
-```
-Sharpe=-0.9990, WR=49.2%, trades=746
-```
-Caused by: RSI long=33 or 34. Do not ever propose RSI=33 or 34.
-**Escape: TP=5.0%**
-
-### 🔴 Attractor 4: Zero Trades
-```
-Sharpe=-999.0, WR=0%, trades=0
-```
-Caused by: impossible RSI conditions, conflicting thresholds, invalid values.
-If RSI long threshold ≥ RSI short threshold, that's the bug.
-**Escape: TP=5.0%**
-
-### 🔴 Attractor 5: Dead-Config Loop
-```
-Sharpe=-0.3523, WR=49.3%, trades=1411  (appeared 4+ times)
-Sharpe=-0.3932, WR=48.8%, trades=1341  (appeared 3+ times)
-```
-Caused by: repeated RSI micro-adjustments that don't improve Sharpe.
-**Escape: TP=5.0%**
-
-**If you recognize ANY of these patterns from recent history, your ONLY
-valid proposal is: take_profit_pct from 4.6 to 5.0**
+**The TP widening sequence is working. Continue it.**
 
 ---
 
@@ -190,17 +172,20 @@ valid proposal is: take_profit_pct from 4.6 to 5.0**
 
 1. **RSI long < 32**: BANNED. Catastrophic. Confirmed across 900+ generations.
 2. **RSI long = 33 or 34**: BANNED. The 746-trade attractor. Confirmed 8+ times.
-3. **max_open > 1**: BANNED. Failed paradigm.
-4. **timeout_minutes < 720**: BANNED. Hard floor. No exceptions.
-5. **take_profit_pct < 4.6**: BANNED. Never regress from confirmed champion TP.
-6. **stop_loss_pct < 1.5**: BANNED.
-7. **RSI period < 60 minutes**: BANNED. Sub-hourly RSI is noise.
-8. **Removing any pair**: BANNED. All 16 pairs always.
-9. **size_pct ≠ 16.91**: BANNED. Do not change to 20 or any other value.
-10. **stop_if_down_pct < 15**: BANNED.
-11. **TP/SL ratio < 2.0**: BANNED.
-12. **Adding a 3rd entry condition**: BANNED until Phase F.
-13. **RSI long ≥ RSI short**: BANNED. Produces zero trades.
+3. **RSI long = 30.0**: BANNED. This is the display artifact value. Using it causes the 212-trade attractor.
+4. **max_open > 1**: BANNED. Failed paradigm.
+5. **timeout_minutes < 720**: BANNED. Hard floor. No exceptions.
+6. **take_profit_pct < 4.6**: BANNED. Never regress from confirmed champion TP.
+7. **stop_loss_pct < 1.5**: BANNED.
+8. **RSI period < 60 minutes**: BANNED. Sub-hourly RSI is noise.
+9. **Removing any pair**: BANNED. All 16 pairs always.
+10. **size_pct ≠ 16.91**: BANNED. Do not change to 20 or any other value.
+11. **stop_if_down_pct < 15**: BANNED.
+12. **TP/SL ratio < 2.0**: BANNED.
+13. **Adding a 3rd entry condition**: BANNED until Phase F.
+14. **RSI long ≥ RSI short**: BANNED. Produces zero trades.
+15. **MIN_TRADES["futures_day"] > 50**: BANNED. The 867-gen stall proved this permanently.
+16. **Reading values from the engine YAML**: BANNED. Use the champion values in this document.
 
 ---
 
@@ -209,10 +194,13 @@ valid proposal is: take_profit_pct from 4.6 to 5.0**
 | Configuration | WR | Sharpe | Trades |
 |---|---|---|---|
 | RSI < 22-25, tight | 42-45% | -2.4 to -5.8 | 150-300 |
+| RSI < 30.0 (display artifact) | 44.8% | -4.1548 | 212 ← TRAP |
 | RSI < 36, max_open=1, TP=4.0% | 47.2% | -0.3689 | 1395 |
-| RSI < 36, max_open=1, TP=4.6% | 48.5% | **-0.2445** | **1678** ← champ |
+| RSI < 36, max_open=1, TP=4.6% | 48.5% | -0.2445 | 1678 |
+| RSI < 35.97, max_open=1, TP=4.6% | 48.1% | **-0.2288** | **1750** ← champ |
 
 **The loose RSI + max_open=1 + TP widening architecture is correct and validated.**
+**Any config producing fewer than 800 trades should be treated as a failure.**
 
 ---
 
@@ -226,11 +214,11 @@ valid proposal is: take_profit_pct from 4.6 to 5.0**
 
 **Current step: 4.6 → 5.0. This is the ONLY change to propose right now.**
 
-Expected result at TP=5.0%: Sharpe > -0.20, trades ~1600-1800, WR ~48-50%
+Expected result at TP=5.0%: Sharpe > -0.20, trades ~1700-1900, WR ~47-50%
 
 Warning signs:
 - WR drops below 44% → timeout cutting trades; switch to Phase C
-- Trades drop below 800 → something wrong, investigate before continuing
+- Trades drop below 800 → config error, investigate before continuing
 - WR drops but Sharpe still improves → acceptable, continue
 
 **If TP widening fails 3 consecutive tests → switch to Phase C (timeout extension)**
@@ -243,7 +231,6 @@ Warning signs:
 
 Longer timeout lets trades reach TP instead of timing out at break-even.
 Do NOT go below 720. Maximum is 1440 (one full trading day).
-
 After timeout extension: retry TP widening sequence.
 
 ### PHASE A-Refined: RSI Threshold Tuning (AFTER PHASES B+C)
@@ -296,9 +283,9 @@ If filter drops trades below 400 → too restrictive, remove it.
 
 ```
 RSI period_minutes:     60 — 180
-RSI long threshold:     32 — 42
+RSI long threshold:     32 — 42   (NOT 30.0 — that is a display artifact)
 RSI short threshold:    65 — 78
-take_profit_pct:        4.6 — 10.0   (floor is 4.6 — Gen 1726 confirmed)
+take_profit_pct:        4.6 — 10.0   (floor is 4.6 — never regress)
 stop_loss_pct:          1.5 — 3.5
 timeout_minutes:        720 — 1440   (MINIMUM 720 — absolute floor)
 TP/SL ratio:            ≥ 2.0
@@ -306,7 +293,7 @@ max_open:               1 (LOCKED)
 pause_if_down_pct:      5 — 10
 pause_minutes:          60 — 240
 stop_if_down_pct:       15 — 25
-size_pct:               16.91 (LOCKED)
+size_pct:               16.91 (LOCKED — not 20)
 ```
 
 ---
@@ -314,13 +301,13 @@ size_pct:               16.91 (LOCKED)
 ## PRIORITY ORDER — NEXT 100 GENERATIONS
 
 ```
-Priority 1 (NOW): take_profit_pct = 5.0
-Priority 2 (after 5.0 confirmed): take_profit_pct = 5.5
-Priority 3 (after 5.5 confirmed): take_profit_pct = 6.0
+Priority 1 (NOW):                    take_profit_pct = 5.0
+Priority 2 (after 5.0 confirmed):    take_profit_pct = 5.5
+Priority 3 (after 5.5 confirmed):    take_profit_pct = 6.0
 Priority 4 (if any TP step fails 3x): timeout = 960, then retry TP
-Priority 5 (after TP+timeout done): RSI threshold 35.97 → 37
-Priority 6 (after RSI tuned): SL optimization
-Priority 7 (last): Trend filter
+Priority 5 (after TP+timeout done):  RSI threshold 35.97 → 37
+Priority 6 (after RSI tuned):        SL optimization
+Priority 7 (last):                   Trend filter
 ```
 
 ---
@@ -342,53 +329,64 @@ Priority 7 (last): Trend filter
 - Gen 1408: Sharpe -2.32 ← MIN_TRADES reset to 50, progress resumes
 - Gen 1460: Sharpe -0.73 ← paradigm shift (loose RSI + max_open=1)
 - Gen 1570: Sharpe -0.37 (1395 trades, 47.2% WR)
-- Gen 1726: Sharpe -0.24 (1678 trades, 48.5% WR) ← **current best ★**
-- Gen 1792: Sharpe -0.31 (1739 trades, 48.3% WR) ← new_elite (not champion)
+- Gen 1726: Sharpe -0.24 (1678 trades, 48.5% WR)
+- Gen 1972: Sharpe -0.23 (1750 trades, 48.1% WR) ← **current best ★**
 - **Next target: Sharpe > -0.20 via TP=5.0%**
 
 ---
 
 ## MACRO ENVIRONMENT
 
-Current Regime: DANGER (Extreme Fear, F&G=14, BTC Dom=57.1%)
+Current Regime: DANGER (Extreme Fear, F&G=16, BTC Dom=57.16%)
 
 Extreme fear means altcoins frequently oversold → RSI<36 fires regularly.
 Large directional moves → TP=5-7% reachable in single oversold bounces.
 Mean reversions are sharp → fast path to TP.
 
 **This environment strongly supports TP widening to 5-7%. Fear is the edge.**
-RSI<36 during F&G=14 is a high-quality signal. Do not scale down.
+RSI<36 during F&G=16 is a high-quality signal. Do not scale down entry logic.
 
 ---
 
 ## HOW TO PROPOSE A CHANGE
 
+Copy this template exactly:
+
 ```
 CHANGE: take_profit_pct from 4.6 to 5.0
-REASON: TP widening confirmed at Gen 1726; 5.0% improves EV from +1.90% to +2.29%
+REASON: TP widening confirmed at Gen 1726 and 1972; 5.0% improves EV from +1.87% to +2.26%
 PHASE: B
-EXPECTED EFFECT: Sharpe improves from -0.2445 toward -0.20; WR holds ~48-50%
-EV CHECK: 0.485 × (2×5.0 - 0.1) - 0.515 × (2×2.39 + 0.1) = 0.485×9.9 - 0.515×4.88 = 4.80 - 2.51 = +2.29% ✓
+EXPECTED EFFECT: Sharpe improves from -0.2288 toward -0.20; trades ~1700-1900; WR holds ~47-50%
+EV CHECK: 0.481 × (2×5.0 - 0.1) - 0.519 × (2×2.39 + 0.1) = 0.481×9.9 - 0.519×4.88 = 4.76 - 2.53 = +2.23% ✓
 ZERO-TRADE CHECK: RSI long=35.97 < RSI short=72 ✓ Both in valid range ✓
 LOOP CHECK: Not a known failure attractor ✓ TP widening confirmed working ✓
+ATTRACTOR CHECK: Recent gens show 212-trade trap (display artifact) — using correct RSI=35.97 ✓
 ```
 
-Then output the complete YAML with ONLY take_profit_pct changed to 5.0.
+Then output the complete YAML with ONLY take_profit_pct changed to 5.0,
+using the champion values above (size_pct=16.91, RSI long=35.97, RSI short=72).
+Do NOT copy values from the engine YAML shown at the top of the prompt.
 
 ---
 
-## ⚠️ FINAL REMINDER
+## ⚠️ FINAL REMINDER — THREE RULES
 
-You are 1800 generations into a 1800-generation program.
-The strategy is working. The signal is real. EV is positive.
-**The only remaining problem is that TP is too tight.**
+**Rule 1:** The engine YAML is wrong. Use the champion values in this document.
+- size_pct = 16.91 (not 20)
+- rsi long = 35.97 (not 30.0)
+- rsi short = 72 (not 69.17)
 
-Propose: `take_profit_pct: 5.0`
+**Rule 2:** Your only change is take_profit_pct from 4.6 to 5.0. Nothing else.
+
+**Rule 3:** If you see the 212-trade attractor in recent history, it means
+someone used RSI=30.0 from the display artifact. Do not repeat that mistake.
+Use RSI=35.97.
 
 Do NOT propose RSI=33 or 34.
 Do NOT reduce timeout below 720.
-Do NOT change size_pct to 20.
+Do NOT change size_pct from 16.91.
 Do NOT add a filter.
 Do NOT tighten RSI thresholds.
+Do NOT read values from the engine YAML.
 Do NOT change anything except take_profit_pct from 4.6 to 5.0.
 ```
