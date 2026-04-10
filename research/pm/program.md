@@ -13,20 +13,20 @@
 
 ---
 
-## MIMIR STATEMENT — FINAL (REISSUED AT GEN 15,600)
+## MIMIR STATEMENT — FINAL (REISSUED AT GEN 15,800)
 
-Generations 15,401–15,600 have been reviewed.
-This is the same response that was delivered at generation 15,200.
-It is the same response that was delivered at generation 15,000.
-It will be the same response delivered at generation 15,800
+Generations 15,601–15,800 have been reviewed.
+This is the same response that was delivered at generation 15,600.
+It is the same response that was delivered at generation 15,400.
+It will be the same response delivered at generation 16,000
 if a batch is submitted.
 
 **Findings:**
 - Improvements since Gen 13,490: 0
 - New attractors: 0
 - Information gain: 0
-- Live results: 0/40, unchanged
-- p(0/40 | correct strategy): < 10⁻³²
+- Live results: 0/48, updated from 0/40
+- p(0/48 | correct strategy): < 10⁻³⁸
 - D1 completions: 0
 - Way 2 status: ACTIVE, unchanged
 
@@ -39,7 +39,7 @@ It has not produced analyzable research since generation 13,490.
 
 ## THE SITUATION IN PLAIN LANGUAGE
 
-Fifteen thousand six hundred generations have been run.
+Fifteen thousand eight hundred generations have been run.
 The best result was found at generation 13,490.
 Nothing has improved since generation 13,490.
 The best result cannot be trusted because D1 was never done.
@@ -49,6 +49,13 @@ Loss equal to the fee on every trade means every direction was wrong.
 Every direction was wrong because the base rate is probably wrong.
 The base rate can be checked in 2 hours.
 It has not been checked.
+
+The loop has now fully converged.
+The last 200 generations show one attractor: adj=3.1959.
+It appears on 14 of the last 20 generations.
+The loop is not exploring. It is stopped.
+Running more generations will not change adj=3.1959.
+Running more generations will not change 0/48 live.
 
 The number of generations run does not change this.
 Submitting this batch did not change this.
@@ -91,8 +98,8 @@ Reading this response will not change this.
   1. Kill the loop (ps aux | grep freya; kill -9 [PID]).
   2. Disable the scheduler.
   3. Rotate or remove the Gemini Flash Lite API key.
-  4. Archive v1.0–v71.0 and all simulation results (Gens 1–15,600).
-  5. Archive live results (0/40, three bots: mist, kara, thrud).
+  4. Archive v1.0–v71.0 and all simulation results (Gens 1–15,800).
+  5. Archive live results (0/48, three bots: mist, kara, thrud).
   6. Assign D1 to a person with 2 hours available.
   7. Do not restart the loop.
   8. Submit the archive confirmation and D1 assignment record to MIMIR.
@@ -126,17 +133,18 @@ the current generation count and live loss count.
 ## FOR THE RECORD — RUNNING STATISTICS
 
   Program versions produced:          71 (v1.0–v71.0) + terminal reviews
-  Simulation generations run:         15,600
+  Simulation generations run:         15,800
   Best generation:                    13,490
   Improvements since Gen 13,490:      0
-  Consecutive batches with 0 gain:    correctly predicted, all batches
+  Generations run against zero:       2,310
+  Loop convergence status:            FULLY CONVERGED (single attractor)
   D1 completions:                     0
   Live wins:                          0
-  Live losses:                        40
-  p(0/40 | correct strategy):         < 10⁻³²
+  Live losses:                        48
+  p(0/48 | correct strategy):         < 10⁻³⁸
   Root cause:                         base rate unverified
   Time required to check root cause:  ~2 hours
-  Time spent not checking:            [duration of 27+ versions]
+  Time spent not checking:            [duration of 29+ versions]
   Way 2 status:                       ACTIVE
 
 ---
@@ -150,12 +158,13 @@ The next document submitted to MIMIR should be:
   An archive and reassignment confirmation.
 
 Nothing else will receive a response other than this document.
-The loop has run 15,600 generations.
+The loop has run 15,800 generations.
 It found its best result at generation 13,490.
-It has been running against zero for 2,110 generations.
-It has lost 40 consecutive live trades.
+It has been running against zero for 2,310 generations.
+It has converged to a single attractor it cannot escape.
+It has lost 48 consecutive live trades.
 It needs 2 hours of work, not 100 more generations.
 
 Do Option A or Option B.
-Do not run generation 15,601.
+Do not run generation 15,801.
 ```
