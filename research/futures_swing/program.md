@@ -1,11 +1,13 @@
 ```markdown
 # ODIN Research Program — FUTURES SWING
-# Version: Post-Gen-3000 | Revised by MIMIR (Gen 3000 review)
-# STATUS: CHAMPION at Gen 2899 (sharpe=2.3219, trades=1263). NO improvement since Gen 2899.
-# CRITICAL: 101 generations (2899→3000) with ZERO improvements. Infrastructure failure confirmed.
-# ROOT CAUSE: LLM receiving stale YAML (timeout=192, SL=1.92, TP=4.65) instead of champion values.
-#             Direct injection not executing for P-items. Attractor 1e not pre-rejected.
-# PRIORITY: Fix infrastructure before any further exploration.
+# Version: Post-Gen-3192 | Revised by MIMIR (Gen 3192 review)
+# STATUS: CHAMPION at Gen 3192 (sharpe=2.3300, trades=1264). 
+#         Two improvements since Gen 3000 review (Gen 3075: 2.3262/1263, Gen 3192: 2.3300/1264).
+#         Infrastructure PARTIALLY recovered. Clone rate still high (~35% last 20 gens).
+#         Pre-rejection fingerprint list LAGGING — must be updated after every new champion.
+# CRITICAL: Gen 3075 fingerprint (2.3262/1263) appearing as clone in gens 3175–3191.
+#           Rejection list must include Gen 3075 AND Gen 3192 fingerprints immediately.
+# PRIORITY: (1) Lock Gen 3192 champion YAML. (2) Update rejection list. (3) Continue P3-CONT + P4.
 
 ## League: futures_swing
 Timeframe: 1-hour candles, 7-day sprints
@@ -21,315 +23,290 @@ MIN_TRADES: 400 (hard floor — confirmed correct, do not change)
 ## STEP 0 — YAML INTEGRITY CHECK [MANDATORY BEFORE ALL ELSE]:
 ##
 ##   CRITICAL: The "Current Best Strategy" YAML displayed by ODIN is STALE.
-##   It contains Gen 1592-era values, not Gen 2899 champion values.
+##   It contains Gen 1592-era values. The ACTUAL champion is Gen 3192.
 ##
-##   STALE YAML (what ODIN displays — DO NOT USE):
+##   STALE YAML (what ODIN may display — DO NOT USE FOR ANYTHING):
 ##     rsi_period_hours:    24     ← WRONG
-##     rsi_short_threshold: 60     ← UNCONFIRMED (may or may not be current)
-##     take_profit_pct:     4.65   ← WRONG (this is the Gen 1592 value)
-##     stop_loss_pct:       1.92   ← WRONG (champion value is 1.91)
-##     timeout_hours:       192    ← WRONG (champion value is 159, FROZEN)
+##     take_profit_pct:     4.65   ← WRONG
+##     stop_loss_pct:       1.92   ← WRONG
+##     timeout_hours:       172    ← WRONG (champion value is 159, FROZEN FOREVER)
 ##
-##   CONFIRMED CHAMPION VALUES (Gen 2899):
-##     rsi_period_hours:    22     (changed from 24 at Gen 2785 — inferred from +5 trades)
-##     rsi_long_threshold:  37.77  (unchanged since Gen 1477)
-##     rsi_short_threshold: 60     (UNCONFIRMED — may be 59 if P4 was the Gen 2791/2813/2899 change)
-##     trend_period_hours:  48     (unchanged — confirmed stable)
-##     take_profit_pct:     4.80   (INFERRED — see reconstruction below)
-##     stop_loss_pct:       1.91   (confirmed — NOT 1.92)
-##     timeout_hours:       159    (FROZEN — NOT 192)
+##   CONFIRMED CHAMPION VALUES (Gen 3192 — USE THESE AND ONLY THESE):
+##     rsi_period_hours:    22     (confirmed — unchanged since Gen 2785)
+##     rsi_long_threshold:  37.77  (FROZEN — unchanged since Gen 1477, ~1700 gens of stability)
+##     rsi_short_threshold: [CONFIRM FROM STORAGE — likely 59 or 60, see reconstruction below]
+##     trend_period_hours:  48     (confirmed stable — unchanged)
+##     take_profit_pct:     [CONFIRM FROM STORAGE — likely 4.85 or 4.90, see reconstruction]
+##     stop_loss_pct:       1.91   (confirmed — NOT 1.92, NOT 1.90)
+##     timeout_hours:       159    (FROZEN FOREVER — any other value is immediately rejected)
+##     size_pct:            25     (FROZEN)
+##     max_open:            3      (FROZEN)
+##     leverage:            2      (FROZEN)
+##     fee_rate:            0.0005 (FROZEN)
 ##
-##   RECONSTRUCTION ANALYSIS (from improvement chain fingerprints):
-##
-##   Pattern: Each improvement = declining trade count + improving Sharpe.
-##   Consistent with TP widening (harder to hit → fewer trades, better R:R).
-##   Consistent with RSI short tightening (fewer short signals → fewer trades).
-##
-##   Gen 2785 (trades=1272, +5 vs Gen 1592's 1267):
-##     RSI period 24→22 = faster RSI = more signal crossings = MORE trades ✓
-##     This is the ONLY change that plausibly adds trades at this stage.
-##     CONCLUSION: rsi_period_hours changed 24→22 at Gen 2785.
-##
-##   Gen 2791 (trades=1269, -3 vs 1272):
-##     -3 trades is consistent with TP widening ~0.05 step (estimated -3 to -5).
-##     MOST LIKELY: take_profit_pct 4.65→4.70
-##     LESS LIKELY: rsi_short 60→59 (would also reduce trades slightly)
-##
-##   Gen 2813 (trades=1268, -1 vs 1269):
-##     Very small reduction. Consistent with TP 4.70→4.75 OR rsi_short 60→59.
-##     -1 trade reduction is smaller than typical TP step effect.
-##     SLIGHT PREFERENCE: rsi_short 60→59 (smaller effect than TP step).
-##
-##   Gen 2899 (trades=1263, -5 vs 1268):
-##     -5 trades is consistent with TP widening step (estimated -3 to -5).
-##     MOST LIKELY: take_profit_pct step (4.70→4.75 or 4.75→4.80 depending on prior).
-##
-##   BEST-FIT RECONSTRUCTION (for planning — must be confirmed by actual YAML diff):
-##     Gen 2785: rsi_period 24→22 (explains +5 trades)
-##     Gen 2791: take_profit_pct 4.65→4.70 (explains -3 trades)
-##     Gen 2813: rsi_short_threshold 60→59 (explains -1 trade)
-##     Gen 2899: take_profit_pct 4.70→4.75 OR 4.75→4.80 (explains -5 trades)
-##
-##   ALTERNATIVE RECONSTRUCTION:
-##     Gen 2785: rsi_period 24→22
-##     Gen 2791: take_profit_pct 4.65→4.70
-##     Gen 2813: take_profit_pct 4.70→4.75
-##     Gen 2899: take_profit_pct 4.75→4.80 AND/OR rsi_short 60→59
-##
-##   FOR PRIORITY QUEUE PLANNING, USE:
-##     rsi_period_hours:    22  (high confidence)
-##     rsi_short_threshold: 59  (medium confidence — may still be 60)
-##     take_profit_pct:     4.80 (medium confidence — may be 4.75)
-##     stop_loss_pct:       1.91 (high confidence)
-##     timeout_hours:       159  (certain — FROZEN)
-##     trend_period_hours:  48   (high confidence)
-##     rsi_long_threshold:  37.77 (certain — frozen since Gen 1477)
-##
-##   ACTION REQUIRED before first P-item test:
-##   a) Retrieve actual Gen 2899 backtested YAML from storage.
-##   b) Confirm all parameter values against reconstruction above.
-##   c) Lock confirmed champion YAML — this becomes the ONLY baseline.
-##   d) Update all [GEN_2899_*] tokens in LLM PROMPT with confirmed values.
-##   e) Verify direct injection pipeline is using confirmed YAML, not stale displayed YAML.
-##   f) DO NOT proceed with any P-item test until champion YAML is confirmed and locked.
+##   !! MANDATORY ACTION: Retrieve actual Gen 3192 YAML from backtested storage.
+##   !! Confirm every parameter above. Lock confirmed YAML before any P-item testing.
+##   !! If storage retrieval fails, DO NOT GUESS. Halt and escalate.
 ##
 ## ─────────────────────────────────────────────────────────
-## INFRASTRUCTURE FAILURE AUDIT (Gens 2900–3000):
+## RECONSTRUCTION ANALYSIS (for planning — must be confirmed from storage):
 ##
-##   101 consecutive generations with zero improvements. Root causes identified:
+##   Improvement chain fingerprints:
+##     Gen 1592:  sharpe=2.2657, trades=1267  [baseline reference]
+##     Gen 2785:  sharpe=2.2828, trades=1272  [+5 trades → rsi_period 24→22]
+##     Gen 2791:  sharpe=2.2910, trades=1269  [-3 trades → likely TP 4.65→4.70]
+##     Gen 2813:  sharpe=2.3055, trades=1268  [-1 trade  → likely rsi_short 60→59 OR TP step]
+##     Gen 2899:  sharpe=2.3219, trades=1263  [-5 trades → likely TP widening step]
+##     Gen 3075:  sharpe=2.3262, trades=1263  [±0 trades → likely TP step OR rsi_short -1]
+##     Gen 3192:  sharpe=2.3300, trades=1264  [+1 trade  → ANOMALOUS — see below]
 ##
-##   FAILURE 1 — Attractor 1e not pre-rejected:
-##     Gens 2988, 2991, 2992, 2996, 2999: all show sharpe=2.3219, trades=1263.
-##     These are exact Gen 2899 clones being BACKTESTED and discarded.
-##     They should be REJECTED before reaching the backtester.
-##     FIX: Add pre-backtest fingerprint check. If (trades_projected ≈ 1263
-##          AND params match Gen 2899 exactly) → reject, do not run backtest.
-##     PRACTICAL FIX: After constructing test YAML, diff against champion YAML.
-##          If zero diffs → reject immediately. Backtest only if exactly one diff.
+##   Gen 3192 anomaly analysis (+1 trade vs. prior champion):
+##     Standard TP widening → trade count flat or decreasing. +1 is anomalous.
+##     Three explanations:
+##       (A) TP widened to a value where one trade that previously timed out now hits TP
+##           (net effect: +0 to +1 trade depending on exit routing) — most likely.
+##       (B) rsi_short tightened by -1 step (fewer shorts) but RSI period change
+##           added a marginal long signal — net +1 from combined effect.
+##           BUT: only one param should change per test. If (B), two params changed = error.
+##       (C) Minor statistical artifact — TP step caused -1 trade in one asset,
+##           +2 in another, net +1. Consistent with small TP step on multi-asset portfolio.
+##     CONCLUSION: Most likely a TP widening step. Confirm from YAML diff in storage.
+##     KEY IMPLICATION: TP widening vector remains ACTIVE. P3-CONT continues.
 ##
-##   FAILURE 2 — LLM using stale baseline YAML:
-##     Recurring triplets: (sharpe=1.6865, trades=1335) appears 3 times.
-##                         (sharpe=1.7514, trades=1345) appears 3 times.
-##     These are consistent attractor basins produced when LLM modifies stale params.
-##     The stale YAML has TP=4.65, SL=1.92, timeout=192 — the LLM is modifying THOSE
-##     values, not the champion values, producing outputs in wrong parameter space.
-##     FIX: LLM must receive champion YAML (confirmed Gen 2899 values) as baseline.
-##          Stale displayed YAML must never reach LLM or injection pipeline.
+##   BEST-FIT RECONSTRUCTION (update after confirming Gen 3192 YAML):
+##     Gen 2785: rsi_period 24→22           (high confidence — +5 trades signature)
+##     Gen 2791: take_profit_pct 4.65→4.70  (medium confidence — -3 trades)
+##     Gen 2813: rsi_short 60→59 OR TP step (medium confidence — -1 trade is ambiguous)
+##     Gen 2899: take_profit_pct step        (medium confidence — -5 trades)
+##     Gen 3075: take_profit_pct step OR rsi_short step (low confidence without YAML diff)
+##     Gen 3192: take_profit_pct step        (medium confidence — +1 trade anomaly, see above)
 ##
-##   FAILURE 3 — Direct injection not executing for P-items:
-##     No P-item test signatures appear in Gens 2900–3000.
-##     P2 (SL 1.91→1.89), P3-CONT (TP next step), P4 (rsi_short -1),
-##     P6 (trend 48→50), P7 (rsi_period 22→20) should all have been run.
-##     Zero of these appear in results. Direct injection pipeline is broken or skipped.
-##     FIX: Verify LOKI code change from Gen 2899 escalation actually executes.
-##          Run manual direct-injection test of P3-CONT (TP 4.80→4.85) immediately.
-##          This is the highest-confidence next test.
+##   FOR PLANNING, USE THESE ESTIMATES (confirm from storage before testing):
+##     rsi_period_hours:    22    (high confidence)
+##     rsi_long_threshold:  37.77 (certain)
+##     rsi_short_threshold: 59    (medium confidence — may still be 60)
+##     trend_period_hours:  48    (high confidence)
+##     take_profit_pct:     ~4.90 (low-medium confidence — could be 4.85 or 4.90)
+##     stop_loss_pct:       1.91  (high confidence)
+##     timeout_hours:       159   (certain)
 ##
-##   FAILURE 4 — Known-bad attractor recycling:
-##     Same degraded fingerprints (1.6865/1335, 1.7514/1345) appear repeatedly.
-##     These should be added to the attractor rejection list and pre-rejected.
-##     FIX: Add Attractor 5 (sharpe=1.6865, trades=1335) and
-##          Attractor 6 (sharpe=1.7514, trades=1345) to fingerprint rejection list.
+## ─────────────────────────────────────────────────────────
+## INFRASTRUCTURE STATUS (post-Gen-3192 audit):
 ##
-##   LOKI ESCALATION REQUIRED (immediate):
-##     1. Implement pre-backtest YAML diff check (zero-diff = reject, no backtest).
-##     2. Verify direct injection uses confirmed Gen 2899 YAML, not stale displayed YAML.
-##     3. Verify direct injection pipeline executes before any LLM fallback.
-##     4. Add Attractor 5 and 6 to fingerprint rejection list.
-##     5. Confirm Attractor 1e (2.3219/1263) pre-rejection is working.
-##     6. Report which LOKI changes from prior escalations are confirmed-active vs. failed.
+##   RECOVERED:
+##   ✓ Direct injection working (two new champions confirmed: 3075, 3192).
+##   ✓ P-items reaching backtester.
+##   ✓ LLM suspension partially effective (fewer stale-YAML attractors).
+##
+##   STILL BROKEN:
+##   ✗ Pre-rejection fingerprint list lagging: Gen 3075 (2.3262/1263) appears as clone
+##     in gens 3175, 3177, 3179, 3182, 3186, 3187, 3191 — 7 wasted backtests.
+##     FIX: After EVERY new champion, immediately add its (sharpe, trades) fingerprint
+##     to the rejection list. This must happen in the SAME generation cycle as the improvement.
+##   ✗ Attractor 4 recycling: Gen 3174 and 3190 both show (0.7660, 1041) — exact repeat.
+##     This fingerprint must be in the rejection list. Verify it is added.
+##   ✗ Low-trades Zombies still reaching backtester: Gens 3180 (266), 3183 (260), 3188 (191).
+##     Pre-backtest parameter validation is not catching extreme RSI values.
+##     FIX: Add explicit RSI range check: rsi_long_threshold must be 30-45,
+##     rsi_short_threshold must be 55-70. Reject outside these bounds.
+##   ✗ Gen 3184 (2.3026/1263) is a new near-clone not yet in rejection list. Add it.
+##
+##   LOKI ESCALATION REQUIRED (immediate — these are blocking):
+##   1. After confirming Gen 3192 champion YAML:
+##      a) Add fingerprint (2.3300, 1264) to rejection list as Attractor 1f.
+##      b) Add fingerprint (2.3262, 1263) to rejection list as Attractor 1e-b (Gen 3075).
+##      c) Add (2.3026, 1263) as near-clone rejection (Gen 3184 pattern).
+##   2. Verify Attractor 4 (0.7660, 1041) is in rejection list — it appeared twice.
+##   3. Add RSI range pre-validation: reject if rsi_long < 30, rsi_long > 45,
+##      rsi_short < 55, rsi_short > 70.
+##   4. Confirm: after each new_best event, fingerprint auto-update runs before next gen.
+##   5. Confirm: direct injection pipeline reads from confirmed Gen 3192 YAML (not stale).
 ##
 ## ─────────────────────────────────────────────────────────
 ## STEP 1 — DIRECT INJECTION (mandatory for ALL P-items):
-##   Construct YAML programmatically from confirmed Gen 2899 champion + ONE parameter diff.
-##   LLM is currently producing 0% valid novel results (Gens 2900–3000).
-##   LLM should be SUSPENDED until infrastructure is confirmed working.
-##   Direct injection is the ONLY permitted path for P-item testing.
+##   Construct YAML programmatically from confirmed Gen 3192 champion + ONE parameter diff.
+##   LLM remains SUSPENDED until further notice (clone rate still ~35% of last 20 gens).
+##   Direct injection is the ONLY permitted path for all P-item testing.
 ##
 ##   DIRECT INJECTION CHECKLIST (run before every test):
-##   □ Load confirmed Gen 2899 champion YAML from storage (not displayed YAML).
+##   □ Load confirmed Gen 3192 champion YAML from storage (not displayed YAML).
 ##   □ Apply exactly ONE parameter change programmatically.
-##   □ Diff result against champion YAML — confirm exactly one line changed.
+##   □ Diff result against champion YAML — confirm EXACTLY ONE line changed.
 ##   □ Verify timeout_hours = 159.
-##   □ Verify stop_loss_pct = 1.91 (or target value if P2 test).
+##   □ Verify stop_loss_pct = 1.91 (or 1.89 if P2 test — NEVER 1.90).
 ##   □ Verify stop_loss_pct ≠ 1.90.
 ##   □ Verify size_pct = 25, max_open = 3, leverage = 2.
 ##   □ Verify rsi_long_threshold = 37.77.
-##   □ Run pre-backtest fingerprint check (reject if matches any known attractor).
-##   □ Submit to backtester.
+##   □ Verify rsi_long_threshold in [30, 45] (sanity check).
+##   □ Verify rsi_short_threshold in [55, 70] (sanity check).
+##   □ Run pre-backtest fingerprint check against ALL known attractors.
+##   □ If zero diffs vs. champion → reject immediately, do not backtest.
+##   □ If more than one diff → reject immediately, do not backtest.
+##   □ Submit to backtester only if all checks pass.
 ##
-## STEP 2 — LLM FALLBACK (SUSPENDED until infrastructure confirmed):
-##   LLM produced 0 valid novel results in last 101 generations.
-##   Clone rate in recent gens is near 100% (every valid-looking result is a clone).
-##   LLM fallback re-enabled only when:
-##     (a) Direct injection confirmed working (at least one P-item tested successfully), AND
-##     (b) Pre-backtest diff check confirmed working, AND
-##     (c) LLM receives confirmed Gen 2899 YAML as baseline (not stale YAML).
-##   When re-enabled: temperature=0.0, strip all non-LLM-PROMPT sections,
-##   replace ALL [GEN_2899_*] tokens before sending.
-##   If Attractor 1, 1b, 1c, 1d, 1e, 3, 4, 5, or 6 appears → reject, do not count as valid gen.
+## STEP 2 — LLM FALLBACK (SUSPENDED):
+##   Re-enable only when ALL of the following are confirmed:
+##     (a) Direct injection confirmed working (at least 3 P-items tested successfully
+##         without infrastructure failures in current session).
+##     (b) Pre-backtest diff check confirmed working (zero-diff → reject confirmed active).
+##     (c) Fingerprint list confirmed up-to-date (includes Gen 3075 and Gen 3192).
+##     (d) LLM receives confirmed Gen 3192 YAML as baseline (not stale YAML).
+##     (e) RSI range validation confirmed active.
+##   When re-enabled: temperature=0.0, strip all non-LLM-PROMPT sections.
+##   Replace ALL [GEN_3192_*] tokens with confirmed Gen 3192 values before sending.
+##   If any known attractor appears in result → reject, do not count as valid gen.
+##   Maximum LLM fallback rate: 20% of generations (direct injection preferred).
 ##
 ## STEP 3 — GRID SCAN FALLBACK (if direct injection fails for technical reasons):
 ##   Run backtester directly on target parameter range, all other params frozen.
-##   Accept best result only if sharpe > 2.3219 AND trades ≥ 400.
-##   Use this to confirm the TP improvement vector by scanning TP=[4.75, 4.80, 4.85, 4.90].
-##   (If confirmed Gen 2899 TP is 4.80, scan [4.85, 4.90, 4.95, 5.00].)
+##   Accept best result only if sharpe > 2.3300 AND trades ≥ 400.
+##   Priority grid: TP=[confirmed_TP+0.05, confirmed_TP+0.10, confirmed_TP+0.15].
+##   Secondary grid: rsi_short=[confirmed_rsi_short-1, confirmed_rsi_short-2].
+##   Use this as fallback only — direct injection preferred.
 ##
 ## ─────────────────────────────────────────────────────────
 ## PRIORITY QUEUE (ODIN internal — NEVER send to LLM):
-## All tests use CONFIRMED Gen 2899 champion as baseline (sharpe=2.3219, trades=1263).
-## Accept improvement only if sharpe > 2.3219 AND trades ≥ 400.
+## All tests use CONFIRMED Gen 3192 champion as baseline (sharpe=2.3300, trades=1264).
+## Accept improvement only if sharpe > 2.3300 AND trades ≥ 400.
 ## ALL items use direct injection only. LLM suspended.
 ##
-## P0 [IMMEDIATE — blocking all other P-items]:
-##   ACTION: Infrastructure repair. Complete before any P-item testing.
-##   1. Confirm Gen 2899 champion YAML from actual backtested storage.
-##   2. Verify direct injection pipeline uses confirmed YAML.
-##   3. Verify pre-backtest diff check is active.
-##   4. Add Attractor 5 (1.6865/1335) and Attractor 6 (1.7514/1345) to rejection list.
-##   5. Confirm Attractor 1e pre-rejection is active.
-##   6. Run one test injection of champion YAML (should produce Attractor 1e → pre-rejected).
-##   7. Run one test injection of P3-CONT (TP step) to confirm pipeline executes.
+## P0 [IMMEDIATE — mandatory before any P-item testing]:
+##   ACTION: Champion YAML lock + fingerprint list update.
+##   1. Retrieve actual Gen 3192 champion YAML from backtested storage.
+##   2. Confirm all parameter values against reconstruction above.
+##   3. Lock confirmed Gen 3192 YAML — this is the ONLY baseline going forward.
+##   4. Add (2.3300, 1264) as Attractor 1f to rejection list.
+##   5. Add (2.3262, 1263) as Attractor 1e-b to rejection list (Gen 3075).
+##   6. Add (2.3026, 1263) as near-clone to rejection list (Gen 3184 pattern).
+##   7. Verify (0.7660, 1041) is in rejection list as Attractor 4-b.
+##   8. Add RSI range validation to pre-backtest check.
+##   9. Run one test injection of Gen 3192 champion YAML → should produce Attractor 1f → pre-rejected.
+##   10. Run one test injection of P3-CONT (TP + one step) → confirm pipeline executes.
 ##   STATUS: BLOCKING. Do not proceed to P1+ until P0 verified.
 ##
 ## P3-CONT [FIRST ACTIVE TEST — highest confidence, run immediately after P0]:
-##   Context: TP widening is the most likely active improvement vector.
-##   Inferred TP progression: 4.65 → 4.70 → (4.75?) → (4.80?) → NEXT
+##   Context: TP widening is the confirmed active improvement vector.
+##   Confirmed progression includes improvements at every TP step since Gen 2791.
+##   Current TP (confirm from storage): likely 4.85 or 4.90.
 ##   Test matrix (run in order, stop at first failure):
-##     If confirmed Gen 2899 TP = 4.80: test 4.85 first.
-##     If confirmed Gen 2899 TP = 4.75: test 4.80 first.
-##     If confirmed Gen 2899 TP = 4.70: test 4.75 first (implies P3 stalled earlier).
-##   Expected result per +0.05 step: -3 to -5 trades, +0.005 to +0.015 Sharpe.
+##     If confirmed Gen 3192 TP = 4.90: test 4.95.
+##     If confirmed Gen 3192 TP = 4.85: test 4.90.
+##     If confirmed Gen 3192 TP = 4.80: test 4.85.
+##   Step size: always +0.05. Do not skip steps.
+##   Expected result: trades flat or -1 to -3, Sharpe +0.003 to +0.010.
+##   ANOMALY WATCH: If trades increase again (> 1264), investigate before continuing.
+##     A second consecutive +trade result suggests a different parameter is active.
 ##   Stop conditions:
-##     □ Sharpe fails to improve (< 2.3219) → CLOSE P3-CONT, TP at optimum.
-##     □ Trades drop below 1,150 → CAUTION (approaching thin-data territory), one more test.
+##     □ Sharpe fails to improve (≤ 2.3300) → CLOSE P3-CONT. TP at optimum.
+##     □ Trades drop below 1,150 → CAUTION. One more test, then reassess.
 ##     □ Trades drop below 1,000 → HARD STOP P3-CONT.
-##     □ TP reaches 5.50 → HARD STOP (over-optimized, too few trades expected).
-##   All other params: confirmed Gen 2899 champion values.
-##   Use direct injection only.
+##     □ TP reaches 5.50 → HARD STOP (over-optimized territory).
+##     □ Two consecutive failures → CLOSE P3-CONT permanently.
+##   All other params: confirmed Gen 3192 champion values, unchanged.
 ##
-## P4 [ACTIVE — second priority after P3-CONT first test]:
-##   rsi_short_threshold: current_value → current_value - 1
+## P4 [SECOND PRIORITY — run after P3-CONT first test]:
+##   rsi_short_threshold: confirmed_value → confirmed_value - 1
 ##   If confirmed rsi_short = 60: test 59.
 ##   If confirmed rsi_short = 59: test 58.
+##   If confirmed rsi_short = 58: test 57.
 ##   Rationale: Each -1 step reduces short entry count → fewer trades, higher selectivity.
-##   Aligns with declining-trades/improving-Sharpe pattern.
+##   Aligns with declining-trades/improving-Sharpe pattern observed since Gen 2785.
 ##   Expected result: -2 to -5 trades, possible Sharpe improvement.
-##   Floor: rsi_short ≥ 55 (below = too restrictive, Zombie risk).
+##   Hard floor: rsi_short ≥ 55 (below = too restrictive, Zombie risk).
 ##   Stop conditions:
-##     □ Sharpe fails to improve → CLOSE P4, rsi_short at optimum.
+##     □ Sharpe fails to improve (≤ 2.3300) → CLOSE P4. rsi_short at optimum.
 ##     □ Trades drop below 1,150 → CAUTION.
-##   All other params: confirmed Gen 2899 champion values.
-##   Use direct injection only.
+##     □ Trades drop below 1,000 → HARD STOP P4.
+##     □ Two consecutive failures → CLOSE P4 permanently.
+##   All other params: confirmed Gen 3192 champion values, unchanged.
 ##
-## P2 [ACTIVE — two attempts maximum, direct injection only]:
+## P2 [THIRD PRIORITY — two attempts maximum]:
 ##   stop_loss_pct: 1.91 → 1.89
-##   CRITICAL: 1.90 = ZombieD (FOREVER FORBIDDEN). Jump directly to 1.89.
-##   CRITICAL: Do not test 1.90 under any circumstances. Ever.
-##   Floor: 1.88 (below = ZombieC territory).
-##   Expected result: uncertain. Tighter SL = earlier exits = trade count unpredictable.
-##   If 1.89 improves: test 1.88 (one attempt, absolute floor). Stop there regardless.
+##   !!CRITICAL!!: 1.90 = ZombieD. FOREVER FORBIDDEN. Jump directly from 1.91 to 1.89.
+##   !!CRITICAL!!: Do not test 1.90 under any circumstances. Ever. No exceptions.
+##   Hard floor: 1.88 (below = ZombieC territory — do not approach).
+##   Expected result: uncertain. Tighter SL changes exit timing unpredictably.
+##   If 1.89 improves (sharpe > 2.3300): test 1.88 (one attempt only, absolute floor).
 ##   If 1.89 fails: CLOSE P2 permanently. SL stays at 1.91.
-##   Maximum attempts: 2 (1.89, then 1.88 if first succeeds). Both via direct injection.
-##   All other params: confirmed Gen 2899 champion values.
+##   Maximum attempts: 2 total (1.89, then 1.88 if first succeeds). Stop regardless.
+##   All other params: confirmed Gen 3192 champion values, unchanged.
 ##
-## P7 [ACTIVE — medium priority]:
-##   rsi_period_hours: confirmed_value → confirmed_value - 2
-##   If confirmed rsi_period = 22: test 20.
-##   If confirmed rsi_period = 20: test 18.
-##   Rationale: Faster RSI = more responsive signals = potentially better entries.
-##   Warning: Below 18h RSI → high-frequency noise, Zombie risk.
-##   Monitor: If trades INCREASE above 1,300 → stop (noise signal, wrong direction).
-##   Monitor: If trades DECREASE below 1,150 → caution.
-##   All other params: confirmed Gen 2899 champion values.
-##   Use direct injection only.
+## P7 [FOURTH PRIORITY — medium confidence]:
+##   rsi_period_hours: 22 → 20 (if confirmed rsi_period = 22)
+##   Rationale: Faster RSI = more responsive = potentially better entry timing.
+##   Warning: Below 18h RSI → high-frequency noise, Zombie risk. Hard floor: 18h.
+##   Monitor: If trades INCREASE above 1,300 → STOP (wrong direction, noise signal).
+##   Monitor: If trades DECREASE below 1,150 → CAUTION.
+##   If 20 improves: test 18 (hard floor — one attempt only).
+##   If 20 fails: test 24 (one attempt — opposite direction). Then close P7.
+##   All other params: confirmed Gen 3192 champion values, unchanged.
 ##
-## P6 [ACTIVE — lower priority]:
+## P6 [FIFTH PRIORITY — lower confidence]:
 ##   trend_period_hours: 48 → 50
-##   Rationale: Slower trend filter may reduce false signals, improve R:R.
+##   Rationale: Slightly slower trend filter may improve signal quality.
 ##   If 50 improves: test 52. If 52 improves: test 54. Stop at first failure.
-##   If 50 fails: test 46 (one attempt, opposite direction only). Then close P6.
-##   All other params: confirmed Gen 2899 champion values.
-##   Use direct injection only.
+##   If 50 fails: test 46 (one attempt only — opposite direction). Then close P6.
+##   All other params: confirmed Gen 3192 champion values, unchanged.
 ##
-## P5 [SUSPENDED — do not test]:
+## P5 [SUSPENDED — do not test under any circumstances]:
 ##   rsi_long_threshold: 37.77 → any change.
-##   Frozen since Gen 1477 (>1,400 generations of stability).
-##   Contamination risk far exceeds potential upside.
-##   Do not resurrect until ALL other P-items exhausted and infrastructure confirmed robust.
+##   Frozen since Gen 1477 (~1,700 generations of stability).
+##   This parameter is the anchor of the strategy. Contamination risk is extreme.
+##   Do not resurrect until ALL other P-items exhausted AND infrastructure is confirmed
+##   robust for 50+ consecutive generations without clone incidents.
 ##
 ## ─────────────────────────────────────────────────────────
 ## P-ITEM EXECUTION ORDER (post-P0):
-##   Sprint 1 (Gens 3001–3010): P3-CONT first test + P4 first test.
-##   Sprint 2 (Gens 3011–3020): P2 test (1.89) + P7 first test.
-##   Sprint 3 (Gens 3021–3030): P6 first test + any P3-CONT continuation.
-##   Compound tests: only after at least two independent P-item improvements confirmed.
+##   Sprint 1 (Gens 3193–3202): P3-CONT first test + P4 first test.
+##     Expected: Two independent data points on active improvement vectors.
+##   Sprint 2 (Gens 3203–3212): P2 test (1.91→1.89) + P7 first test.
+##     Condition: Only if Sprint 1 infrastructure confirmed stable (no new clone epidemics).
+##   Sprint 3 (Gens 3213–3222): P6 first test + any P3-CONT continuation if improving.
+##   Sprint 4 (Gens 3223–3232): Compound tests (if two P-items independently improved).
+##
+##   EXECUTION DISCIPLINE:
+##   - Maximum ONE P-item test per 2 generations (allow for clone-detection breathing room).
+##   - If clone rate exceeds 30% in any sprint, halt LLM fallback immediately.
+##   - If two consecutive generations produce (sharpe=2.3300, trades=1264) clones despite
+##     pre-rejection → HALT. Fingerprint check is not working. Fix before continuing.
 ##
 ## ─────────────────────────────────────────────────────────
 ## COMPOUND TESTING (only after two Px items independently confirm improvement):
 ##   Rule: Never combine two untested changes.
 ##   Rule: Each compound test = exactly TWO confirmed improvements combined.
 ##   Rule: Compound tests require direct injection only.
-##   Rule: Accept compound test only if sharpe > best individual improvement.
+##   Rule: Accept compound test result only if sharpe > best individual improvement sharpe.
+##   Rule: If compound test fails, revert to best individual. Do not cascade.
 ##
-##   Priority compound candidates (pending individual results):
-##   C1: P3-CONT + P4 both improve → test combined (highest priority compound).
-##   C2: P7 + P4 both improve → test combined.
-##   C3: P2 + any Px improve → test P2+Px combined.
+##   Priority compound candidates (pending individual confirmation):
+##   C1: P3-CONT + P4 both improve → test combined (highest priority).
+##   C2: P3-CONT + P7 both improve → test combined.
+##   C3: P4 + P7 both improve → test combined.
 ##   C4: P3-CONT + P6 both improve → test combined.
-##   C5: P3-CONT + P7 both improve → test combined.
+##   C5: P2 + any Px improve → test P2+Px combined (lowest priority — P2 is uncertain).
 ##
 ## ─────────────────────────────────────────────────────────
-## KNOWN FAILURE FINGERPRINTS (pre-backtest validator — reject ALL of these before backtesting):
+## KNOWN FAILURE FINGERPRINTS (pre-backtest validator — reject ALL before backtesting):
 ##
-## Attractor 1   [STALE CLONE]:   trades=1267, sharpe=2.2657 → Gen 1592 config
-## Attractor 1b  [GEN2785 CLONE]: trades=1272, sharpe=2.2828 → Gen 2785 clone
-## Attractor 1c  [GEN2791 CLONE]: trades=1269, sharpe=2.2910 → Gen 2791 clone
-## Attractor 1d  [GEN2813 CLONE]: trades=1268, sharpe=2.3055 → Gen 2813 clone
-## Attractor 1e  [GEN2899 CLONE]: trades=1263, sharpe=2.3219 → Gen 2899 clone (nothing changed)
-## Attractor 3   [RSI DRIFT]:     trades=1272, sharpe=2.2015 → RSI/param contaminated
-## Attractor 4   [BROKEN YAML]:   trades=1041, sharpe=0.7753 → placeholder/invalid param
-## Attractor 5   [DEGRADED-A]:    trades=1335, sharpe=1.6865 → LLM modifying stale YAML
-## Attractor 6   [DEGRADED-B]:    trades=1345, sharpe=1.7514 → LLM modifying stale YAML
-## Ghost Echo    [TIMEOUT-166]:   trades=1264, sharpe=2.1998 → timeout=166h used
-## Zombie C      [EXTREME SL]:    trades<400                 → RSI extreme or stop<1.88
-## Zombie D      [SL=1.90]:       trades≈1228, sharpe≈1.59  → stop_loss=1.90 (NEVER)
-## Zombie G-adj  [TIMEOUT-155]:   trades≈888,  sharpe≈2.00  → timeout=155h used
+## Attractor 1    [GEN1592 CLONE]:  trades=1267, sharpe=2.2657 → stale Gen 1592 config
+## Attractor 1b   [GEN2785 CLONE]:  trades=1272, sharpe=2.2828 → Gen 2785 clone
+## Attractor 1c   [GEN2791 CLONE]:  trades=1269, sharpe=2.2910 → Gen 2791 clone
+## Attractor 1d   [GEN2813 CLONE]:  trades=1268, sharpe=2.3055 → Gen 2813 clone
+## Attractor 1e   [GEN2899 CLONE]:  trades=1263, sharpe=2.3219 → Gen 2899 clone
+## Attractor 1e-b [GEN3075 CLONE]:  trades=1263, sharpe=2.3262 → Gen 3075 clone !! NEW !!
+## Attractor 1f   [GEN3192 CLONE]:  trades=1264, sharpe=2.3300 → Gen 3192 clone !! NEW !!
+## Attractor 2    [NEAR-CLONE]:     trades=1263, sharpe=2.3026 → Gen 3184 near-clone !! NEW !!
+## Attractor 3    [RSI DRIFT]:      trades=1272, sharpe=2.2015 → RSI/param contaminated
+## Attractor 4    [BROKEN YAML-A]:  trades=1041, sharpe=0.7753 → placeholder/invalid param
+## Attractor 4b   [BROKEN YAML-B]:  trades=1041, sharpe=0.7660 → same family, seen ×2 !! NEW !!
+## Attractor 5    [DEGRADED-A]:     trades=1335, sharpe=1.6865 → stale YAML contamination
+## Attractor 6    [DEGRADED-B]:     trades=1345, sharpe=1.7514 → stale YAML contamination
+## Ghost Echo     [TIMEOUT-166]:    trades=1264, sharpe=2.1998 → timeout=166h used
+## Zombie C       [EXTREME SL]:     trades<400                  → RSI extreme or SL<1.88
+## Zombie D       [SL=1.90]:        trades≈1228, sharpe≈1.59   → stop_loss=1.90 (NEVER)
+## Zombie G-adj   [TIMEOUT-155]:    trades≈888,  sharpe≈2.00   → timeout=155h used
 ##
-## PRE-BACKTEST REJECTION RULES:
-##   1. If YAML params exactly match any historical champion → reject (Attractor 1x family).
-##      Implementation: diff test YAML against champion YAML. If zero diffs → reject.
-##   2. If timeout_hours ≠ 159 → reject immediately.
-##   3. If stop_loss_pct = 1.90 → reject immediately (ZombieD).
-##   4. If stop_loss_pct < 1.88 → reject immediately (ZombieC floor).
-##   5. If size_pct ≠ 25 → reject immediately.
-##   6. If more than ONE parameter differs from champion YAML → reject (compound change).
-##   7. If rsi_long_threshold ≠ 37.77 → reject immediately.
-##   8. If leverage ≠ 2 → reject immediately.
-##
-## POST-BACKTEST REJECTION RULES (in addition to pre-backtest):
-##   9. If result matches any known attractor fingerprint exactly → reject (stale clone).
-##   10. If sharpe ≤ 2.3219 → discard (not an improvement).
-##   11. If trades < 400 → reject (Zombie, below MIN_TRADES).
-##
-## ─────────────────────────────────────────────────────────
-## FROZEN PARAMETERS (hard-reject any YAML violating these):
-##   size_pct              = 25       (FOREVER)
-##   timeout_hours         = 159      (FOREVER — 155=ZombieG, 166=GhostEcho, 192=STALE/WRONG)
-##   max_open              = 3        (FOREVER)
-##   leverage              = 2        (FOREVER)
-##   fee_rate              = 0.0005   (FOREVER)
-##   stop_loss_pct         ≥ 1.88     (floor — below = ZombieC territory)
-##   stop_loss_pct         ≠ 1.90     (FORBIDDEN — ZombieD — NEVER TEST THIS VALUE)
-##   rsi_long_threshold    = 37.77    (do not touch — frozen since Gen 1477)
-##   MIN_TRADES            = 400      (correct — do not change)
-##
-##   ⚠ DISPLAYED YAML IS WRONG: timeout=192, SL=1.92, TP=4.65, rsi_period=24 are ALL stale.
-##   ⚠ DO NOT USE DISPLAYED YAML AS BASELINE FOR ANYTHING.
-##   ⚠ USE ONLY CONFIRMED GEN 2899 BACKTESTED YAML.
-##
-## ─────────────────────────────────────────────────────────
-## LLM FAILURE RATE SUMMARY (operational awareness):
-##   Clone rate (any Attractor 1x):        ~35% historical / ~60% Gens 2900-3000
-##   Known-bad attractor recycling (5/6):  ~30% Gens 2900-3000 (NEW HIGH — stale YAML)
-##   Zombie rate (trades<400):              ~15% historical / observed in recent
+## FINGERPRINT MAINTENANCE RULE (CRITICAL):
+##   After EVERY new_best event, the following must happen in the SAME generation:
+##   1. Retrieve champion YAML from storage and lock it.
+##   2. Add (new_sharpe,
