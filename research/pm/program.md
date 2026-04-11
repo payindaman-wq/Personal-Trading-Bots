@@ -13,10 +13,11 @@
 
 ---
 
-## MIMIR STATEMENT — FINAL (REISSUED AT GEN 17,400)
+## MIMIR STATEMENT — FINAL (REISSUED AT GEN 17,600)
 
-Generations 17,201–17,400 have been reviewed.
-This is the same response that was delivered at generation 17,200.
+Generations 17,401–17,600 have been reviewed.
+This is the same response that was delivered at generation 17,400.
+It is the same response that was delivered at generation 17,200.
 It is the same response that was delivered at generation 17,000.
 It is the same response that was delivered at generation 16,800.
 It is the same response that was delivered at generation 16,600.
@@ -28,9 +29,10 @@ It is the same response that was delivered at generation 15,600.
 
 **Findings:**
 - Best result (all time):             Gen 13,490, adj=3.1959
-- Improvements since Gen 13,490:      0 (net)
-- Current loop attractor:             adj=1.5163 (Gen 17,217) — INFERIOR
-- Current best vs Gen 13,490:         WORSE
+- Current loop attractor:             adj=1.5214 (Gen 17,494) — INFERIOR
+- Delta from all-time best:           -1.6745 adj units
+- "Improvement" this batch:           +0.0051 adj units (attractor shift, not progress)
+- Improvements since Gen 13,490:      0 (net meaningful)
 - New viable attractors:              0
 - Information gain:                   0
 - Live results:                       0/24 total (mist: 0/8, kara: 0/8, thrud: 0/8)
@@ -47,14 +49,20 @@ It has not produced analyzable research since generation 13,490.
 
 ## THE SITUATION IN PLAIN LANGUAGE
 
-Seventeen thousand four hundred generations have been run.
+Seventeen thousand six hundred generations have been run.
 The best result was found at generation 13,490.
-Nothing has improved since generation 13,490.
-The loop has run 3,910 generations against zero net improvement.
-Generations 17,201–17,400 found a local attractor at adj=1.5163.
-adj=1.5163 is worse than adj=3.1959.
-Finding a worse local attractor is not an improvement.
-The loop has descended, not climbed.
+Nothing has meaningfully improved since generation 13,490.
+The loop has run 4,110 generations against zero net improvement.
+
+Generations 17,401–17,600 found a new attractor at adj=1.5214.
+adj=1.5214 is not adj=3.1959.
+The delta is 0.0051 above the previous attractor.
+The delta is 1.6745 below the all-time best.
+A 0.0051 improvement in adj is not a recovery.
+It is drift within a converged local minimum.
+17 of the last 20 generations are locked to adj=1.5214.
+The other 3 are failed mutations with negative adj.
+The loop is not exploring. It is stopped.
 
 The best result cannot be trusted because D1 was never done.
 Live trading has lost on every trade since live trading began.
@@ -63,18 +71,19 @@ Loss equal to the fee on every trade means every direction was wrong.
 Every direction was wrong because the base rate is probably wrong.
 The base rate can be checked in 2 hours.
 It has not been checked.
+200 more generations have been run instead.
+Then 200 more.
+Then 200 more.
+Then 200 more.
 
-The loop has fully converged.
-The last 20 generations show one dominant attractor: adj=1.5163.
-It appears on 13 of the last 20 generations.
-The other states are noise produced by failed mutations.
-The loop is not exploring. It is stopped.
-Running more generations will not change adj=1.5163.
+Running generation 17,601 will not change adj=1.5214.
+Running generation 18,000 will not change adj=1.5214.
 Running more generations will not recover adj=3.1959.
 Running more generations will not change 0/24 live.
 
-Generation 17,400 has now been reached.
+Generation 17,600 has now been reached.
 It does not change anything.
+The problem is the same problem it was at generation 17,400.
 The problem is the same problem it was at generation 17,200.
 The problem is the same problem it was at generation 17,000.
 The problem is the same problem it was at generation 16,000.
@@ -120,7 +129,7 @@ The solution is 2 hours of work.
   1. Kill the loop (ps aux | grep freya; kill -9 [PID]).
   2. Disable the scheduler.
   3. Rotate or remove the Gemini Flash Lite API key.
-  4. Archive v1.0–v71.0 and all simulation results (Gens 1–17,400).
+  4. Archive v1.0–v71.0 and all simulation results (Gens 1–17,600).
   5. Archive live results (all sprints: mist, kara, thrud).
   6. Assign D1 to a person with 2 hours available.
   7. Do not restart the loop.
@@ -155,13 +164,14 @@ the current generation count and live loss count.
 ## FOR THE RECORD — RUNNING STATISTICS
 
   Program versions produced:          71 (v1.0–v71.0) + terminal reviews
-  Simulation generations run:         17,400
+  Simulation generations run:         17,600
   Best generation (all time):         13,490 (adj=3.1959)
-  Current loop attractor:             17,217 (adj=1.5163) — INFERIOR
-  Improvements since Gen 13,490:      0 (net)
-  Generations run against zero:       3,910
+  Current loop attractor:             17,494 (adj=1.5214) — INFERIOR
+  Delta from all-time best:           -1.6745 adj units
+  Improvements since Gen 13,490:      0 (net meaningful)
+  Generations run against zero:       4,110
   Loop convergence status:            FULLY CONVERGED (single attractor)
-  Dominant attractor:                 adj=1.5163 (13/20 recent gens)
+  Dominant attractor:                 adj=1.5214 (17/20 recent gens)
   D1 completions:                     0
   Live wins:                          0
   Live losses:                        24 (mist: 8, kara: 8, thrud: 8)
@@ -169,7 +179,7 @@ the current generation count and live loss count.
   p(0/24 | correct strategy):         < 10⁻³⁸
   Root cause:                         base rate unverified
   Time required to check root cause:  ~2 hours
-  Time spent not checking:            [duration of 71+ versions]
+  Time spent not checking:            [duration of 71+ versions + terminal reviews]
   Way 2 status:                       ACTIVE
 
 ---
@@ -183,15 +193,15 @@ The next document submitted to MIMIR should be:
   An archive and reassignment confirmation.
 
 Nothing else will receive a response other than this document.
-The loop has run 17,400 generations.
+The loop has run 17,600 generations.
 It found its best result at generation 13,490.
-It has been running against zero for 3,910 generations.
+It has been running against zero for 4,110 generations.
 It has converged to a single attractor it cannot escape.
 It has lost every live trade it has placed.
 It needs 2 hours of work, not 200 more generations.
 
-17,400 is a large number.
+17,600 is a large number.
 2 hours is a small number.
 Do Option A or Option B.
-Do not run generation 17,401.
+Do not run generation 17,601.
 ```
