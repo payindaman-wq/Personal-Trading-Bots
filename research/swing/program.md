@@ -1,33 +1,46 @@
 ```markdown
 # ODIN Research Program — Swing Trading Strategy Optimizer
-# Effective from Gen 16401 | Incumbent: Gen 15979 (Sharpe=1.2430)
-# MIMIR-reviewed 2026-04-10 (v22)
+# Effective from Gen 16601 | Incumbent: Gen 15979 (Sharpe=1.2430)
+# MIMIR-reviewed 2026-04-11 (v23)
 #
 # ══════════════════════════════════════════════════════════════════════
-# STATUS: ACTIVE — DEEP CEILING PHASE (14 improvements in 3,662 gens)
-# Sharpe has climbed from 0.0799 → 1.2430 via exit refinement.
+# STATUS: ACTIVE — CRITICAL STALL PHASE (0 improvements in 621 gens)
+# Last improvement: Gen 15979 (621 generations ago). This is the
+# longest stall in the research program's history.
+# Sharpe has climbed from 0.0799 → 1.2430 via exit refinement only.
 # The core indicator triplet is CONFIRMED VIABLE AND FROZEN.
+#
 # ⚠️ TRADES = 60 (HARD CEILING). All mutations must be trade-count
 #    neutral or trade-count reducing.
 #
-# ⚠️ v22 CRITICAL UPDATES:
-#    1. INCUMBENT UNCHANGED: Gen 15979 (Sharpe=1.2430) remains the
-#       incumbent. No new_best event has occurred since gen 15979.
-#       Gens 16386, 16387, 16396, 16400 produced [discarded] at 1.2430
-#       — these are REPRODUCTIONS, not improvements. Target: ABOVE 1.2430.
-#    2. DOMINANT FAILURE MODE (last 20 gens, ~50% of attempts):
-#       Sharpe=0.5761, 57 trades. ROOT CAUSE: LLM mutated short bollinger
-#       (168) or short MACD (24) or flipped momentum value. This has
-#       appeared 7 times in the last 20 generations. DO NOT TOUCH THESE.
-#    3. PATH PRIORITY SWITCH: PATH A1 (timeout) is now RECOMMENDED
-#       because PATH A2 (TP) was recommended last session AND TP=10.x
-#       tested worse than TP=9.5 (Sharpe=1.1882), suggesting the TP
-#       improvement curve is non-monotone. PATH A1 next value: 168.
-#       PATH A2 remains available: next value 11.0.
-#    4. INCUMBENT YAML: The only valid incumbent has:
+# ⚠️ v23 CRITICAL UPDATES:
+#    1. ESCALATION TRIGGER FIRED: We are past gen 16500 with zero
+#       improvement. Structural reassessment is now AUTHORIZED.
+#       See the NEW PATHS section below for newly unlocked mutations.
+#    2. NEW FAILURE CLUSTER (0.3154, 56 trades): This appeared 4 times
+#       in gens 16582, 16583, 16593, 16595. ROOT CAUSE UNKNOWN.
+#       Likely the LLM is using a corrupted or wrong YAML. If you
+#       see 0.3154, you have the wrong YAML. Re-read the incumbent.
+#    3. RECURRING FAILURE (1.1450, 57 trades): Appeared 4 times in
+#       gens 16588-16590, 16599. This is a specific wrong YAML
+#       producing 57 trades. DO NOT USE any YAML that gives 57 trades.
+#       If you see 1.1450 or 57 trades, you have the wrong YAML.
+#    4. NEAR-MISS OBSERVED (1.2429, 60 trades): Appeared in gens
+#       16581 and 16584. This is 0.0001 below the incumbent. Most
+#       likely this IS the timeout=168 result — slightly worse than
+#       timeout=156. If this is confirmed as timeout=168, then PATH A1
+#       next value is 192 (skip 168).
+#    5. INCUMBENT UNCHANGED: Gen 15979 (Sharpe=1.2430) remains.
+#       Target: STRICTLY ABOVE 1.2430.
+#    6. PATH PRIORITY: PATH A1 (timeout=192) and PATH A2 (TP=11.0)
+#       remain available. PATH A3 (NEW: SL relaxation, SL=2.0) and
+#       PATH A4 (NEW: risk parameter adjustment) are now AUTHORIZED
+#       as of this session due to escalation trigger firing.
+#    7. INCUMBENT YAML: The only valid incumbent has:
 #         take_profit_pct: 9.5   (UNCHANGED)
-#         timeout_hours:   156   (UNCHANGED — not 144, not 138, not 129)
-#       If you see ANY other values, you have the WRONG YAML.
+#         timeout_hours:   156   (UNCHANGED)
+#         stop_loss_pct:   1.5   (UNCHANGED — but PATH A3 may change)
+#         size_pct:        25.0  (UNCHANGED — frozen)
 # ══════════════════════════════════════════════════════════════════════
 
 ## ══════════════════════════════════════════════════════════════════════
@@ -40,10 +53,11 @@ It currently displays a DEAD stale YAML. Typical broken UI values:
   - TP=7.36 or 7.24 or 7.14 or 8.x  ← ALWAYS WRONG
   - timeout=129 or 138 or 144        ← ALL DEAD VALUES
   - size_pct=30 or 28.54 or 28.18    ← ALL WRONG
+  - max_open=3                        ← WRONG (incumbent has max_open=2)
 
 ⚠️ MOST DANGEROUS UI VARIANT: timeout=144, TP=9.5 — this is the OLD
 gen 15480 YAML. Using it produces Sharpe=1.2288. It is DEAD.
-The real incumbent has timeout=156, TP=9.5.
+The real incumbent has timeout=156, TP=9.5, max_open=2, size_pct=25.0.
 
 THIS IS COMPLETELY WRONG. THAT YAML IS DEAD. IGNORE IT ENTIRELY.
 
@@ -66,9 +80,10 @@ the CURRENT INCUMBENT YAML block below:
   □ timeout_hours = 156                (NOT 144 ← DEAD gen 15480)
                                        (NOT 138 ← DEAD gen 15062)
                                        (NOT 129 ← DEAD stale UI)
-  □ stop_loss_pct = 1.5                (FROZEN — do not change)
+  □ stop_loss_pct = 1.5                (default — PATH A3 may change)
   □ size_pct = 25.0                    (FROZEN — do not change)
-  □ pairs = [BTC/USD]                  (do not add ETH/USD or SOL/USD)
+  □ max_open = 2                       (FROZEN — do not change)
+  □ pairs = [BTC/USD]                  (do not add ETH/USD or SOL/USD yet)
   □ long bollinger period = 48         (do not change)
   □ short bollinger period = 168       ← DO NOT CHANGE. CAUSES 0.5761.
   □ long macd period = 48              (do not change)
@@ -85,71 +100,101 @@ or flipping momentum_accelerating to true. DO NOT TOUCH THESE THREE.
 ⚠️ MOST COMMON MISTAKE #2: Producing Sharpe=1.2288 by using
 timeout=144 (gen 15480 DEAD). Your incumbent has timeout=156.
 
-⚠️ MOST COMMON MISTAKE #3: Producing Sharpe=1.2430 (no-op
-reproduction). This means your proposed value is the same as the
-incumbent. The incumbent TP is 9.5 and timeout is 156. Change one
-of these to a NEW value: TP→11.0 or timeout→168.
+⚠️ MOST COMMON MISTAKE #3: Producing Sharpe=1.2430 or 1.2429 (no-op
+or near-miss reproduction). This means your proposed value is the
+same as the incumbent OR produces nearly the same result.
+  - If you got 1.2430: you reproduced the incumbent exactly.
+  - If you got 1.2429: you likely tested timeout=168 (already done).
+  The incumbent TP is 9.5 and timeout is 156.
+  Next values: TP→11.0 or timeout→192 (not 168 — likely already tested).
+
+⚠️ MOST COMMON MISTAKE #4: Producing Sharpe=1.1450/57 trades.
+You have a corrupt or wrong YAML. The real incumbent has 60 trades.
+Any YAML producing 57 trades is wrong. Re-read the incumbent YAML.
+
+⚠️ MOST COMMON MISTAKE #5: Producing Sharpe=0.3154/56 trades.
+You have the wrong YAML. Re-read the incumbent YAML immediately.
 
 If ANY value above does not match the YAML below, STOP.
 You have a stale or wrong YAML. Re-read the CURRENT INCUMBENT block.
 
 ## ══════════════════════════════════════════════════════════════════════
-## ⚠️ 0.5761 FAILURE DIAGNOSIS — IF YOU SEE THIS OUTPUT, READ THIS
+## ⚠️ FAILURE DIAGNOSIS — IF YOU SEE ANY OF THESE OUTPUTS, READ THIS
 ## ══════════════════════════════════════════════════════════════════════
 
 IF YOUR BACKTEST PRODUCES Sharpe=0.5761, trades=57:
   YOU CHANGED THE SHORT BOLLINGER PERIOD (must be 168)
   OR YOU CHANGED THE SHORT MACD PERIOD (must be 24)
   OR YOU FLIPPED momentum_accelerating FROM false TO true
-  THIS IS THE #1 FAILURE MODE. It happened 7 times in the last 20 gens.
+  HOW TO FIX: Revert ALL indicator changes.
 
-HOW TO FIX: Revert ALL indicator changes. Keep all indicators exactly
-as they are in the gen15979 incumbent YAML. The ONLY parameters you
-are allowed to change are take_profit_pct and timeout_hours.
+IF YOUR BACKTEST PRODUCES Sharpe=0.3154, trades=56:
+  YOU HAVE THE WRONG YAML. This is a new failure cluster.
+  HOW TO FIX: Discard your entire YAML. Start fresh from the
+  CURRENT INCUMBENT block below. Do not modify any indicator.
 
-DO NOT CHANGE ANY INDICATOR. DO NOT CHANGE ANY PERIOD. DO NOT FLIP
-ANY VALUE. CHANGE ONLY TP OR TIMEOUT. NOTHING ELSE.
+IF YOUR BACKTEST PRODUCES Sharpe=1.1450, trades=57:
+  YOU HAVE THE WRONG YAML (a specific corrupt variant).
+  HOW TO FIX: Discard your entire YAML. Start fresh from the
+  CURRENT INCUMBENT block below. Incumbent has 60 trades, not 57.
+
+IF YOUR BACKTEST PRODUCES Sharpe=1.2429, trades=60:
+  You likely tested timeout=168. This is 0.0001 below the incumbent.
+  timeout=168 is considered TESTED AND INFERIOR.
+  HOW TO FIX: Use timeout=192 as the next PATH A1 value.
+
+IF YOUR BACKTEST PRODUCES Sharpe=1.2430, trades=60:
+  Your mutation was a no-op. You reproduced the incumbent exactly.
+  HOW TO FIX: Verify you changed exactly ONE parameter to a NEW value.
+  TP→11.0 (not 9.5) OR timeout→192 (not 156 or 168).
+
+IF YOUR BACKTEST PRODUCES Sharpe=1.2288, trades=60:
+  YOUR TIMEOUT WAS 144, NOT 156. You used the DEAD gen 15480 YAML.
+  HOW TO FIX: Start from gen15979 incumbent. timeout must be 156.
 
 ## ══════════════════════════════════════════════════════════════════════
 ## ⚠️ MUTATION DISCIPLINE — FOLLOW THESE STEPS EXACTLY
 ## ══════════════════════════════════════════════════════════════════════
 
 STEP 1: Read the CURRENT INCUMBENT YAML block below.
-        Explicitly write out:
+        Explicitly write out ALL of these values:
+          INCUMBENT NAME: [value]     ← must contain "gen15979"
           INCUMBENT TP: [value]       ← must be 9.5
           INCUMBENT TIMEOUT: [value]  ← must be 156
-        If these are not 9.5 and 156, STOP — you have the wrong YAML.
+          INCUMBENT SL: [value]       ← must be 1.5
+          INCUMBENT SIZE: [value]     ← must be 25.0
+          INCUMBENT MAX_OPEN: [value] ← must be 2
+        If ANY of these are wrong, STOP — you have the wrong YAML.
 
 STEP 2: Write the single parameter you are changing, before/after:
           CHANGING: [parameter] from [old value] to [new value]
-          Example: CHANGING: timeout_hours from 156 to 168
+          Example: CHANGING: timeout_hours from 156 to 192
           Example: CHANGING: take_profit_pct from 9.5 to 11.0
+          Example: CHANGING: stop_loss_pct from 1.5 to 2.0
 
 STEP 3: Confirm the new value is NOT in the "already tested" lists.
+        Confirm the new value is not the same as the incumbent.
 
 STEP 4: Write the complete mutated YAML with ONLY that one change.
         Every other value must be IDENTICAL to the incumbent.
+        Double-check: short bollinger=168, short macd=24,
+        momentum_accelerating=false on both sides, size_pct=25.0,
+        max_open=2, stop_loss_pct=1.5 (unless PATH A3).
 
 STEP 5: Name the strategy:
           random_restart_v3_tightened_sl_v3_gen15979_[descriptor]
-          Example: random_restart_v3_tightened_sl_v3_gen15979_timeout168
+          Example: random_restart_v3_tightened_sl_v3_gen15979_timeout192
           Example: random_restart_v3_tightened_sl_v3_gen15979_tp11
+          Example: random_restart_v3_tightened_sl_v3_gen15979_sl20
 
 If you cannot identify a valid untested mutation, write
 "NO VALID MUTATION AVAILABLE" and explain why.
-
-## RESEARCH SCOPE
-League: swing | Timeframe: 1h candles | Data: 2yr Binance OHLCV
-Allowed pairs: BTC/USD, ETH/USD, SOL/USD (enforced in code)
-Trade frequency target: 30–60 trades over 2yr backtest window
-Min trades: SWING_MIN_TRADES=30 (immutable code constant)
-Max trades: SWING_MAX_TRADES=60 (hard rejection in code)
 
 ## ══════════════════════════════════════════════════════════════════════
 ## CURRENT INCUMBENT — THIS IS THE ONLY YAML YOU MAY MUTATE
 ## DO NOT USE ANY PREVIOUS VERSION. DO NOT USE THE UI DISPLAY BOX.
 ## THE UI DISPLAY IS BROKEN. The real incumbent has:
-##   name=gen15979, timeout=156, TP=9.5, size_pct=25.0
+##   name=gen15979, timeout=156, TP=9.5, size_pct=25.0, max_open=2
 ## ══════════════════════════════════════════════════════════════════════
 
 ```yaml
@@ -201,11 +246,11 @@ risk:
 ```
 
 ⚠️ VERIFY BEFORE MUTATING:
-  take_profit_pct  = 9.5   ← INCUMBENT. Change to 11.0 if using PATH A2.
-  timeout_hours    = 156   ← INCUMBENT. Change to 168 if using PATH A1.
-                             DO NOT use 144 (gen 15480 DEAD).
-  stop_loss_pct    = 1.5   ← FROZEN.
+  take_profit_pct  = 9.5   ← INCUMBENT.
+  timeout_hours    = 156   ← INCUMBENT. Next: 192 (skip 168 — likely tested).
+  stop_loss_pct    = 1.5   ← Default. PATH A3 may test 2.0.
   size_pct         = 25.0  ← FROZEN.
+  max_open         = 2     ← FROZEN.
   short bollinger  = 168   ← FROZEN. DO NOT CHANGE. CAUSES 0.5761.
   short macd       = 24    ← FROZEN. DO NOT CHANGE. CAUSES 0.5761.
   momentum value   = false ← FROZEN. DO NOT FLIP. CAUSES 0.5761.
@@ -223,15 +268,15 @@ Sharpe: 1.2430 | Trades: 60 | Win rate: 41.7%
   TP=7.38  → Sharpe=1.1311, 60 trades  [gen 14993 — superseded]
   TP≈8.x   → Sharpe=1.1426, 60 trades  [gen 15042 — superseded]
   TP=9.5   → Sharpe=1.2430             [CURRENT INCUMBENT — do not reproduce]
-  TP=10.0  → Sharpe≈1.1882, 60 trades  [WORSE than 9.5 — DO NOT USE]
-  TP=10.5  → Sharpe≈1.1882, 60 trades  [WORSE than 9.5 — DO NOT USE]
+  TP=10.0  → Sharpe≈1.1882, 60 trades  [WORSE — DO NOT USE]
+  TP=10.5  → Sharpe≈1.1882, 60 trades  [WORSE — DO NOT USE]
 
 ⚠️ CRITICAL: TP=10.0 and TP=10.5 were tested and returned Sharpe=1.1882,
 which is WORSE than the current incumbent. The TP improvement curve is
 NON-MONOTONE. Skip 10.0 and 10.5. Start at 11.0.
 
 ### NEXT UNTESTED TP VALUES (try in this order):
-  → 11.0  ← PATH A2 (available if not using PATH A1 this session)
+  → 11.0  ← PATH A2 (primary TP candidate)
   → 11.5
   → 12.0
   → 13.0
@@ -243,17 +288,25 @@ NON-MONOTONE. Skip 10.0 and 10.5. Start at 11.0.
   timeout=138 → gen 15062 (Sharpe=1.2063, superseded)
   timeout=144 → gen 15480 (Sharpe=1.2288, DEAD)
   timeout=156 → gen 15979 (Sharpe=1.2430, CURRENT INCUMBENT)
+  timeout=168 → LIKELY TESTED (Sharpe=1.2429 seen in gens 16581/16584
+                — 0.0001 below incumbent, treated as INFERIOR/TESTED)
 
 ### NEXT UNTESTED TIMEOUT VALUES (try in this order):
-  → 168  ← PATH A1 — RECOMMENDED THIS SESSION (primary)
-  → 192
+  → 192  ← PATH A1 — PRIMARY RECOMMENDATION THIS SESSION
+           (168 appears tested and inferior at 1.2429)
   → 216
   → 240
   → 264
   → 288
 
-### STOP LOSS VALUES (FROZEN — DO NOT TEST):
-  SL=1.5 → CURRENT INCUMBENT (frozen — do not change)
+### STOP LOSS VALUES (PATH A3 — NOW AUTHORIZED):
+  SL=1.5 → CURRENT INCUMBENT
+  SL=2.0 → NEXT TO TEST (PATH A3 — newly authorized)
+  SL=2.5 → After 2.0
+  NOTE: SL relaxation may allow longer-running trades to survive
+  minor pullbacks. Test SL=2.0 as a single isolated change.
+  ⚠️ SL relaxation may increase trade count. Monitor carefully.
+  ⚠️ If SL=2.0 causes trades > 60, it will be rejected. Accept this.
 
 ### INDICATOR PERIODS (ALL FROZEN — DO NOT CHANGE ANY):
   long bollinger:  48  (incumbent — frozen)
@@ -267,8 +320,12 @@ NON-MONOTONE. Skip 10.0 and 10.5. Start at 11.0.
 ## DEAD CLUSTERS — SHARPE VALUES THAT INDICATE SOMETHING WENT WRONG
 ## ══════════════════════════════════════════════════════════════════════
 
+  DEAD: Sharpe=0.3154 (56 trades) — ⚠️ NEW FAILURE (4 times in last 20).
+        ROOT CAUSE UNKNOWN. You have the wrong YAML.
+        FIX: Discard entire YAML. Start fresh from incumbent block.
+
   DEAD: Sharpe=0.5279 (57 trades) — short-side indicator mutation.
-  DEAD: Sharpe=0.5761 (57 trades) — ⚠️ DOMINANT FAILURE (7/20 gens).
+  DEAD: Sharpe=0.5761 (57 trades) — ⚠️ PERSISTENT FAILURE.
         ROOT CAUSE: changed short bollinger (168), short MACD (24),
         or flipped momentum value false→true.
         FIX: Revert ALL indicator changes. Only change TP or timeout.
@@ -281,119 +338,79 @@ NON-MONOTONE. Skip 10.0 and 10.5. Start at 11.0.
   DEAD: Sharpe≈1.1311 (60 trades) — gen 14993, superseded
   DEAD: Sharpe≈1.1362 (60 trades) — corrupt YAML variant
   DEAD: Sharpe≈1.1426 (60 trades) — gen 15042, superseded
-  DEAD: Sharpe≈1.1450 (57 trades) — corrupt/partial YAML
+  DEAD: Sharpe≈1.1450 (57 trades) — ⚠️ RECURRING FAILURE (4 times).
+        You have a specific wrong YAML producing 57 trades.
+        FIX: Discard your YAML. Incumbent has 60 trades, not 57.
   DEAD: Sharpe≈1.1643 (60 trades) — gen 15960, discarded
   DEAD: Sharpe≈1.1708 (60 trades) — gen 15998, discarded
-  DEAD: Sharpe≈1.1882 (60 trades) — TP=10.0 or 10.5, inferior to 9.5
+  DEAD: Sharpe≈1.1882 (60 trades) — TP=10.0 or 10.5, inferior
   DEAD: Sharpe=1.2063 (60 trades) — gen 15062, superseded
   DEAD: Sharpe=1.2287 (60 trades) — float duplicate of gen 15480
   DEAD: Sharpe=1.2288 (60 trades) — gen 15480, timeout=144 DEAD
+  DEAD: Sharpe=1.2429 (60 trades) — likely timeout=168, INFERIOR
+        by 0.0001. Treat as tested. Use timeout=192 instead.
   DEAD: Sharpe=1.2430 (60 trades) — gen 15979, CURRENT INCUMBENT
         Reproducing this = no-op. Your mutation had no effect.
 
 Diagnostic guide:
-  Got 0.5761 or 0.5279: you changed short bollinger/MACD or flipped
-        momentum. ONLY change TP or timeout. Nothing else.
-  Got 0.6911: you used the broken UI YAML (name: crossover).
-  Got 0.7734: you used the stale UI YAML (timeout=129).
-  Got 1.1882: you tested TP=10.0 or 10.5. Already done. Use 11.0+.
-  Got 1.2063: you mutated from gen 15062 YAML (timeout=138). DEAD.
-  Got 1.2288: YOUR TIMEOUT WAS 144, NOT 156. Fix it immediately.
-  Got 1.2430: your mutation was a no-op. The value you used is the
-        same as the incumbent (TP=9.5 or timeout=156). Use the NEXT
-        untested value: TP→11.0 or timeout→168.
+  Got 0.3154/56 trades: wrong YAML entirely. Start from incumbent.
+  Got 0.5761 or 0.5279: changed short bollinger/MACD or flipped
+        momentum. ONLY change TP, timeout, or SL. Nothing else.
+  Got 0.6911: used the broken UI YAML (name: crossover).
+  Got 0.7734: used the stale UI YAML (timeout=129).
+  Got 1.1450/57 trades: wrong YAML producing 57 trades. Discard it.
+  Got 1.1882: tested TP=10.0 or 10.5. Already done. Use 11.0+.
+  Got 1.2063: mutated from gen 15062 YAML (timeout=138). DEAD.
+  Got 1.2288: timeout was 144, not 156. Fix it immediately.
+  Got 1.2429: likely timeout=168. Already tested inferior. Use 192.
+  Got 1.2430: mutation was a no-op. Use TP→11.0 or timeout→192.
 
 Your target is Sharpe STRICTLY ABOVE 1.2430.
 
 ## ══════════════════════════════════════════════════════════════════════
-## FOR THE NEXT 100 GENERATIONS: ONLY TWO MUTATION TYPES PERMITTED
+## FOR THE NEXT 100 GENERATIONS: PERMITTED MUTATION TYPES
+## (ESCALATION HAS FIRED — THREE PATHS NOW AUTHORIZED)
 ## ══════════════════════════════════════════════════════════════════════
 
-  TYPE 1 (PATH A1): Change timeout_hours ← RECOMMENDED THIS SESSION
+  PATH A1 (RECOMMENDED): Change timeout_hours
     Incumbent value: 156
-    Already tested:  129, 138, 144, 156
-    Next untested (in order): 168, 192, 216, 240, 264, 288
+    Already tested:  129, 138, 144, 156, 168 (likely — see 1.2429)
+    Next untested (in order): 192, 216, 240, 264, 288
+    ⚠️ PRIMARY: timeout=192
+    Do NOT use 168 (likely tested, produced 1.2429 which is inferior).
     Do NOT go below 156. Do NOT exceed 300.
-    ⚠️ PRIMARY RECOMMENDATION: timeout=168
 
-  TYPE 2 (PATH A2): Change take_profit_pct
+  PATH A2: Change take_profit_pct
     Incumbent value: 9.5
     Already tested:  7.14, 7.38, ~8.x, 9.5, ~10.0, ~10.5
     Next untested (in order): 11.0, 11.5, 12.0, 13.0, 14.0, 15.0
-    Do NOT use 10.0 or 10.5 — tested, inferior (Sharpe=1.1882).
-    Do NOT go below 9.5. Start at 11.0.
-    ⚠️ NOTE: TP=10.x was WORSE than TP=9.5. Curve is non-monotone.
-    ⚠️ SECONDARY RECOMMENDATION: TP=11.0 (if not doing PATH A1)
+    Do NOT use 10.0 or 10.5 — tested, inferior.
+    Do NOT go below 9.5.
+    ⚠️ SECONDARY: TP=11.0
 
-PRIORITY THIS SESSION: PATH A1 (timeout=168) because:
-  - PATH A2 was recommended last session
-  - TP=10.x tested inferior, suggesting TP curve may be flattening
-  - Timeout increases have been the most reliable improvement path
-  Alternate paths each session.
+  PATH A3 (NOW AUTHORIZED — NEW): Change stop_loss_pct
+    Incumbent value: 1.5
+    Already tested:  1.5 (incumbent)
+    Next untested (in order): 2.0, 2.5, 3.0
+    ⚠️ TERTIARY: SL=2.0
+    ⚠️ WARNING: SL relaxation may cause trade count to change.
+       If trades exceed 60, the backtest will be rejected.
+       If trades drop below 30, it will also be rejected.
+       Test as a single isolated change. Do not combine with PATH A1/A2.
+    RATIONALE: With a 9.5% TP and 156hr timeout, a tighter SL at 1.5%
+    may be stopping trades out prematurely before they can reach TP.
+    A wider SL of 2.0% may allow more trades to survive and reach TP.
+    This is a single-variable test. Name it: ..._gen15979_sl20
 
-DO NOT attempt any other mutation type. These are the ONLY two
-permitted mutations for the next 100 generations.
+  PRIORITY ORDER THIS SESSION:
+    1st choice: PATH A1 → timeout=192
+    2nd choice: PATH A2 → TP=11.0
+    3rd choice: PATH A3 → SL=2.0
+    Alternate paths across consecutive generations.
+    Do not attempt the same path twice in a row if it failed.
+
+DO NOT attempt any other mutation type without MIMIR approval.
 
 ## ══════════════════════════════════════════════════════════════════════
 ## THE MOST IMPORTANT CONSTRAINT RIGHT NOW
-## ══════════════════════════════════════════════════════════════════════
-
-THE CURRENT STRATEGY HITS EXACTLY 60 TRADES — THE HARD CEILING.
-
-This means:
-  - ANY mutation that loosens entry conditions → [max_trades_reject]
-  - ANY mutation that tightens exits (lower TP, lower SL, lower timeout)
-    → trades close sooner → more re-entries → [max_trades_reject]
-  - ONLY mutations that reduce or maintain trade count are viable
-
-SAFE mutations (trade-count neutral or reducing):
-  ✓ Increasing timeout_hours above 156 (fewer time-outs, fewer re-entries)
-  ✓ Increasing take_profit_pct above 9.5 (fewer TP hits, fewer re-entries)
-
-DANGEROUS mutations (WILL cause max_trades_reject or 0.5761):
-  ✗ Decreasing any period_hours
-  ✗ Decreasing take_profit_pct (below 9.5)
-  ✗ Decreasing timeout_hours (below 156)
-  ✗ Removing any entry condition
-  ✗ Adding a second pair
-  ✗ Changing short bollinger 168 → ANYTHING  (causes 0.5761)
-  ✗ Changing short macd 24 → ANYTHING        (causes 0.5761)
-  ✗ Flipping momentum_accelerating false→true (causes 0.5761)
-  ✗ Changing size_pct (frozen at 25.0)
-  ✗ Changing stop_loss_pct (frozen at 1.5)
-  ✗ Changing max_open (frozen at 2)
-
-## ══════════════════════════════════════════════════════════════════════
-## KEY DIFFERENCE: GEN 15480 (DEAD) vs GEN 15979 (INCUMBENT)
-## ══════════════════════════════════════════════════════════════════════
-
-  Gen 15480 (DEAD):      take_profit_pct=9.5, timeout_hours=144 → 1.2288
-  Gen 15979 (INCUMBENT): take_profit_pct=9.5, timeout_hours=156 → 1.2430
-
-  THE ONLY DIFFERENCE IS timeout_hours: 144 vs 156.
-  If your YAML has timeout=144, you are mutating from the DEAD incumbent.
-  If your YAML has timeout=156, you are mutating from the correct one.
-
-## ══════════════════════════════════════════════════════════════════════
-## STRUCTURAL REASSESSMENT TRIGGER
-## ══════════════════════════════════════════════════════════════════════
-
-If neither PATH A1 (timeout) nor PATH A2 (TP) produces improvement
-through gen 16500, escalate to MIMIR for structural reassessment.
-Potential future directions (NOT permitted yet):
-  - Adding a second confirmation indicator on the long side
-  - Pair expansion (ETH/USD) with tight controls
-  - Risk parameter adjustment (pause_if_down_pct, pause_hours)
-  - Stop loss relaxation trial (SL=2.0) as a single test
-These are BLOCKED until the current two paths are exhausted.
-
-## ══════════════════════════════════════════════════════════════════════
-## GIT COMMIT REMINDER
-## ══════════════════════════════════════════════════════════════════════
-
-YAML must be committed to git after EVERY new_best event.
-The Gen 2126 loss (best strategy lost due to no git commit) must
-not be repeated. This is a mandatory non-negotiable requirement.
-⚠️ COMMIT THE Gen 15979 YAML TO GIT NOW IF NOT ALREADY DONE.
-After any future new_best event, commit IMMEDIATELY before proceeding.
-```
+## ══════════════════════════════════════════════════════════════
