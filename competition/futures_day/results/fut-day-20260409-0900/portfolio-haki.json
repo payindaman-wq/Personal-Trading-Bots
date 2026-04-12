@@ -1,0 +1,87 @@
+{
+  "bot": "haki",
+  "competition_id": "fut-day-20260409-0900",
+  "duration_hours": 24,
+  "started_at": "2026-04-09T09:00:01.980119+00:00",
+  "pairs": [
+    "BTC/USD",
+    "ETH/USD",
+    "SOL/USD",
+    "XRP/USD",
+    "DOGE/USD",
+    "AVAX/USD",
+    "LINK/USD",
+    "UNI/USD",
+    "AAVE/USD",
+    "NEAR/USD",
+    "APT/USD",
+    "SUI/USD",
+    "ARB/USD",
+    "OP/USD",
+    "ADA/USD",
+    "POL/USD"
+  ],
+  "starting_capital": 1000.0,
+  "fee_rate": 0.0005,
+  "cash": 669.7490516853999,
+  "positions": [
+    {
+      "pair": "DOGE/USD",
+      "direction": "long",
+      "entry_price": 0.0916059,
+      "quantity": 2619.91858603,
+      "cost_basis": 120.0,
+      "leverage": 2.0,
+      "opened_at": "2026-04-09T09:40:02.252618+00:00"
+    },
+    {
+      "pair": "AVAX/USD",
+      "direction": "long",
+      "entry_price": 9.1,
+      "quantity": 26.37362637,
+      "cost_basis": 120.0,
+      "leverage": 2.0,
+      "opened_at": "2026-04-09T09:40:02.252652+00:00"
+    },
+    {
+      "pair": "NEAR/USD",
+      "direction": "short",
+      "entry_price": 1.332,
+      "quantity": 137.13153153,
+      "cost_basis": 91.3296,
+      "leverage": 2.0,
+      "opened_at": "2026-04-09T10:50:02.042677+00:00"
+    }
+  ],
+  "closed_trades": [
+    {
+      "pair": "NEAR/USD",
+      "direction": "short",
+      "reason": "timeout",
+      "entry_price": 1.335,
+      "exit_price": 1.332,
+      "pnl_usd": 1.0787,
+      "pnl_pct": 0.8989,
+      "funding_cost": 0.0,
+      "leverage": 2.0,
+      "won": true,
+      "opened_at": "2026-04-09T09:35:01.625204+00:00",
+      "closed_at": "2026-04-09T10:50:02.041806+00:00"
+    }
+  ],
+  "stats": {
+    "total_trades": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "total_pnl_usd": 1.0787,
+    "total_pnl_pct": -23.8921,
+    "total_fees": 0.0,
+    "max_drawdown_pct": 0.0,
+    "current_equity": 761.08,
+    "peak_equity": 1000.0,
+    "live_equity_mtm": 672.15,
+    "live_pnl_usd": -327.85,
+    "live_pnl_pct": -32.7847
+  }
+}

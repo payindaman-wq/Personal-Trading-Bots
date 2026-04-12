@@ -19,9 +19,11 @@
   },
   "error_consecutive": {
     "day_errors": 0,
-    "swing_errors": 0,
+    "swing_errors": 1,
     "arb_errors": 0,
-    "spread_errors": 0
+    "spread_errors": 0,
+    "futures_day_errors": 0,
+    "futures_swing_errors": 0
   },
   "mimir_last_alerted_ts": "2026-03-24T11:58"
 }

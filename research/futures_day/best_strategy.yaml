@@ -20,8 +20,8 @@ pairs:
 - ADA/USD
 - POL/USD
 position:
-  size_pct: 13.64
-  max_open: 2
+  size_pct: 8
+  max_open: 1
   fee_rate: 0.0005
 entry:
   long:
@@ -29,16 +29,16 @@ entry:
     - indicator: rsi
       period_minutes: 60
       operator: lt
-      value: 28
+      value: 30.0
   short:
     conditions:
     - indicator: rsi
       period_minutes: 60
       operator: gt
-      value: 72
+      value: 68.63
 exit:
-  take_profit_pct: 4.0
-  stop_loss_pct: 2.0
+  take_profit_pct: 4.6
+  stop_loss_pct: 2.59
   timeout_minutes: 720
 risk:
   pause_if_down_pct: 8

@@ -170,8 +170,28 @@ def start_new():
 
 
 def main():
-    now = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')
-    print(f'[futures_day_restart] {now}')
+    now_str = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')
+    print(f'[futures_day_restart] {now_str}')
+
+    # Cycle boundary: pause for LOKI review when all sprints in cycle are done
+    cs       = load_cycle_state()
+    sprint_n = cs.get('sprint_in_cycle', 0)
+    spc      = cs.get('sprints_per_cycle', 7)
+    if sprint_n >= spc and cs.get('status') != 'awaiting_review':
+        cs['status'] = 'awaiting_review'
+        save_cycle_state(cs)
+        old_cycle = cs.get('cycle', 1)
+        print(f'  [cycle] Futures Day Cycle {old_cycle} complete ({spc} sprints) — awaiting LOKI review')
+        try:
+            import json as _j
+            inbox = os.path.join(WORKSPACE, 'syn_inbox.jsonl')
+            e = _j.dumps({'ts': datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M'),
+                          'source': 'futures_day_restart', 'severity': 'info',
+                          'msg': f'Futures Day Cycle {old_cycle} complete — LOKI restructure pending'})
+            open(inbox, 'a').write(e + '\n')
+        except Exception:
+            pass
+        return  # LOKI adjusts strategies then normal daily restart fires next cycle
 
     comp_dir, meta = find_active()
 

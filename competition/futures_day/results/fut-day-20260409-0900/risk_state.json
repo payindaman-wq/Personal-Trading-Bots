@@ -1,0 +1,50 @@
+{
+  "haki": {
+    "stopped": true,
+    "paused_until": null
+  },
+  "brandr": {
+    "stopped": true,
+    "paused_until": null
+  },
+  "vemund": {
+    "stopped": false,
+    "paused_until": "2026-04-10T09:05:02.300971+00:00"
+  },
+  "starkad": {
+    "stopped": true,
+    "paused_until": null
+  },
+  "helgi": {
+    "stopped": true,
+    "paused_until": null
+  },
+  "asmund": {
+    "stopped": true,
+    "paused_until": null
+  },
+  "hakon": {
+    "stopped": true,
+    "paused_until": null
+  },
+  "kveldulf": {
+    "stopped": true,
+    "paused_until": null
+  },
+  "ulfhedinn": {
+    "stopped": false,
+    "paused_until": "2026-04-10T09:35:02.287906+00:00"
+  },
+  "vikar": {
+    "stopped": false,
+    "paused_until": "2026-04-10T09:05:02.260976+00:00"
+  },
+  "orvar": {
+    "stopped": false,
+    "paused_until": "2026-04-10T09:05:02.270077+00:00"
+  },
+  "ketil": {
+    "stopped": false,
+    "paused_until": "2026-04-10T09:35:01.705356+00:00"
+  }
+}

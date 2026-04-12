@@ -1,8 +1,8 @@
 {
   "champion": "sigurd",
   "challenger": "autobotday",
-  "challenger_wins": 2,
-  "champion_wins": 4,
+  "challenger_wins": 1,
+  "champion_wins": 6,
   "history": [
     {
       "sprint": "comp-20260326-0910",
@@ -75,6 +75,30 @@
       "autobot_pnl": 0.1799,
       "top3": true,
       "processed_at": "2026-04-06T09:00"
+    },
+    {
+      "sprint": "comp-20260407-0900",
+      "winner": "leif",
+      "autobot_rank": 7,
+      "autobot_pnl": 0.0,
+      "top3": false,
+      "processed_at": "2026-04-09T09:00"
+    },
+    {
+      "sprint": "comp-20260409-0900",
+      "winner": "freydis",
+      "autobot_rank": 4,
+      "autobot_pnl": 0.0,
+      "top3": false,
+      "processed_at": "2026-04-11T09:00"
+    },
+    {
+      "sprint": "comp-20260410-0910",
+      "winner": "gunnar",
+      "autobot_rank": 3,
+      "autobot_pnl": 0.0,
+      "top3": true,
+      "processed_at": "2026-04-12T09:00"
     }
   ]
 }

@@ -1,0 +1,48 @@
+{
+  "generated_utc": "2026-04-12T23:07:37.509297+00:00",
+  "days_analyzed": 7,
+  "api_access": {
+    "taostats": {
+      "subnet": {
+        "ok": false,
+        "error": "HTTP 404: Not Found"
+      },
+      "metagraph": {
+        "ok": false,
+        "error": "HTTP 404: Not Found"
+      }
+    },
+    "taoshi_ptn": {
+      "v1_signals": {
+        "ok": false,
+        "error": "HTTP 404: Not Found"
+      },
+      "v1_miners": {
+        "ok": false,
+        "error": "HTTP 404: Not Found"
+      },
+      "v1_leaderboard": {
+        "ok": false,
+        "error": "HTTP 404: Not Found"
+      },
+      "signals": {
+        "ok": false,
+        "error": "HTTP 404: Not Found"
+      },
+      "request_network": {
+        "ok": false,
+        "error": "HTTP 404: Not Found"
+      }
+    }
+  },
+  "top_miners": [],
+  "signal_analysis": {
+    "note": "No public unauthenticated signal endpoint found.",
+    "implication": "Taoshi PTN signals require API key or validator stake."
+  },
+  "recommendation": "No public APIs reachable. Check network/firewall, then consider: pip3 install bittensor for direct on-chain access.",
+  "next_steps": [
+    "Verify VPS can reach api.taostats.io (curl test)",
+    "pip3 install bittensor if taostats unreachable"
+  ]
+}

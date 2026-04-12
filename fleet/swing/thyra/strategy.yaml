@@ -9,18 +9,10 @@ pairs:
   - DOGE/USD
   - AVAX/USD
   - LINK/USD
-  - UNI/USD
-  - AAVE/USD
-  - NEAR/USD
-  - APT/USD
   - SUI/USD
-  - ARB/USD
-  - OP/USD
-  - ADA/USD
-  - POL/USD
 position:
   size_pct: 20
-  max_open: 3
+  max_open: 2
   fee_rate: 0.001
 entry:
   long:
@@ -39,7 +31,10 @@ entry:
       - indicator: rsi
         period_hours: 14
         operator: lt
-        value: 68
+        value: 63
+      - indicator: volume_above_avg
+        operator: eq
+        value: true
   short:
     conditions:
       - indicator: trend
@@ -56,11 +51,14 @@ entry:
       - indicator: rsi
         period_hours: 14
         operator: gt
-        value: 32
+        value: 37
+      - indicator: volume_above_avg
+        operator: eq
+        value: true
 exit:
-  take_profit_pct: 12.0
+  take_profit_pct: 15.0
   stop_loss_pct: 4.0
-  timeout_hours: 96
+  timeout_hours: 120
 risk:
   pause_if_down_pct: 8
   pause_hours: 24

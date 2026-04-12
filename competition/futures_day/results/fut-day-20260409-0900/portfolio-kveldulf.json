@@ -1,0 +1,101 @@
+{
+  "bot": "kveldulf",
+  "competition_id": "fut-day-20260409-0900",
+  "duration_hours": 24,
+  "started_at": "2026-04-09T09:00:01.980119+00:00",
+  "pairs": [
+    "BTC/USD",
+    "ETH/USD",
+    "SOL/USD",
+    "XRP/USD",
+    "DOGE/USD",
+    "AVAX/USD",
+    "LINK/USD",
+    "UNI/USD",
+    "AAVE/USD",
+    "NEAR/USD",
+    "APT/USD",
+    "SUI/USD",
+    "ARB/USD",
+    "OP/USD",
+    "ADA/USD",
+    "POL/USD"
+  ],
+  "starting_capital": 1000.0,
+  "fee_rate": 0.0005,
+  "cash": 598.519805013294,
+  "positions": [
+    {
+      "pair": "POL/USD",
+      "direction": "long",
+      "entry_price": 0.08643,
+      "quantity": 3494.41166262,
+      "cost_basis": 151.011,
+      "leverage": 2.0,
+      "opened_at": "2026-04-09T15:45:01.882171+00:00"
+    },
+    {
+      "pair": "SUI/USD",
+      "direction": "long",
+      "entry_price": 0.935,
+      "quantity": 323.01818182,
+      "cost_basis": 151.011,
+      "leverage": 2.0,
+      "opened_at": "2026-04-09T15:50:01.441164+00:00"
+    },
+    {
+      "pair": "AAVE/USD",
+      "direction": "long",
+      "entry_price": 91.79,
+      "quantity": 2.3013618,
+      "cost_basis": 105.621,
+      "leverage": 2.0,
+      "opened_at": "2026-04-09T16:10:02.138391+00:00"
+    }
+  ],
+  "closed_trades": [
+    {
+      "pair": "AAVE/USD",
+      "direction": "long",
+      "reason": "target",
+      "entry_price": 90.76,
+      "exit_price": 91.78,
+      "pnl_usd": 6.7431,
+      "pnl_pct": 4.4954,
+      "funding_cost": 0.0,
+      "leverage": 2.0,
+      "won": true,
+      "opened_at": "2026-04-09T15:20:01.361264+00:00",
+      "closed_at": "2026-04-09T15:35:01.960726+00:00"
+    },
+    {
+      "pair": "ARB/USD",
+      "direction": "long",
+      "reason": "timeout",
+      "entry_price": 0.1041,
+      "exit_price": 0.104,
+      "pnl_usd": -0.5803,
+      "pnl_pct": -0.3842,
+      "funding_cost": 0.0,
+      "leverage": 2.0,
+      "won": false,
+      "opened_at": "2026-04-09T15:40:02.131393+00:00",
+      "closed_at": "2026-04-09T16:10:02.136968+00:00"
+    }
+  ],
+  "stats": {
+    "total_trades": 2,
+    "wins": 1,
+    "losses": 1,
+    "win_rate": 50.0,
+    "total_pnl_usd": 6.1628,
+    "total_pnl_pct": -29.5859,
+    "total_fees": 0.0,
+    "max_drawdown_pct": 0.0,
+    "current_equity": 704.14,
+    "peak_equity": 1006.7430586155999,
+    "live_equity_mtm": 603.98,
+    "live_pnl_usd": -396.02,
+    "live_pnl_pct": -39.6024
+  }
+}

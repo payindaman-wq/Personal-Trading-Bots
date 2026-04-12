@@ -1,0 +1,69 @@
+{
+  "bot": "autobotdayfutures",
+  "competition_id": "fut-day-20260410-0900",
+  "duration_hours": 24,
+  "started_at": "2026-04-10T09:00:01.780297+00:00",
+  "pairs": [
+    "BTC/USD",
+    "ETH/USD",
+    "SOL/USD",
+    "XRP/USD",
+    "DOGE/USD",
+    "AVAX/USD",
+    "LINK/USD",
+    "UNI/USD",
+    "AAVE/USD",
+    "NEAR/USD",
+    "APT/USD",
+    "SUI/USD",
+    "ARB/USD",
+    "OP/USD",
+    "ADA/USD",
+    "POL/USD"
+  ],
+  "starting_capital": 1000.0,
+  "fee_rate": 0.0005,
+  "cash": 848.0288468,
+  "positions": [
+    {
+      "pair": "XRP/USD",
+      "direction": "long",
+      "entry_price": 1.36089,
+      "quantity": 200.192815,
+      "cost_basis": 136.2202,
+      "leverage": 2.0,
+      "opened_at": "2026-04-10T22:00:02.469964+00:00"
+    }
+  ],
+  "closed_trades": [
+    {
+      "pair": "BTC/USD",
+      "direction": "short",
+      "reason": "timeout",
+      "entry_price": 71797.1,
+      "exit_price": 73207.1,
+      "pnl_usd": -15.751,
+      "pnl_pct": -7.8755,
+      "funding_cost": 0.04,
+      "leverage": 2.0,
+      "won": false,
+      "opened_at": "2026-04-10T10:00:02.235933+00:00",
+      "closed_at": "2026-04-10T22:00:02.468233+00:00"
+    }
+  ],
+  "stats": {
+    "total_trades": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "total_pnl_usd": -15.751,
+    "total_pnl_pct": -1.5751,
+    "total_fees": 0.0,
+    "max_drawdown_pct": 0.0,
+    "current_equity": 984.25,
+    "peak_equity": 1000.0,
+    "live_equity_mtm": 842.07,
+    "live_pnl_usd": -157.93,
+    "live_pnl_pct": -15.7929
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "bot": "asmund",
+  "competition_id": "fut-day-20260408-0900",
+  "duration_hours": 24,
+  "started_at": "2026-04-08T09:00:02.097730+00:00",
+  "pairs": [
+    "BTC/USD",
+    "ETH/USD",
+    "SOL/USD",
+    "XRP/USD",
+    "DOGE/USD",
+    "AVAX/USD",
+    "LINK/USD",
+    "UNI/USD",
+    "AAVE/USD",
+    "NEAR/USD",
+    "APT/USD",
+    "SUI/USD",
+    "ARB/USD",
+    "OP/USD",
+    "ADA/USD",
+    "POL/USD"
+  ],
+  "starting_capital": 1000.0,
+  "fee_rate": 0.0005,
+  "cash": 760.0,
+  "positions": [
+    {
+      "pair": "BTC/USD",
+      "direction": "short",
+      "entry_price": 71019.9,
+      "quantity": 0.00337933,
+      "cost_basis": 120.0,
+      "leverage": 2.0,
+      "opened_at": "2026-04-09T07:45:02.267557+00:00"
+    },
+    {
+      "pair": "ETH/USD",
+      "direction": "short",
+      "entry_price": 2182.31,
+      "quantity": 0.10997521,
+      "cost_basis": 120.0,
+      "leverage": 2.0,
+      "opened_at": "2026-04-09T07:45:02.267915+00:00"
+    }
+  ],
+  "closed_trades": [],
+  "stats": {
+    "total_trades": 0,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "total_pnl_usd": 0.0,
+    "total_pnl_pct": 0.0,
+    "total_fees": 0.0,
+    "max_drawdown_pct": 0.0,
+    "current_equity": 1000.0,
+    "peak_equity": 1000.0,
+    "live_equity_mtm": 757.73,
+    "live_pnl_usd": -242.27,
+    "live_pnl_pct": -24.2268
+  }
+}

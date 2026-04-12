@@ -1,13 +1,8 @@
 {
-  "cycle": 1,
-  "sprint_in_cycle": 4,
+  "cycle": 2,
+  "sprint_in_cycle": 0,
   "sprints_per_cycle": 4,
   "cycle_started_at": null,
   "status": "active",
-  "sprints": [
-    "swing-20260308-0854",
-    "swing-20260315-1745",
-    "swing-20260322-1810",
-    "swing-20260329-0842"
-  ]
+  "sprints": []
 }

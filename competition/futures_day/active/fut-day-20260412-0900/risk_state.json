@@ -1,0 +1,30 @@
+{
+  "brandr": {
+    "stopped": true,
+    "paused_until": null
+  },
+  "haki": {
+    "stopped": true,
+    "paused_until": null
+  },
+  "vemund": {
+    "stopped": false,
+    "paused_until": "2026-04-12T23:20:02.295404+00:00"
+  },
+  "asmund": {
+    "stopped": true,
+    "paused_until": null
+  },
+  "helgi": {
+    "stopped": false,
+    "paused_until": "2026-04-12T23:35:02.267746+00:00"
+  },
+  "starkad": {
+    "stopped": true,
+    "paused_until": null
+  },
+  "ketil": {
+    "stopped": false,
+    "paused_until": "2026-04-12T23:20:01.856178+00:00"
+  }
+}

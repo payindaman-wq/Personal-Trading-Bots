@@ -1,0 +1,69 @@
+{
+  "bot": "ulfhedinn",
+  "competition_id": "fut-day-20260411-0900",
+  "duration_hours": 24,
+  "started_at": "2026-04-11T09:00:01.297206+00:00",
+  "pairs": [
+    "BTC/USD",
+    "ETH/USD",
+    "SOL/USD",
+    "XRP/USD",
+    "DOGE/USD",
+    "AVAX/USD",
+    "LINK/USD",
+    "UNI/USD",
+    "AAVE/USD",
+    "NEAR/USD",
+    "APT/USD",
+    "SUI/USD",
+    "ARB/USD",
+    "OP/USD",
+    "ADA/USD",
+    "POL/USD"
+  ],
+  "starting_capital": 1000.0,
+  "fee_rate": 0.0005,
+  "cash": 903.5776679693932,
+  "positions": [
+    {
+      "pair": "ETH/USD",
+      "direction": "short",
+      "entry_price": 2315.43,
+      "quantity": 0.08637704,
+      "cost_basis": 100.0,
+      "leverage": 2.0,
+      "opened_at": "2026-04-11T19:15:01.704571+00:00"
+    }
+  ],
+  "closed_trades": [
+    {
+      "pair": "ADA/USD",
+      "direction": "short",
+      "reason": "timeout",
+      "entry_price": 0.253573,
+      "exit_price": 0.251305,
+      "pnl_usd": 3.5777,
+      "pnl_pct": 3.5777,
+      "funding_cost": 0.0,
+      "leverage": 2.0,
+      "won": true,
+      "opened_at": "2026-04-11T19:10:01.720207+00:00",
+      "closed_at": "2026-04-11T20:40:02.166142+00:00"
+    }
+  ],
+  "stats": {
+    "total_trades": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "total_pnl_usd": 3.5777,
+    "total_pnl_pct": -9.6422,
+    "total_fees": 0.0,
+    "max_drawdown_pct": 0.0,
+    "current_equity": 903.58,
+    "peak_equity": 1000.0,
+    "live_equity_mtm": 907.4,
+    "live_pnl_usd": -92.6,
+    "live_pnl_pct": -9.2599
+  }
+}

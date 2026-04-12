@@ -1,4 +1,4 @@
-name: autobotswingfutures
+name: crossover
 style: swing_momentum
 inspiration: "ODIN-injected champion \u2014 updated at each sprint reset"
 league: futures_swing
@@ -21,8 +21,8 @@ pairs:
 - ADA/USD
 - POL/USD
 position:
-  size_pct: 15
-  max_open: 2
+  size_pct: 25
+  max_open: 3
   fee_rate: 0.0005
 entry:
   long:
@@ -31,27 +31,27 @@ entry:
       period_hours: 48
       operator: eq
       value: up
-    - indicator: momentum_accelerating
+    - indicator: rsi
       period_hours: 24
-      operator: eq
-      value: true
+      operator: lt
+      value: 37.77
   short:
     conditions:
     - indicator: trend
       period_hours: 48
       operator: eq
       value: down
-    - indicator: momentum_accelerating
+    - indicator: rsi
       period_hours: 24
-      operator: eq
-      value: true
+      operator: gt
+      value: 60
 exit:
-  take_profit_pct: 5.0
-  stop_loss_pct: 2.5
-  timeout_hours: 96
+  take_profit_pct: 4.65
+  stop_loss_pct: 1.92
+  timeout_hours: 176
 risk:
   pause_if_down_pct: 8
   pause_minutes: 120
   stop_if_down_pct: 18
-_sharpe: -1.8376
-_trades: 194
+_sharpe: 2.3494
+_trades: 1265

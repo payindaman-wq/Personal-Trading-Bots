@@ -1,0 +1,106 @@
+{
+  "bot": "regin",
+  "competition_id": "fut-swing-20260407-0027",
+  "duration_hours": 168,
+  "started_at": "2026-04-07T00:27:26.437301+00:00",
+  "pairs": [
+    "BTC/USD",
+    "ETH/USD",
+    "SOL/USD",
+    "XRP/USD",
+    "DOGE/USD",
+    "AVAX/USD",
+    "LINK/USD",
+    "UNI/USD",
+    "AAVE/USD",
+    "NEAR/USD",
+    "APT/USD",
+    "SUI/USD",
+    "ARB/USD",
+    "OP/USD",
+    "ADA/USD",
+    "POL/USD"
+  ],
+  "starting_capital": 1000.0,
+  "fee_rate": 0.0005,
+  "cash": 741.8442800739999,
+  "positions": [
+    {
+      "pair": "BTC/USD",
+      "direction": "short",
+      "entry_price": 72108.0,
+      "quantity": 0.00439661,
+      "cost_basis": 158.5155,
+      "leverage": 2.0,
+      "opened_at": "2026-04-09T16:00:09.984302+00:00"
+    },
+    {
+      "pair": "ETH/USD",
+      "direction": "short",
+      "entry_price": 2305.9,
+      "quantity": 0.11354699,
+      "cost_basis": 130.914,
+      "leverage": 2.0,
+      "opened_at": "2026-04-11T19:00:09.267652+00:00"
+    }
+  ],
+  "closed_trades": [
+    {
+      "pair": "BTC/USD",
+      "direction": "long",
+      "reason": "target",
+      "entry_price": 68920.0,
+      "exit_price": 72108.0,
+      "pnl_usd": 27.5439,
+      "pnl_pct": 18.3626,
+      "funding_cost": 0.21,
+      "leverage": 2.0,
+      "won": true,
+      "opened_at": "2026-04-07T00:33:49.515731+00:00",
+      "closed_at": "2026-04-09T16:00:09.908197+00:00"
+    },
+    {
+      "pair": "ETH/USD",
+      "direction": "long",
+      "reason": "target",
+      "entry_price": 2113.7,
+      "exit_price": 2217.4,
+      "pnl_usd": 29.2265,
+      "pnl_pct": 19.4844,
+      "funding_cost": 0.21,
+      "leverage": 2.0,
+      "won": true,
+      "opened_at": "2026-04-07T00:33:49.539991+00:00",
+      "closed_at": "2026-04-09T16:00:09.909447+00:00"
+    },
+    {
+      "pair": "ETH/USD",
+      "direction": "short",
+      "reason": "stop",
+      "entry_price": 2217.4,
+      "exit_price": 2305.9,
+      "pnl_usd": -25.4967,
+      "pnl_pct": -16.0846,
+      "funding_cost": 0.1902,
+      "leverage": 2.0,
+      "won": false,
+      "opened_at": "2026-04-09T16:00:10.052039+00:00",
+      "closed_at": "2026-04-11T19:00:09.215730+00:00"
+    }
+  ],
+  "stats": {
+    "total_trades": 3,
+    "wins": 2,
+    "losses": 1,
+    "win_rate": 66.67,
+    "total_pnl_usd": 31.2737,
+    "total_pnl_pct": -12.7242,
+    "total_fees": 0.0,
+    "max_drawdown_pct": 0.0,
+    "current_equity": 872.76,
+    "peak_equity": 1056.770432074,
+    "live_equity_mtm": 1043.22,
+    "live_pnl_usd": 43.22,
+    "live_pnl_pct": 4.3219
+  }
+}

@@ -123,37 +123,37 @@ def patch_start_time(comp_id):
 
 
 def advance_cycle_if_needed(cycle_state):
-    """If current cycle has completed sprints_per_cycle sprints, archive and advance."""
+    """If cycle is complete, set awaiting_review for LOKI to handle. Returns (state, paused)."""
     sprint_in_cycle   = cycle_state.get("sprint_in_cycle", 0)
     sprints_per_cycle = cycle_state.get("sprints_per_cycle", 7)
     if sprint_in_cycle < sprints_per_cycle:
-        return cycle_state  # still within cycle
+        return cycle_state, False  # still within cycle
 
-    import shutil
-    old_cycle   = cycle_state.get("cycle", 1)
-    new_cycle   = old_cycle + 1
-    results_dir = os.path.join(WORKSPACE, "competition", "results")
-    archive_dir = os.path.join(WORKSPACE, "competition", "archive", f"cycle-{old_cycle}")
-
-    if os.path.isdir(results_dir) and os.listdir(results_dir):
-        os.makedirs(archive_dir, exist_ok=True)
-        for entry in os.listdir(results_dir):
-            shutil.move(os.path.join(results_dir, entry), os.path.join(archive_dir, entry))
-        print(f"  [cycle] Archived Cycle {old_cycle} results -> {archive_dir}")
-
-    cycle_state["cycle"]            = new_cycle
-    cycle_state["sprint_in_cycle"]  = 0
-    cycle_state["cycle_started_at"] = None
-    cycle_state["status"]           = "active"
-    cycle_state["sprints"]          = []
-    print(f"  [cycle] Cycle {old_cycle} complete ({sprints_per_cycle} sprints) — advanced to Cycle {new_cycle}")
-    return cycle_state
+    old_cycle = cycle_state.get("cycle", 1)
+    cycle_state["status"] = "awaiting_review"
+    save_cycle_state(cycle_state)
+    print(f"  [cycle] Day Cycle {old_cycle} complete ({sprints_per_cycle} sprints) — awaiting LOKI review")
+    # Write to SYN inbox so the alert reaches user if LOKI is delayed
+    try:
+        import json as _json
+        from datetime import datetime as _dt, timezone as _tz
+        inbox = os.path.join(WORKSPACE, "syn_inbox.jsonl")
+        entry = _json.dumps({"ts": _dt.now(_tz.utc).strftime("%Y-%m-%dT%H:%M"),
+                             "source": "day_restart", "severity": "info",
+                             "msg": f"Day Cycle {old_cycle} complete — LOKI restructure pending"})
+        with open(inbox, "a") as _f:
+            _f.write(entry + "\n")
+    except Exception:
+        pass
+    return cycle_state, True
 
 
 def start_new():
     """Start a new 24h sprint. Returns new comp_id on success, None on failure."""
     cycle_state  = load_cycle_state()
-    cycle_state  = advance_cycle_if_needed(cycle_state)
+    cycle_state, paused = advance_cycle_if_needed(cycle_state)
+    if paused:
+        return None  # LOKI will handle restructure and trigger next sprint
     new_sprint_n = cycle_state.get("sprint_in_cycle", 0) + 1
     result = subprocess.run(
         ["python3", START_SCRIPT, "24"],

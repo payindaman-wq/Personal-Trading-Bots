@@ -1,0 +1,69 @@
+{
+  "bot": "vikar",
+  "competition_id": "fut-day-20260412-0900",
+  "duration_hours": 24,
+  "started_at": "2026-04-12T09:00:01.654500+00:00",
+  "pairs": [
+    "BTC/USD",
+    "ETH/USD",
+    "SOL/USD",
+    "XRP/USD",
+    "DOGE/USD",
+    "AVAX/USD",
+    "LINK/USD",
+    "UNI/USD",
+    "AAVE/USD",
+    "NEAR/USD",
+    "APT/USD",
+    "SUI/USD",
+    "ARB/USD",
+    "OP/USD",
+    "ADA/USD",
+    "POL/USD"
+  ],
+  "starting_capital": 1000.0,
+  "fee_rate": 0.0005,
+  "cash": 901.916547471168,
+  "positions": [
+    {
+      "pair": "AAVE/USD",
+      "direction": "long",
+      "entry_price": 89.53,
+      "quantity": 2.23864626,
+      "cost_basis": 100.213,
+      "leverage": 2.0,
+      "opened_at": "2026-04-12T22:20:01.856654+00:00"
+    }
+  ],
+  "closed_trades": [
+    {
+      "pair": "ARB/USD",
+      "direction": "short",
+      "reason": "timeout",
+      "entry_price": 0.1127,
+      "exit_price": 0.1121,
+      "pnl_usd": 2.1295,
+      "pnl_pct": 2.1295,
+      "funding_cost": 0.0,
+      "leverage": 2.0,
+      "won": true,
+      "opened_at": "2026-04-12T17:55:01.939729+00:00",
+      "closed_at": "2026-04-12T18:45:01.467818+00:00"
+    }
+  ],
+  "stats": {
+    "total_trades": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "total_pnl_usd": 2.1295,
+    "total_pnl_pct": 0.213,
+    "total_fees": 0.0,
+    "max_drawdown_pct": 0.0,
+    "current_equity": 1002.13,
+    "peak_equity": 1002.1295474711679,
+    "live_equity_mtm": 903.71,
+    "live_pnl_usd": -96.29,
+    "live_pnl_pct": -9.6293
+  }
+}

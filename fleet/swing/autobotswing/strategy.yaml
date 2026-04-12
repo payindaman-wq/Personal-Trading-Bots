@@ -1,51 +1,44 @@
 name: crossover
 style: randomly generated
 pairs:
-  - BTC/USD
-  - ETH/USD
-  - SOL/USD
-  - XRP/USD
-  - DOGE/USD
-  - AVAX/USD
-  - LINK/USD
-  - UNI/USD
-  - AAVE/USD
-  - NEAR/USD
-  - APT/USD
-  - SUI/USD
-  - ARB/USD
-  - OP/USD
-  - ADA/USD
-  - POL/USD
+- BTC/USD
 position:
-  size_pct: 15
-  max_open: 1
+  size_pct: 30
+  max_open: 3
   fee_rate: 0.001
 entry:
   long:
     conditions:
-    - indicator: rsi
-      period_hours: 21
-      operator: lt
-      value: 36.56
+    - indicator: momentum_accelerating
+      period_hours: 48
+      operator: eq
+      value: false
+    - indicator: bollinger_position
+      period_hours: 48
+      operator: eq
+      value: below_lower
     - indicator: macd_signal
-      period_hours: 26
+      period_hours: 48
       operator: eq
       value: bullish
   short:
     conditions:
-    - indicator: rsi
-      period_hours: 21
-      operator: gt
-      value: 60.64
-    - indicator: macd_signal
+    - indicator: momentum_accelerating
       period_hours: 48
+      operator: eq
+      value: false
+    - indicator: bollinger_position
+      period_hours: 168
+      operator: eq
+      value: above_upper
+    - indicator: macd_signal
+      period_hours: 24
       operator: eq
       value: bearish
 exit:
-  take_profit_pct: 3.55
-  stop_loss_pct: 2.72
-  timeout_hours: 196
+  take_profit_pct: 7.36
+  stop_loss_pct: 1.5
+  timeout_hours: 129
 risk:
   pause_if_down_pct: 8
   stop_if_down_pct: 18

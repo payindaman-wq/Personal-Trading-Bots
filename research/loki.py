@@ -69,8 +69,8 @@ PM_CODE_CHANGE_KEYWORDS = [
 
 # Files LOKI must never touch (block list for extra safety)
 BLOCKED_FILES = [
-    "competition_tick.py", "swing_competition_tick.py", "arb_competition_tick.py",
-    "spread_competition_tick.py", "league_watchdog.py", "sys_heartbeat.py",
+    "competition_tick.py", "swing_competition_tick.py", "futures_swing_competition_tick.py",
+    "futures_day_competition_tick.py", "league_watchdog.py", "sys_heartbeat.py",
     "day_daily_restart.py", "/bots/", "backtest.py",
 ]
 
@@ -97,12 +97,12 @@ def load_gemini_key():
     return data.get("gemini_api_key") or data["gemini_api_keys"][0]
 
 
-def call_gemini(prompt):
+def call_gemini(prompt, max_tokens=500, temperature=0.1):
     api_key = load_gemini_key()
     url = f"{GEMINI_BASE}/{GEMINI_MODEL}:generateContent?key={api_key}"
     payload = json.dumps({
         "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {"maxOutputTokens": 500, "temperature": 0.1},
+        "generationConfig": {"maxOutputTokens": max_tokens, "temperature": temperature},
     }).encode()
     req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=30) as r:
@@ -472,6 +472,374 @@ def process_pm_entry(entry):
     write_loki_log(ts, "pm", gen, actions)
 
 
+
+# ── Cycle End Restructure ──────────────────────────────────────────────────────
+
+CYCLE_REVIEW_LOG = os.path.join(RESEARCH, "loki_cycle_review_log.jsonl")
+
+# All 5 active leagues. Autobots excluded from strategy adjustment.
+CYCLE_LEAGUE_CONFIGS = {
+    "day": {
+        "cycle_state":  os.path.join(WORKSPACE, "competition", "cycle_state.json"),
+        "leaderboard":  os.path.join(WORKSPACE, "competition", "leaderboard.json"),
+        "fleet_dir":    os.path.join(WORKSPACE, "fleet"),
+        "strategy_fmt": "day_conditions",
+        "advance_cmd":  ["python3", os.path.join(WORKSPACE, "cycle_advance.py")],
+        "start_cmd":    [None],   # day restart handled by cron — no explicit start needed
+        "autobots":     {"autobotday"},
+    },
+    "futures_day": {
+        "cycle_state":  os.path.join(WORKSPACE, "competition", "futures_day", "cycle_state.json"),
+        "leaderboard":  os.path.join(WORKSPACE, "competition", "futures_day", "futures_day_leaderboard.json"),
+        "fleet_dir":    os.path.join(WORKSPACE, "fleet", "futures_day"),
+        "strategy_fmt": "day_conditions",
+        "advance_cmd":  None,   # inline advance
+        "start_cmd":    [None],  # futures_day restart handled by cron
+        "autobots":     {"autobotdayfutures"},
+    },
+    "swing": {
+        "cycle_state":  os.path.join(WORKSPACE, "competition", "swing", "swing_cycle_state.json"),
+        "leaderboard":  os.path.join(WORKSPACE, "competition", "swing", "swing_leaderboard.json"),
+        "fleet_dir":    os.path.join(WORKSPACE, "fleet", "swing"),
+        "strategy_fmt": "swing_conditions",
+        "advance_cmd":  ["python3", os.path.join(WORKSPACE, "swing_cycle_advance.py")],
+        "start_cmd":    "swing_needs_cycle",   # sentinel: built dynamically with new cycle num
+        "autobots":     {"autobotswing"},
+    },
+    "futures_swing": {
+        "cycle_state":  os.path.join(WORKSPACE, "competition", "futures_swing", "cycle_state.json"),
+        "leaderboard":  os.path.join(WORKSPACE, "competition", "futures_swing", "futures_swing_leaderboard.json"),
+        "fleet_dir":    os.path.join(WORKSPACE, "fleet", "futures_swing"),
+        "strategy_fmt": "swing_conditions",
+        "advance_cmd":  None,   # inline advance
+        "start_cmd":    ["python3", os.path.join(WORKSPACE, "futures_swing_restart.py")],
+        "autobots":     {"autobotswingfutures"},
+    },
+    "pm": {
+        "cycle_state":  os.path.join(WORKSPACE, "competition", "polymarket", "polymarket_cycle_state.json"),
+        "leaderboard":  os.path.join(WORKSPACE, "competition", "polymarket", "polymarket_leaderboard.json"),
+        "fleet_dir":    os.path.join(WORKSPACE, "fleet", "polymarket"),
+        "strategy_fmt": "pm",
+        "advance_cmd":  ["python3", os.path.join(WORKSPACE, "polymarket_cycle_advance.py")],
+        "start_cmd":    None,   # advance includes sprint start
+        "autobots":     {"mist", "kara", "thrud"},
+    },
+}
+
+
+def load_cycle_review_log():
+    """Return set of (league, cycle) whose strategies have already been adjusted this cycle."""
+    if not os.path.exists(CYCLE_REVIEW_LOG):
+        return set()
+    seen = set()
+    with open(CYCLE_REVIEW_LOG) as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                e = json.loads(line)
+                seen.add((e["league"], e["cycle"]))
+            except Exception:
+                pass
+    return seen
+
+
+def write_cycle_review_entry(league, cycle, actions):
+    entry = {
+        "ts":      datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
+        "league":  league,
+        "cycle":   cycle,
+        "actions": actions,
+        "dry_run": DRY_RUN,
+    }
+    if not DRY_RUN:
+        with open(CYCLE_REVIEW_LOG, "a") as f:
+            f.write(json.dumps(entry) + "\n")
+    else:
+        print(f"  [dry-run] cycle review log: {json.dumps(entry)}")
+
+
+def build_restructure_prompt(bot_name, perf, strategy_yaml, fmt):
+    stats = "\n".join([
+        f"Cumulative PnL: {perf.get('cumulative_pnl_usd', 0):.2f} USD ({perf.get('cumulative_pnl_pct', 0):.1f}%)",
+        f"Win rate: {perf.get('overall_win_rate', 0):.1f}%",
+        f"Total trades: {perf.get('total_trades', 0)}",
+        f"Total fees: {perf.get('total_fees_usd', 0):.2f} USD",
+        f"Best sprint: {perf.get('best_sprint_pnl_pct', 0):.1f}%",
+        f"Worst sprint: {perf.get('worst_sprint_pnl_pct', 0):.1f}%",
+        f"Sprint wins: {perf.get('sprint_wins', 0)}",
+    ])
+    if fmt == "day_conditions":
+        return "\n".join([
+            "You are tuning a losing intraday crypto trading bot (24h sprints, 5-min ticks).",
+            "Make targeted changes to improve performance. Output ONLY the complete updated YAML — no explanation, no markdown.",
+            "",
+            f"BOT: {bot_name}",
+            f"PERFORMANCE (full cycle):\n{stats}",
+            "",
+            f"CURRENT STRATEGY YAML:\n{strategy_yaml}",
+            "",
+            "RULES:",
+            "- Do NOT change: name, style, inspiration, pairs list, fee_rate, league, leverage",
+            "- You MAY change: position.size_pct, position.max_open, entry conditions,",
+            "  exit.take_profit_pct, exit.stop_loss_pct, exit.timeout_minutes, risk thresholds",
+            "- Use period_minutes (NOT period_hours) for all indicators",
+            "- Available indicators: trend, price_vs_ema, macd_signal, rsi, momentum_accelerating,",
+            "  volume_above_avg, price_vs_vwap, bollinger_position",
+            "- Day league typical ranges: TP 0.5-3%, SL 0.3-1.5%, timeout 30-180min",
+            "- Overtrading (many trades, negative PnL): reduce max_open, add volume_above_avg",
+            "- 0% win rate: reduce max_open, add tighter RSI filter",
+            "",
+            "Output the complete YAML only:",
+        ])
+    elif fmt == "swing_conditions":
+        return "\n".join([
+            "You are tuning a losing crypto swing trading bot (7-day sprints).",
+            "Make targeted changes to improve performance. Output ONLY the complete updated YAML — no explanation, no markdown.",
+            "",
+            f"BOT: {bot_name}",
+            f"PERFORMANCE (full cycle):\n{stats}",
+            "",
+            f"CURRENT STRATEGY YAML:\n{strategy_yaml}",
+            "",
+            "RULES:",
+            "- Do NOT change: name, style, inspiration, pairs list, fee_rate, league, leverage",
+            "- You MAY change: position.size_pct, position.max_open, entry conditions,",
+            "  exit.take_profit_pct, exit.stop_loss_pct, exit.timeout_hours, risk thresholds",
+            "- Use period_hours (NOT period_minutes) for swing indicators",
+            "- Available indicators: trend, price_vs_ema, macd_signal, rsi, momentum_accelerating,",
+            "  volume_above_avg, price_vs_vwap, bollinger_position",
+            "- bollinger_position values: above_upper, above_middle, below_middle, below_lower",
+            "- volume_above_avg: no period_hours, operator eq, value true",
+            "- Overtrading: reduce max_open to 2, add volume_above_avg",
+            "- 0% win rate: reduce take_profit_pct; SL too tight: increase stop_loss_pct",
+            "",
+            "Output the complete YAML only:",
+        ])
+    elif fmt == "pm":
+        return "\n".join([
+            "You are tuning a losing prediction markets bot.",
+            "Make targeted changes to improve performance. Output ONLY the complete updated YAML — no explanation, no markdown.",
+            "",
+            f"BOT: {bot_name}",
+            f"PERFORMANCE (full cycle):\n{stats}",
+            "",
+            f"CURRENT STRATEGY YAML:\n{strategy_yaml}",
+            "",
+            "RULES:",
+            "- Do NOT change: name, category, type, description, prompt_persona",
+            "- You MAY change: market_filter.price_range [min,max], market_filter.min_liquidity_usd,",
+            "  market_filter.max_days_to_resolve, edge.min_edge_pts (0.03-0.25),",
+            "  edge.max_positions, edge.max_position_pct",
+            "- 0% win rate: increase min_edge_pts significantly",
+            "- Low win rate + many trades: tighten price_range to [0.15, 0.85], reduce max_positions",
+            "",
+            "Output the complete YAML only:",
+        ])
+    return ""
+
+
+def adjust_bot_strategy(bot_name, perf, fleet_dir, fmt):
+    """Use Gemini Flash Lite to generate an improved strategy for a losing bot."""
+    strat_path = os.path.join(fleet_dir, bot_name, "strategy.yaml")
+    if not os.path.exists(strat_path):
+        return False, f"{bot_name}: strategy.yaml not found"
+
+    with open(strat_path) as f:
+        strategy_yaml = f.read()
+
+    prompt = build_restructure_prompt(bot_name, perf, strategy_yaml, fmt)
+    if not prompt:
+        return False, f"{bot_name}: unsupported fmt {fmt}"
+
+    try:
+        new_yaml_str = call_gemini(prompt, max_tokens=1500, temperature=0.2)
+    except Exception as e:
+        return False, f"{bot_name}: Gemini failed: {e}"
+
+    # Strip markdown fencing if Gemini adds it despite instructions
+    lines = new_yaml_str.splitlines()
+    if lines and lines[0].startswith("```"):
+        lines = [l for l in lines if not l.startswith("```")]
+        new_yaml_str = "\n".join(lines)
+
+    try:
+        new_data = yaml.safe_load(new_yaml_str)
+    except Exception as e:
+        return False, f"{bot_name}: YAML parse failed: {e}"
+
+    if not isinstance(new_data, dict):
+        return False, f"{bot_name}: Gemini returned non-dict"
+
+    if new_data.get("name") != bot_name:
+        return False, f"{bot_name}: Gemini changed name to '{new_data.get('name')}' — rejected"
+
+    if DRY_RUN:
+        print(f"  [dry-run] Would write adjusted strategy for {bot_name}")
+        return True, f"{bot_name}: adjusted (dry-run)"
+
+    backup = strat_path + f".pre_cycle_{datetime.now().strftime('%Y%m%d_%H%M')}.bak"
+    shutil.copy2(strat_path, backup)
+    with open(strat_path, "w") as f:
+        f.write(new_yaml_str.rstrip() + "\n")
+    return True, f"{bot_name}: strategy adjusted"
+
+
+def run_cycle_advance_and_start(league, cfg, old_cycle):
+    """Run advance + start for a league after strategies have been adjusted."""
+    actions = []
+
+    advance_cmd = cfg.get("advance_cmd")
+    if advance_cmd:
+        if DRY_RUN:
+            print(f"  [dry-run] Would run: {os.path.basename(advance_cmd[-1])}")
+            actions.append("cycle_advanced (dry-run)")
+        else:
+            r = subprocess.run(advance_cmd, capture_output=True, text=True, cwd=WORKSPACE)
+            if r.returncode == 0:
+                print(f"  [loki] Cycle advance OK")
+                actions.append("cycle_advanced")
+            else:
+                print(f"  [loki] Cycle advance FAILED: {r.stderr[:150]}")
+                tg_send(f"[LOKI] {league.upper()} cycle advance FAILED: {r.stderr[:100]}", severity="error")
+                return actions   # abort — don't start if advance failed
+    else:
+        # Inline advance for leagues without a dedicated advance script
+        try:
+            with open(cfg["cycle_state"]) as f:
+                cs = json.load(f)
+            cs["cycle"]            = old_cycle + 1
+            cs["sprint_in_cycle"]  = 0
+            cs["status"]           = "active"
+            cs["cycle_started_at"] = None
+            cs["sprints"]          = []
+            if not DRY_RUN:
+                with open(cfg["cycle_state"], "w") as f:
+                    json.dump(cs, f, indent=2)
+            print(f"  [loki] {league}: cycle {old_cycle} -> {old_cycle + 1} (inline advance)")
+            actions.append(f"cycle_advanced_inline: {old_cycle}->{old_cycle + 1}")
+        except Exception as e:
+            print(f"  [loki] Inline advance failed [{league}]: {e}")
+            tg_send(f"[LOKI] {league.upper()} inline advance FAILED: {e}", severity="error")
+            return actions
+
+    # Start command
+    start_cmd = cfg.get("start_cmd")
+    if start_cmd == "swing_needs_cycle":
+        new_cycle = old_cycle + 1
+        start_cmd = [
+            "python3", os.path.join(WORKSPACE, "swing_competition_start.py"),
+            "--cycle", str(new_cycle), "--sprint-in-cycle", "1",
+        ]
+    # [None] sentinel means cron handles restart; skip explicit start
+    if start_cmd and start_cmd != [None]:
+        if DRY_RUN:
+            print(f"  [dry-run] Would start: {os.path.basename(start_cmd[1])}")
+            actions.append("sprint_started (dry-run)")
+        else:
+            r = subprocess.run(start_cmd, capture_output=True, text=True, cwd=WORKSPACE)
+            if r.returncode == 0:
+                print(f"  [loki] Cycle {old_cycle + 1} sprint 1 started")
+                actions.append("sprint_started")
+            else:
+                print(f"  [loki] Sprint start FAILED: {r.stderr[:150]}")
+                tg_send(f"[LOKI] {league.upper()} sprint start FAILED: {r.stderr[:100]}", severity="error")
+    elif start_cmd == [None]:
+        print(f"  [loki] {league}: start handled by cron/watchdog")
+        actions.append("start_deferred_to_cron")
+
+    return actions
+
+
+def handle_cycle_review(league, cfg, cycle):
+    """Adjust losing bots for one league, then advance the cycle."""
+    print(f"\n[loki] CYCLE REVIEW: {league.upper()} Cycle {cycle}")
+    all_actions = []
+
+    try:
+        with open(cfg["leaderboard"]) as f:
+            lb = json.load(f)
+    except Exception as e:
+        print(f"  [loki] Cannot load leaderboard [{league}]: {e}")
+        return
+
+    rankings  = lb.get("rankings", [])
+    autobots  = cfg.get("autobots", set())
+    fleet_dir = cfg["fleet_dir"]
+    fmt       = cfg["strategy_fmt"]
+
+    losers = [r for r in rankings
+              if r["bot"] not in autobots and r.get("cumulative_pnl_usd", 0) < 0]
+
+    if not losers:
+        print(f"  [loki] No losers — all bots profitable")
+        all_actions.append("no_losers")
+    else:
+        print(f"  [loki] {len(losers)} loser(s): {[r['bot'] for r in losers]}")
+        adjusted, failed_list = [], []
+        for r in losers:
+            bot = r["bot"]
+            perf = {k: r.get(k, 0) for k in [
+                "cumulative_pnl_usd", "cumulative_pnl_pct", "overall_win_rate",
+                "total_trades", "total_fees_usd", "best_sprint_pnl_pct",
+                "worst_sprint_pnl_pct", "sprint_wins",
+            ]}
+            ok, desc = adjust_bot_strategy(bot, perf, fleet_dir, fmt)
+            print(f"  [loki]   {desc}")
+            if ok:
+                adjusted.append(bot)
+            else:
+                failed_list.append(desc)
+
+        if adjusted:
+            rel_paths = [
+                os.path.relpath(os.path.join(fleet_dir, b, "strategy.yaml"), WORKSPACE)
+                for b in adjusted
+            ]
+            git_commit(rel_paths,
+                       f"[loki] {league.upper()} Cycle {cycle} restructure: {len(adjusted)} bots tuned")
+            all_actions.append(f"adjusted: {', '.join(adjusted)}")
+        if failed_list:
+            all_actions.append(f"adjust_failed: {len(failed_list)}")
+
+    # Write review log BEFORE advance (prevents re-applying strategies on LOKI retry)
+    write_cycle_review_entry(league, cycle, all_actions)
+
+    # Advance cycle + start sprint 1
+    advance_actions = run_cycle_advance_and_start(league, cfg, cycle)
+    all_actions.extend(advance_actions)
+
+    tg_send(
+        f"[LOKI] {league.upper()} Cycle {cycle} restructure: "
+        f"{len(losers)} loser(s) tuned, Cycle {cycle + 1} started.",
+        severity="info",
+    )
+
+
+def handle_all_cycle_reviews():
+    """Check all 5 leagues for awaiting_review status and process each."""
+    already_reviewed = load_cycle_review_log()
+
+    for league, cfg in CYCLE_LEAGUE_CONFIGS.items():
+        try:
+            if not os.path.exists(cfg["cycle_state"]):
+                continue
+            with open(cfg["cycle_state"]) as f:
+                cs = json.load(f)
+            if cs.get("status") != "awaiting_review":
+                continue
+            cycle = cs.get("cycle", 1)
+            if (league, cycle) in already_reviewed:
+                # Strategies done — retry advance/start only (previous run may have failed mid-way)
+                print(f"  [loki] {league.upper()} Cycle {cycle}: strategies done, retrying advance/start")
+                run_cycle_advance_and_start(league, cfg, cycle)
+                continue
+            handle_cycle_review(league, cfg, cycle)
+        except Exception as e:
+            print(f"  [loki] Cycle review error [{league}]: {e}")
+
+
 # ── Main processing ────────────────────────────────────────────────────────────
 
 def process_entry(entry):
@@ -543,6 +911,8 @@ def process_entry(entry):
 def main():
     if DRY_RUN:
         print("[loki] *** DRY-RUN MODE — no changes will be applied ***")
+
+    handle_all_cycle_reviews()
 
     if not os.path.exists(MIMIR_LOG):
         print("[loki] No mimir_log.jsonl — nothing to do")

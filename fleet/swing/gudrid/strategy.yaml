@@ -20,7 +20,7 @@ pairs:
   - POL/USD
 position:
   size_pct: 18
-  max_open: 4
+  max_open: 2
   fee_rate: 0.001
 entry:
   long:
@@ -40,7 +40,10 @@ entry:
       - indicator: rsi
         period_hours: 14
         operator: lt
-        value: 68
+        value: 65
+      - indicator: volume_above_avg
+        operator: eq
+        value: true
   short:
     conditions:
       - indicator: trend
@@ -58,10 +61,13 @@ entry:
       - indicator: rsi
         period_hours: 14
         operator: gt
-        value: 32
+        value: 35
+      - indicator: volume_above_avg
+        operator: eq
+        value: true
 exit:
-  take_profit_pct: 10.0
-  stop_loss_pct: 3.0
+  take_profit_pct: 12.0
+  stop_loss_pct: 5.0
   timeout_hours: 120
 risk:
   pause_if_down_pct: 7

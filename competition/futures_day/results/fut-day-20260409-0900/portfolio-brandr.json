@@ -1,0 +1,120 @@
+{
+  "bot": "brandr",
+  "competition_id": "fut-day-20260409-0900",
+  "duration_hours": 24,
+  "started_at": "2026-04-09T09:00:01.980119+00:00",
+  "pairs": [
+    "BTC/USD",
+    "ETH/USD",
+    "SOL/USD",
+    "XRP/USD",
+    "DOGE/USD",
+    "AVAX/USD",
+    "LINK/USD",
+    "UNI/USD",
+    "AAVE/USD",
+    "NEAR/USD",
+    "APT/USD",
+    "SUI/USD",
+    "ARB/USD",
+    "OP/USD",
+    "ADA/USD",
+    "POL/USD"
+  ],
+  "starting_capital": 1000.0,
+  "fee_rate": 0.0005,
+  "cash": 760.7738286194,
+  "positions": [
+    {
+      "pair": "NEAR/USD",
+      "direction": "short",
+      "entry_price": 1.331,
+      "quantity": 180.96829452,
+      "cost_basis": 120.4344,
+      "leverage": 2.0,
+      "opened_at": "2026-04-09T10:35:01.974144+00:00"
+    },
+    {
+      "pair": "UNI/USD",
+      "direction": "short",
+      "entry_price": 3.084,
+      "quantity": 78.10272374,
+      "cost_basis": 120.4344,
+      "leverage": 2.0,
+      "opened_at": "2026-04-09T10:50:01.994066+00:00"
+    }
+  ],
+  "closed_trades": [
+    {
+      "pair": "ETH/USD",
+      "direction": "long",
+      "reason": "timeout",
+      "entry_price": 2184.08,
+      "exit_price": 2192.32,
+      "pnl_usd": 1.8109,
+      "pnl_pct": 1.5091,
+      "funding_cost": 0.0,
+      "leverage": 2.0,
+      "won": true,
+      "opened_at": "2026-04-09T09:25:01.273282+00:00",
+      "closed_at": "2026-04-09T10:25:01.336341+00:00"
+    },
+    {
+      "pair": "SOL/USD",
+      "direction": "long",
+      "reason": "timeout",
+      "entry_price": 82.44,
+      "exit_price": 82.57,
+      "pnl_usd": 0.7569,
+      "pnl_pct": 0.6308,
+      "funding_cost": 0.0,
+      "leverage": 2.0,
+      "won": true,
+      "opened_at": "2026-04-09T09:25:01.273333+00:00",
+      "closed_at": "2026-04-09T10:25:01.338034+00:00"
+    },
+    {
+      "pair": "AVAX/USD",
+      "direction": "long",
+      "reason": "timeout",
+      "entry_price": 9.12,
+      "exit_price": 9.14,
+      "pnl_usd": 1.0526,
+      "pnl_pct": 0.8772,
+      "funding_cost": 0.0,
+      "leverage": 2.0,
+      "won": true,
+      "opened_at": "2026-04-09T09:25:01.273584+00:00",
+      "closed_at": "2026-04-09T10:25:01.339665+00:00"
+    },
+    {
+      "pair": "AAVE/USD",
+      "direction": "long",
+      "reason": "timeout",
+      "entry_price": 90.12,
+      "exit_price": 89.75,
+      "pnl_usd": -1.9778,
+      "pnl_pct": -1.6423,
+      "funding_cost": 0.0,
+      "leverage": 2.0,
+      "won": false,
+      "opened_at": "2026-04-09T10:30:02.030359+00:00",
+      "closed_at": "2026-04-09T11:30:02.296195+00:00"
+    }
+  ],
+  "stats": {
+    "total_trades": 4,
+    "wins": 3,
+    "losses": 1,
+    "win_rate": 75.0,
+    "total_pnl_usd": 1.6426,
+    "total_pnl_pct": -23.9226,
+    "total_fees": 0.0,
+    "max_drawdown_pct": 0.0,
+    "current_equity": 760.77,
+    "peak_equity": 1003.6204682962,
+    "live_equity_mtm": 762.65,
+    "live_pnl_usd": -237.35,
+    "live_pnl_pct": -23.7352
+  }
+}

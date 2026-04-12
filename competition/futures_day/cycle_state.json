@@ -1,11 +1,15 @@
 {
   "cycle": 1,
-  "sprint_in_cycle": 2,
+  "sprint_in_cycle": 6,
   "sprints_per_cycle": 7,
   "status": "active",
   "sprints": [
     "fut-day-20260407-0027",
-    "fut-day-20260408-0900"
+    "fut-day-20260408-0900",
+    "fut-day-20260409-0900",
+    "fut-day-20260410-0900",
+    "fut-day-20260411-0900",
+    "fut-day-20260412-0900"
   ],
   "cycle_started_at": "2026-04-07T00:27:26.397795+00:00"
 }

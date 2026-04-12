@@ -34,18 +34,6 @@ LEAGUES = {
         "start_script": os.path.join(WORKSPACE, "swing_competition_start.py"),
         "start_args":   ["168"],
     },
-    "arb": {
-        "active_dir":   os.path.join(WORKSPACE, "competition", "arb", "active"),
-        "tick_script":  os.path.join(WORKSPACE, "arb_competition_tick.py"),
-        "start_script": os.path.join(WORKSPACE, "arb_competition_start.py"),
-        "start_args":   [],
-    },
-    "spread": {
-        "active_dir":   os.path.join(WORKSPACE, "competition", "spread", "active"),
-        "tick_script":  os.path.join(WORKSPACE, "spread_competition_tick.py"),
-        "start_script": os.path.join(WORKSPACE, "spread_competition_start.py"),
-        "start_args":   ["168"],
-    },
 }
 
 POLYMARKET_AUTO_STATE = os.path.join(WORKSPACE, "competition", "polymarket", "auto_state.json")
@@ -53,8 +41,6 @@ LOKI_LOG             = os.path.join(WORKSPACE, "research", "loki_log.jsonl")
 
 CYCLE_STATE_FILES = {
     "swing":  os.path.join(WORKSPACE, "competition", "swing", "swing_cycle_state.json"),
-    "arb":    os.path.join(WORKSPACE, "competition", "arb",   "arb_cycle_state.json"),
-    "spread": os.path.join(WORKSPACE, "competition", "spread","spread_cycle_state.json"),
 }
 
 
@@ -313,10 +299,19 @@ try:
 except Exception as e:
     print("  [POLYMARKET] Error: " + str(e))
 
-print("[weekly] Restarting futures swing league...")
-import subprocess as _sp, sys as _sys
-_r = _sp.run([_sys.executable, os.path.join(WORKSPACE, "futures_swing_restart.py")],
-             capture_output=True, text=True, cwd=WORKSPACE)
-print(_r.stdout or _r.stderr or "  (no output)")
+print("[weekly] Futures swing league check...")
+import subprocess as _sp, sys as _sys, json as _jsn
+_cs_path = os.path.join(WORKSPACE, "competition", "futures_swing", "cycle_state.json")
+try:
+    with open(_cs_path) as _f:
+        _cs = _jsn.load(_f)
+    if _cs.get("status") == "awaiting_review":
+        print("  [futures_swing] Cycle awaiting LOKI review — skipping weekly restart")
+    else:
+        _r = _sp.run([_sys.executable, os.path.join(WORKSPACE, "futures_swing_restart.py")],
+                     capture_output=True, text=True, cwd=WORKSPACE)
+        print(_r.stdout or _r.stderr or "  (no output)")
+except Exception as _e:
+    print(f"  [futures_swing] Error: {_e}")
 
 print("Done.")

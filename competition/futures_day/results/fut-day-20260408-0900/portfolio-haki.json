@@ -1,0 +1,72 @@
+{
+  "bot": "haki",
+  "competition_id": "fut-day-20260408-0900",
+  "duration_hours": 24,
+  "started_at": "2026-04-08T09:00:02.097730+00:00",
+  "pairs": [
+    "BTC/USD",
+    "ETH/USD",
+    "SOL/USD",
+    "XRP/USD",
+    "DOGE/USD",
+    "AVAX/USD",
+    "LINK/USD",
+    "UNI/USD",
+    "AAVE/USD",
+    "NEAR/USD",
+    "APT/USD",
+    "SUI/USD",
+    "ARB/USD",
+    "OP/USD",
+    "ADA/USD",
+    "POL/USD"
+  ],
+  "starting_capital": 1000.0,
+  "fee_rate": 0.0005,
+  "cash": 640.0,
+  "positions": [
+    {
+      "pair": "POL/USD",
+      "direction": "long",
+      "entry_price": 0.08646,
+      "quantity": 2775.85010409,
+      "cost_basis": 120.0,
+      "leverage": 2.0,
+      "opened_at": "2026-04-09T08:00:02.181476+00:00"
+    },
+    {
+      "pair": "AAVE/USD",
+      "direction": "long",
+      "entry_price": 90.54,
+      "quantity": 2.65076209,
+      "cost_basis": 120.0,
+      "leverage": 2.0,
+      "opened_at": "2026-04-09T08:05:01.952116+00:00"
+    },
+    {
+      "pair": "SUI/USD",
+      "direction": "short",
+      "entry_price": 0.9085,
+      "quantity": 264.17171161,
+      "cost_basis": 120.0,
+      "leverage": 2.0,
+      "opened_at": "2026-04-09T08:30:02.297125+00:00"
+    }
+  ],
+  "closed_trades": [],
+  "stats": {
+    "total_trades": 0,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "total_pnl_usd": 0.0,
+    "total_pnl_pct": 0.0,
+    "total_fees": 0.0,
+    "max_drawdown_pct": 0.0,
+    "current_equity": 1000.0,
+    "peak_equity": 1000.0,
+    "live_equity_mtm": 639.44,
+    "live_pnl_usd": -360.56,
+    "live_pnl_pct": -36.0557
+  }
+}
