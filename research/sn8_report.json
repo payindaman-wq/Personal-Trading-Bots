@@ -1,48 +1,190 @@
 {
-  "generated_utc": "2026-04-12T23:07:37.509297+00:00",
-  "days_analyzed": 7,
-  "api_access": {
-    "taostats": {
-      "subnet": {
-        "ok": false,
-        "error": "HTTP 404: Not Found"
-      },
-      "metagraph": {
-        "ok": false,
-        "error": "HTTP 404: Not Found"
-      }
+  "generated_utc": "2026-04-12T23:21:14.740546+00:00",
+  "subnet": "SN8 \u2014 Proprietary Trading Network (Taoshi)",
+  "chain_endpoint": "wss://entrypoint-finney.opentensor.ai:443",
+  "epoch_meta": {
+    "n_neurons": 256,
+    "burn_rao": 500000,
+    "burn_tao": 0.0005,
+    "tempo_blocks": 360,
+    "epoch_seconds": 4320,
+    "epochs_per_day": 20.0
+  },
+  "stats": {
+    "n_active_miners": 53,
+    "n_validators": 19,
+    "total_emission_tao": 296.021650544,
+    "miner_pool_tao": 2.17791387,
+    "miner_pool_daily_tao": 43.558277399999994,
+    "avg_miner_epoch_tao": 0.041092714528301884,
+    "avg_miner_daily_tao": 0.8218542905660376,
+    "top_miner_epoch_tao": 1.064245227,
+    "top_miner_daily_tao": 21.28490454,
+    "top5_emission_share": 0.8923,
+    "burn_recovery_days_avg": 0.0006083803488519039
+  },
+  "top_miners": [
+    {
+      "uid": 163,
+      "incentive": 0.007186999313344014,
+      "consensus": 0.009140154116121157,
+      "emission_tao": 1.064245227
     },
-    "taoshi_ptn": {
-      "v1_signals": {
-        "ok": false,
-        "error": "HTTP 404: Not Found"
-      },
-      "v1_miners": {
-        "ok": false,
-        "error": "HTTP 404: Not Found"
-      },
-      "v1_leaderboard": {
-        "ok": false,
-        "error": "HTTP 404: Not Found"
-      },
-      "signals": {
-        "ok": false,
-        "error": "HTTP 404: Not Found"
-      },
-      "request_network": {
-        "ok": false,
-        "error": "HTTP 404: Not Found"
-      }
+    {
+      "uid": 170,
+      "incentive": 0.002014190890363928,
+      "consensus": 0.002670328831921874,
+      "emission_tao": 0.299069678
+    },
+    {
+      "uid": 13,
+      "incentive": 0.0015716792553597315,
+      "consensus": 0.0015869382772564279,
+      "emission_tao": 0.232772247
+    },
+    {
+      "uid": 210,
+      "incentive": 0.0014190890363927672,
+      "consensus": 0.0014648661020828565,
+      "emission_tao": 0.210912311
+    },
+    {
+      "uid": 68,
+      "incentive": 0.0009155413138017853,
+      "consensus": 0.001052872510872053,
+      "emission_tao": 0.136270934
+    },
+    {
+      "uid": 185,
+      "incentive": 4.5777065690089265e-05,
+      "consensus": 4.5777065690089265e-05,
+      "emission_tao": 0.008852734
+    },
+    {
+      "uid": 206,
+      "incentive": 4.5777065690089265e-05,
+      "consensus": 4.5777065690089265e-05,
+      "emission_tao": 0.008847565
+    },
+    {
+      "uid": 2,
+      "incentive": 3.0518043793392844e-05,
+      "consensus": 3.0518043793392844e-05,
+      "emission_tao": 0.006622664
+    },
+    {
+      "uid": 6,
+      "incentive": 3.0518043793392844e-05,
+      "consensus": 3.0518043793392844e-05,
+      "emission_tao": 0.006622664
+    },
+    {
+      "uid": 17,
+      "incentive": 3.0518043793392844e-05,
+      "consensus": 3.0518043793392844e-05,
+      "emission_tao": 0.006622664
+    },
+    {
+      "uid": 19,
+      "incentive": 3.0518043793392844e-05,
+      "consensus": 3.0518043793392844e-05,
+      "emission_tao": 0.006622664
+    },
+    {
+      "uid": 27,
+      "incentive": 3.0518043793392844e-05,
+      "consensus": 3.0518043793392844e-05,
+      "emission_tao": 0.006622664
+    },
+    {
+      "uid": 74,
+      "incentive": 3.0518043793392844e-05,
+      "consensus": 3.0518043793392844e-05,
+      "emission_tao": 0.006622664
+    },
+    {
+      "uid": 78,
+      "incentive": 3.0518043793392844e-05,
+      "consensus": 3.0518043793392844e-05,
+      "emission_tao": 0.006622664
+    },
+    {
+      "uid": 87,
+      "incentive": 3.0518043793392844e-05,
+      "consensus": 3.0518043793392844e-05,
+      "emission_tao": 0.006622664
+    },
+    {
+      "uid": 96,
+      "incentive": 3.0518043793392844e-05,
+      "consensus": 3.0518043793392844e-05,
+      "emission_tao": 0.006626455
+    },
+    {
+      "uid": 97,
+      "incentive": 3.0518043793392844e-05,
+      "consensus": 3.0518043793392844e-05,
+      "emission_tao": 0.006622664
+    },
+    {
+      "uid": 107,
+      "incentive": 3.0518043793392844e-05,
+      "consensus": 3.0518043793392844e-05,
+      "emission_tao": 0.006622664
+    },
+    {
+      "uid": 119,
+      "incentive": 3.0518043793392844e-05,
+      "consensus": 3.0518043793392844e-05,
+      "emission_tao": 0.006622664
+    },
+    {
+      "uid": 125,
+      "incentive": 3.0518043793392844e-05,
+      "consensus": 3.0518043793392844e-05,
+      "emission_tao": 0.006622664
     }
-  },
-  "top_miners": [],
-  "signal_analysis": {
-    "note": "No public unauthenticated signal endpoint found.",
-    "implication": "Taoshi PTN signals require API key or validator stake."
-  },
-  "recommendation": "No public APIs reachable. Check network/firewall, then consider: pip3 install bittensor for direct on-chain access.",
+  ],
+  "top_validators": [
+    {
+      "uid": 1,
+      "dividends": 0.5995117112993057,
+      "vtrust": 0.9999847409781033,
+      "emission_tao": 88.735994405
+    },
+    {
+      "uid": 0,
+      "dividends": 0.09669642175936523,
+      "vtrust": 0.9871671625848784,
+      "emission_tao": 14.312125414
+    },
+    {
+      "uid": 31,
+      "dividends": 0.08714427405203326,
+      "vtrust": 0.999801632715343,
+      "emission_tao": 12.899464254
+    },
+    {
+      "uid": 4,
+      "dividends": 0.04315251392385748,
+      "vtrust": 0.9881742580300603,
+      "emission_tao": 6.388305822
+    },
+    {
+      "uid": 222,
+      "dividends": 0.034821087968261236,
+      "vtrust": 0.9806057831692988,
+      "emission_tao": 5.15580674
+    }
+  ],
+  "competition": "EXTREME \u2014 top 5 take 89% of miner pool. Everyone else earns near-zero.",
+  "economics": "Entry cost negligible (0.0005 TAO). Recoverable in <1 day at avg rank.",
+  "recommendation": "Registration is dirt cheap (0.0005 TAO). However: only 53 of 256 slots are active miners, and the top 5 take 89% of the miner pool. The remaining 48 miners share barely 4.6912 TAO-alpha/day. Your day bots are not yet Kraken-validated \u2014 submitting to SN8 before Phase 2 is premature. Signal ingestion (using SN8 outputs as inputs) requires Taoshi API access \u2014 no free public endpoint exists. Recommended: wait for Phase 2 validation, then evaluate SN8 entry with a proven live-performance bot.",
   "next_steps": [
-    "Verify VPS can reach api.taostats.io (curl test)",
-    "pip3 install bittensor if taostats unreachable"
+    "Complete Phase 2 Kraken validation \u2014 SN8 entry only makes sense with a live-proven bot",
+    "Request Taoshi PTN API key (https://docs.taoshi.io) to consume SN8 signals as input",
+    "Re-run this scout weekly to track competition/emission changes: python3 /root/.openclaw/workspace/research/sn8_scout.py",
+    "If Taoshi API key obtained: build sn8_signal_feeder.py to shadow-trade against your bots",
+    "Watch burn cost \u2014 currently 0.0005 TAO (very cheap). Enter during low-cost windows."
   ]
 }

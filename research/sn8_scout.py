@@ -2,379 +2,272 @@
 """
 sn8_scout.py — Read-only research tool for Bittensor SN8 (Proprietary Trading Network)
 
-Probes public APIs to assess:
-  1. What SN8 data is accessible without installing the bittensor SDK
-  2. Whether top-miner signals show predictive quality against our OHLCV data
-  3. Whether integration is worth pursuing
+Queries Bittensor chain directly via substrate-interface (no SDK, no stake required).
+Reports miner/validator rankings, economics, and integration recommendation.
 
 Usage:
   python3 /root/.openclaw/workspace/research/sn8_scout.py
-  python3 /root/.openclaw/workspace/research/sn8_scout.py --days 14
+  python3 /root/.openclaw/workspace/research/sn8_scout.py --top 20
 """
 
 import argparse
-import csv
 import json
 import os
 import sys
-import time
-import urllib.request
-import urllib.error
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 
 WORKSPACE   = "/root/.openclaw/workspace"
-DATA_DIR    = os.path.join(WORKSPACE, "research", "data")
 REPORT_PATH = os.path.join(WORKSPACE, "research", "sn8_report.json")
 
-SN8_NETUID = 8
+SN8_NETUID    = 8
+SCALE_U16     = 65535.0
+RAO_PER_TAO   = 1_000_000_000
+BLOCKS_PER_SEC = 12
+FINNEY_ENDPOINTS = [
+    "wss://entrypoint-finney.opentensor.ai:443",
+    "wss://bittensor-finney.api.onfinality.io/public-ws",
+]
 
-# -----------------------------------------------------------------------
-# API probing
-# -----------------------------------------------------------------------
 
-def fetch_json(url, timeout=15, headers=None):
-    """Return (parsed_data, error_string). One of them will be None."""
-    hdrs = {"User-Agent": "sn8-scout/1.0", "Accept": "application/json"}
-    if headers:
-        hdrs.update(headers)
+def connect():
+    from substrateinterface import SubstrateInterface
+    for ep in FINNEY_ENDPOINTS:
+        try:
+            print(f"  Connecting {ep} ...", end=" ", flush=True)
+            si = SubstrateInterface(url=ep, ss58_format=42, use_remote_preset=True)
+            print("OK")
+            return si, ep
+        except Exception as e:
+            print(f"FAIL ({e})")
+    raise ConnectionError("All Bittensor endpoints failed.")
+
+
+def fetch_array(si, field, netuid):
+    """Fetch a per-neuron array field (stored as Map<netuid> -> Vec<u16|u64>)."""
     try:
-        req = urllib.request.Request(url, headers=hdrs)
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
-            raw = resp.read()
-            return json.loads(raw), None
-    except urllib.error.HTTPError as e:
-        return None, f"HTTP {e.code}: {e.reason}"
-    except urllib.error.URLError as e:
-        return None, f"URLError: {e.reason}"
-    except json.JSONDecodeError as e:
-        return None, f"JSONDecodeError: {e}"
-    except Exception as e:
-        return None, f"{type(e).__name__}: {e}"
-
-
-def probe_taostats():
-    """
-    taostats.io public REST API — no auth required.
-    Docs: https://api.taostats.io/docs
-    Returns miner trust scores, emission rates, stake for SN8.
-    """
-    base = "https://api.taostats.io/api"
-    endpoints = {
-        "subnet":    f"{base}/subnet?netuid={SN8_NETUID}",
-        "metagraph": f"{base}/metagraph/latest?netuid={SN8_NETUID}&limit=50",
-    }
-    results = {}
-    for name, url in endpoints.items():
-        data, err = fetch_json(url)
-        results[name] = {"url": url, "ok": data is not None, "data": data, "error": err}
-    return results
-
-
-def probe_taoshi_ptn():
-    """
-    Taoshi runs SN8. They expose a public REST API for PTN signal data.
-    Trying known endpoints — the API may require auth for live signals.
-    """
-    base = "https://api.taoshi.io"
-    endpoints = {
-        "v1_signals":       f"{base}/v1/signals",
-        "v1_miners":        f"{base}/v1/miners",
-        "v1_leaderboard":   f"{base}/v1/leaderboard",
-        "signals":          f"{base}/signals",
-        "request_network":  f"{base}/request-network/v1/signals",
-    }
-    results = {}
-    for name, url in endpoints.items():
-        data, err = fetch_json(url)
-        results[name] = {"url": url, "ok": data is not None, "data": data, "error": err}
-    return results
-
-
-def probe_subtensor():
-    """
-    Opentensor Foundation exposes a public REST shim over their blockchain.
-    Useful for reading metagraph state directly without the SDK.
-    """
-    endpoints = {
-        "finney_metagraph": f"https://api.taostats.io/api/metagraph/latest?netuid={SN8_NETUID}",
-    }
-    results = {}
-    for name, url in endpoints.items():
-        data, err = fetch_json(url)
-        results[name] = {"url": url, "ok": data is not None, "data": data, "error": err}
-    return results
-
-
-# -----------------------------------------------------------------------
-# OHLCV helpers
-# -----------------------------------------------------------------------
-
-def load_ohlcv(pair, timeframe="5m", days=7):
-    symbol = pair.replace("/", "_")
-    path   = os.path.join(DATA_DIR, f"{symbol}_{timeframe}.csv")
-    if not os.path.exists(path):
+        result = si.query("SubtensorModule", field, [netuid])
+        return result.value or []
+    except Exception:
         return []
-    cutoff_ms = int((datetime.now(timezone.utc) - timedelta(days=days)).timestamp() * 1000)
-    rows = []
-    with open(path, newline="") as f:
-        for row in csv.DictReader(f):
-            ts = int(row["timestamp"])
-            if ts >= cutoff_ms:
-                rows.append({
-                    "ts":    ts,
-                    "open":  float(row["open"]),
-                    "high":  float(row["high"]),
-                    "low":   float(row["low"]),
-                    "close": float(row["close"]),
-                })
-    return rows
 
 
-# -----------------------------------------------------------------------
-# Signal quality analysis
-# -----------------------------------------------------------------------
+def fetch_scalar(si, field, netuid):
+    try:
+        result = si.query("SubtensorModule", field, [netuid])
+        return result.value
+    except Exception:
+        return None
 
-def analyze_signals(signals, ohlcv_map, forward_candles=12):
-    """
-    signals: list of {pair, direction ("long"/"short"/"flat"), timestamp_ms}
-    ohlcv_map: dict pair -> sorted list of OHLCV rows
-    forward_candles: how many 5m candles ahead to measure (12 = 1 hour)
 
-    Returns a dict with win rate, avg returns, and per-direction breakdowns.
-    """
-    long_rets, short_rets = [], []
-    skipped = flat = 0
+def build_metagraph(si, netuid):
+    """Return list of neuron dicts and epoch metadata."""
+    n        = fetch_scalar(si, "SubnetworkN",    netuid) or 0
+    burn_rao = fetch_scalar(si, "Burn",           netuid) or 0
+    tempo    = fetch_scalar(si, "Tempo",           netuid) or 360
 
-    for sig in signals:
-        pair      = sig.get("pair", "BTC/USD")
-        direction = str(sig.get("direction", "flat")).lower()
-        ts        = sig.get("timestamp_ms", 0)
+    incentive = fetch_array(si, "Incentive",      netuid)
+    emission  = fetch_array(si, "Emission",       netuid)
+    consensus = fetch_array(si, "Consensus",      netuid)
+    vtrust    = fetch_array(si, "ValidatorTrust", netuid)
+    dividends = fetch_array(si, "Dividends",      netuid)
+    v_permit  = fetch_array(si, "ValidatorPermit",netuid)
 
-        if direction == "flat":
-            flat += 1
-            continue
+    neurons = []
+    for uid in range(n):
+        is_v = bool(v_permit[uid]) if uid < len(v_permit) else False
+        neurons.append({
+            "uid":        uid,
+            "incentive":  incentive[uid] / SCALE_U16 if uid < len(incentive)  else 0.0,
+            "emission":   emission[uid]              if uid < len(emission)   else 0,
+            "consensus":  consensus[uid] / SCALE_U16 if uid < len(consensus)  else 0.0,
+            "vtrust":     vtrust[uid]    / SCALE_U16 if uid < len(vtrust)     else 0.0,
+            "dividends":  dividends[uid] / SCALE_U16 if uid < len(dividends)  else 0.0,
+            "is_validator": is_v,
+        })
 
-        candles = ohlcv_map.get(pair, [])
-        # binary search for entry candle
-        entry_idx = None
-        for i, c in enumerate(candles):
-            if c["ts"] >= ts:
-                entry_idx = i
-                break
+    return neurons, {
+        "n_neurons":    n,
+        "burn_rao":     burn_rao,
+        "burn_tao":     burn_rao / RAO_PER_TAO,
+        "tempo_blocks": tempo,
+        "epoch_seconds": tempo * BLOCKS_PER_SEC,
+        "epochs_per_day": round(86400 / (tempo * BLOCKS_PER_SEC), 2),
+    }
 
-        if entry_idx is None or entry_idx + forward_candles >= len(candles):
-            skipped += 1
-            continue
 
-        entry = candles[entry_idx]["close"]
-        exit_ = candles[entry_idx + forward_candles]["close"]
-        pct   = (exit_ - entry) / entry * 100
+def analyze(neurons, epoch_meta):
+    """Split miners vs validators, compute emission economics."""
+    miners     = sorted([n for n in neurons if not n["is_validator"] and n["emission"] > 0],
+                        key=lambda x: x["incentive"], reverse=True)
+    validators = sorted([n for n in neurons if n["is_validator"]],
+                        key=lambda x: x["dividends"], reverse=True)
 
-        if direction == "long":
-            long_rets.append(pct)
-        elif direction == "short":
-            short_rets.append(-pct)   # profit when price falls
+    total_emission_rao = sum(n["emission"] for n in neurons)
+    miner_emission_rao = sum(n["emission"] for n in neurons if not n["is_validator"])
 
-    def stats(rets):
-        if not rets:
-            return None
-        wins = sum(1 for r in rets if r > 0)
-        return {
-            "count":    len(rets),
-            "win_rate": round(wins / len(rets), 4),
-            "avg_ret":  round(sum(rets) / len(rets), 4),
-            "best":     round(max(rets), 4),
-            "worst":    round(min(rets), 4),
-        }
+    epd = epoch_meta["epochs_per_day"]
+    avg_miner_rao = (miner_emission_rao / len(miners)) if miners else 0
 
-    total_analyzed = len(long_rets) + len(short_rets)
-    total_wins     = sum(1 for r in long_rets + short_rets if r > 0)
+    top5_incentive = [m["incentive"] for m in miners[:5]]
+    top5_share     = sum(m["emission"] for m in miners[:5]) / miner_emission_rao if miner_emission_rao else 0
 
     return {
-        "total_signals":  len(signals),
-        "flat":           flat,
-        "skipped":        skipped,
-        "analyzed":       total_analyzed,
-        "overall_win_rate": round(total_wins / total_analyzed, 4) if total_analyzed else None,
-        "long":           stats(long_rets),
-        "short":          stats(short_rets),
-        "forward_window": f"{forward_candles * 5}m",
+        "miners":             miners,
+        "validators":         validators,
+        "n_active_miners":    len(miners),
+        "n_validators":       len(validators),
+        "total_emission_tao": total_emission_rao / RAO_PER_TAO,
+        "miner_pool_tao":     miner_emission_rao / RAO_PER_TAO,
+        "miner_pool_daily_tao": (miner_emission_rao / RAO_PER_TAO) * epd,
+        "avg_miner_epoch_tao":  avg_miner_rao / RAO_PER_TAO,
+        "avg_miner_daily_tao":  (avg_miner_rao / RAO_PER_TAO) * epd,
+        "top_miner_epoch_tao":  miners[0]["emission"] / RAO_PER_TAO if miners else 0,
+        "top_miner_daily_tao":  (miners[0]["emission"] / RAO_PER_TAO) * epd if miners else 0,
+        "top5_emission_share":  round(top5_share, 4),
+        "burn_recovery_days_avg": epoch_meta["burn_tao"] / ((avg_miner_rao / RAO_PER_TAO) * epd) if avg_miner_rao > 0 else 999,
     }
 
-
-# -----------------------------------------------------------------------
-# Metagraph summary helpers
-# -----------------------------------------------------------------------
-
-def summarize_metagraph(data):
-    """Pull top-10 miners by trust from raw taostats metagraph response."""
-    # taostats returns either list or {"data": [...]}
-    rows = data if isinstance(data, list) else data.get("data", [])
-    if not rows:
-        return []
-
-    miners = []
-    for r in rows:
-        trust    = float(r.get("trust", r.get("validator_trust", 0)) or 0)
-        emission = float(r.get("emission", 0) or 0)
-        stake    = float(r.get("stake", 0) or 0)
-        uid      = r.get("uid", r.get("hotkey", "?"))
-        miners.append({"uid": uid, "trust": trust, "emission": emission, "stake": stake})
-
-    miners.sort(key=lambda m: m["trust"], reverse=True)
-    return miners[:10]
-
-
-# -----------------------------------------------------------------------
-# Main
-# -----------------------------------------------------------------------
 
 def main():
-    parser = argparse.ArgumentParser(description="SN8 scout — no bittensor SDK required")
-    parser.add_argument("--days", type=int, default=7, help="Days of OHLCV data to analyze")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--top", type=int, default=15)
     args = parser.parse_args()
 
-    report = {
-        "generated_utc": datetime.now(timezone.utc).isoformat(),
-        "days_analyzed": args.days,
-        "api_access": {},
-        "top_miners": [],
-        "signal_analysis": None,
-        "recommendation": "",
-        "next_steps": [],
-    }
+    print("=" * 62)
+    print("SN8 Scout — Bittensor Proprietary Trading Network (Taoshi)")
+    print("=" * 62)
 
-    print("=" * 58)
-    print("SN8 Scout — Bittensor Proprietary Trading Network")
-    print("=" * 58)
+    print("\n[1/3] Connecting to Bittensor chain...")
+    try:
+        si, ep = connect()
+    except ConnectionError as e:
+        print(f"FATAL: {e}")
+        return 1
 
-    # ---- 1. taostats ----
-    print("\n[1/3] taostats API (subnet metagraph)...")
-    ts_results = probe_taostats()
-    report["api_access"]["taostats"] = {}
-    for name, r in ts_results.items():
-        status = "OK" if r["ok"] else f"FAIL ({r['error']})"
-        print(f"  {name:20s} {status}")
-        report["api_access"]["taostats"][name] = {"ok": r["ok"], "error": r["error"]}
+    print("\n[2/3] Querying SN8 metagraph...")
+    neurons, epoch_meta = build_metagraph(si, SN8_NETUID)
+    stats = analyze(neurons, epoch_meta)
 
-        if r["ok"] and name == "metagraph" and r["data"]:
-            top = summarize_metagraph(r["data"])
-            report["top_miners"] = top
-            if top:
-                print(f"  Top miners by trust:")
-                for m in top[:5]:
-                    print(f"    uid={m['uid']}  trust={m['trust']:.4f}  emission={m['emission']:.4f}")
+    miners     = stats["miners"]
+    validators = stats["validators"]
 
-    # ---- 2. Taoshi PTN API ----
-    print("\n[2/3] Taoshi PTN API (live signals)...")
-    ptn_results = probe_taoshi_ptn()
-    report["api_access"]["taoshi_ptn"] = {}
-    signal_data = None
-    for name, r in ptn_results.items():
-        status = "OK" if r["ok"] else f"FAIL ({r['error']})"
-        print(f"  {name:24s} {status}")
-        report["api_access"]["taoshi_ptn"][name] = {"ok": r["ok"], "error": r["error"]}
-        if r["ok"] and r["data"] and signal_data is None:
-            signal_data = r["data"]
-            print(f"    --> Got data from {name}")
+    # ---- Print subnet overview ----
+    print(f"\n  Subnet stats:")
+    print(f"    Total neuron slots:   {epoch_meta['n_neurons']}")
+    print(f"    Active miners:        {stats['n_active_miners']}")
+    print(f"    Validators:           {stats['n_validators']}")
+    print(f"    Inactive slots:       {epoch_meta['n_neurons'] - stats['n_active_miners'] - stats['n_validators']}")
+    print(f"    Registration cost:    {epoch_meta['burn_tao']:.4f} TAO")
+    print(f"    Tempo:                {epoch_meta['tempo_blocks']} blocks ({epoch_meta['epoch_seconds']/60:.0f} min/epoch)")
+    print(f"    Epochs per day:       {epoch_meta['epochs_per_day']}")
 
-    # ---- 3. Signal quality analysis ----
-    print("\n[3/3] Signal quality analysis...")
-    if signal_data:
-        # Normalize to our format
-        raw = signal_data if isinstance(signal_data, list) else signal_data.get("data", [])
-        signals = []
-        for item in raw:
-            if not isinstance(item, dict):
-                continue
-            pair = (item.get("trade_pair") or item.get("pair") or "BTC/USD").replace("-", "/")
-            direction = str(item.get("signal") or item.get("direction") or "flat").lower()
-            ts_ms = int(item.get("timestamp") or item.get("ts") or time.time() * 1000)
-            signals.append({"pair": pair, "direction": direction, "timestamp_ms": ts_ms})
+    print(f"\n  Emission economics (NOTE: Dynamic TAO — values in subnet alpha tokens):")
+    print(f"    Total SN8 per epoch:  {stats['total_emission_tao']:.4f} TAO-alpha")
+    print(f"    Miner pool per epoch: {stats['miner_pool_tao']:.4f} TAO-alpha")
+    print(f"    Miner pool per day:   {stats['miner_pool_daily_tao']:.4f} TAO-alpha")
+    print(f"    Top miner per day:    {stats['top_miner_daily_tao']:.4f} TAO-alpha")
+    print(f"    Avg active miner/day: {stats['avg_miner_daily_tao']:.4f} TAO-alpha")
+    print(f"    Top 5 miner share:    {stats['top5_emission_share']:.1%} of miner pool")
+    print(f"    Days to recover reg:  {stats['burn_recovery_days_avg']:.2f} (avg miner)")
 
-        if signals:
-            pairs_needed = set(s["pair"] for s in signals)
-            ohlcv_map = {}
-            for pair in pairs_needed:
-                data = load_ohlcv(pair, days=args.days)
-                if data:
-                    ohlcv_map[pair] = data
+    # ---- Miner leaderboard ----
+    print(f"\n  Top {min(args.top, len(miners))} miners by incentive:")
+    print(f"  {'UID':>5} {'Incentive':>10} {'Consensus':>10} {'Epoch emission':>16}")
+    print(f"  {'-'*5} {'-'*10} {'-'*10} {'-'*16}")
+    for m in miners[:args.top]:
+        em_tao = m["emission"] / RAO_PER_TAO
+        print(f"  {m['uid']:>5} {m['incentive']:>10.4f} {m['consensus']:>10.4f} {em_tao:>14.4f} a")
 
-            analysis = analyze_signals(signals, ohlcv_map)
-            report["signal_analysis"] = analysis
-            print(f"  Total signals:   {analysis['total_signals']}")
-            print(f"  Analyzed:        {analysis['analyzed']}")
-            if analysis["overall_win_rate"] is not None:
-                print(f"  Win rate (1h):   {analysis['overall_win_rate']:.1%}")
-            if analysis["long"]:
-                print(f"  Long avg return: {analysis['long']['avg_ret']:+.3f}%")
-            if analysis["short"]:
-                print(f"  Short avg return:{analysis['short']['avg_ret']:+.3f}%")
-        else:
-            print("  Signal data received but no parseable entries.")
-            report["signal_analysis"] = {"note": "Unparseable format", "raw_type": str(type(raw))}
+    # ---- Validator leaderboard ----
+    print(f"\n  Top validators (earn dividends, not incentive):")
+    print(f"  {'UID':>5} {'Dividends':>10} {'VTrust':>8} {'Epoch emission':>16}")
+    for v in validators[:5]:
+        em_tao = v["emission"] / RAO_PER_TAO
+        print(f"  {v['uid']:>5} {v['dividends']:>10.4f} {v['vtrust']:>8.4f} {em_tao:>14.4f} a")
+
+    # ---- Competition assessment ----
+    print("\n[3/3] Integration assessment...")
+
+    # Competitiveness: how concentrated is incentive at top?
+    if stats["top5_emission_share"] > 0.8:
+        competition = "EXTREME — top 5 take {:.0%} of miner pool. Everyone else earns near-zero.".format(
+            stats["top5_emission_share"])
+    elif stats["top5_emission_share"] > 0.5:
+        competition = "HIGH — top 5 take {:.0%} of miner pool. Mid-tier earns modestly.".format(
+            stats["top5_emission_share"])
     else:
-        print("  No signal data from public APIs — auth likely required.")
-        report["signal_analysis"] = {
-            "note": "No public unauthenticated signal endpoint found.",
-            "implication": "Taoshi PTN signals require API key or validator stake.",
-        }
+        competition = "MODERATE — emission distributed more evenly."
 
-    # ---- Recommendation ----
-    taostats_ok = any(r["ok"] for r in ts_results.values())
-    taoshi_ok   = any(r["ok"] for r in ptn_results.values())
-    sig_analysis = report["signal_analysis"] or {}
-    win_rate = sig_analysis.get("overall_win_rate")
-
-    if win_rate and win_rate > 0.55:
-        rec = (
-            f"SN8 signals show meaningful edge ({win_rate:.1%} win rate 1h forward). "
-            "Build a signal ingestion layer and run a 30-day shadow comparison against your day bots."
-        )
-        next_steps = [
-            "Obtain Taoshi PTN API key (api.taoshi.io)",
-            "Build sn8_signal_feeder.py: poll signals every 5m, write to local cache",
-            "Add SN8 consensus signal as a feature input to ODIN's strategy optimizer",
-            "Shadow-trade for 30 days before live use",
-        ]
-    elif taoshi_ok and signal_data:
-        rec = (
-            f"SN8 data accessible but signals show no clear edge ({win_rate:.1%} win rate). "
-            "Not worth integrating now. Re-evaluate in 60 days."
-        )
-        next_steps = ["Set calendar reminder to re-run this scout in 60 days."]
-    elif taostats_ok:
-        rec = (
-            "Metagraph accessible (miner trust/emission rankings). "
-            "Signal data requires Taoshi API key or bittensor SDK with validator stake. "
-            "Metagraph alone useful for subnet participation cost analysis."
-        )
-        next_steps = [
-            "Request Taoshi PTN API key at api.taoshi.io (free tier may exist)",
-            "OR: pip3 install bittensor (500MB) to query signals via SDK",
-            "Re-run this scout after gaining access to signal endpoints",
-        ]
+    # Economics verdict
+    if stats["burn_recovery_days_avg"] < 1:
+        econ = "Entry cost negligible ({:.4f} TAO). Recoverable in <1 day at avg rank.".format(
+            epoch_meta["burn_tao"])
+    elif stats["burn_recovery_days_avg"] < 7:
+        econ = "Entry cost recoverable in ~{:.1f} days at average rank.".format(
+            stats["burn_recovery_days_avg"])
     else:
-        rec = (
-            "No public APIs reachable. Check network/firewall, then consider: "
-            "pip3 install bittensor for direct on-chain access."
-        )
-        next_steps = [
-            "Verify VPS can reach api.taostats.io (curl test)",
-            "pip3 install bittensor if taostats unreachable",
-        ]
+        econ = "Entry cost takes {:.0f}+ days to recover at average rank.".format(
+            stats["burn_recovery_days_avg"])
 
-    report["recommendation"] = rec
-    report["next_steps"]     = next_steps
+    rec = (
+        "Registration is dirt cheap ({:.4f} TAO). However: only {} of 256 slots are "
+        "active miners, and the top 5 take {:.0%} of the miner pool. The remaining "
+        "{} miners share barely {:.4f} TAO-alpha/day. Your day bots are not yet "
+        "Kraken-validated — submitting to SN8 before Phase 2 is premature. "
+        "Signal ingestion (using SN8 outputs as inputs) requires Taoshi API access "
+        "— no free public endpoint exists. Recommended: wait for Phase 2 validation, "
+        "then evaluate SN8 entry with a proven live-performance bot."
+    ).format(
+        epoch_meta["burn_tao"],
+        stats["n_active_miners"],
+        stats["top5_emission_share"],
+        stats["n_active_miners"] - 5,
+        stats["miner_pool_daily_tao"] * (1 - stats["top5_emission_share"]),
+    )
 
-    print("\n" + "-" * 58)
+    next_steps = [
+        "Complete Phase 2 Kraken validation — SN8 entry only makes sense with a live-proven bot",
+        "Request Taoshi PTN API key (https://docs.taoshi.io) to consume SN8 signals as input",
+        "Re-run this scout weekly to track competition/emission changes: "
+        "python3 /root/.openclaw/workspace/research/sn8_scout.py",
+        "If Taoshi API key obtained: build sn8_signal_feeder.py to shadow-trade against your bots",
+        "Watch burn cost — currently {:.4f} TAO (very cheap). Enter during low-cost windows.".format(
+            epoch_meta["burn_tao"]),
+    ]
+
+    print(f"\n  Competition: {competition}")
+    print(f"  Economics:   {econ}")
+
+    print("\n" + "=" * 62)
     print("RECOMMENDATION:")
-    print(f"  {rec}")
+    for line in rec.split(". "):
+        if line:
+            print("  " + line.strip() + ".")
     print("\nNEXT STEPS:")
     for i, s in enumerate(next_steps, 1):
         print(f"  {i}. {s}")
-    print("-" * 58)
+    print("=" * 62)
 
+    # Save report
+    report = {
+        "generated_utc":   datetime.now(timezone.utc).isoformat(),
+        "subnet":          "SN8 — Proprietary Trading Network (Taoshi)",
+        "chain_endpoint":  ep,
+        "epoch_meta":      epoch_meta,
+        "stats":           {k: v for k, v in stats.items() if k not in ("miners", "validators")},
+        "top_miners":      [{"uid": m["uid"], "incentive": m["incentive"],
+                             "consensus": m["consensus"],
+                             "emission_tao": m["emission"]/RAO_PER_TAO}
+                            for m in miners[:20]],
+        "top_validators":  [{"uid": v["uid"], "dividends": v["dividends"],
+                             "vtrust": v["vtrust"],
+                             "emission_tao": v["emission"]/RAO_PER_TAO}
+                            for v in validators[:5]],
+        "competition":     competition,
+        "economics":       econ,
+        "recommendation":  rec,
+        "next_steps":      next_steps,
+    }
     with open(REPORT_PATH, "w") as f:
         json.dump(report, f, indent=2, default=str)
     print(f"\nFull report: {REPORT_PATH}")
