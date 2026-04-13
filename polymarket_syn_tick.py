@@ -431,11 +431,12 @@ def filter_for_bot(markets, strategy, existing_cids):
         if m["liquidity"] < min_liq:
             continue
 
-        # End date
+        # End date — must resolve before both max_days cutoff AND sprint end
         if m["end_date"]:
             try:
                 end_dt = datetime.fromisoformat(m["end_date"].replace("Z", "+00:00"))
-                if end_dt > cutoff or end_dt < datetime.now(timezone.utc):
+                effective_cutoff = min(cutoff, sprint_end_dt) if sprint_end_dt else cutoff
+                if end_dt > effective_cutoff or end_dt < datetime.now(timezone.utc):
                     continue
             except Exception:
                 pass

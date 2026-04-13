@@ -3119,3 +3119,15 @@ expected <block end>, but found '<block mapping start>'
 3180	-1.1097	47.5	-18.29	1383	discarded	perturb cond_long_0: 30.0->26.47	2026-04-13T02:57
 3181	-0.9503	48.2	-18.10	1665	discarded	perturb tp: 4.6->4.36	2026-04-13T03:00
 3182	0.3357	49.0	6.39	1752	discarded	crossover(A_entry+B_exit)	2026-04-13T03:04
+3183	-999.0000	0.0	0.00	0	low_trades	trades=0	2026-04-13T03:34
+3184	-0.5057	47.6	-11.88	1826	discarded	perturb sl: 2.59->2.31	2026-04-13T03:37
+3185	-1.6360	48.2	-18.15	932	discarded	perturb tp: 4.6->3.92	2026-04-13T03:39
+3186	-0.8971	46.8	-18.30	716	discarded	llm	2026-04-13T03:41
+3187	-0.8971	46.8	-18.30	716	discarded	llm	2026-04-13T03:43
+3188	-2.2954	48.2	-18.08	672	discarded	perturb cond_short_0: 68.63->58.1	2026-04-13T03:45
+3189	-0.8971	46.8	-18.30	716	discarded	llm	2026-04-13T03:47
+3190	-0.8971	46.8	-18.30	716	discarded	llm	2026-04-13T03:49
+3191	-1.0713	47.9	-18.13	1439	discarded	perturb tp: 4.6->4.25	2026-04-13T03:52
+3192	-2.1212	46.6	-18.03	982	discarded	perturb to: 720->480	2026-04-13T03:54
+3193	-0.8971	46.8	-18.30	716	discarded	llm	2026-04-13T03:56
+3194	-1.0343	48.8	-18.17	1565	discarded	perturb tp: 4.6->3.87	2026-04-13T03:59

@@ -15,12 +15,14 @@ Available indicators:
   bollinger_position    -- above_upper | below_lower | inside Bollinger Bands
   macd_signal           -- bullish | bearish | neutral
                           (standard: slow=26h, period_hours: 26)
+  volume_above_avg      -- True if latest candle volume > avg volume over period_hours
 """
 from swing_price_store import (
     get_current_price,
     get_price_n_hours_ago,
     get_price_series,
     get_vwap,
+    get_volume_series,
 )
 
 FLAT_THRESHOLD_PCT = 1.0   # wider flat band for swing (vs 0.15% for day trading)
@@ -175,6 +177,18 @@ def macd_signal(pair, period_hours):
     return "neutral"
 
 
+
+def volume_above_avg(pair, period_hours=24):
+    """True if current candle volume exceeds the average over period_hours."""
+    n = max(period_hours + 1, 2)
+    vols = get_volume_series(pair, n)
+    if vols is None:
+        return None
+    avg = sum(vols[:-1]) / len(vols[:-1])
+    if avg == 0:
+        return None
+    return vols[-1] > avg
+
 # ---------------------------------------------------------------------------
 # Dispatch + evaluation
 # ---------------------------------------------------------------------------
@@ -196,6 +210,8 @@ def compute_indicator(name, pair, period_hours):
         return bollinger_position(pair, period_hours)
     if name == "macd_signal":
         return macd_signal(pair, period_hours)
+    if name == "volume_above_avg":
+        return volume_above_avg(pair, period_hours)
     raise ValueError(f"Unknown indicator: {name}")
 
 

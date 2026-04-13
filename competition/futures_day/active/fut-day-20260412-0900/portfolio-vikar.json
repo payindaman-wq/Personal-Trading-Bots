@@ -23,17 +23,8 @@
   ],
   "starting_capital": 1000.0,
   "fee_rate": 0.0005,
-  "cash": 806.396800672368,
+  "cash": 909.8699082625881,
   "positions": [
-    {
-      "pair": "NEAR/USD",
-      "direction": "long",
-      "entry_price": 1.357,
-      "quantity": 148.56153279,
-      "cost_basis": 100.799,
-      "leverage": 2.0,
-      "opened_at": "2026-04-13T03:10:01.683304+00:00"
-    },
     {
       "pair": "AAVE/USD",
       "direction": "short",
@@ -72,21 +63,35 @@
       "won": true,
       "opened_at": "2026-04-12T22:20:01.856654+00:00",
       "closed_at": "2026-04-13T00:45:01.382619+00:00"
+    },
+    {
+      "pair": "NEAR/USD",
+      "direction": "long",
+      "reason": "timeout",
+      "entry_price": 1.357,
+      "exit_price": 1.366,
+      "pnl_usd": 2.6741,
+      "pnl_pct": 2.6529,
+      "funding_cost": 0.0,
+      "leverage": 2.0,
+      "won": true,
+      "opened_at": "2026-04-13T03:10:01.683304+00:00",
+      "closed_at": "2026-04-13T03:55:02.044719+00:00"
     }
   ],
   "stats": {
-    "total_trades": 2,
-    "wins": 2,
+    "total_trades": 3,
+    "wins": 3,
     "losses": 0,
     "win_rate": 100.0,
-    "total_pnl_usd": 7.9948,
-    "total_pnl_pct": 0.7995,
+    "total_pnl_usd": 10.6689,
+    "total_pnl_pct": -9.013,
     "total_fees": 0.0,
     "max_drawdown_pct": 0.0,
-    "current_equity": 1007.99,
+    "current_equity": 909.87,
     "peak_equity": 1007.994800672368,
-    "live_equity_mtm": 807.59,
-    "live_pnl_usd": -192.41,
-    "live_pnl_pct": -19.2415
+    "live_equity_mtm": 910.64,
+    "live_pnl_usd": -89.36,
+    "live_pnl_pct": -8.9362
   }
 }

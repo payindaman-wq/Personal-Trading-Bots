@@ -207,8 +207,8 @@
       "total_trades": 0,
       "wins": 0,
       "losses": 0,
-      "last_seen_ts": 1776050671,
-      "last_seen_tx": "0x0ef2a3f95d5c3f0484111ac26752ec88b4f5c2d4fce7f253d7e22ee55d530eea",
+      "last_seen_ts": 1776051119,
+      "last_seen_tx": "0x273b57b13aadd58b0b6fd1cebe290dafab4873c91087d00c731c3f6bbf8c4d68",
       "sprint_pnl_usd": 0.0,
       "sprint_wins": 0,
       "sprint_trades": 0,
@@ -226,5 +226,5 @@
     "active_positions": 0,
     "total_trades": 0
   },
-  "generated_at": "2026-04-13T03:29:41.816904+00:00"
+  "generated_at": "2026-04-13T04:01:52.689176+00:00"
 }

@@ -44,9 +44,21 @@ POPULATION_SIZE   = 5
 MIMIR_INTERVAL    = 200
 SUSPICIOUS_SHARPE = 8.0
 MIN_BETS          = 20
-PM_FEE_PCT        = 0.02
+# Kalshi taker fee: 2.5% of potential profit per contract
+# (e.g. YES at 50c -> $0.0125/contract; low-prob contracts carry heavy fees)
+KALSHI_FEE_PROFIT_PCT   = 0.025
+KALSHI_MAX_FEE_CONTRACT = 0.07   # cap, not binding in practice at normal odds
 
-CATEGORIES = ["sports", "politics", "crypto", "economics", "world_events"]
+# ── PERMANENT KALSHI CONSTRAINTS (do not remove or relax) ────────────────────
+# These reflect hard limitations of Kalshi's public API and sprint structure.
+# See sanitize_candidate() — enforced on every Gemini mutation.
+#   - No sports: Kalshi public endpoint carries no sports markets
+#   - max_days_to_resolve <= 7: sprint window is 7 days; longer = locked capital
+#   - price_range [0.10, 0.90]: Kalshi fee (2.5% of profit/contract) is brutal
+#     at low probabilities — e.g. YES at 0.10 costs 22.5% of position in fees
+# ─────────────────────────────────────────────────────────────────────────────
+# Sports excluded: Kalshi public API does not serve sports markets
+CATEGORIES = ["politics", "crypto", "economics", "world_events"]
 
 
 def log(msg):
@@ -164,10 +176,16 @@ def simulate_strategy(strategy, markets, base_rates):
         else:
             continue
 
-        if bet_odds < 0.02:
+        if bet_odds < 0.05:  # Kalshi floor: avoid extreme-odds contracts
             continue
 
-        fee = bet_size * PM_FEE_PCT
+        # Kalshi fee: 2.5% of potential profit per contract
+        # profit_per_contract = 1 - bet_odds (each contract pays $1 at resolution)
+        n_contracts = bet_size / bet_odds
+        profit_per_contract = 1.0 - bet_odds
+        fee_per_contract = min(KALSHI_FEE_PROFIT_PCT * profit_per_contract,
+                               KALSHI_MAX_FEE_CONTRACT)
+        fee = fee_per_contract * n_contracts
         res = m.get("resolution")
         if (bet == "yes" and res == "yes") or (bet == "no" and res == "no"):
             pnl.append(bet_size * (1.0 / bet_odds - 1.0) - fee)
@@ -199,6 +217,43 @@ def simulate_strategy(strategy, markets, base_rates):
     }
 
 
+
+
+def sanitize_candidate(candidate, best):
+    """
+    PERMANENT KALSHI CONSTRAINTS — do not remove or relax these.
+    Enforces hard limits on every Gemini-generated strategy candidate
+    so constraint violations in LLM output are silently corrected.
+
+    Constraints (set 2026-04-13, permanent):
+      - category:           must be in CATEGORIES (no sports — Kalshi public API has none)
+      - max_days_to_resolve: must be <= 7 (sprint window; longer ties up capital)
+      - price_range:        min >= 0.10, max <= 0.90 (fee-efficiency on Kalshi)
+      - min_edge_pts:       must be >= 0.04 (avoid fee-crushed near-zero-edge trades)
+    """
+    # Category
+    if candidate.get("category") not in CATEGORIES:
+        candidate["category"] = best.get("category", CATEGORIES[0])
+
+    # Sprint window cap
+    if candidate.get("max_days_to_resolve", 7) > 7:
+        candidate["max_days_to_resolve"] = 7
+
+    # Price range fee-efficiency bounds
+    pr = candidate.get("price_range", [0.10, 0.90])
+    if not isinstance(pr, list) or len(pr) != 2:
+        pr = [0.10, 0.90]
+    pr[0] = max(float(pr[0]), 0.10)
+    pr[1] = min(float(pr[1]), 0.90)
+    candidate["price_range"] = pr
+
+    # Edge floor
+    if candidate.get("min_edge_pts", 0.04) < 0.04:
+        candidate["min_edge_pts"] = 0.04
+
+    return candidate
+
+
 def load_strategy(path):
     with open(path) as f:
         return yaml.safe_load(f)
@@ -211,13 +266,13 @@ def save_strategy(s, path):
 
 DEFAULT_STRATEGY = {
     "name":                "pm_research_best",
-    "category":            "world_events",
+    "category":            "politics",
     "include_keywords":    [],
     "exclude_keywords":    [],
-    "price_range":         [0.05, 0.90],
-    "min_liquidity_usd":   1000,
-    "max_days_to_resolve": 30,
-    "min_edge_pts":        0.05,
+    "price_range":         [0.10, 0.90],
+    "min_liquidity_usd":   500,
+    "max_days_to_resolve": 7,    # hard cap: must close within sprint window
+    "min_edge_pts":        0.06,
     "max_position_pct":    0.10,
 }
 
@@ -290,11 +345,16 @@ def mutate_llm(best, metrics, program_md, api_key):
     prog = f"\n## Research Program\n{program_md}" if program_md.strip() else ""
 
     prompt = (
-        "You are FREYA, a prediction markets strategy optimizer.\n\n"
+        "You are FREYA, a prediction markets strategy optimizer for KALSHI "
+        "(CFTC-regulated US exchange - no sports, politics/crypto/economics/world_events only).\n\n"
         "HOW THE SIMULATOR WORKS:\n"
-        "- Filters 300k+ historical resolved Polymarket/Kalshi/Manifold markets\n"
-        "- Category YES resolution rates: sports=30.6%, politics=29.1%, "
-        "crypto=31.5%, economics=26.0%, world_events=12.0%\n"
+        "- Filters 300k+ historical resolved Kalshi/Polymarket markets\n"
+        "- Kalshi carries: politics, crypto, economics, world_events (NO sports)\n"
+        "- Category YES resolution rates: politics=29.1%, crypto=31.5%, "
+        "economics=26.0%, world_events=12.0%\n"
+        "- KALSHI FEE: 2.5%% of potential profit per contract; low-prob bets "
+        "near 0.05-0.15 carry outsized fee drag so avoid them\n"
+        "- Keep price_range min>=0.10 and max<=0.90 to stay fee-efficient\n"
         "- Bet direction: market_odds > base_rate + min_edge_pts -> bet NO; "
         "market_odds < base_rate - min_edge_pts -> bet YES\n"
         "- adj_score = sharpe x log(n_bets/20 + 1), needs >=20 bets\n\n"
@@ -302,13 +362,13 @@ def mutate_llm(best, metrics, program_md, api_key):
         f"roi={metrics['roi_pct']:.1f}%, win={metrics['win_rate']:.1f}%, n={metrics['n_bets']}):\n"
         "```yaml\n" + strategy_yaml + "```" + prog + "\n\n"
         "MUTABLE PARAMETERS:\n"
-        "- category: [sports, politics, crypto, economics, world_events]\n"
-        "- include_keywords: lowercase strings to match in titles ([] = no filter)\n"
+        "- category: [politics, crypto, economics, world_events] (no sports on Kalshi)\n"
+        "- include_keywords: lowercase strings matching Kalshi market titles\n"
         "- exclude_keywords: strings to exclude\n"
-        "- price_range: [min, max] odds range\n"
+        "- price_range: [min>=0.10, max<=0.90] to stay Kalshi fee-efficient\n"
         "- min_liquidity_usd: 100-10000\n"
-        "- max_days_to_resolve: 3-90\n"
-        "- min_edge_pts: 0.03-0.25\n"
+        "- max_days_to_resolve: 3-7 (hard cap = sprint window; longer locks up capital)\n"
+        "- min_edge_pts: 0.04-0.25\n"
         "- max_position_pct: 0.02-0.20\n\n"
         "Propose exactly ONE change to maximize adj_score.\n"
         "Output ONLY the updated strategy YAML, no explanation, no fences."
@@ -344,7 +404,7 @@ def mutate_perturbation(best):
     elif choice == "max_position_pct":
         s["max_position_pct"] = round(random.uniform(0.02, 0.20), 3)
     elif choice == "max_days_to_resolve":
-        s["max_days_to_resolve"] = random.choice([3, 7, 14, 21, 30, 60, 90])
+        s["max_days_to_resolve"] = random.choice([3, 5, 7])  # sprint window cap
     return s, f"perturb:{choice}"
 
 
@@ -360,17 +420,18 @@ def mutate_crossover(population):
     return s, "crossover"
 
 
+# Sports removed: Kalshi public API does not carry sports markets
 KW_POOL = {
-    "sports":       ["nfl", "nba", "mlb", "soccer", "championship", "playoff",
-                     "super bowl", "world cup", "tennis", "ufc"],
     "politics":     ["election", "president", "senate", "congress", "vote",
-                     "party", "candidate", "primary", "governor"],
-    "crypto":       ["bitcoin", "ethereum", "btc", "eth", "crypto", "token",
-                     "defi", "nft", "blockchain"],
+                     "party", "candidate", "primary", "governor", "house",
+                     "republican", "democrat", "approval", "tariff", "policy"],
+    "crypto":       ["bitcoin", "btc", "ethereum", "eth", "solana", "sol",
+                     "xrp", "crypto", "price", "above", "below"],
     "economics":    ["cpi", "nfp", "gdp", "inflation", "fed", "interest rate",
-                     "jobs", "recession", "earnings"],
-    "world_events": ["will", "before", "announce", "sign", "approve",
-                     "launch", "release", "confirm", "complete"],
+                     "unemployment", "recession", "rate hike", "rate cut",
+                     "jobs report", "fomc", "powell"],
+    "world_events": ["ceasefire", "treaty", "war", "sanction", "trade deal",
+                     "agreement", "summit", "nato", "announce", "approve"],
 }
 
 
@@ -386,7 +447,7 @@ def mutate_random_restart():
         "price_range":         [round(random.uniform(0.03, 0.15), 2),
                                 round(random.uniform(0.85, 0.97), 2)],
         "min_liquidity_usd":   random.choice([100, 200, 500, 1000, 2000]),
-        "max_days_to_resolve": random.choice([7, 14, 30, 60, 90]),
+        "max_days_to_resolve": random.choice([3, 5, 7]),  # sprint window cap
         "min_edge_pts":        round(random.uniform(0.03, 0.20), 3),
         "max_position_pct":    round(random.uniform(0.05, 0.15), 3),
     }
@@ -468,8 +529,7 @@ def main():
                                     "n_bets": 0, "adj_score": 0}, "invalid", str(mut_type))
                 continue
 
-            if candidate.get("category") not in CATEGORIES:
-                candidate["category"] = best.get("category", "world_events")
+            candidate = sanitize_candidate(candidate, best)
 
             metrics = simulate_strategy(candidate, markets, base_rates)
             score   = metrics["adj_score"]

@@ -175,6 +175,14 @@ def get_vwap(pair, period_hours=24):
     return round(vwap, 6)
 
 
+
+def get_volume_series(pair, n_points):
+    """Return last n_points volumes oldest-first, or None if insufficient history."""
+    history = load_history(pair)
+    if not history or len(history) < n_points:
+        return None
+    return [c["volume"] for c in history[-n_points:]]
+
 # ---------------------------------------------------------------------------
 # Update logic
 # ---------------------------------------------------------------------------

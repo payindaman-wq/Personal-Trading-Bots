@@ -47,8 +47,8 @@
     "max_drawdown_pct": 0.0,
     "current_equity": 1000.0,
     "peak_equity": 1000.0,
-    "live_equity_mtm": 901.18,
-    "live_pnl_usd": -98.82,
-    "live_pnl_pct": -9.8821
+    "live_equity_mtm": 903.24,
+    "live_pnl_usd": -96.76,
+    "live_pnl_pct": -9.6758
   }
 }

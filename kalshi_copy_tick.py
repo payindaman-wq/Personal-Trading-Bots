@@ -673,6 +673,12 @@ def write_dashboard(state):
 def tick(state, api_key, kalshi_markets, kalshi_index):
     dry_run    = state.get("dry_run", True)
     new_events = []
+    # Sprint-end guard: parse once per tick
+    _sprint_ends_raw = state.get("sprint_ends_at", "")
+    try:
+        _sprint_end_dt = datetime.fromisoformat(_sprint_ends_raw) if _sprint_ends_raw else None
+    except Exception:
+        _sprint_end_dt = None
 
     for bot in state["bots"]:
         wallet   = bot["pm_wallet"]
@@ -687,6 +693,20 @@ def tick(state, api_key, kalshi_markets, kalshi_index):
 
             if side == "BUY":
                 match, score = find_kalshi_match(title, kalshi_markets, kalshi_index)
+                if match:
+                    # Sprint-window guard: skip if Kalshi market closes after sprint ends
+                    _ct = match.get("close_time", "")
+                    if _sprint_end_dt and _ct:
+                        try:
+                            _close_dt = datetime.fromisoformat(_ct.replace("Z", "+00:00"))
+                            if _close_dt > _sprint_end_dt:
+                                log.info(
+                                    f"[{bot['name']}] SKIP {match['ticker']} — "
+                                    f"resolves {_ct[:10]}, after sprint end {str(_sprint_end_dt)[:10]}"
+                                )
+                                match = None
+                        except Exception:
+                            pass  # unparseable close_time — allow through
                 if match:
                     event = open_position(bot, trade, match, api_key, dry_run)
                     if event:
