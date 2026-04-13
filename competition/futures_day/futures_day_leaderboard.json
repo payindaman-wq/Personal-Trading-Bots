@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-13T03:44:01.507381+00:00",
+  "generated_at": "2026-04-13T04:14:01.378746+00:00",
   "league": "futures_day",
   "total_sprints": 2,
   "archived": 1,
@@ -51,13 +51,13 @@
       "sprint_wins": 0,
       "podiums": 1,
       "points": 3,
-      "cumulative_pnl_usd": 7.99,
-      "cumulative_pnl_pct": 0.7995,
-      "total_trades": 2,
-      "total_wins": 2,
+      "cumulative_pnl_usd": 10.67,
+      "cumulative_pnl_pct": -9.013,
+      "total_trades": 3,
+      "total_wins": 3,
       "total_losses": 0,
-      "best_sprint_pnl_pct": 0.7995,
-      "worst_sprint_pnl_pct": 0.0,
+      "best_sprint_pnl_pct": 0.0,
+      "worst_sprint_pnl_pct": -9.013,
       "sprint_log": [
         {
           "comp_id": "fut-day-20260407-0027",
@@ -71,15 +71,15 @@
         {
           "comp_id": "fut-day-20260412-0900",
           "rank": 2,
-          "pnl_usd": 7.99,
-          "pnl_pct": 0.7995,
-          "trades": 2,
+          "pnl_usd": 10.67,
+          "pnl_pct": -9.013,
+          "trades": 3,
           "win_rate": 100.0,
           "in_progress": true
         }
       ],
       "overall_win_rate": 100.0,
-      "avg_pnl_pct_per_sprint": 0.3997
+      "avg_pnl_pct_per_sprint": -4.5065
     },
     {
       "bot": "haki",
@@ -334,6 +334,78 @@
       "avg_pnl_pct_per_sprint": -12.0411
     },
     {
+      "bot": "hakon",
+      "sprints_entered": 2,
+      "sprint_wins": 0,
+      "podiums": 0,
+      "points": 1,
+      "cumulative_pnl_usd": -3.22,
+      "cumulative_pnl_pct": -0.3219,
+      "total_trades": 10,
+      "total_wins": 5,
+      "total_losses": 5,
+      "best_sprint_pnl_pct": 0.0,
+      "worst_sprint_pnl_pct": -0.3219,
+      "sprint_log": [
+        {
+          "comp_id": "fut-day-20260407-0027",
+          "rank": 11,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260412-0900",
+          "rank": 10,
+          "pnl_usd": -3.22,
+          "pnl_pct": -0.3219,
+          "trades": 10,
+          "win_rate": 50.0,
+          "in_progress": true
+        }
+      ],
+      "overall_win_rate": 50.0,
+      "avg_pnl_pct_per_sprint": -0.161
+    },
+    {
+      "bot": "orvar",
+      "sprints_entered": 2,
+      "sprint_wins": 0,
+      "podiums": 0,
+      "points": 1,
+      "cumulative_pnl_usd": -5.09,
+      "cumulative_pnl_pct": -0.5086,
+      "total_trades": 32,
+      "total_wins": 15,
+      "total_losses": 17,
+      "best_sprint_pnl_pct": 0.0,
+      "worst_sprint_pnl_pct": -0.5086,
+      "sprint_log": [
+        {
+          "comp_id": "fut-day-20260407-0027",
+          "rank": 5,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260412-0900",
+          "rank": 11,
+          "pnl_usd": -5.09,
+          "pnl_pct": -0.5086,
+          "trades": 32,
+          "win_rate": 46.88,
+          "in_progress": true
+        }
+      ],
+      "overall_win_rate": 46.9,
+      "avg_pnl_pct_per_sprint": -0.2543
+    },
+    {
       "bot": "asmund",
       "sprints_entered": 2,
       "sprint_wins": 0,
@@ -358,7 +430,7 @@
         },
         {
           "comp_id": "fut-day-20260412-0900",
-          "rank": 10,
+          "rank": 12,
           "pnl_usd": -5.62,
           "pnl_pct": -12.5462,
           "trades": 5,
@@ -370,90 +442,18 @@
       "avg_pnl_pct_per_sprint": -6.2731
     },
     {
-      "bot": "orvar",
-      "sprints_entered": 2,
-      "sprint_wins": 0,
-      "podiums": 0,
-      "points": 1,
-      "cumulative_pnl_usd": -5.93,
-      "cumulative_pnl_pct": -0.593,
-      "total_trades": 30,
-      "total_wins": 13,
-      "total_losses": 17,
-      "best_sprint_pnl_pct": 0.0,
-      "worst_sprint_pnl_pct": -0.593,
-      "sprint_log": [
-        {
-          "comp_id": "fut-day-20260407-0027",
-          "rank": 5,
-          "pnl_usd": 0.0,
-          "pnl_pct": 0.0,
-          "trades": 0,
-          "win_rate": 0.0,
-          "in_progress": false
-        },
-        {
-          "comp_id": "fut-day-20260412-0900",
-          "rank": 11,
-          "pnl_usd": -5.93,
-          "pnl_pct": -0.593,
-          "trades": 30,
-          "win_rate": 43.33,
-          "in_progress": true
-        }
-      ],
-      "overall_win_rate": 43.3,
-      "avg_pnl_pct_per_sprint": -0.2965
-    },
-    {
-      "bot": "hakon",
-      "sprints_entered": 2,
-      "sprint_wins": 0,
-      "podiums": 0,
-      "points": 1,
-      "cumulative_pnl_usd": -6.92,
-      "cumulative_pnl_pct": -0.6916,
-      "total_trades": 8,
-      "total_wins": 3,
-      "total_losses": 5,
-      "best_sprint_pnl_pct": 0.0,
-      "worst_sprint_pnl_pct": -0.6916,
-      "sprint_log": [
-        {
-          "comp_id": "fut-day-20260407-0027",
-          "rank": 11,
-          "pnl_usd": 0.0,
-          "pnl_pct": 0.0,
-          "trades": 0,
-          "win_rate": 0.0,
-          "in_progress": false
-        },
-        {
-          "comp_id": "fut-day-20260412-0900",
-          "rank": 12,
-          "pnl_usd": -6.92,
-          "pnl_pct": -0.6916,
-          "trades": 8,
-          "win_rate": 37.5,
-          "in_progress": true
-        }
-      ],
-      "overall_win_rate": 37.5,
-      "avg_pnl_pct_per_sprint": -0.3458
-    },
-    {
       "bot": "kveldulf",
       "sprints_entered": 2,
       "sprint_wins": 0,
       "podiums": 0,
       "points": 1,
-      "cumulative_pnl_usd": -8.85,
-      "cumulative_pnl_pct": -0.8852,
-      "total_trades": 2,
+      "cumulative_pnl_usd": -12.57,
+      "cumulative_pnl_pct": -1.2572,
+      "total_trades": 3,
       "total_wins": 0,
-      "total_losses": 2,
+      "total_losses": 3,
       "best_sprint_pnl_pct": 0.0,
-      "worst_sprint_pnl_pct": -0.8852,
+      "worst_sprint_pnl_pct": -1.2572,
       "sprint_log": [
         {
           "comp_id": "fut-day-20260407-0027",
@@ -467,15 +467,15 @@
         {
           "comp_id": "fut-day-20260412-0900",
           "rank": 13,
-          "pnl_usd": -8.85,
-          "pnl_pct": -0.8852,
-          "trades": 2,
+          "pnl_usd": -12.57,
+          "pnl_pct": -1.2572,
+          "trades": 3,
           "win_rate": 0.0,
           "in_progress": true
         }
       ],
       "overall_win_rate": 0.0,
-      "avg_pnl_pct_per_sprint": -0.4426
+      "avg_pnl_pct_per_sprint": -0.6286
     }
   ]
 }

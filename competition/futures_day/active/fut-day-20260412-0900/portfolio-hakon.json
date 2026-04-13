@@ -23,25 +23,25 @@
   ],
   "starting_capital": 1000.0,
   "fee_rate": 0.0005,
-  "cash": 754.7449608115892,
+  "cash": 757.554046982389,
   "positions": [
     {
-      "pair": "BTC/USD",
-      "direction": "short",
-      "entry_price": 71131.7,
-      "quantity": 0.00335067,
-      "cost_basis": 119.1696,
+      "pair": "SOL/USD",
+      "direction": "long",
+      "entry_price": 81.91,
+      "quantity": 2.92061043,
+      "cost_basis": 119.6136,
       "leverage": 2.0,
-      "opened_at": "2026-04-13T01:10:01.888456+00:00"
+      "opened_at": "2026-04-13T04:10:01.949395+00:00"
     },
     {
-      "pair": "ETH/USD",
-      "direction": "short",
-      "entry_price": 2204.04,
-      "quantity": 0.10813742,
-      "cost_basis": 119.1696,
+      "pair": "ARB/USD",
+      "direction": "long",
+      "entry_price": 0.1115,
+      "quantity": 2145.53542601,
+      "cost_basis": 119.6136,
       "leverage": 2.0,
-      "opened_at": "2026-04-13T01:10:01.888608+00:00"
+      "opened_at": "2026-04-13T04:10:01.951810+00:00"
     }
   ],
   "closed_trades": [
@@ -156,21 +156,49 @@
       "won": false,
       "opened_at": "2026-04-12T22:10:01.392978+00:00",
       "closed_at": "2026-04-13T01:10:01.887789+00:00"
+    },
+    {
+      "pair": "BTC/USD",
+      "direction": "short",
+      "reason": "timeout",
+      "entry_price": 71131.7,
+      "exit_price": 70940.5,
+      "pnl_usd": 1.2813,
+      "pnl_pct": 1.0752,
+      "funding_cost": 0.0,
+      "leverage": 2.0,
+      "won": true,
+      "opened_at": "2026-04-13T01:10:01.888456+00:00",
+      "closed_at": "2026-04-13T04:10:01.946853+00:00"
+    },
+    {
+      "pair": "ETH/USD",
+      "direction": "short",
+      "reason": "timeout",
+      "entry_price": 2204.04,
+      "exit_price": 2192.87,
+      "pnl_usd": 2.4158,
+      "pnl_pct": 2.0272,
+      "funding_cost": 0.0,
+      "leverage": 2.0,
+      "won": true,
+      "opened_at": "2026-04-13T01:10:01.888608+00:00",
+      "closed_at": "2026-04-13T04:10:01.947940+00:00"
     }
   ],
   "stats": {
-    "total_trades": 8,
-    "wins": 3,
+    "total_trades": 10,
+    "wins": 5,
     "losses": 5,
-    "win_rate": 37.5,
-    "total_pnl_usd": -6.916,
-    "total_pnl_pct": -0.6916,
+    "win_rate": 50.0,
+    "total_pnl_usd": -3.2189,
+    "total_pnl_pct": -0.3219,
     "total_fees": 0.0,
     "max_drawdown_pct": 0.0,
-    "current_equity": 993.08,
+    "current_equity": 996.78,
     "peak_equity": 1001.585157136,
-    "live_equity_mtm": 757.67,
-    "live_pnl_usd": -242.33,
-    "live_pnl_pct": -24.2325
+    "live_equity_mtm": 756.01,
+    "live_pnl_usd": -243.99,
+    "live_pnl_pct": -24.3987
   }
 }

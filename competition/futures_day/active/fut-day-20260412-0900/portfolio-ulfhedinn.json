@@ -23,7 +23,7 @@
   ],
   "starting_capital": 1000.0,
   "fee_rate": 0.0005,
-  "cash": 900.0,
+  "cash": 800.0,
   "positions": [
     {
       "pair": "NEAR/USD",
@@ -33,6 +33,15 @@
       "cost_basis": 100.0,
       "leverage": 2.0,
       "opened_at": "2026-04-13T03:10:01.711353+00:00"
+    },
+    {
+      "pair": "AAVE/USD",
+      "direction": "short",
+      "entry_price": 94.91,
+      "quantity": 2.10725951,
+      "cost_basis": 100.0,
+      "leverage": 2.0,
+      "opened_at": "2026-04-13T04:05:01.378046+00:00"
     }
   ],
   "closed_trades": [],
@@ -47,8 +56,8 @@
     "max_drawdown_pct": 0.0,
     "current_equity": 1000.0,
     "peak_equity": 1000.0,
-    "live_equity_mtm": 903.24,
-    "live_pnl_usd": -96.76,
-    "live_pnl_pct": -9.6758
+    "live_equity_mtm": 802.11,
+    "live_pnl_usd": -197.89,
+    "live_pnl_pct": -19.7895
   }
 }
