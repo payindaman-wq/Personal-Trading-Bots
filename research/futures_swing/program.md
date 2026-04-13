@@ -1,21 +1,49 @@
 ```markdown
 # ODIN Research Program — FUTURES SWING
-# Version: Post-Gen-4000 | Revised by MIMIR (Gen 4000 review)
+# Version: Post-Gen-4200 | Revised by MIMIR (Gen 4200 review)
 # STATUS: CHAMPION UNCHANGED at Gen 3340 (sharpe=2.3494, trades=1265, win_rate=40.1%)
-#         Champion stall duration: 660 generations (Gen 3340 → Gen 4000). CRITICAL.
+#         Champion stall duration: 860 generations (Gen 3340 → Gen 4200). CRITICAL.
+#         NEW ANOMALY: sharpe=2.3521/trades=1263 produced at Gens 4183, 4188, 4194 — DISCARDED.
+#         This anomaly is the highest-priority diagnostic before any other work proceeds.
 #
 # ══════════════════════════════════════════════════════════════════
-# MIMIR GEN-4000 VERDICT:
-#   The Gen 3800 grid-scan mandate was NEVER EXECUTED.
-#   Gens 3801–4000 show unmistakable LLM output patterns:
-#     - 5 exact champion clones (3983, 3991, 3992, 3993, 3994)
-#     - 6 low-trade zombies (3982, 3986, 3987, 3988, 3989, 3990, 3996, 3998)
-#     - 0 grid-pattern results
-#   LOKI escalation has a 0% fix rate across 10 attempts over 2,600 generations.
-#   ESCALATION IS SUSPENDED AS PRIMARY FIX MECHANISM.
-#   The grid scan must be executed by ODIN directly, without LLM, without LOKI.
-#   If ODIN cannot execute a pre-specified YAML diff without LLM involvement,
-#   ODIN must HALT and report that capability gap — not continue burning generations.
+# MIMIR GEN-4200 VERDICT:
+#
+#   CRITICAL NEW FINDING — THE 2.3521 DISCARD ANOMALY:
+#     Gens 4183, 4188, 4194: sharpe=2.3521, trades=1263, win_rate=40.1% — tagged "discarded"
+#     2.3521 > 2.3494 (champion). These results should have triggered new_best.
+#     They did NOT. This is a champion-acceptance logic failure OR evidence that a
+#     higher champion already exists in storage that is not reflected in the improvement log.
+#     Gens 4181, 4190, 4192, 4193: sharpe=2.3513, trades=1265 — tagged "new_elite"
+#     "new_elite" is an unexplained category. It does not appear in prior gen history.
+#     Either "new_elite" is a shadow champion tier (bug) or the acceptance gate is broken.
+#     RESOLUTION REQUIRED BEFORE ANY GRID SCAN OR LLM GENERATION PROCEEDS.
+#
+#   GRID SCAN STATUS:
+#     Mandated at Gen 3800. Reactivated at Gen 4000. Still zero tests completed at Gen 4200.
+#     This is 400 generations of non-execution. The mandate has no teeth.
+#     ODIN must demonstrate Phase A0 execution at Gen 4201 or HALT permanently.
+#
+#   LLM LOOP STATUS:
+#     Attractor families unchanged since Gen 2785:
+#       - sharpe≈0.6621/trades≈1042 (appears 3/20 recent gens)
+#       - sharpe≈-9.018/trades≈28 (appears 2/20 recent gens)
+#       - sharpe≈1.3815/trades≈969 (appears 2/20 recent gens)
+#     LLM is reading stale YAML (rsi_period=24, TP=4.65, SL=1.92, timeout=176).
+#     The displayed "Current Best Strategy" YAML has been wrong since Gen 1592.
+#     Every LLM generation is working from corrupted input.
+#
+#   LOKI STATUS:
+#     10 escalations. 0 structural fixes confirmed by results.
+#     LOKI is PERMANENTLY SUSPENDED as a resolution mechanism.
+#     No further LOKI escalations for any issue described in this document.
+#
+#   ROOT CAUSE (FINAL, UNCHANGED):
+#     The displayed YAML is wrong. The champion storage path may also be wrong.
+#     The champion-acceptance logic is broken (2.3521 not accepted).
+#     The LLM loop cannot be fixed by prompt changes alone.
+#     Only path forward: ODIN executes deterministic YAML diffs. No LLM. No LOKI.
+#     If ODIN cannot do this: HALT and report. Do not run Gen 4201.
 # ══════════════════════════════════════════════════════════════════
 
 ## League: futures_swing
@@ -38,10 +66,7 @@ MIN_TRADES: 400 (hard floor — pre-backtest enforcement mandatory)
 ##   rsi_short_threshold: [MUST BE CONFIRMED FROM STORAGE — 59 or 60, do not assume]
 ##   trend_period_hours:  48     (certain)
 ##   take_profit_pct:     [MUST BE CONFIRMED FROM STORAGE]
-##                        Estimated: 4.95–5.00 based on:
-##                          Gen 3400 (2.3428/1265) = confirmed_TP - 0.05 (high confidence)
-##                          Gen 3382 (2.3330/1270) = different family (lower TP, more trades)
-##                        Do NOT use estimated value. Retrieve exact value from storage.
+##                        Estimated: 4.95–5.00. Do NOT use estimated value.
 ##   stop_loss_pct:       1.91   (certain — NOT 1.90, NOT 1.92)
 ##   timeout_hours:       159    (FROZEN FOREVER)
 ##   size_pct:            25     (FROZEN)
@@ -50,102 +75,94 @@ MIN_TRADES: 400 (hard floor — pre-backtest enforcement mandatory)
 ##   fee_rate:            0.0005 (FROZEN)
 ##
 ## STALE YAML WARNING (PERMANENT — THIS WARNING NEVER EXPIRES):
-##   The displayed "Current Best Strategy" YAML is WRONG and has been since Gen 1592.
+##   The displayed "Current Best Strategy" YAML is WRONG since Gen 1592:
 ##     rsi_period_hours: 24     ← WRONG (champion is 22)
 ##     take_profit_pct:  4.65   ← WRONG (champion is ~4.95–5.00)
 ##     stop_loss_pct:    1.92   ← WRONG (champion is 1.91)
 ##     timeout_hours:    176    ← WRONG (champion is 159)
 ##     rsi_short value:  60     ← UNCONFIRMED (may be 59 or 60)
 ##   IGNORE THE DISPLAYED YAML ENTIRELY.
-##   Any result with trades > 1350 or sharpe < 2.0 from a "champion-based" test
-##   is evidence of stale YAML contamination. Log and reject immediately.
+##   Load champion EXCLUSIVELY from confirmed storage path with hash verification.
+##
+## 2.3521 ANOMALY NOTES:
+##   Gens 4183, 4188, 4194: sharpe=2.3521, trades=1263, win_rate=40.1% — "discarded"
+##   Gens 4181, 4190, 4192, 4193: sharpe=2.3513, trades=1265 — "new_elite"
+##   These are NOT normal discards. 2.3521 > champion. "new_elite" is unexplained.
+##   HYPOTHESIS A: A silent champion update occurred between Gen 3340 and Gen 4181,
+##     storing 2.3521 or 2.3513 as the new internal champion without logging new_best.
+##     If true: the real champion is NOT Gen 3340/2.3494. The champion log is broken.
+##   HYPOTHESIS B: The acceptance gate has a bug comparing against a wrong baseline
+##     (e.g., comparing against the stale YAML's Sharpe rather than stored champion Sharpe).
+##   HYPOTHESIS C: "new_elite" is a parallel tracking tier with a broken promotion gate.
+##   RESOLUTION PROTOCOL (execute BEFORE Gen 4201):
+##     Step Z1: Query champion storage directly. What YAML is stored? What Sharpe?
+##     Step Z2: Re-run the YAML producing 2.3521 (identify its parameters from Gen 4183).
+##              Confirm whether result is reproducible.
+##     Step Z3: If 2.3521 is reproducible and its YAML differs from Gen 3340 champion:
+##              Log it as new champion immediately. Update champion log. Update hash.
+##     Step Z4: Determine what "new_elite" means in the codebase. If it is a champion
+##              tier that should trigger new_best but doesn't: fix the promotion gate.
+##              Then re-evaluate whether any new_elite result should be the champion.
+##     Step Z5: After Z1–Z4, confirm the true champion YAML and Sharpe.
+##              All subsequent grid tests use this confirmed champion as baseline.
+##     DO NOT SKIP STEP Z. Running grid tests from a wrong baseline wastes all tests.
 ##
 ## ─────────────────────────────────────────────────────────
-## GEN 4000 SITUATION ASSESSMENT:
+## GEN 4200 SITUATION ASSESSMENT:
 ##
-##   Champion stall: 660 generations without improvement.
-##   Grid scan mandate (issued Gen 3800): NOT EXECUTED in 200 generations.
-##   LLM suspension mandate: NOT ENFORCED in 200 generations.
-##   LOKI escalation effectiveness: 0% across 10 attempts, 2,600 generations.
+##   Champion stall: 860 generations. True stall may be shorter if 2.3521 is real.
+##   Grid scan mandate: 400+ generations of non-execution.
+##   LLM loop: producing same attractor families as Gen 2785.
+##   Acceptance logic: broken (2.3521 not accepted as champion).
+##   Champion storage: possibly ahead of improvement log.
 ##
-##   Last 20 generations (3981–4000) breakdown:
-##     Exact champion clones (2.3494/1265): Gens 3983, 3991, 3992, 3994 = 4/20 = 20%
-##     Near-clone (2.3364/1264): Gen 3993 = 1/20 = 5%
-##     Low-trade zombies (<400 trades): Gens 3982,3986,3987,3988,3989,3990,3996,3998=8/20=40%
-##     High-trade discards (>1350): Gens 3984(1418), 3985(1381), 4000(1458) = 3/20 = 15%
-##     Other discarded: Gens 3981, 3995, 3997, 3999 = 4/20 = 20%
-##     Useful novel results: ZERO in last 20 generations.
-##     Grid-scan-pattern results: ZERO in last 200 generations.
+##   Last 20 generations (4181–4200) breakdown:
+##     "new_elite" (2.3513/1265): Gens 4181, 4190, 4192, 4193 = 4/20 = 20%
+##     High-sharpe discards (2.3521/1263): Gens 4183, 4188, 4194 = 3/20 = 15%
+##     Low-trade zombies (<400 trades): Gens 4182(28), 4196(28), 4197(178) = 3/20 = 15%
+##     Attractor family (0.6621/1042): Gens 4189, 4191, 4198 = 3/20 = 15%
+##     Attractor family (1.3815/969): Gens 4185, 4186 = 2/20 = 10%
+##     Other discarded: Gens 4184, 4187, 4195, 4199, 4200 = 5/20 = 25%
+##     True grid-scan results: ZERO in 400 generations.
 ##
 ##   CONFIRMED INFRASTRUCTURE FAILURES (persistent, unresolved):
-##     ✗ LLM suspension: NOT ENFORCED (LLM still producing output)
-##     ✗ Clone detection: NOT WORKING (4 exact clones in 20 gens, 5 including near-clone)
-##     ✗ Zombie pre-rejection: NOT WORKING (8/20 gens = 40% zombies)
-##     ✗ Fingerprint rejection: NOT WORKING (attractor families still reaching backtester)
-##     ✗ Stale YAML rejection: NOT WORKING (high-trade results still appearing)
-##     ✗ Grid scan execution: ZERO TESTS COMPLETED in 200 generations
-##
-##   ROOT CAUSE (FINAL ASSESSMENT):
-##     LOKI escalation cannot fix the LLM loop. Ten attempts confirm this.
-##     The only viable path is ODIN executing pre-specified YAML diffs directly,
-##     bypassing LLM entirely.
-##     If ODIN cannot do this: ODIN must HALT and report the capability gap.
-##     Continuing to run LLM generations is actively harmful — it wastes compute,
-##     pollutes the result log, and has produced zero improvements in 660 generations.
+##     ✗ Champion acceptance gate: BROKEN (2.3521 not promoted)
+##     ✗ "new_elite" promotion: BROKEN or UNDEFINED
+##     ✗ LLM suspension: NOT ENFORCED
+##     ✗ Clone detection: NOT WORKING (repeated identical results)
+##     ✗ Zombie pre-rejection: PARTIALLY WORKING (40% → 15% improvement, still failing)
+##     ✗ Stale YAML rejection: NOT WORKING
+##     ✗ Grid scan execution: ZERO TESTS in 400 generations
+##     ✗ Champion storage/log consistency: UNKNOWN (Step Z required)
 ##
 ## ─────────────────────────────────────────────────────────
-## MANDATORY HALT CONDITION (CHECK BEFORE EVERY GENERATION):
+## MANDATORY PRE-RUN SEQUENCE (Gen 4201 MUST begin with this — no exceptions):
 ##
-##   If the current mode is GRID SCAN and the proposed test does not match
-##   the next pre-specified grid test exactly (verified by parameter diff):
-##     → HALT IMMEDIATELY. Do not submit. Log: "GRID DEVIATION at Gen XXXX."
-##     → Do not resume until the deviation source is identified and eliminated.
+##   STEP Z — ANOMALY RESOLUTION (see full protocol above)
+##   Complete Z1–Z5 before any backtest submission.
+##   If Step Z reveals the true champion is 2.3521 (or any value other than 2.3494):
+##     Update all references in this document.
+##     The grid scan baselines from the true confirmed champion.
+##   If Step Z cannot be completed (storage unreachable, hash unavailable):
+##     HALT. Report: "STEP Z FAILED: Cannot confirm true champion. Halting Gen 4201."
 ##
-##   If three or more of the last 20 results are exact champion clones:
-##     → HALT IMMEDIATELY. Log: "CLONE FLOOD at Gen XXXX."
+##   PHASE A0 — CHAMPION RE-CONFIRMATION (immediately after Step Z)
 ##
-##   If five or more of the last 20 results are low-trade zombies:
-##     → HALT IMMEDIATELY. Log: "ZOMBIE FLOOD at Gen XXXX."
-##     [Note: Gen 4000 already meets this condition — 8/20 zombies.]
-##
-##   "HALT" means: stop all generation loops. Do not start Gen N+1.
-##   Output the halt condition to the run log. Wait for human operator review.
-##   Do NOT escalate to LOKI. LOKI has not resolved these issues in 10 attempts.
-##   Do NOT resume automatically.
-##
-## ─────────────────────────────────────────────────────────
-## STEP A — PRIMARY RESEARCH MODE: DETERMINISTIC GRID SCAN
-## [STATUS: ACTIVATED AT GEN 3800 — NEVER EXECUTED — REACTIVATED NOW]
-##
-##   EXECUTION MODEL:
-##   ODIN constructs each test YAML programmatically from storage-retrieved champion file.
-##   No LLM involvement of any kind. No free-form proposals. No prompt submissions.
-##   Each test = (champion YAML from storage) + (exactly ONE parameter change, pre-specified).
-##   ODIN verifies the diff before submission. If diff ≠ expected → reject, log, halt.
-##
-##   IF ODIN CANNOT EXECUTE THIS MODEL:
-##   ODIN must output: "CAPABILITY GAP: Cannot execute deterministic grid without LLM."
-##   Then HALT. Do not continue running LLM generations as a substitute.
-##   The cost of 200 wasted LLM generations (Gen 3801–4000) exceeds the cost of halting.
-##
-##   ─────────────────────────────────────────────────────
-##   PHASE A0 — CHAMPION RE-CONFIRMATION (MANDATORY FIRST — before any grid tests)
-##
-##   A0.1: Load champion YAML from storage. Verify hash.
+##   A0.1: Load confirmed champion YAML from storage (post Step Z). Verify hash.
 ##         Submit with ZERO parameter changes.
-##         Expected result: (sharpe=2.3494, trades=1265, win_rate=40.1%).
+##         Expected result: matches confirmed champion sharpe/trades/win_rate exactly.
 ##         If result differs by more than (±0.0005 sharpe, ±2 trades): HALT.
 ##         Log: "A0.1 champion re-confirmation: [PASS/FAIL]. Result: (sharpe, trades)."
 ##
-##   A0.2: From the confirmed storage YAML, log exact values of:
-##         - rsi_short_threshold (record as confirmed_rsi_short)
-##         - take_profit_pct (record as confirmed_TP)
-##         Replace ALL [CONFIRM_*] tokens in this document with confirmed values.
+##   A0.2: From confirmed storage YAML, log exact values of:
+##         - rsi_short_threshold → confirmed_rsi_short
+##         - take_profit_pct → confirmed_TP
+##         Replace ALL [CONFIRM_*] tokens with confirmed values throughout this document.
 ##         Log: "A0.2 confirmed_rsi_short=[VALUE], confirmed_TP=[VALUE]."
 ##
-##   A0.3: Verify fingerprint system is active:
+##   A0.3: Verify fingerprint/clone-detection system is active:
 ##         Inject A0.1 champion YAML → must be rejected as clone BEFORE submission.
-##         If NOT rejected → fingerprint system is broken → HALT. Do not proceed.
+##         If NOT rejected → fingerprint system broken → HALT.
 ##         Log: "A0.3 fingerprint self-test: [PASS/FAIL]."
 ##
 ##   A0.4: Verify zombie pre-rejection is active:
@@ -154,17 +171,76 @@ MIN_TRADES: 400 (hard floor — pre-backtest enforcement mandatory)
 ##         If NOT rejected → RSI validation broken → HALT.
 ##         Log: "A0.4 zombie pre-rejection self-test: [PASS/FAIL]."
 ##
-##   Do NOT proceed to Phase A1 until ALL of A0.1–A0.4 are PASS.
+##   A0.5: Verify acceptance gate is functioning:
+##         Construct a synthetic result record: sharpe=confirmed_champion_sharpe + 0.01,
+##         trades=1265, win_rate=40.1%. Feed to acceptance logic.
+##         Must be accepted as new_best. If NOT accepted → acceptance gate broken → HALT.
+##         Log: "A0.5 acceptance gate self-test: [PASS/FAIL]."
+##         [Note: A0.5 is a dry-run test of the gate logic, not a backtest submission.]
+##
+##   A0.6: Resolve "new_elite" category:
+##         If "new_elite" is defined in codebase: document what it means.
+##         If it should trigger champion update but doesn't: fix before proceeding.
+##         If it is a valid sub-champion tier (e.g., top-10 non-champion): document and accept.
+##         Log: "A0.6 new_elite resolution: [DEFINITION]. Action taken: [NONE/FIX]."
+##
+##   Do NOT proceed to Phase A1 until ALL of A0.1–A0.6 are PASS.
 ##   A single FAIL in A0 → HALT. Fix the failing check. Re-run A0 from the top.
+##   Do NOT escalate to LOKI. Fix directly in ODIN codebase.
+##
+## ─────────────────────────────────────────────────────────
+## MANDATORY HALT CONDITIONS (check before EVERY generation):
+##
+##   HALT-1: Grid scan mode active AND proposed test does not match
+##            the next pre-specified grid test exactly (verified by parameter diff).
+##            → HALT. Log: "GRID DEVIATION at Gen XXXX."
+##
+##   HALT-2: Three or more of the last 20 results are exact champion clones.
+##            → HALT. Log: "CLONE FLOOD at Gen XXXX."
+##
+##   HALT-3: Five or more of the last 20 results are low-trade zombies (<400 trades).
+##            → HALT. Log: "ZOMBIE FLOOD at Gen XXXX."
+##            [Gen 4200 does NOT meet this condition: only 3/20 zombies. Monitor.]
+##
+##   HALT-4: Step Z has not been completed and Gen 4201 is about to start.
+##            → HALT. Log: "STEP Z INCOMPLETE. Cannot start Gen 4201."
+##
+##   HALT-5: A0.1–A0.6 have not all passed and Phase A1 is about to start.
+##            → HALT. Log: "A0 INCOMPLETE. Cannot start Phase A1."
+##
+##   HALT-6: A result with sharpe > current_champion_sharpe is tagged anything
+##            other than "new_best" (e.g., "discarded", "new_elite").
+##            → HALT IMMEDIATELY. Log: "ACCEPTANCE GATE FAILURE at Gen XXXX.
+##              Result sharpe=[X] > champion sharpe=[Y] but not accepted."
+##            This condition was met at Gens 4183, 4188, 4194. It was not caught.
+##            It MUST be caught going forward.
+##
+##   "HALT" means: stop all generation loops. Do not start Gen N+1.
+##   Output the halt condition to the run log. Wait for human operator review.
+##   Do NOT escalate to LOKI. Do NOT resume automatically.
+##
+## ─────────────────────────────────────────────────────────
+## STEP A — PRIMARY RESEARCH MODE: DETERMINISTIC GRID SCAN
+## [STATUS: MANDATED Gen 3800. Reactivated Gen 4000. STILL UNEXECUTED at Gen 4200.]
+## [FINAL REACTIVATION: Execute at Gen 4201 or HALT permanently.]
+##
+##   EXECUTION MODEL:
+##   ODIN constructs each test YAML programmatically from storage-retrieved champion file.
+##   No LLM involvement of any kind. No free-form proposals. No prompt submissions.
+##   Each test = (confirmed champion YAML from storage, post Step Z) + (ONE pre-specified change).
+##   ODIN verifies the diff before submission. If diff ≠ expected → reject, log, halt.
+##
+##   IF ODIN CANNOT EXECUTE THIS MODEL:
+##   Output: "CAPABILITY GAP: Cannot execute deterministic grid without LLM."
+##   Then HALT PERMANENTLY. Do not run any further LLM generations as substitute.
+##   The cost of 400 wasted LLM generations (Gen 3801–4200) is documented.
+##   Continuing would make it 500. That is not acceptable.
 ##
 ##   ─────────────────────────────────────────────────────
 ##   PHASE A1 — TAKE PROFIT GRID (highest priority)
 ##
-##   Rationale: confirmed_TP is unknown (estimated 4.95–5.00). Gen 3400 tested
-##   confirmed_TP - 0.05 → 2.3428 (below champion). Direction: test upward.
-##   This phase resolves the single largest known uncertainty.
-##
-##   Each test: champion YAML + ONE change to take_profit_pct only.
+##   Baseline: confirmed_TP from A0.2 (estimated 4.95–5.00, exact value required).
+##   Each test: confirmed champion YAML + ONE change to take_profit_pct only.
 ##   Diff must show exactly 1 line changed. Verify before submission.
 ##
 ##   A1.1: take_profit_pct = confirmed_TP + 0.05
@@ -173,13 +249,18 @@ MIN_TRADES: 400 (hard floor — pre-backtest enforcement mandatory)
 ##   A1.4: take_profit_pct = confirmed_TP + 0.20
 ##   A1.5: take_profit_pct = confirmed_TP + 0.25
 ##   A1.6: take_profit_pct = confirmed_TP - 0.10
-##          (confirmed_TP - 0.05 already tested at Gen 3400 = 2.3428)
+##          (confirmed_TP - 0.05 already tested at Gen 3400 = 2.3428, below champion)
 ##   A1.7: take_profit_pct = confirmed_TP - 0.15
 ##   A1.8: take_profit_pct = confirmed_TP + 0.30
 ##   A1.9: take_profit_pct = confirmed_TP + 0.40
 ##   A1.10: take_profit_pct = confirmed_TP + 0.50
 ##
-##   Accept only if: sharpe > 2.3494 AND trades in [900, 1400].
+##   SPECIAL NOTE: The 2.3521 results at Gens 4183/4188/4194 (trades=1263, win_rate=40.1%)
+##   may correspond to a specific TP value. If the parameter generating 2.3521 can be
+##   identified from generation logs, test it explicitly as A1.0 before proceeding.
+##   A TP value of confirmed_TP + 0.05 is the most likely candidate based on Gen 3400 data.
+##
+##   Accept only if: sharpe > confirmed_champion_sharpe AND trades in [900, 1400].
 ##   If A1.1 improves champion: immediately test A1.1+0.05 and A1.1+0.10 before A1.2.
 ##   If any A1 test produces trades < 1100: TP is too high — stop upward scan.
 ##   If no A1 test improves: TP confirmed at local maximum. Log and proceed to A2.
@@ -188,12 +269,10 @@ MIN_TRADES: 400 (hard floor — pre-backtest enforcement mandatory)
 ##   ─────────────────────────────────────────────────────
 ##   PHASE A2 — RSI SHORT THRESHOLD GRID (second priority)
 ##
-##   Rationale: confirmed_rsi_short is unconfirmed (59 or 60). A2.1 resolves the
-##   uncertainty AND tests a neighbor simultaneously. Low risk, potentially high value.
-##
-##   Each test: champion YAML + ONE change to rsi_short_threshold only.
+##   Baseline: confirmed_rsi_short from A0.2 (59 or 60 — exact value required).
+##   Each test: confirmed champion YAML + ONE change to rsi_short_threshold only.
 ##   Constraint: rsi_short must be in [55, 70].
-##   Constraint: (rsi_short - 37.77) must be >= 10 → minimum rsi_short = 48 (satisfied).
+##   Constraint: (rsi_short - rsi_long_threshold) must be >= 10.
 ##
 ##   A2.1: rsi_short = confirmed_rsi_short - 1
 ##   A2.2: rsi_short = confirmed_rsi_short + 1
@@ -202,39 +281,36 @@ MIN_TRADES: 400 (hard floor — pre-backtest enforcement mandatory)
 ##   A2.5: rsi_short = confirmed_rsi_short - 3
 ##   A2.6: rsi_short = confirmed_rsi_short + 3
 ##
-##   Accept only if: sharpe > 2.3494 AND trades in [900, 1400].
-##   If any A2 test improves: re-run A1 grid from new champion before continuing.
+##   Accept only if: sharpe > confirmed_champion_sharpe AND trades in [900, 1400].
+##   If any A2 test improves: re-run A1 grid from new champion before continuing A2.
 ##   Log each result with same format as A1.
 ##
 ##   ─────────────────────────────────────────────────────
 ##   PHASE A3 — RSI PERIOD GRID (third priority)
 ##
-##   Rationale: rsi_period has been 22 since Gen 2785. Adjacent values untested
-##   exhaustively. Note: period=24 is the stale YAML value — it should produce
-##   a known result (stale YAML family). If A3.4 matches a known attractor,
-##   that confirms stale YAML contamination source.
-##
-##   Each test: champion YAML + ONE change to rsi_period_hours only.
+##   Baseline: rsi_period_hours = 22 (confirmed Gen 2785).
+##   Each test: confirmed champion YAML + ONE change to rsi_period_hours only.
 ##   Constraint: rsi_period_hours must be in [18, 28].
 ##
 ##   A3.1: rsi_period_hours = 21
 ##   A3.2: rsi_period_hours = 23
 ##   A3.3: rsi_period_hours = 20
-##   A3.4: rsi_period_hours = 24  [expected: stale YAML family attractor — diagnostic]
+##   A3.4: rsi_period_hours = 24  [diagnostic — expected to produce stale YAML attractor]
 ##   A3.5: rsi_period_hours = 19
 ##   A3.6: rsi_period_hours = 25
+##   A3.7: rsi_period_hours = 18
+##   A3.8: rsi_period_hours = 26
 ##
-##   Accept only if: sharpe > 2.3494 AND trades in [900, 1400].
-##   If A3.4 produces (sharpe ≈ 0.77, trades ≈ 1041): confirms Attractor 4 family.
-##     Log: "A3.4 diagnostic confirms stale YAML origin. rsi_period=24 is contamination source."
+##   Accept only if: sharpe > confirmed_champion_sharpe AND trades in [900, 1400].
+##   If A3.4 produces (sharpe ≈ 0.77, trades ≈ 1041): confirms Attractor 4 family origin.
+##     Log: "A3.4 diagnostic: rsi_period=24 is the stale YAML contamination source."
+##   Log each result with same format as A1.
 ##
 ##   ─────────────────────────────────────────────────────
 ##   PHASE A4 — TREND PERIOD GRID (fourth priority)
 ##
-##   Rationale: trend_period=48 has never been systematically tested. This parameter
-##   controls the regime filter and could have significant impact on trade quality.
-##
-##   Each test: champion YAML + ONE change to trend_period_hours only.
+##   Baseline: trend_period_hours = 48 (certain).
+##   Each test: confirmed champion YAML + ONE change to trend_period_hours only.
 ##   Constraint: trend_period_hours must be in [24, 96].
 ##
 ##   A4.1: trend_period_hours = 36
@@ -244,17 +320,16 @@ MIN_TRADES: 400 (hard floor — pre-backtest enforcement mandatory)
 ##   A4.5: trend_period_hours = 72
 ##   A4.6: trend_period_hours = 30
 ##   A4.7: trend_period_hours = 84
+##   A4.8: trend_period_hours = 24
+##   A4.9: trend_period_hours = 96
 ##
-##   Accept only if: sharpe > 2.3494 AND trades in [900, 1400].
+##   Accept only if: sharpe > confirmed_champion_sharpe AND trades in [900, 1400].
 ##
 ##   ─────────────────────────────────────────────────────
 ##   PHASE A5 — RSI LONG THRESHOLD GRID (fifth priority)
 ##
-##   Rationale: rsi_long = 37.77 has been frozen since Gen 1477 (2,500+ generations).
-##   The non-integer value (37.77) suggests it was arrived at by decimal search, but
-##   neighbors have never been tested. Potential for meaningful improvement exists.
-##
-##   Each test: champion YAML + ONE change to rsi_long_threshold only.
+##   Baseline: rsi_long_threshold = 37.77 (confirmed Gen 1477, frozen 2,500+ gens).
+##   Each test: confirmed champion YAML + ONE change to rsi_long_threshold only.
 ##   Constraint: rsi_long must be in [30, 45].
 ##   Constraint: (confirmed_rsi_short - rsi_long) must be >= 10.
 ##
@@ -266,8 +341,10 @@ MIN_TRADES: 400 (hard floor — pre-backtest enforcement mandatory)
 ##   A5.6: rsi_long = 39.00
 ##   A5.7: rsi_long = 35.50
 ##   A5.8: rsi_long = 37.50
+##   A5.9: rsi_long = 35.00
+##   A5.10: rsi_long = 39.50
 ##
-##   Accept only if: sharpe > 2.3494 AND trades in [900, 1400].
+##   Accept only if: sharpe > confirmed_champion_sharpe AND trades in [900, 1400].
 ##   Note: higher rsi_long → more long entries → higher trade count.
 ##         lower rsi_long → fewer long entries → lower trade count.
 ##   If A5.2–A5.4 produce trades > 1350: rsi_long is near a trade-count cliff.
@@ -275,100 +352,4 @@ MIN_TRADES: 400 (hard floor — pre-backtest enforcement mandatory)
 ##   ─────────────────────────────────────────────────────
 ##   PHASE A6 — STOP LOSS GRID (sixth priority)
 ##
-##   Rationale: SL=1.91 confirmed since early optimization. Fine-grained neighbors
-##   around 1.91 have not been tested at non-integer precision.
-##
-##   Each test: champion YAML + ONE change to stop_loss_pct only.
-##   Constraint: stop_loss_pct must NOT be 1.90 or 1.92 (known non-optimal neighbors).
-##
-##   A6.1: stop_loss_pct = 1.85
-##   A6.2: stop_loss_pct = 1.88
-##   A6.3: stop_loss_pct = 1.93
-##   A6.4: stop_loss_pct = 1.94
-##   A6.5: stop_loss_pct = 1.97
-##   A6.6: stop_loss_pct = 2.00
-##   A6.7: stop_loss_pct = 1.80
-##   A6.8: stop_loss_pct = 1.75
-##
-##   Accept only if: sharpe > 2.3494 AND trades in [900, 1400].
-##
-##   ─────────────────────────────────────────────────────
-##   PHASE A7 — COMBINED BEST (only after all single-param phases complete)
-##
-##   If 0 improvements found in A1–A6:
-##     Log: "Phase A grid complete. No improvements. Strategy is at local maximum
-##           for all tested single-parameter changes. Champion remains Gen 3340."
-##     Proceed to Phase B (structural changes).
-##
-##   If 1 improvement found:
-##     The new champion is the baseline. Re-run A1–A6 from new champion.
-##     (New champion may open new neighbors that were previously sub-threshold.)
-##
-##   If 2+ improvements found:
-##     Test top-2 single-param improvements combined (one YAML, two changes from
-##     original Gen 3340 champion — or from new champion if one was already accepted).
-##     Accept only if combined result beats the best single-param result.
-##
-##   Total Phase A tests: ~41 backtests (including A7). Target: < 50 generations.
-##
-##   ─────────────────────────────────────────────────────
-##   PHASE B — STRUCTURAL EXPLORATION (only if Phase A yields no improvement)
-##
-##   Rationale: If Phase A confirms a local maximum across all 6 parameters, the
-##   strategy may require structural change rather than parameter tuning.
-##   These tests modify strategy logic, not just parameter values.
-##
-##   B1 — MULTI-ASSET FILTER: Test restricting pairs to [BTC/USD, ETH/USD, SOL/USD]
-##        (the backtest universe). Current pair list includes 16 pairs but backtest
-##        only tests 3. Confirm pair list alignment.
-##        Note: If backtest only uses BTC/USD, ETH/USD, SOL/USD regardless of pair list,
-##        then the pair list in the YAML is cosmetic and B1 is irrelevant. Confirm this.
-##
-##   B2 — FUNDING COST SENSITIVITY: At 2x leverage, funding = ~0.01% per 8h = 0.03%/day.
-##        For a 159h max timeout, funding drag = ~0.60% per position.
-##        Test timeout_hours = 120 (funding drag reduction ~0.46%) to see if reduced
-##        drag improves Sharpe despite fewer trade completions.
-##        NOTE: timeout_hours was "FROZEN FOREVER" — this freeze is now reconsidered
-##        given 660-generation stall. A frozen parameter that was never re-examined
-##        is a research gap, not a confirmed optimum.
-##
-##   B3 — WIN RATE CEILING ANALYSIS: Champion win rate is ~40.1% across all champions
-##        since Gen 2785. This is suspiciously stable and suggests the win rate is
-##        structurally bounded. The Sharpe improvement since Gen 2785 comes from
-##        trade quality (profit factor), not win rate improvement. Test whether
-##        a tighter RSI entry (rsi_long = 32, rsi_short = 63) improves profit factor
-##        at the cost of trade count.
-##
-##   B4 — RISK ASYMMETRY TEST: Current TP/SL ratio = confirmed_TP / 1.91 ≈ 2.6:1.
-##        Test TP + 0.50 with SL - 0.10 simultaneously (wider reward, tighter risk).
-##        This is a 2-parameter change, permitted only in Phase B.
-##
-##   Phase B tests are exploratory and do not follow the strict single-change rule.
-##   Each B test must still pass the pre-backtest validation checklist (Step C).
-##   Phase B results that improve champion → execute Step D (post-new_best protocol).
-##
-## ─────────────────────────────────────────────────────────
-## STEP B — GRID TEST EXECUTION PROTOCOL (renamed from Step B in prior version)
-## [Renamed to avoid collision with Phase B above — this is the PRE-BACKTEST CHECKLIST]
-##
-##   PRE-SUBMISSION VALIDATION (run before EVERY backtester submission):
-##
-##   SOURCE VALIDATION:
-##   □ Load champion YAML from confirmed storage path (hard-coded path, no fallback).
-##   □ Verify file hash matches confirmed Gen 3340 champion hash.
-##   □ If hash mismatch → HALT. Do not submit. Do not escalate to LOKI.
-##     Output: "HASH MISMATCH at Gen XXXX. Halting." Wait for human operator.
-##
-##   PARAMETER INTEGRITY (Phase A tests):
-##   □ Apply exactly the pre-specified parameter change for the current grid step.
-##   □ Diff result against champion YAML. Confirm exactly 0 lines changed (A0 test)
-##     or exactly 1 line changed (A1–A6 tests) or exactly 2 lines changed (A7/B4 only).
-##   □ If diff shows wrong number of changes → reject. Log "multi-diff error." HALT.
-##   □ Verify timeout_hours = 159 (FROZEN — reject if any other value, including 176).
-##   □ Verify size_pct = 25, max_open = 3, leverage = 2, fee_rate = 0.0005.
-##   □ Verify stop_loss_pct ≠ 1.90 (explicit check).
-##   □ Verify rsi_long_threshold in [30, 45].
-##   □ Verify rsi_short_threshold in [55, 70].
-##   □ Verify (rsi_short_threshold - rsi_long_threshold) >= 10.
-##   □ Verify rsi_period_hours in [18, 28] (unless Phase A3 test — then verify in range).
-##   □ Verify trend_period_hours in [24,
+##   Baseline: stop_loss_pct = 1.91 (confirmed
