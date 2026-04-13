@@ -9,7 +9,7 @@
   },
   "vemund": {
     "stopped": false,
-    "paused_until": "2026-04-12T23:20:02.295404+00:00"
+    "paused_until": "2026-04-13T03:55:01.826862+00:00"
   },
   "asmund": {
     "stopped": true,
@@ -17,7 +17,7 @@
   },
   "helgi": {
     "stopped": false,
-    "paused_until": "2026-04-12T23:35:02.267746+00:00"
+    "paused_until": "2026-04-13T03:55:01.700851+00:00"
   },
   "starkad": {
     "stopped": true,
@@ -25,6 +25,6 @@
   },
   "ketil": {
     "stopped": false,
-    "paused_until": "2026-04-12T23:20:01.856178+00:00"
+    "paused_until": "2026-04-13T03:55:01.679237+00:00"
   }
 }

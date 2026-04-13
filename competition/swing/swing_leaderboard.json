@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-12T23:05:01.572700+00:00",
+  "generated_at": "2026-04-13T03:05:01.541399+00:00",
   "league": "swing",
   "total_sprints": 1,
   "archived": 0,
@@ -126,7 +126,7 @@
       "avg_pnl_pct_per_sprint": 0.0
     },
     {
-      "bot": "orm",
+      "bot": "runa",
       "sprints_entered": 1,
       "sprint_wins": 0,
       "podiums": 0,
@@ -155,7 +155,7 @@
       "avg_pnl_pct_per_sprint": 0.0
     },
     {
-      "bot": "runa",
+      "bot": "solveig",
       "sprints_entered": 1,
       "sprint_wins": 0,
       "podiums": 0,
@@ -184,7 +184,7 @@
       "avg_pnl_pct_per_sprint": 0.0
     },
     {
-      "bot": "solveig",
+      "bot": "thyra",
       "sprints_entered": 1,
       "sprint_wins": 0,
       "podiums": 0,
@@ -194,7 +194,7 @@
       "total_trades": 0,
       "total_wins": 0,
       "total_losses": 0,
-      "total_fees_usd": 0.0,
+      "total_fees_usd": 0.2,
       "worst_drawdown_pct": 0.0,
       "best_sprint_pnl_pct": 0.0,
       "worst_sprint_pnl_pct": 0.0,
@@ -213,7 +213,7 @@
       "avg_pnl_pct_per_sprint": 0.0
     },
     {
-      "bot": "thyra",
+      "bot": "egil",
       "sprints_entered": 1,
       "sprint_wins": 0,
       "podiums": 0,
@@ -223,7 +223,7 @@
       "total_trades": 0,
       "total_wins": 0,
       "total_losses": 0,
-      "total_fees_usd": 0.0,
+      "total_fees_usd": 0.25,
       "worst_drawdown_pct": 0.0,
       "best_sprint_pnl_pct": 0.0,
       "worst_sprint_pnl_pct": 0.0,
@@ -252,7 +252,7 @@
       "total_trades": 0,
       "total_wins": 0,
       "total_losses": 0,
-      "total_fees_usd": 0.0,
+      "total_fees_usd": 0.56,
       "worst_drawdown_pct": 0.0,
       "best_sprint_pnl_pct": 0.0,
       "worst_sprint_pnl_pct": 0.0,
@@ -271,7 +271,7 @@
       "avg_pnl_pct_per_sprint": 0.0
     },
     {
-      "bot": "egil",
+      "bot": "orm",
       "sprints_entered": 1,
       "sprint_wins": 0,
       "podiums": 0,
@@ -281,7 +281,7 @@
       "total_trades": 0,
       "total_wins": 0,
       "total_losses": 0,
-      "total_fees_usd": 0.25,
+      "total_fees_usd": 0.66,
       "worst_drawdown_pct": 0.0,
       "best_sprint_pnl_pct": 0.0,
       "worst_sprint_pnl_pct": 0.0,

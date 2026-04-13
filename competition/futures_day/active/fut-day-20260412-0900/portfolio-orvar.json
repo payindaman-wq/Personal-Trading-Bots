@@ -23,25 +23,25 @@
   ],
   "starting_capital": 1000.0,
   "fee_rate": 0.0005,
-  "cash": 797.8835071215863,
+  "cash": 795.2563894836887,
   "positions": [
     {
-      "pair": "SOL/USD",
+      "pair": "DOGE/USD",
       "direction": "long",
-      "entry_price": 82.2,
-      "quantity": 2.42664234,
-      "cost_basis": 99.735,
+      "entry_price": 0.0911006,
+      "quantity": 2182.35664749,
+      "cost_basis": 99.407,
       "leverage": 2.0,
-      "opened_at": "2026-04-12T22:15:02.285738+00:00"
+      "opened_at": "2026-04-13T02:50:02.232817+00:00"
     },
     {
       "pair": "AVAX/USD",
       "direction": "long",
-      "entry_price": 9.08,
-      "quantity": 21.96806167,
-      "cost_basis": 99.735,
+      "entry_price": 9.07,
+      "quantity": 21.9199559,
+      "cost_basis": 99.407,
       "leverage": 2.0,
-      "opened_at": "2026-04-12T22:15:02.286078+00:00"
+      "opened_at": "2026-04-13T02:50:02.232864+00:00"
     }
   ],
   "closed_trades": [
@@ -380,21 +380,105 @@
       "won": false,
       "opened_at": "2026-04-12T21:15:01.651364+00:00",
       "closed_at": "2026-04-12T22:15:02.283916+00:00"
+    },
+    {
+      "pair": "SOL/USD",
+      "direction": "long",
+      "reason": "timeout",
+      "entry_price": 82.2,
+      "exit_price": 81.89,
+      "pnl_usd": -1.5045,
+      "pnl_pct": -1.5085,
+      "funding_cost": 0.0,
+      "leverage": 2.0,
+      "won": false,
+      "opened_at": "2026-04-12T22:15:02.285738+00:00",
+      "closed_at": "2026-04-13T00:45:01.397585+00:00"
+    },
+    {
+      "pair": "AVAX/USD",
+      "direction": "long",
+      "reason": "timeout",
+      "entry_price": 9.08,
+      "exit_price": 9.08,
+      "pnl_usd": 0.0,
+      "pnl_pct": 0.0,
+      "funding_cost": 0.0,
+      "leverage": 2.0,
+      "won": false,
+      "opened_at": "2026-04-12T22:15:02.286078+00:00",
+      "closed_at": "2026-04-13T00:45:01.398661+00:00"
+    },
+    {
+      "pair": "BTC/USD",
+      "direction": "short",
+      "reason": "timeout",
+      "entry_price": 71064.5,
+      "exit_price": 71157.6,
+      "pnl_usd": -0.5219,
+      "pnl_pct": -0.524,
+      "funding_cost": 0.0,
+      "leverage": 2.0,
+      "won": false,
+      "opened_at": "2026-04-13T00:45:01.400312+00:00",
+      "closed_at": "2026-04-13T01:45:02.017148+00:00"
+    },
+    {
+      "pair": "UNI/USD",
+      "direction": "short",
+      "reason": "timeout",
+      "entry_price": 3.037,
+      "exit_price": 3.052,
+      "pnl_usd": -1.9674,
+      "pnl_pct": -1.9756,
+      "funding_cost": 0.0,
+      "leverage": 2.0,
+      "won": false,
+      "opened_at": "2026-04-13T00:45:01.401437+00:00",
+      "closed_at": "2026-04-13T01:45:02.017843+00:00"
+    },
+    {
+      "pair": "SOL/USD",
+      "direction": "short",
+      "reason": "timeout",
+      "entry_price": 82.15,
+      "exit_price": 82.0,
+      "pnl_usd": 0.7255,
+      "pnl_pct": 0.7304,
+      "funding_cost": 0.0,
+      "leverage": 2.0,
+      "won": true,
+      "opened_at": "2026-04-13T01:45:02.019454+00:00",
+      "closed_at": "2026-04-13T02:50:02.230882+00:00"
+    },
+    {
+      "pair": "DOGE/USD",
+      "direction": "long",
+      "reason": "timeout",
+      "entry_price": 0.091104,
+      "exit_price": 0.0911006,
+      "pnl_usd": -0.0148,
+      "pnl_pct": -0.0149,
+      "funding_cost": 0.0,
+      "leverage": 2.0,
+      "won": false,
+      "opened_at": "2026-04-13T01:45:02.019727+00:00",
+      "closed_at": "2026-04-13T02:50:02.231518+00:00"
     }
   ],
   "stats": {
-    "total_trades": 24,
-    "wins": 12,
-    "losses": 12,
-    "win_rate": 50.0,
-    "total_pnl_usd": -2.6462,
-    "total_pnl_pct": -0.2646,
+    "total_trades": 30,
+    "wins": 13,
+    "losses": 17,
+    "win_rate": 43.33,
+    "total_pnl_usd": -5.9293,
+    "total_pnl_pct": -0.593,
     "total_fees": 0.0,
     "max_drawdown_pct": 0.0,
-    "current_equity": 997.35,
+    "current_equity": 994.07,
     "peak_equity": 1005.3419649142179,
-    "live_equity_mtm": 794.82,
-    "live_pnl_usd": -205.18,
-    "live_pnl_pct": -20.5182
+    "live_equity_mtm": 794.6,
+    "live_pnl_usd": -205.4,
+    "live_pnl_pct": -20.5398
   }
 }

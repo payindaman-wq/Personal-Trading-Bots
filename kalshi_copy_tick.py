@@ -2,11 +2,11 @@
 """
 kalshi_copy_tick.py — Live Kalshi copy trader mirroring top Polymarket traders.
 
-Monitors 3 Polymarket copy-trade winners. When they enter a position, finds the
+Monitors all 10 Polymarket copy-traders. When they enter a position, finds the
 equivalent Kalshi market and executes a REAL order. Closes when they exit.
 
-Capital: $333/bot × 3 bots = ~$999 live on Kalshi
-Position size: 10% of bot capital per bet (~$33 per trade)
+Capital: $1000/bot × 10 bots = ~$10,000 sim on Kalshi
+Position size: 10% of bot capital per bet (~$100 per trade)
 Match threshold: 0.55 (Jaccard title similarity)
 
 Run:     python3 /root/.openclaw/workspace/kalshi_copy_tick.py
@@ -43,26 +43,18 @@ KALSHI_DATA_URL   = "https://api.elections.kalshi.com/trade-api/v2"  # public en
 PM_ACTIVITY_URL   = "https://data-api.polymarket.com/activity"
 PM_MARKET_URL     = "https://gamma-api.polymarket.com/markets"
 
-# ── Bots: top 3 Polymarket copy-trade winners ──────────────────────────────
+# ── Bots: all 10 Polymarket copy-traders mirrored onto Kalshi ──────────────
 BOT_CONFIG = [
-    {
-        "name":             "sol_k",
-        "pm_trader":        "SecondWindCapital",
-        "pm_wallet":        "0x8c80d213c0cbad777d06ee3f58f6ca4bc03102c3",
-        "starting_capital": 333.33,
-    },
-    {
-        "name":             "freyr_k",
-        "pm_trader":        "beachboy4",
-        "pm_wallet":        "0x",   # wallet filled in at init from PM profile
-        "starting_capital": 333.33,
-    },
-    {
-        "name":             "baldur_k",
-        "pm_trader":        "UAEVALORANTFAN",
-        "pm_wallet":        "0x",
-        "starting_capital": 333.33,
-    },
+    {"name": "sol_k",     "pm_trader": "SecondWindCapital",   "pm_wallet": "0x8c80d213c0cbad777d06ee3f58f6ca4bc03102c3", "starting_capital": 1000.0},
+    {"name": "freyr_k",   "pm_trader": "beachboy4",           "pm_wallet": "0xc2e7800b5af46e6093872b177b7a5e7f0563be51", "starting_capital": 1000.0},
+    {"name": "haakon_k",  "pm_trader": "WoofMaster",          "pm_wallet": "0x916f7165c2c836aba22edb6453cdbb5f3ea253ba", "starting_capital": 1000.0},
+    {"name": "thor_k",    "pm_trader": "majorexploiter",      "pm_wallet": "0x019782cab5d844f02bafb71f512758be78579f3c", "starting_capital": 1000.0},
+    {"name": "torkel_k",  "pm_trader": "HorizonSplendidView", "pm_wallet": "0x02227b8f5a9636e895607edd3185ed6ee5598ff7", "starting_capital": 1000.0},
+    {"name": "bragi_k",   "pm_trader": "Blessed-Sunshine",    "pm_wallet": "0x59a0744db1f39ff3afccd175f80e6e8dfc239a09", "starting_capital": 1000.0},
+    {"name": "heimdall_k","pm_trader": "FTWUTB",              "pm_wallet": "0xdb2223cc5202a4718c3069f577ec971f71c96478", "starting_capital": 1000.0},
+    {"name": "baldur_k",  "pm_trader": "UAEVALORANTFAN",      "pm_wallet": "0xc65ca4755436f82d8eb461e65781584b8cadea39", "starting_capital": 1000.0},
+    {"name": "vidar_k",   "pm_trader": "ewelmealt",           "pm_wallet": "0x07921379f7b31ef93da634b688b2fe36897db778", "starting_capital": 1000.0},
+    {"name": "hallvard_k","pm_trader": "Countryside",         "pm_wallet": "0xbddf61af533ff524d27154e589d2d7a81510c684", "starting_capital": 1000.0},
 ]
 
 STOP_WORDS = {
@@ -569,7 +561,7 @@ def advance_sprint(state):
             "type":           "kalshi_copy",
             "pm_trader":      b.get("pm_trader", ""),
             "sprint_pnl_usd": sp_pnl,
-            "sprint_pnl_pct": round(sp_pnl / b.get("starting_capital", 333.33) * 100, 2),
+            "sprint_pnl_pct": round(sp_pnl / b.get("starting_capital", 1000.0) * 100, 2),
             "sprint_trades":  sp_trades,
             "sprint_wins":    sp_wins,
             "win_rate":       round(sp_wins / sp_trades * 100, 1) if sp_trades > 0 else 0.0,
