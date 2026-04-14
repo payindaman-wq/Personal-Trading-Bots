@@ -65,7 +65,7 @@ LEAGUES = [
 SERVICES = [
     {"name": "odin_day",   "unit": "odin_day.service"},
     {"name": "odin_swing", "unit": "odin_swing.service"},
-    {"name": "polymarket",     "unit": "polymarket.service"},
+    {"name": "kalshi_copy",    "unit": "kalshi_copy.service"},
     {"name": "polymarket_syn", "unit": "polymarket_syn.service"},
 ]
 
