@@ -1,8 +1,8 @@
 {
   "champion": "sigurd",
   "challenger": "autobotday",
-  "challenger_wins": 1,
-  "champion_wins": 6,
+  "challenger_wins": 0,
+  "champion_wins": 7,
   "history": [
     {
       "sprint": "comp-20260326-0910",
@@ -99,6 +99,14 @@
       "autobot_pnl": 0.0,
       "top3": true,
       "processed_at": "2026-04-12T09:00"
+    },
+    {
+      "sprint": "comp-20260411-0900",
+      "winner": "lagertha",
+      "autobot_rank": 5,
+      "autobot_pnl": 0.0,
+      "top3": false,
+      "processed_at": "2026-04-13T09:00"
     }
   ]
 }

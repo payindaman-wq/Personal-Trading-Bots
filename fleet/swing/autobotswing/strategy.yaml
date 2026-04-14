@@ -1,4 +1,4 @@
-name: crossover
+name: crossover_tightened_momentum_short_v2
 style: randomly generated
 pairs:
 - BTC/USD
@@ -21,6 +21,10 @@ entry:
       period_hours: 48
       operator: eq
       value: bullish
+    - indicator: price_change_pct
+      period_hours: 24
+      operator: lt
+      value: -0.5
   short:
     conditions:
     - indicator: momentum_accelerating
@@ -35,8 +39,12 @@ entry:
       period_hours: 24
       operator: eq
       value: bearish
+    - indicator: price_change_pct
+      period_hours: 24
+      operator: gt
+      value: 0.5
 exit:
-  take_profit_pct: 7.36
+  take_profit_pct: 6.63
   stop_loss_pct: 1.5
   timeout_hours: 129
 risk:

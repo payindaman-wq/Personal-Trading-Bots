@@ -56,6 +56,64 @@ def find_active():
     return (comp_dir, meta) if meta.get('status') == 'active' else (None, None)
 
 
+def _equity_from_portfolio(p):
+    return p.get('cash', 0) + sum(pos.get('cost_basis', 0) for pos in p.get('positions', []))
+
+
+def write_score_file(comp_id, sprint_dir, results_dir, league, duration_hours):
+    scores = []
+    if not os.path.isdir(sprint_dir):
+        return
+    for fname in sorted(os.listdir(sprint_dir)):
+        if not fname.startswith('portfolio-') or not fname.endswith('.json'):
+            continue
+        try:
+            p = json.load(open(os.path.join(sprint_dir, fname)))
+        except Exception:
+            continue
+        eq     = _equity_from_portfolio(p)
+        s      = p.get('stats', {})
+        trades = s.get('total_trades', 0)
+        wins   = s.get('wins', 0)
+        scores.append({
+            'bot':           p.get('bot') or fname.replace('portfolio-', '').replace('.json', ''),
+            'final_equity':  round(eq, 2),
+            'total_pnl_pct': round(s.get('total_pnl_pct', 0), 4),
+            'total_trades':  trades,
+            'win_rate':      round((wins / trades * 100) if trades > 0 else 0.0, 2),
+        })
+    if not scores:
+        return
+    scores.sort(key=lambda x: x['final_equity'], reverse=True)
+    now = datetime.now(timezone.utc)
+    meta_path = os.path.join(sprint_dir, 'meta.json')
+    started_at = ''
+    if os.path.exists(meta_path):
+        try:
+            m = json.load(open(meta_path))
+            started_at = m.get('started_at', '')
+            m['status']   = 'completed'
+            m['ended_at'] = now.isoformat()
+            with open(meta_path, 'w') as fh:
+                json.dump(m, fh, indent=2)
+        except Exception:
+            pass
+    score_data = {
+        'comp_id':        comp_id,
+        'league':         league,
+        'started_at':     started_at,
+        'ended_at':       now.isoformat(),
+        'duration_hours': duration_hours,
+        'scores':         scores,
+        'winner':         scores[0]['bot'],
+    }
+    score_path = os.path.join(results_dir, comp_id + '_score.json')
+    with open(score_path, 'w') as fh:
+        json.dump(score_data, fh, indent=2)
+    winner_bot = scores[0]['bot']
+    print(f'  Scored: {comp_id} -> winner={winner_bot}')
+
+
 def archive_current(comp_id):
     src = os.path.join(ACTIVE_DIR, comp_id)
     dest = os.path.join(RESULTS_DIR, comp_id)
@@ -64,6 +122,7 @@ def archive_current(comp_id):
         shutil.rmtree(dest)
     shutil.move(src, dest)
     print(f'  Archived: {comp_id}')
+    write_score_file(comp_id, dest, RESULTS_DIR, 'futures_swing', 168)
     return True
 
 

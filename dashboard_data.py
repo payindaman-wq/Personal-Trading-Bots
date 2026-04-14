@@ -446,8 +446,17 @@ def get_sprint_archive():
                 day_sources.append(("day", full))
     day_sources.append(("day", DAY_RESULTS_DIR))
 
-    sources = day_sources + [
-        ("swing",  SWING_RESULTS_DIR),
+    # Build swing sources: archived cycle dirs (oldest first), then current results/
+    swing_archive_root = os.path.join(WORKSPACE, "competition", "swing", "archive")
+    swing_sources = []
+    if os.path.isdir(swing_archive_root):
+        for cycle_dir in sorted(os.listdir(swing_archive_root)):
+            full = os.path.join(swing_archive_root, cycle_dir)
+            if os.path.isdir(full):
+                swing_sources.append(("swing", full))
+    swing_sources.append(("swing", SWING_RESULTS_DIR))
+
+    sources = day_sources + swing_sources + [
         ("arb",    ARB_RESULTS_DIR),
         ("spread", SPREAD_RESULTS_DIR),
     ]
@@ -482,7 +491,7 @@ def get_sprint_archive():
                 })
             archive.append({
                 "comp_id":        pm_data.get("sprint_id", fname.replace(".json", "")) + f" ({pm_label})",
-                "league":         "polymarket",
+                "league":         "predictions",
                 "winner":         rankings[0]["bot"] if rankings else "",
                 "duration_hours": 168,
                 "started_at":     pm_data.get("started_at", ""),

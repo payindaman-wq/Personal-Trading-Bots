@@ -23,7 +23,7 @@
   ],
   "starting_capital": 1000.0,
   "fee_rate": 0.0005,
-  "cash": 700.0,
+  "cash": 754.46548624,
   "positions": [
     {
       "pair": "BTC/USD",
@@ -35,29 +35,44 @@
       "opened_at": "2026-04-12T09:30:10.389816+00:00"
     },
     {
-      "pair": "ETH/USD",
+      "pair": "ARB/USD",
       "direction": "long",
-      "entry_price": 2213.8,
-      "quantity": 0.1355136,
-      "cost_basis": 150.0,
+      "entry_price": 0.11302,
+      "quantity": 2356.06972217,
+      "cost_basis": 133.1415,
       "leverage": 2.0,
-      "opened_at": "2026-04-12T09:30:10.434644+00:00"
+      "opened_at": "2026-04-13T23:00:08.238568+00:00"
     }
   ],
-  "closed_trades": [],
+  "closed_trades": [
+    {
+      "pair": "ETH/USD",
+      "direction": "long",
+      "reason": "target",
+      "entry_price": 2213.8,
+      "exit_price": 2353.0,
+      "pnl_usd": 37.607,
+      "pnl_pct": 25.0713,
+      "funding_cost": 0.12,
+      "leverage": 2.0,
+      "won": true,
+      "opened_at": "2026-04-12T09:30:10.434644+00:00",
+      "closed_at": "2026-04-13T23:00:07.147473+00:00"
+    }
+  ],
   "stats": {
-    "total_trades": 0,
-    "wins": 0,
+    "total_trades": 1,
+    "wins": 1,
     "losses": 0,
-    "win_rate": 0.0,
-    "total_pnl_usd": 0.0,
-    "total_pnl_pct": 0.0,
+    "win_rate": 100.0,
+    "total_pnl_usd": 37.607,
+    "total_pnl_pct": -11.2393,
     "total_fees": 0.0,
     "max_drawdown_pct": 0.0,
-    "current_equity": 1000.0,
+    "current_equity": 887.61,
     "peak_equity": 1000.0,
-    "live_equity_mtm": 995.03,
-    "live_pnl_usd": -4.97,
-    "live_pnl_pct": -0.4971
+    "live_equity_mtm": 1049.88,
+    "live_pnl_usd": 49.88,
+    "live_pnl_pct": 4.9882
   }
 }

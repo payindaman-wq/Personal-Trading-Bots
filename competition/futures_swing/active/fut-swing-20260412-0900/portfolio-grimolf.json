@@ -23,41 +23,98 @@
   ],
   "starting_capital": 1000.0,
   "fee_rate": 0.0005,
-  "cash": 700.0,
+  "cash": 718.194282173441,
   "positions": [
+    {
+      "pair": "NEAR/USD",
+      "direction": "long",
+      "entry_price": 1.4074,
+      "quantity": 184.4656814,
+      "cost_basis": 129.8085,
+      "leverage": 2.0,
+      "opened_at": "2026-04-13T22:30:11.411684+00:00"
+    },
+    {
+      "pair": "AAVE/USD",
+      "direction": "long",
+      "entry_price": 100.86,
+      "quantity": 2.51317668,
+      "cost_basis": 126.7395,
+      "leverage": 2.0,
+      "opened_at": "2026-04-14T01:00:11.623084+00:00"
+    }
+  ],
+  "closed_trades": [
     {
       "pair": "AVAX/USD",
       "direction": "short",
+      "reason": "stop",
       "entry_price": 9.0205,
-      "quantity": 33.25757996,
-      "cost_basis": 150.0,
+      "exit_price": 9.321,
+      "pnl_usd": -20.0778,
+      "pnl_pct": -13.3852,
+      "funding_cost": 0.09,
       "leverage": 2.0,
-      "opened_at": "2026-04-12T09:30:14.605816+00:00"
+      "won": false,
+      "opened_at": "2026-04-12T09:30:14.605816+00:00",
+      "closed_at": "2026-04-13T15:00:16.511907+00:00"
     },
     {
       "pair": "OP/USD",
       "direction": "short",
+      "reason": "stop",
       "entry_price": 0.10811,
-      "quantity": 2774.95143835,
-      "cost_basis": 150.0,
+      "exit_price": 0.11196,
+      "pnl_usd": -21.4871,
+      "pnl_pct": -14.3248,
+      "funding_cost": 0.12,
       "leverage": 2.0,
-      "opened_at": "2026-04-12T09:30:16.182079+00:00"
+      "won": false,
+      "opened_at": "2026-04-12T09:30:16.182079+00:00",
+      "closed_at": "2026-04-13T20:00:11.906827+00:00"
+    },
+    {
+      "pair": "AAVE/USD",
+      "direction": "long",
+      "reason": "target",
+      "entry_price": 95.269,
+      "exit_price": 101.4,
+      "pnl_usd": 32.0455,
+      "pnl_pct": 25.7418,
+      "funding_cost": 0.0,
+      "leverage": 2.0,
+      "won": true,
+      "opened_at": "2026-04-13T15:00:18.236496+00:00",
+      "closed_at": "2026-04-13T22:30:09.572615+00:00"
+    },
+    {
+      "pair": "ADA/USD",
+      "direction": "short",
+      "reason": "stop",
+      "entry_price": 0.24131,
+      "exit_price": 0.2489,
+      "pnl_usd": -15.7383,
+      "pnl_pct": -12.5813,
+      "funding_cost": 0.0,
+      "leverage": 2.0,
+      "won": false,
+      "opened_at": "2026-04-13T20:00:14.881801+00:00",
+      "closed_at": "2026-04-14T00:00:10.495615+00:00"
     }
   ],
-  "closed_trades": [],
   "stats": {
-    "total_trades": 0,
-    "wins": 0,
-    "losses": 0,
-    "win_rate": 0.0,
-    "total_pnl_usd": 0.0,
-    "total_pnl_pct": 0.0,
+    "total_trades": 4,
+    "wins": 1,
+    "losses": 3,
+    "win_rate": 25.0,
+    "total_pnl_usd": -25.2577,
+    "total_pnl_pct": -15.5066,
     "total_fees": 0.0,
     "max_drawdown_pct": 0.0,
-    "current_equity": 1000.0,
+    "current_equity": 844.93,
     "peak_equity": 1000.0,
-    "live_equity_mtm": 1004.17,
-    "live_pnl_usd": 4.17,
-    "live_pnl_pct": 0.4175
+    "live_equity_mtm": 972.7,
+    "live_pnl_usd": -27.3,
+    "live_pnl_pct": -2.73
   }
 }

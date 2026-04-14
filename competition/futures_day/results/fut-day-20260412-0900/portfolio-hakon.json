@@ -23,25 +23,25 @@
   ],
   "starting_capital": 1000.0,
   "fee_rate": 0.0005,
-  "cash": 757.554046982389,
+  "cash": 770.0648094464352,
   "positions": [
     {
-      "pair": "SOL/USD",
-      "direction": "long",
-      "entry_price": 81.91,
-      "quantity": 2.92061043,
-      "cost_basis": 119.6136,
+      "pair": "LINK/USD",
+      "direction": "short",
+      "entry_price": 8.76282,
+      "quantity": 27.40871089,
+      "cost_basis": 120.0888,
       "leverage": 2.0,
-      "opened_at": "2026-04-13T04:10:01.949395+00:00"
+      "opened_at": "2026-04-13T07:10:02.258249+00:00"
     },
     {
-      "pair": "ARB/USD",
-      "direction": "long",
-      "entry_price": 0.1115,
-      "quantity": 2145.53542601,
-      "cost_basis": 119.6136,
+      "pair": "BTC/USD",
+      "direction": "short",
+      "entry_price": 70620.8,
+      "quantity": 0.00297387,
+      "cost_basis": 105.0084,
       "leverage": 2.0,
-      "opened_at": "2026-04-13T04:10:01.951810+00:00"
+      "opened_at": "2026-04-13T08:45:02.096698+00:00"
     }
   ],
   "closed_trades": [
@@ -184,21 +184,63 @@
       "won": true,
       "opened_at": "2026-04-13T01:10:01.888608+00:00",
       "closed_at": "2026-04-13T04:10:01.947940+00:00"
+    },
+    {
+      "pair": "SOL/USD",
+      "direction": "long",
+      "reason": "timeout",
+      "entry_price": 81.91,
+      "exit_price": 82.22,
+      "pnl_usd": 1.8108,
+      "pnl_pct": 1.5139,
+      "funding_cost": 0.0,
+      "leverage": 2.0,
+      "won": true,
+      "opened_at": "2026-04-13T04:10:01.949395+00:00",
+      "closed_at": "2026-04-13T07:10:02.256029+00:00"
+    },
+    {
+      "pair": "ARB/USD",
+      "direction": "long",
+      "reason": "timeout",
+      "entry_price": 0.1115,
+      "exit_price": 0.112,
+      "pnl_usd": 2.1455,
+      "pnl_pct": 1.7937,
+      "funding_cost": 0.0,
+      "leverage": 2.0,
+      "won": true,
+      "opened_at": "2026-04-13T04:10:01.951810+00:00",
+      "closed_at": "2026-04-13T07:10:02.256739+00:00"
+    },
+    {
+      "pair": "ARB/USD",
+      "direction": "long",
+      "reason": "stop",
+      "entry_price": 0.112,
+      "exit_price": 0.1107,
+      "pnl_usd": -5.5756,
+      "pnl_pct": -4.6429,
+      "funding_cost": 0.0,
+      "leverage": 2.0,
+      "won": false,
+      "opened_at": "2026-04-13T07:10:02.258899+00:00",
+      "closed_at": "2026-04-13T08:45:02.095883+00:00"
     }
   ],
   "stats": {
-    "total_trades": 10,
-    "wins": 5,
-    "losses": 5,
-    "win_rate": 50.0,
-    "total_pnl_usd": -3.2189,
-    "total_pnl_pct": -0.3219,
+    "total_trades": 13,
+    "wins": 7,
+    "losses": 6,
+    "win_rate": 53.85,
+    "total_pnl_usd": -4.8382,
+    "total_pnl_pct": -12.4927,
     "total_fees": 0.0,
     "max_drawdown_pct": 0.0,
-    "current_equity": 996.78,
+    "current_equity": 875.07,
     "peak_equity": 1001.585157136,
-    "live_equity_mtm": 756.01,
-    "live_pnl_usd": -243.99,
-    "live_pnl_pct": -24.3987
+    "live_equity_mtm": 773.51,
+    "live_pnl_usd": -226.49,
+    "live_pnl_pct": -22.6495
   }
 }

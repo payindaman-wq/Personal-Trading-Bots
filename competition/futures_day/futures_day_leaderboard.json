@@ -1,27 +1,108 @@
 {
-  "generated_at": "2026-04-13T04:14:01.378746+00:00",
+  "generated_at": "2026-04-14T05:44:01.292097+00:00",
   "league": "futures_day",
-  "total_sprints": 2,
-  "archived": 1,
-  "active_sprint": "fut-day-20260412-0900",
+  "total_sprints": 7,
+  "archived": 6,
+  "active_sprint": "fut-day-20260413-0900",
   "cycle": 1,
-  "sprint_in_cycle": 6,
+  "sprint_in_cycle": 7,
   "sprints_per_cycle": 7,
   "cycle_status": "active",
   "rankings": [
     {
+      "bot": "orvar",
+      "sprints_entered": 7,
+      "sprint_wins": 2,
+      "podiums": 4,
+      "points": 26,
+      "cumulative_pnl_usd": 59.62,
+      "cumulative_pnl_pct": -34.6288,
+      "total_trades": 130,
+      "total_wins": 12,
+      "total_losses": 7,
+      "best_sprint_pnl_pct": 0.1967,
+      "worst_sprint_pnl_pct": -9.4448,
+      "sprint_log": [
+        {
+          "comp_id": "fut-day-20260407-0027",
+          "rank": 5,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260408-0900",
+          "rank": 1,
+          "pnl_usd": 1.97,
+          "pnl_pct": 0.1967,
+          "trades": 2,
+          "win_rate": 100.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260409-0900",
+          "rank": 1,
+          "pnl_usd": 28.25,
+          "pnl_pct": -7.3812,
+          "trades": 27,
+          "win_rate": 59.26,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260410-0900",
+          "rank": 2,
+          "pnl_usd": 9.24,
+          "pnl_pct": -9.2278,
+          "trades": 11,
+          "win_rate": 72.73,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260411-0900",
+          "rank": 3,
+          "pnl_usd": 5.01,
+          "pnl_pct": -9.4448,
+          "trades": 31,
+          "win_rate": 54.84,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260412-0900",
+          "rank": 12,
+          "pnl_usd": -8.36,
+          "pnl_pct": -0.8362,
+          "trades": 40,
+          "win_rate": 42.5,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260413-0900",
+          "rank": 1,
+          "pnl_usd": 23.51,
+          "pnl_pct": -7.9355,
+          "trades": 19,
+          "win_rate": 63.16,
+          "in_progress": true
+        }
+      ],
+      "overall_win_rate": 9.2,
+      "avg_pnl_pct_per_sprint": -4.947
+    },
+    {
       "bot": "ketil",
-      "sprints_entered": 2,
-      "sprint_wins": 0,
-      "podiums": 1,
-      "points": 5,
-      "cumulative_pnl_usd": 12.06,
-      "cumulative_pnl_pct": -8.9188,
-      "total_trades": 13,
-      "total_wins": 9,
-      "total_losses": 4,
+      "sprints_entered": 7,
+      "sprint_wins": 2,
+      "podiums": 4,
+      "points": 28,
+      "cumulative_pnl_usd": 28.21,
+      "cumulative_pnl_pct": -47.5338,
+      "total_trades": 71,
+      "total_wins": 10,
+      "total_losses": 5,
       "best_sprint_pnl_pct": 0.0,
-      "worst_sprint_pnl_pct": -8.9188,
+      "worst_sprint_pnl_pct": -11.5147,
       "sprint_log": [
         {
           "comp_id": "fut-day-20260407-0027",
@@ -30,6 +111,42 @@
           "pnl_pct": 0.0,
           "trades": 0,
           "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260408-0900",
+          "rank": 8,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260409-0900",
+          "rank": 13,
+          "pnl_usd": -16.39,
+          "pnl_pct": -11.5147,
+          "trades": 21,
+          "win_rate": 47.62,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260410-0900",
+          "rank": 1,
+          "pnl_usd": 13.39,
+          "pnl_pct": -8.8511,
+          "trades": 11,
+          "win_rate": 72.73,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260411-0900",
+          "rank": 2,
+          "pnl_usd": 13.1,
+          "pnl_pct": -8.7374,
+          "trades": 11,
+          "win_rate": 63.64,
           "in_progress": false
         },
         {
@@ -39,29 +156,38 @@
           "pnl_pct": -8.9188,
           "trades": 13,
           "win_rate": 69.23,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260413-0900",
+          "rank": 5,
+          "pnl_usd": 6.05,
+          "pnl_pct": -9.5118,
+          "trades": 15,
+          "win_rate": 66.67,
           "in_progress": true
         }
       ],
-      "overall_win_rate": 69.2,
-      "avg_pnl_pct_per_sprint": -4.4594
+      "overall_win_rate": 14.1,
+      "avg_pnl_pct_per_sprint": -6.7905
     },
     {
-      "bot": "vikar",
-      "sprints_entered": 2,
-      "sprint_wins": 0,
+      "bot": "hakon",
+      "sprints_entered": 7,
+      "sprint_wins": 1,
       "podiums": 1,
-      "points": 3,
-      "cumulative_pnl_usd": 10.67,
-      "cumulative_pnl_pct": -9.013,
-      "total_trades": 3,
-      "total_wins": 3,
-      "total_losses": 0,
+      "points": 13,
+      "cumulative_pnl_usd": 18.17,
+      "cumulative_pnl_pct": -58.7096,
+      "total_trades": 33,
+      "total_wins": 4,
+      "total_losses": 1,
       "best_sprint_pnl_pct": 0.0,
-      "worst_sprint_pnl_pct": -9.013,
+      "worst_sprint_pnl_pct": -12.9548,
       "sprint_log": [
         {
           "comp_id": "fut-day-20260407-0027",
-          "rank": 3,
+          "rank": 11,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
           "trades": 0,
@@ -69,35 +195,80 @@
           "in_progress": false
         },
         {
+          "comp_id": "fut-day-20260408-0900",
+          "rank": 6,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260409-0900",
+          "rank": 12,
+          "pnl_usd": -9.55,
+          "pnl_pct": -12.9548,
+          "trades": 1,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260410-0900",
+          "rank": 9,
+          "pnl_usd": -5.45,
+          "pnl_pct": -12.5445,
+          "trades": 1,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260411-0900",
+          "rank": 1,
+          "pnl_usd": 28.86,
+          "pnl_pct": -9.4497,
+          "trades": 13,
+          "win_rate": 53.85,
+          "in_progress": false
+        },
+        {
           "comp_id": "fut-day-20260412-0900",
-          "rank": 2,
-          "pnl_usd": 10.67,
-          "pnl_pct": -9.013,
-          "trades": 3,
-          "win_rate": 100.0,
+          "rank": 10,
+          "pnl_usd": -4.84,
+          "pnl_pct": -12.4927,
+          "trades": 13,
+          "win_rate": 53.85,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260413-0900",
+          "rank": 3,
+          "pnl_usd": 9.15,
+          "pnl_pct": -11.2679,
+          "trades": 5,
+          "win_rate": 80.0,
           "in_progress": true
         }
       ],
-      "overall_win_rate": 100.0,
-      "avg_pnl_pct_per_sprint": -4.5065
+      "overall_win_rate": 12.1,
+      "avg_pnl_pct_per_sprint": -8.3871
     },
     {
-      "bot": "haki",
-      "sprints_entered": 2,
+      "bot": "vemund",
+      "sprints_entered": 7,
       "sprint_wins": 0,
       "podiums": 0,
-      "points": 1,
-      "cumulative_pnl_usd": 3.92,
-      "cumulative_pnl_pct": -23.608,
-      "total_trades": 1,
+      "points": 6,
+      "cumulative_pnl_usd": 3.84,
+      "cumulative_pnl_pct": -59.5862,
+      "total_trades": 17,
       "total_wins": 1,
-      "total_losses": 0,
+      "total_losses": 1,
       "best_sprint_pnl_pct": 0.0,
-      "worst_sprint_pnl_pct": -23.608,
+      "worst_sprint_pnl_pct": -19.4998,
       "sprint_log": [
         {
           "comp_id": "fut-day-20260407-0027",
-          "rank": 10,
+          "rank": 12,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
           "trades": 0,
@@ -105,31 +276,76 @@
           "in_progress": false
         },
         {
-          "comp_id": "fut-day-20260412-0900",
-          "rank": 3,
-          "pnl_usd": 3.92,
-          "pnl_pct": -23.608,
+          "comp_id": "fut-day-20260408-0900",
+          "rank": 13,
+          "pnl_usd": -0.26,
+          "pnl_pct": -0.0265,
           "trades": 1,
-          "win_rate": 100.0,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260409-0900",
+          "rank": 5,
+          "pnl_usd": -0.83,
+          "pnl_pct": -10.0751,
+          "trades": 5,
+          "win_rate": 20.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260410-0900",
+          "rank": 4,
+          "pnl_usd": 4.04,
+          "pnl_pct": -9.6177,
+          "trades": 3,
+          "win_rate": 66.67,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260411-0900",
+          "rank": 8,
+          "pnl_usd": -3.61,
+          "pnl_pct": -10.3228,
+          "trades": 5,
+          "win_rate": 40.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260412-0900",
+          "rank": 7,
+          "pnl_usd": -0.44,
+          "pnl_pct": -10.0443,
+          "trades": 1,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260413-0900",
+          "rank": 7,
+          "pnl_usd": 4.94,
+          "pnl_pct": -19.4998,
+          "trades": 2,
+          "win_rate": 50.0,
           "in_progress": true
         }
       ],
-      "overall_win_rate": 100.0,
-      "avg_pnl_pct_per_sprint": -11.804
+      "overall_win_rate": 5.9,
+      "avg_pnl_pct_per_sprint": -8.5123
     },
     {
       "bot": "brandr",
-      "sprints_entered": 2,
+      "sprints_entered": 7,
       "sprint_wins": 1,
-      "podiums": 1,
-      "points": 8,
-      "cumulative_pnl_usd": 1.74,
-      "cumulative_pnl_pct": -23.8258,
-      "total_trades": 1,
-      "total_wins": 1,
-      "total_losses": 0,
+      "podiums": 3,
+      "points": 19,
+      "cumulative_pnl_usd": 0.9,
+      "cumulative_pnl_pct": -131.9411,
+      "total_trades": 12,
+      "total_wins": 0,
+      "total_losses": 1,
       "best_sprint_pnl_pct": 0.0,
-      "worst_sprint_pnl_pct": -23.8258,
+      "worst_sprint_pnl_pct": -24.17,
       "sprint_log": [
         {
           "comp_id": "fut-day-20260407-0027",
@@ -141,31 +357,157 @@
           "in_progress": false
         },
         {
+          "comp_id": "fut-day-20260408-0900",
+          "rank": 2,
+          "pnl_usd": 0.69,
+          "pnl_pct": -11.9312,
+          "trades": 1,
+          "win_rate": 100.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260409-0900",
+          "rank": 3,
+          "pnl_usd": 1.64,
+          "pnl_pct": -23.9226,
+          "trades": 4,
+          "win_rate": 75.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260410-0900",
+          "rank": 6,
+          "pnl_usd": -1.7,
+          "pnl_pct": -24.17,
+          "trades": 1,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260411-0900",
+          "rank": 6,
+          "pnl_usd": -1.04,
+          "pnl_pct": -24.0482,
+          "trades": 4,
+          "win_rate": 25.0,
+          "in_progress": false
+        },
+        {
           "comp_id": "fut-day-20260412-0900",
           "rank": 4,
           "pnl_usd": 1.74,
           "pnl_pct": -23.8258,
           "trades": 1,
           "win_rate": 100.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260413-0900",
+          "rank": 11,
+          "pnl_usd": -0.43,
+          "pnl_pct": -24.0433,
+          "trades": 1,
+          "win_rate": 0.0,
           "in_progress": true
         }
       ],
-      "overall_win_rate": 100.0,
-      "avg_pnl_pct_per_sprint": -11.9129
+      "overall_win_rate": 0.0,
+      "avg_pnl_pct_per_sprint": -18.8487
     },
     {
-      "bot": "helgi",
-      "sprints_entered": 2,
+      "bot": "vikar",
+      "sprints_entered": 7,
       "sprint_wins": 0,
-      "podiums": 0,
-      "points": 1,
-      "cumulative_pnl_usd": 1.22,
-      "cumulative_pnl_pct": -9.8781,
-      "total_trades": 1,
+      "podiums": 2,
+      "points": 12,
+      "cumulative_pnl_usd": -0.21,
+      "cumulative_pnl_pct": -40.0302,
+      "total_trades": 26,
       "total_wins": 1,
       "total_losses": 0,
       "best_sprint_pnl_pct": 0.0,
-      "worst_sprint_pnl_pct": -9.8781,
+      "worst_sprint_pnl_pct": -10.3208,
+      "sprint_log": [
+        {
+          "comp_id": "fut-day-20260407-0027",
+          "rank": 3,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260408-0900",
+          "rank": 12,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260409-0900",
+          "rank": 6,
+          "pnl_usd": -3.57,
+          "pnl_pct": -10.3208,
+          "trades": 4,
+          "win_rate": 25.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260410-0900",
+          "rank": 7,
+          "pnl_usd": -2.3,
+          "pnl_pct": -10.1961,
+          "trades": 8,
+          "win_rate": 62.5,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260411-0900",
+          "rank": 10,
+          "pnl_usd": -10.1,
+          "pnl_pct": -1.0098,
+          "trades": 10,
+          "win_rate": 50.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260412-0900",
+          "rank": 2,
+          "pnl_usd": 10.67,
+          "pnl_pct": -9.013,
+          "trades": 3,
+          "win_rate": 100.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260413-0900",
+          "rank": 6,
+          "pnl_usd": 5.09,
+          "pnl_pct": -9.4905,
+          "trades": 1,
+          "win_rate": 100.0,
+          "in_progress": true
+        }
+      ],
+      "overall_win_rate": 3.8,
+      "avg_pnl_pct_per_sprint": -5.7186
+    },
+    {
+      "bot": "helgi",
+      "sprints_entered": 7,
+      "sprint_wins": 0,
+      "podiums": 0,
+      "points": 6,
+      "cumulative_pnl_usd": -0.67,
+      "cumulative_pnl_pct": -50.0672,
+      "total_trades": 9,
+      "total_wins": 2,
+      "total_losses": 1,
+      "best_sprint_pnl_pct": 0.0,
+      "worst_sprint_pnl_pct": -10.5381,
       "sprint_log": [
         {
           "comp_id": "fut-day-20260407-0027",
@@ -174,6 +516,42 @@
           "pnl_pct": 0.0,
           "trades": 0,
           "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260408-0900",
+          "rank": 7,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260409-0900",
+          "rank": 7,
+          "pnl_usd": -5.77,
+          "pnl_pct": -10.5381,
+          "trades": 3,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260410-0900",
+          "rank": 5,
+          "pnl_usd": -0.58,
+          "pnl_pct": -10.0585,
+          "trades": 1,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260411-0900",
+          "rank": 5,
+          "pnl_usd": 0.27,
+          "pnl_pct": -9.9734,
+          "trades": 1,
+          "win_rate": 100.0,
           "in_progress": false
         },
         {
@@ -183,29 +561,38 @@
           "pnl_pct": -9.8781,
           "trades": 1,
           "win_rate": 100.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260413-0900",
+          "rank": 9,
+          "pnl_usd": 4.19,
+          "pnl_pct": -9.6191,
+          "trades": 3,
+          "win_rate": 66.67,
           "in_progress": true
         }
       ],
-      "overall_win_rate": 100.0,
-      "avg_pnl_pct_per_sprint": -4.939
+      "overall_win_rate": 22.2,
+      "avg_pnl_pct_per_sprint": -7.1525
     },
     {
-      "bot": "ulfhedinn",
-      "sprints_entered": 2,
+      "bot": "haki",
+      "sprints_entered": 7,
       "sprint_wins": 0,
-      "podiums": 0,
-      "points": 1,
-      "cumulative_pnl_usd": 0.0,
-      "cumulative_pnl_pct": 0.0,
-      "total_trades": 0,
-      "total_wins": 0,
+      "podiums": 1,
+      "points": 8,
+      "cumulative_pnl_usd": -3.0,
+      "cumulative_pnl_pct": -108.184,
+      "total_trades": 12,
+      "total_wins": 1,
       "total_losses": 0,
       "best_sprint_pnl_pct": 0.0,
-      "worst_sprint_pnl_pct": 0.0,
+      "worst_sprint_pnl_pct": -24.2216,
       "sprint_log": [
         {
           "comp_id": "fut-day-20260407-0027",
-          "rank": 9,
+          "rank": 10,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
           "trades": 0,
@@ -213,35 +600,8 @@
           "in_progress": false
         },
         {
-          "comp_id": "fut-day-20260412-0900",
-          "rank": 6,
-          "pnl_usd": 0.0,
-          "pnl_pct": 0.0,
-          "trades": 0,
-          "win_rate": 0.0,
-          "in_progress": true
-        }
-      ],
-      "overall_win_rate": 0.0,
-      "avg_pnl_pct_per_sprint": 0.0
-    },
-    {
-      "bot": "autobotdayfutures",
-      "sprints_entered": 2,
-      "sprint_wins": 0,
-      "podiums": 0,
-      "points": 1,
-      "cumulative_pnl_usd": -0.05,
-      "cumulative_pnl_pct": -0.0047,
-      "total_trades": 1,
-      "total_wins": 0,
-      "total_losses": 1,
-      "best_sprint_pnl_pct": 0.0,
-      "worst_sprint_pnl_pct": -0.0047,
-      "sprint_log": [
-        {
-          "comp_id": "fut-day-20260407-0027",
-          "rank": 13,
+          "comp_id": "fut-day-20260408-0900",
+          "rank": 5,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
           "trades": 0,
@@ -249,67 +609,67 @@
           "in_progress": false
         },
         {
-          "comp_id": "fut-day-20260412-0900",
+          "comp_id": "fut-day-20260409-0900",
+          "rank": 4,
+          "pnl_usd": 1.08,
+          "pnl_pct": -23.8921,
+          "trades": 1,
+          "win_rate": 100.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260410-0900",
+          "rank": 10,
+          "pnl_usd": -6.55,
+          "pnl_pct": -12.6483,
+          "trades": 5,
+          "win_rate": 40.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260411-0900",
           "rank": 7,
-          "pnl_usd": -0.05,
-          "pnl_pct": -0.0047,
-          "trades": 1,
-          "win_rate": 0.0,
-          "in_progress": true
-        }
-      ],
-      "overall_win_rate": 0.0,
-      "avg_pnl_pct_per_sprint": -0.0024
-    },
-    {
-      "bot": "vemund",
-      "sprints_entered": 2,
-      "sprint_wins": 0,
-      "podiums": 0,
-      "points": 1,
-      "cumulative_pnl_usd": -0.44,
-      "cumulative_pnl_pct": -10.0443,
-      "total_trades": 1,
-      "total_wins": 0,
-      "total_losses": 1,
-      "best_sprint_pnl_pct": 0.0,
-      "worst_sprint_pnl_pct": -10.0443,
-      "sprint_log": [
-        {
-          "comp_id": "fut-day-20260407-0027",
-          "rank": 12,
-          "pnl_usd": 0.0,
-          "pnl_pct": 0.0,
-          "trades": 0,
-          "win_rate": 0.0,
+          "pnl_usd": -3.31,
+          "pnl_pct": -24.2216,
+          "trades": 4,
+          "win_rate": 25.0,
           "in_progress": false
         },
         {
           "comp_id": "fut-day-20260412-0900",
-          "rank": 8,
-          "pnl_usd": -0.44,
-          "pnl_pct": -10.0443,
+          "rank": 3,
+          "pnl_usd": 3.92,
+          "pnl_pct": -23.608,
           "trades": 1,
-          "win_rate": 0.0,
+          "win_rate": 100.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260413-0900",
+          "rank": 10,
+          "pnl_usd": 1.86,
+          "pnl_pct": -23.814,
+          "trades": 1,
+          "win_rate": 100.0,
           "in_progress": true
         }
       ],
-      "overall_win_rate": 0.0,
-      "avg_pnl_pct_per_sprint": -5.0221
+      "overall_win_rate": 8.3,
+      "avg_pnl_pct_per_sprint": -15.4549
     },
     {
       "bot": "starkad",
-      "sprints_entered": 2,
+      "sprints_entered": 7,
       "sprint_wins": 0,
-      "podiums": 0,
-      "points": 1,
-      "cumulative_pnl_usd": -0.47,
-      "cumulative_pnl_pct": -24.0821,
-      "total_trades": 4,
-      "total_wins": 2,
-      "total_losses": 2,
+      "podiums": 1,
+      "points": 8,
+      "cumulative_pnl_usd": -3.39,
+      "cumulative_pnl_pct": -120.4675,
+      "total_trades": 41,
+      "total_wins": 1,
+      "total_losses": 3,
       "best_sprint_pnl_pct": 0.0,
-      "worst_sprint_pnl_pct": -24.0821,
+      "worst_sprint_pnl_pct": -25.1665,
       "sprint_log": [
         {
           "comp_id": "fut-day-20260407-0027",
@@ -321,34 +681,88 @@
           "in_progress": false
         },
         {
-          "comp_id": "fut-day-20260412-0900",
+          "comp_id": "fut-day-20260408-0900",
+          "rank": 10,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260409-0900",
           "rank": 9,
+          "pnl_usd": -7.44,
+          "pnl_pct": -24.6853,
+          "trades": 7,
+          "win_rate": 28.57,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260410-0900",
+          "rank": 3,
+          "pnl_usd": 8.84,
+          "pnl_pct": -23.4652,
+          "trades": 7,
+          "win_rate": 85.71,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260411-0900",
+          "rank": 13,
+          "pnl_usd": -13.41,
+          "pnl_pct": -25.1665,
+          "trades": 19,
+          "win_rate": 52.63,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260412-0900",
+          "rank": 8,
           "pnl_usd": -0.47,
           "pnl_pct": -24.0821,
           "trades": 4,
           "win_rate": 50.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260413-0900",
+          "rank": 4,
+          "pnl_usd": 9.09,
+          "pnl_pct": -23.0684,
+          "trades": 4,
+          "win_rate": 25.0,
           "in_progress": true
         }
       ],
-      "overall_win_rate": 50.0,
-      "avg_pnl_pct_per_sprint": -12.0411
+      "overall_win_rate": 2.4,
+      "avg_pnl_pct_per_sprint": -17.2096
     },
     {
-      "bot": "hakon",
-      "sprints_entered": 2,
+      "bot": "ulfhedinn",
+      "sprints_entered": 7,
       "sprint_wins": 0,
       "podiums": 0,
-      "points": 1,
-      "cumulative_pnl_usd": -3.22,
-      "cumulative_pnl_pct": -0.3219,
-      "total_trades": 10,
-      "total_wins": 5,
-      "total_losses": 5,
+      "points": 6,
+      "cumulative_pnl_usd": -20.91,
+      "cumulative_pnl_pct": -42.0777,
+      "total_trades": 16,
+      "total_wins": 3,
+      "total_losses": 1,
       "best_sprint_pnl_pct": 0.0,
-      "worst_sprint_pnl_pct": -0.3219,
+      "worst_sprint_pnl_pct": -10.5644,
       "sprint_log": [
         {
           "comp_id": "fut-day-20260407-0027",
+          "rank": 9,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260408-0900",
           "rank": 11,
           "pnl_usd": 0.0,
           "pnl_pct": 0.0,
@@ -357,103 +771,67 @@
           "in_progress": false
         },
         {
-          "comp_id": "fut-day-20260412-0900",
-          "rank": 10,
-          "pnl_usd": -3.22,
-          "pnl_pct": -0.3219,
-          "trades": 10,
-          "win_rate": 50.0,
-          "in_progress": true
-        }
-      ],
-      "overall_win_rate": 50.0,
-      "avg_pnl_pct_per_sprint": -0.161
-    },
-    {
-      "bot": "orvar",
-      "sprints_entered": 2,
-      "sprint_wins": 0,
-      "podiums": 0,
-      "points": 1,
-      "cumulative_pnl_usd": -5.09,
-      "cumulative_pnl_pct": -0.5086,
-      "total_trades": 32,
-      "total_wins": 15,
-      "total_losses": 17,
-      "best_sprint_pnl_pct": 0.0,
-      "worst_sprint_pnl_pct": -0.5086,
-      "sprint_log": [
+          "comp_id": "fut-day-20260409-0900",
+          "rank": 8,
+          "pnl_usd": -6.94,
+          "pnl_pct": -10.5644,
+          "trades": 3,
+          "win_rate": 33.33,
+          "in_progress": false
+        },
         {
-          "comp_id": "fut-day-20260407-0027",
-          "rank": 5,
-          "pnl_usd": 0.0,
-          "pnl_pct": 0.0,
-          "trades": 0,
-          "win_rate": 0.0,
+          "comp_id": "fut-day-20260410-0900",
+          "rank": 13,
+          "pnl_usd": -17.13,
+          "pnl_pct": -1.7126,
+          "trades": 7,
+          "win_rate": 14.29,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260411-0900",
+          "rank": 4,
+          "pnl_usd": 3.58,
+          "pnl_pct": -9.6422,
+          "trades": 1,
+          "win_rate": 100.0,
           "in_progress": false
         },
         {
           "comp_id": "fut-day-20260412-0900",
-          "rank": 11,
-          "pnl_usd": -5.09,
-          "pnl_pct": -0.5086,
-          "trades": 32,
-          "win_rate": 46.88,
-          "in_progress": true
-        }
-      ],
-      "overall_win_rate": 46.9,
-      "avg_pnl_pct_per_sprint": -0.2543
-    },
-    {
-      "bot": "asmund",
-      "sprints_entered": 2,
-      "sprint_wins": 0,
-      "podiums": 0,
-      "points": 1,
-      "cumulative_pnl_usd": -5.62,
-      "cumulative_pnl_pct": -12.5462,
-      "total_trades": 5,
-      "total_wins": 1,
-      "total_losses": 4,
-      "best_sprint_pnl_pct": 0.0,
-      "worst_sprint_pnl_pct": -12.5462,
-      "sprint_log": [
-        {
-          "comp_id": "fut-day-20260407-0027",
-          "rank": 6,
-          "pnl_usd": 0.0,
-          "pnl_pct": 0.0,
-          "trades": 0,
+          "rank": 9,
+          "pnl_usd": -4.72,
+          "pnl_pct": -10.472,
+          "trades": 1,
           "win_rate": 0.0,
           "in_progress": false
         },
         {
-          "comp_id": "fut-day-20260412-0900",
-          "rank": 12,
-          "pnl_usd": -5.62,
-          "pnl_pct": -12.5462,
-          "trades": 5,
-          "win_rate": 20.0,
+          "comp_id": "fut-day-20260413-0900",
+          "rank": 8,
+          "pnl_usd": 4.3,
+          "pnl_pct": -9.6865,
+          "trades": 4,
+          "win_rate": 75.0,
           "in_progress": true
         }
       ],
-      "overall_win_rate": 20.0,
-      "avg_pnl_pct_per_sprint": -6.2731
+      "overall_win_rate": 18.8,
+      "avg_pnl_pct_per_sprint": -6.0111
     },
     {
       "bot": "kveldulf",
-      "sprints_entered": 2,
+      "sprints_entered": 7,
       "sprint_wins": 0,
-      "podiums": 0,
-      "points": 1,
-      "cumulative_pnl_usd": -12.57,
-      "cumulative_pnl_pct": -1.2572,
-      "total_trades": 3,
-      "total_wins": 0,
+      "podiums": 1,
+      "points": 10,
+      "cumulative_pnl_usd": -21.26,
+      "cumulative_pnl_pct": -76.9718,
+      "total_trades": 29,
+      "total_wins": 6,
       "total_losses": 3,
-      "best_sprint_pnl_pct": 0.0,
-      "worst_sprint_pnl_pct": -1.2572,
+      "best_sprint_pnl_pct": 1.056,
+      "worst_sprint_pnl_pct": -45.8476,
       "sprint_log": [
         {
           "comp_id": "fut-day-20260407-0027",
@@ -465,17 +843,224 @@
           "in_progress": false
         },
         {
+          "comp_id": "fut-day-20260408-0900",
+          "rank": 9,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260409-0900",
+          "rank": 2,
+          "pnl_usd": 6.16,
+          "pnl_pct": -29.5859,
+          "trades": 2,
+          "win_rate": 50.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260410-0900",
+          "rank": 11,
+          "pnl_usd": -13.37,
+          "pnl_pct": -1.3371,
+          "trades": 8,
+          "win_rate": 37.5,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260411-0900",
+          "rank": 12,
+          "pnl_usd": -12.04,
+          "pnl_pct": -45.8476,
+          "trades": 7,
+          "win_rate": 28.57,
+          "in_progress": false
+        },
+        {
           "comp_id": "fut-day-20260412-0900",
           "rank": 13,
           "pnl_usd": -12.57,
           "pnl_pct": -1.2572,
           "trades": 3,
           "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260413-0900",
+          "rank": 2,
+          "pnl_usd": 10.56,
+          "pnl_pct": 1.056,
+          "trades": 9,
+          "win_rate": 66.67,
+          "in_progress": true
+        }
+      ],
+      "overall_win_rate": 20.7,
+      "avg_pnl_pct_per_sprint": -10.996
+    },
+    {
+      "bot": "asmund",
+      "sprints_entered": 7,
+      "sprint_wins": 0,
+      "podiums": 1,
+      "points": 8,
+      "cumulative_pnl_usd": -32.14,
+      "cumulative_pnl_pct": -63.1369,
+      "total_trades": 41,
+      "total_wins": 3,
+      "total_losses": 4,
+      "best_sprint_pnl_pct": 0.0,
+      "worst_sprint_pnl_pct": -12.8099,
+      "sprint_log": [
+        {
+          "comp_id": "fut-day-20260407-0027",
+          "rank": 6,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260408-0900",
+          "rank": 3,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260409-0900",
+          "rank": 11,
+          "pnl_usd": -8.48,
+          "pnl_pct": -12.8099,
+          "trades": 9,
+          "win_rate": 22.22,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260410-0900",
+          "rank": 8,
+          "pnl_usd": -3.59,
+          "pnl_pct": -12.386,
+          "trades": 7,
+          "win_rate": 42.86,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260411-0900",
+          "rank": 9,
+          "pnl_usd": -7.95,
+          "pnl_pct": -12.7549,
+          "trades": 13,
+          "win_rate": 38.46,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260412-0900",
+          "rank": 11,
+          "pnl_usd": -5.62,
+          "pnl_pct": -12.5462,
+          "trades": 5,
+          "win_rate": 20.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260413-0900",
+          "rank": 12,
+          "pnl_usd": -6.5,
+          "pnl_pct": -12.6399,
+          "trades": 7,
+          "win_rate": 42.86,
+          "in_progress": true
+        }
+      ],
+      "overall_win_rate": 7.3,
+      "avg_pnl_pct_per_sprint": -9.0196
+    },
+    {
+      "bot": "autobotdayfutures",
+      "sprints_entered": 7,
+      "sprint_wins": 0,
+      "podiums": 0,
+      "points": 6,
+      "cumulative_pnl_usd": -52.37,
+      "cumulative_pnl_pct": -5.2371,
+      "total_trades": 7,
+      "total_wins": 0,
+      "total_losses": 2,
+      "best_sprint_pnl_pct": 0.0,
+      "worst_sprint_pnl_pct": -1.7122,
+      "sprint_log": [
+        {
+          "comp_id": "fut-day-20260407-0027",
+          "rank": 13,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260408-0900",
+          "rank": 4,
+          "pnl_usd": 0.0,
+          "pnl_pct": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260409-0900",
+          "rank": 10,
+          "pnl_usd": -8.34,
+          "pnl_pct": -0.8339,
+          "trades": 1,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260410-0900",
+          "rank": 12,
+          "pnl_usd": -15.75,
+          "pnl_pct": -1.5751,
+          "trades": 1,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260411-0900",
+          "rank": 11,
+          "pnl_usd": -11.11,
+          "pnl_pct": -1.1112,
+          "trades": 2,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260412-0900",
+          "rank": 6,
+          "pnl_usd": -0.05,
+          "pnl_pct": -0.0047,
+          "trades": 1,
+          "win_rate": 0.0,
+          "in_progress": false
+        },
+        {
+          "comp_id": "fut-day-20260413-0900",
+          "rank": 13,
+          "pnl_usd": -17.12,
+          "pnl_pct": -1.7122,
+          "trades": 2,
+          "win_rate": 0.0,
           "in_progress": true
         }
       ],
       "overall_win_rate": 0.0,
-      "avg_pnl_pct_per_sprint": -0.6286
+      "avg_pnl_pct_per_sprint": -0.7482
     }
   ]
 }

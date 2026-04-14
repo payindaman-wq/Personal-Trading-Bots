@@ -1,0 +1,101 @@
+{
+  "comp_id": "fut-day-20260408-0900",
+  "league": "futures_day",
+  "started_at": "2026-04-08T09:00:00+00:00",
+  "ended_at": "2026-04-09T09:00:00+00:00",
+  "duration_hours": 24,
+  "scores": [
+    {
+      "bot": "orvar",
+      "final_equity": 1001.97,
+      "total_pnl_pct": 0.1967,
+      "total_trades": 2,
+      "win_rate": 100.0
+    },
+    {
+      "bot": "brandr",
+      "final_equity": 1000.69,
+      "total_pnl_pct": -11.9312,
+      "total_trades": 1,
+      "win_rate": 100.0
+    },
+    {
+      "bot": "asmund",
+      "final_equity": 1000.0,
+      "total_pnl_pct": 0.0,
+      "total_trades": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "autobotdayfutures",
+      "final_equity": 1000.0,
+      "total_pnl_pct": 0.0,
+      "total_trades": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "haki",
+      "final_equity": 1000.0,
+      "total_pnl_pct": 0.0,
+      "total_trades": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "hakon",
+      "final_equity": 1000.0,
+      "total_pnl_pct": 0.0,
+      "total_trades": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "helgi",
+      "final_equity": 1000.0,
+      "total_pnl_pct": 0.0,
+      "total_trades": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "ketil",
+      "final_equity": 1000.0,
+      "total_pnl_pct": 0.0,
+      "total_trades": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "kveldulf",
+      "final_equity": 1000.0,
+      "total_pnl_pct": 0.0,
+      "total_trades": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "starkad",
+      "final_equity": 1000.0,
+      "total_pnl_pct": 0.0,
+      "total_trades": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "ulfhedinn",
+      "final_equity": 1000.0,
+      "total_pnl_pct": 0.0,
+      "total_trades": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "vikar",
+      "final_equity": 1000.0,
+      "total_pnl_pct": 0.0,
+      "total_trades": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "vemund",
+      "final_equity": 999.74,
+      "total_pnl_pct": -0.0265,
+      "total_trades": 1,
+      "win_rate": 0.0
+    }
+  ],
+  "winner": "orvar"
+}

@@ -29,7 +29,7 @@ entry:
     - indicator: rsi
       period_minutes: 60
       operator: lt
-      value: 30.0
+      value: 29.33
   short:
     conditions:
     - indicator: rsi
@@ -44,5 +44,5 @@ risk:
   pause_if_down_pct: 8
   pause_minutes: 120
   stop_if_down_pct: 18
-_sharpe: 0.3357
-_trades: 1752
+_sharpe: 0.4066
+_trades: 1756

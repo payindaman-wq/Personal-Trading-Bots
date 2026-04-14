@@ -9,7 +9,7 @@
   },
   "vemund": {
     "stopped": false,
-    "paused_until": "2026-04-13T04:25:02.104305+00:00"
+    "paused_until": "2026-04-13T08:55:02.261515+00:00"
   },
   "asmund": {
     "stopped": true,
@@ -17,7 +17,7 @@
   },
   "helgi": {
     "stopped": false,
-    "paused_until": "2026-04-13T04:40:02.068083+00:00"
+    "paused_until": "2026-04-13T09:35:01.745335+00:00"
   },
   "starkad": {
     "stopped": true,
@@ -25,10 +25,18 @@
   },
   "ketil": {
     "stopped": false,
-    "paused_until": "2026-04-13T04:40:02.040056+00:00"
+    "paused_until": "2026-04-13T09:35:01.713929+00:00"
   },
   "vikar": {
     "stopped": false,
-    "paused_until": "2026-04-13T04:30:01.943034+00:00"
+    "paused_until": "2026-04-13T08:55:02.216144+00:00"
+  },
+  "ulfhedinn": {
+    "stopped": false,
+    "paused_until": "2026-04-13T09:50:01.758839+00:00"
+  },
+  "hakon": {
+    "stopped": true,
+    "paused_until": null
   }
 }

@@ -48,10 +48,10 @@ entry:
 exit:
   take_profit_pct: 4.65
   stop_loss_pct: 1.92
-  timeout_hours: 182
+  timeout_hours: 166
 risk:
   pause_if_down_pct: 8
   pause_minutes: 120
   stop_if_down_pct: 18
-_sharpe: 2.3521
-_trades: 1263
+_sharpe: 2.3513
+_trades: 1265

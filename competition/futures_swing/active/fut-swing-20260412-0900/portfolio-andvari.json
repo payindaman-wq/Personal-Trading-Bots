@@ -23,41 +23,70 @@
   ],
   "starting_capital": 1000.0,
   "fee_rate": 0.0005,
-  "cash": 700.0,
+  "cash": 663.5461643200001,
   "positions": [
     {
       "pair": "BTC/USD",
-      "direction": "short",
-      "entry_price": 71568.0,
-      "quantity": 0.00419182,
-      "cost_basis": 150.0,
+      "direction": "long",
+      "entry_price": 74124.0,
+      "quantity": 0.00383649,
+      "cost_basis": 142.188,
       "leverage": 2.0,
-      "opened_at": "2026-04-12T09:30:13.188423+00:00"
+      "opened_at": "2026-04-13T22:30:09.456959+00:00"
+    },
+    {
+      "pair": "ETH/USD",
+      "direction": "long",
+      "entry_price": 2326.0,
+      "quantity": 0.12225967,
+      "cost_basis": 142.188,
+      "leverage": 2.0,
+      "opened_at": "2026-04-13T22:30:09.566592+00:00"
+    }
+  ],
+  "closed_trades": [
+    {
+      "pair": "BTC/USD",
+      "direction": "short",
+      "reason": "stop",
+      "entry_price": 71568.0,
+      "exit_price": 74124.0,
+      "pnl_usd": -21.5486,
+      "pnl_pct": -14.3657,
+      "funding_cost": 0.12,
+      "leverage": 2.0,
+      "won": false,
+      "opened_at": "2026-04-12T09:30:13.188423+00:00",
+      "closed_at": "2026-04-13T22:30:09.343800+00:00"
     },
     {
       "pair": "ETH/USD",
       "direction": "short",
+      "reason": "stop",
       "entry_price": 2213.8,
-      "quantity": 0.1355136,
-      "cost_basis": 150.0,
+      "exit_price": 2326.0,
+      "pnl_usd": -30.5293,
+      "pnl_pct": -20.3528,
+      "funding_cost": 0.12,
       "leverage": 2.0,
-      "opened_at": "2026-04-12T09:30:13.419082+00:00"
+      "won": false,
+      "opened_at": "2026-04-12T09:30:13.419082+00:00",
+      "closed_at": "2026-04-13T22:30:09.344617+00:00"
     }
   ],
-  "closed_trades": [],
   "stats": {
-    "total_trades": 0,
+    "total_trades": 2,
     "wins": 0,
-    "losses": 0,
+    "losses": 2,
     "win_rate": 0.0,
-    "total_pnl_usd": 0.0,
-    "total_pnl_pct": 0.0,
+    "total_pnl_usd": -52.0779,
+    "total_pnl_pct": -5.2078,
     "total_fees": 0.0,
     "max_drawdown_pct": 0.0,
-    "current_equity": 1000.0,
+    "current_equity": 947.92,
     "peak_equity": 1000.0,
-    "live_equity_mtm": 1004.97,
-    "live_pnl_usd": 4.97,
-    "live_pnl_pct": 0.4971
+    "live_equity_mtm": 953.52,
+    "live_pnl_usd": -46.48,
+    "live_pnl_pct": -4.6477
   }
 }

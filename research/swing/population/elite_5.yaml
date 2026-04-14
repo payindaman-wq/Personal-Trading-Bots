@@ -4,7 +4,7 @@ pairs:
 - BTC/USD
 position:
   size_pct: 30
-  max_open: 2
+  max_open: 3
   fee_rate: 0.001
 entry:
   long:
@@ -21,6 +21,10 @@ entry:
       period_hours: 48
       operator: eq
       value: bullish
+    - indicator: price_change_pct
+      period_hours: 24
+      operator: lt
+      value: -0.5
   short:
     conditions:
     - indicator: momentum_accelerating
@@ -35,13 +39,17 @@ entry:
       period_hours: 24
       operator: eq
       value: bearish
+    - indicator: price_change_pct
+      period_hours: 24
+      operator: gt
+      value: 0.5
 exit:
-  take_profit_pct: 7.36
+  take_profit_pct: 6.63
   stop_loss_pct: 1.5
   timeout_hours: 129
 risk:
   pause_if_down_pct: 8
   stop_if_down_pct: 18
   pause_hours: 48
-_sharpe: 1.243
-_trades: 60
+_sharpe: 1.3445
+_trades: 58
