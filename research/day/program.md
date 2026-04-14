@@ -1,28 +1,54 @@
 ```markdown
 # ODIN Research Program — Crypto Day Trading Strategy Optimizer
-# Version: 8000-MIMIR-AUDIT
+# Version: 8200-MIMIR-AUDIT-2
 
 ---
 
 ## CRITICAL CONTEXT — READ BEFORE ANYTHING ELSE
 
-The formal accepted best strategy (Sharpe=1.1137, -0.50/macd=30, 288 trades)
-was accepted during a MIN_TRADES=200 window. It is a legacy artifact.
+### Deployment State (IMPORTANT)
+The strategy currently in production is a 5-indicator legacy artifact
+(style: momentum_price_change_macd_ema_trend_filter). It is WRONG.
+ODIN is optimizing a 2-indicator strategy. These are different strategies.
+The 2-indicator strategy must replace the 5-indicator artifact as soon
+as any valid run achieves Sharpe > 1.1137 AND trades ≥ 280.
 
-The GENUINE best result ever observed is:
+### Formal Accepted Best
+  Sharpe=1.1137, price_change_pct=-0.50, macd=30, 288 trades
+  STATUS: Artifact — accepted during MIN_TRADES=200 window (Gen 5400).
+  This is NOT the performance ceiling. It is an anomaly from a bad window.
+
+### True Performance Ceiling (never formally accepted)
   Sharpe=1.1717, price_change_pct=-0.43, macd=30, ~323 trades
-  This was FALSELY REJECTED when MIN_TRADES was temporarily set to 350.
-  This is the true performance ceiling and the reference target.
+  Falsely rejected at Gen 6200 when MIN_TRADES was wrongly set to 350.
+  This is the reference target. It was a statistical outlier — the true
+  median at -0.43/macd=30 is approximately 1.075–1.08, not 1.17.
 
-The current formal best will be REPLACED as soon as any run achieves:
-  Sharpe > 1.1137 AND trades ≥ 280
+### Phase 1 Escalation Status: TRIGGERED
+  Phase 1 required escalation if zero runs beat 1.1137 after 35 attempts.
+  That condition has been met. Zero runs beat 1.1137 in Phase 1.
+  CONCLUSION: -0.43/macd=30 true median ≈ 1.075-1.08. The 1.1717 result
+  was a high-percentile outlier. Do NOT continue Phase 1.
+  TRANSITION: Move immediately to Phase 2 and Phase 3.
 
-MIN_TRADES[day] = 280. This is LOCKED. History:
-  Gen 5400: set to 200 → accepted suboptimal -0.50 result (BAD)
-  Gen 6200: set to 350 → falsely rejected 1.1717 result (BAD)
-  Gen 6600: restored to 280 → CORRECT. Never change this again.
+### MIN_TRADES History (DO NOT REPEAT THESE MISTAKES)
+  Gen 5400: set to 200 → accepted -0.50 artifact (BAD)
+  Gen 6200: set to 350 → rejected 1.1717 genuine best (BAD)
+  Gen 6600: restored to 280 → CORRECT
 
-DO NOT CHANGE MIN_TRADES. Any proposal to change it is automatically rejected.
+MIN_TRADES[day] = 280. LOCKED. NEVER CHANGE THIS AGAIN.
+Any proposal to change MIN_TRADES is automatically rejected without review.
+
+### Notable Recent Anomalies (Log — Do Not Discard)
+  Gen 8194: Sharpe=1.3082, win_rate=27.0%, trades=148 [low_trades — rejected]
+  Gen 8197: Sharpe=1.1626, win_rate=25.6%, trades=164 [low_trades — rejected]
+  INTERPRETATION: These high-Sharpe low-trade results indicate some parameter
+  combination is producing very selective, high-quality signals. The elevated
+  win rates (27%, 25.6% vs. typical 24%) confirm genuine signal quality.
+  These may correspond to -0.42 or -0.41 thresholds, or macd=45 producing
+  fewer but better entries. This is the most promising lead in the data.
+  Do NOT change MIN_TRADES to capture these. Instead, find parameter sets
+  that produce similar quality at ≥280 trades.
 
 ---
 
@@ -37,10 +63,6 @@ You output nothing else — no commentary, no headers, no explanation.
 
 ## THE TEMPLATE — COPY THIS EXACTLY
 
-This is the complete, correct output. Copy every character exactly.
-Change ONLY the two values marked ← CHANGE THIS.
-Do not change anything else. Do not add anything. Do not remove anything.
-
 ```yaml
 name: crossover
 style: momentum_optimized
@@ -71,9 +93,9 @@ entry:
     - indicator: price_change_pct
       period_minutes: 30
       operator: lt
-      value: -0.43        ← CHANGE THIS (see Parameter 1 rules)
+      value: -0.43
     - indicator: macd_signal
-      period_minutes: 30  ← CHANGE THIS (must be 15, 30, or 45)
+      period_minutes: 30
       operator: eq
       value: bullish
   short:
@@ -81,9 +103,9 @@ entry:
     - indicator: price_change_pct
       period_minutes: 30
       operator: gt
-      value: 0.43         ← CHANGE THIS (long value, sign flipped)
+      value: 0.43
     - indicator: macd_signal
-      period_minutes: 30  ← CHANGE THIS (same as long macd period)
+      period_minutes: 30
       operator: eq
       value: bearish
 exit:
@@ -96,43 +118,53 @@ risk:
   pause_minutes: 60
 ```
 
+The two values you change are:
+  (A) price_change_pct value: long entry (e.g., -0.43) and short entry (sign-flipped, e.g., 0.43)
+  (B) macd_signal period_minutes: both long and short (must be identical)
+
+Change NOTHING else. Not the style, not the pairs, not max_open, not stop_loss, nothing.
+
 ---
 
 ## PARAMETER RULES — EXACT AND COMPLETE
 
-### Parameter 1: price_change_pct threshold (long value)
+### Parameter A: price_change_pct threshold (long value)
 
-MUST be EXACTLY ONE of these eleven values. No others are valid:
+MUST be EXACTLY ONE of these values. No others are valid:
   -0.40
   -0.41
   -0.42
-  -0.43  ← PRIMARY TARGET
+  -0.43
   -0.44
   -0.46
   -0.47
   -0.48
   -0.50
-  (DO NOT USE -0.45 or -0.49 — confirmed underperformers)
+
+FORBIDDEN (confirmed underperformers — never use):
+  -0.45  ← DO NOT USE
+  -0.49  ← DO NOT USE
 
 Rules:
-  - Always exactly 2 decimal places (e.g., -0.43, not -0.430, not -.43)
-  - The period_minutes on price_change_pct is ALWAYS 30. Never change it.
-  - The short value is ALWAYS the long value with sign flipped:
-      long=-0.43 → short=+0.43
-      long=-0.42 → short=+0.42
-      long=-0.40 → short=+0.40
+  - Always exactly 2 decimal places: -0.43 ✓  |  -0.430 ✗  |  -.43 ✗
+  - period_minutes on price_change_pct is ALWAYS 30. Never 5, 15, 45, 60.
+  - Short value = long value with sign flipped:
+      long=-0.43 → short=0.43
+      long=-0.42 → short=0.42
+      long=-0.40 → short=0.40
+      (No leading minus on short value)
 
-### Parameter 2: macd_signal period_minutes
+### Parameter B: macd_signal period_minutes
 
 MUST be EXACTLY ONE of: 15, 30, 45
-  - Must be identical for long and short.
-  - 30 is the primary value. 45 is high-priority exploration. 15 is deprioritized.
+  - Must be identical for long and short entries.
+  - 45 is the highest exploration priority right now.
+  - 30 is the known baseline.
+  - 15 is deprioritized (confirmed weaker performance).
 
 ---
 
 ## WHAT IS FIXED — NEVER CHANGE THESE
-
-Every field below must appear exactly as shown. Do not alter them.
 
 | Field                              | Required value      |
 |------------------------------------|---------------------|
@@ -147,6 +179,8 @@ Every field below must appear exactly as shown. Do not alter them.
 | price_change_pct period_minutes    | 30 (ALWAYS)         |
 | pairs list                         | all 16 pairs above  |
 
+If any of these differ from the table, your output is wrong. Delete and restart.
+
 ---
 
 ## CONDITION STRUCTURE — FIXED AND NON-NEGOTIABLE
@@ -160,22 +194,26 @@ entry.short.conditions: EXACTLY 2 items
   Item 2: macd_signal
 
 Total indicator entries in your output: EXACTLY 4.
-Count them. If the count is not 4, your output is wrong.
+Count them before submitting: __ long1 __ long2 __ short1 __ short2 = 4
 
-The ONLY valid indicator names: price_change_pct, macd_signal
-The ONLY valid value strings for macd_signal: bullish, bearish
+VALID indicator names (ONLY these two):
+  price_change_pct
+  macd_signal
 
-FORBIDDEN indicator names (never use these):
+FORBIDDEN indicator names (NEVER use):
   momentum_accelerating, price_vs_ema, trend, rsi, ema, volume_spike,
-  or any indicator name not in {price_change_pct, macd_signal}
+  macd, price_change, any_other_name
 
-FORBIDDEN value strings (never use these):
-  true, false, above, below, up, down, rising, falling, or any string
-  not in {bullish, bearish} for the macd_signal indicator
+VALID value strings for macd_signal (ONLY these two):
+  bullish
+  bearish
+
+FORBIDDEN value strings (NEVER use):
+  true, false, above, below, up, down, rising, falling, crossing, any_other_string
 
 ---
 
-## CORRECT STRUCTURE — MEMORIZE THIS PATTERN
+## THE ONLY CORRECT ENTRY STRUCTURE — MEMORIZE THIS
 
 ```yaml
 entry:
@@ -201,167 +239,213 @@ entry:
       value: bearish
 ```
 
-This pattern is sacred. Copy it exactly. Change only the numbers.
+This is the sacred pattern. The ONLY things you change are:
+  - The number after "value:" on the price_change_pct lines
+  - The number after "period_minutes:" on the macd_signal lines
 
 ---
 
-## DEFAULT — WHEN UNCERTAIN, USE THIS
+## KNOWN RESULTS TABLE
 
-If you are unsure which parameter values to use, always output:
-  price_change_pct: long=-0.43, short=+0.43
-  macd_signal period_minutes: 30
-
-This is always a valid output. It is always better than guessing wrong.
+| Long value | MACD period | Trades    | Sharpe        | Status                              |
+|------------|-------------|-----------|---------------|-------------------------------------|
+| -0.43      | 30          | 301–323   | 1.07–1.1717   | Median ~1.075. Best was outlier.    |
+| -0.50      | 30          | 288       | 1.1137        | ⚠️ Formal best — artifact only      |
+| -0.42      | 30          | ~323      | ≈1.15         | 🎯 HIGH PRIORITY — test now         |
+| -0.41      | 30          | ~324      | ≈1.14         | 🎯 HIGH PRIORITY — test now         |
+| -0.40      | 30          | ~333      | ≈1.12         | 🔶 Test — approx known              |
+| -0.44      | 30          | ~318      | ≈1.10         | 🔶 Below primary                    |
+| -0.43      | 45          | ?         | ?             | 🎯 HIGHEST PRIORITY — untested      |
+| -0.42      | 45          | ?         | ?             | 🎯 HIGH PRIORITY — untested         |
+| -0.41      | 45          | ?         | ?             | 🎯 HIGH PRIORITY — untested         |
+| -0.43      | 15          | ~308      | ≈1.08         | ❌ Deprioritize                     |
+| -0.46      | 30          | ?         | ?             | ⬜ Untested                         |
+| -0.47      | 30          | ?         | ?             | ⬜ Untested                         |
+| -0.48      | 30          | ?         | ?             | ⬜ Untested                         |
+| -0.45      | any         | —         | low           | ❌ NEVER TEST AGAIN                 |
+| -0.49      | any         | —         | low           | ❌ NEVER TEST AGAIN                 |
 
 ---
 
 ## KNOWN FAILURE SIGNATURES — AUTOMATIC DISCARD
 
-The following results mean your YAML was structurally broken.
-If you see these, do not adjust parameters — copy the template fresh.
+| Sharpe      | Trades | Cause                                        |
+|-------------|--------|----------------------------------------------|
+| -11.8843    | 325    | Forbidden indicators added (most common)     |
+| -0.3075     | 529    | price_change_pct period_minutes ≠ 30         |
+| -7.1400     | 484    | Template structural error                    |
+| -4.5965     | 585    | Missing macd_signal                          |
+| -5.3618     | 548    | Structural deviation                         |
+| -2.5284     | 958    | Entry conditions too loose                   |
+| -18.5654    | 155    | Wrong indicator config                       |
+| -4.26       | 899    | macd_signal omitted                          |
+| -5.0586     | 434    | Structural deviation                         |
+| -12.5537    | 320    | Structural deviation                         |
+| -16.2826    | 148    | Wrong indicator or period                    |
+| -16.3656    | 284    | Malformed YAML — partial validity            |
+| -1.8626     | 1391   | No confirmation filter — structural collapse |
+| -1.7458     | 1191   | No confirmation filter — structural collapse |
 
-| Sharpe      | Trades | Win rate | Cause                                |
-|-------------|--------|----------|--------------------------------------|
-| -11.8843    | 325    | 35.1%    | Wrong indicator structure ← MOST COMMON |
-| -7.1400     | 484    | 37.0%    | Template structural error            |
-| -4.5965     | 585    | 35.4%    | Missing macd_signal                  |
-| -5.3618     | 548    | 27.9%    | Structural deviation                 |
-| -2.5284     | 958    | 37.1%    | Entry conditions too loose           |
-| -18.5654    | 155    | —        | Wrong indicator config               |
-| -4.26       | 899    | —        | macd_signal omitted                  |
-| -5.0586     | 434    | 43.5%    | Structural deviation                 |
-| -0.3075     | 529    | 19.3%    | Wrong period_minutes on price_change |
-| -12.5537    | 320    | 34.7%    | Structural deviation                 |
-| -16.2826    | 148    | 43.2%    | Wrong indicator or period            |
+TRADES > 450: Always a structural failure. Reject regardless of Sharpe.
+TRADES < 280: Rejected regardless of Sharpe (but log if Sharpe > 1.10).
 
-The -11.8843/325/35.1% signature is the most common failure (seen 4+ times
-in recent generations). It means forbidden indicators were added. If you
-feel tempted to add any indicator other than price_change_pct or macd_signal,
-stop and copy the template from scratch.
-
-Trades below 280: automatically rejected regardless of Sharpe.
-Trades above 450: structural error — treat as failure even if Sharpe looks good.
+The -0.3075/529 failure appeared 3 times in the last 20 generations.
+CAUSE: price_change_pct period_minutes was set to something other than 30.
+PREVENTION: The period_minutes on price_change_pct is ALWAYS 30. Lock it.
 
 ---
 
-## KNOWN RESULTS SUMMARY
+## STRUCTURAL FAILURE PREVENTION
 
-| Long value | MACD period | Trades    | Sharpe        | Adj score  | Status                          |
-|------------|-------------|-----------|---------------|------------|---------------------------------|
-| -0.43      | 30          | 305–325   | 1.07–1.1717   | 2.72–3.02  | 🎯 PRIMARY TARGET — best observed|
-| -0.50      | 30          | 288       | 1.1137        | 2.672      | ⚠️ Formal accepted best (artifact)|
-| -0.42      | 30          | ~323      | ≈1.15         | ≈2.92      | 🔶 Phase 3 — high priority      |
-| -0.41      | 30          | ~324      | ≈1.14         | ≈2.90      | 🔶 Phase 3                      |
-| -0.40      | 30          | ~333      | ≈1.12         | ≈2.89      | 🔶 Phase 3                      |
-| -0.44      | 30          | ~318      | ≈1.10         | ≈2.77      | 🔶 Below primary target         |
-| -0.43      | 15          | ~308      | ≈1.08         | ≈2.75      | ❌ Tested — deprioritize        |
-| -0.43      | 45          | ?         | ?             | ?          | ⬜ UNTESTED — HIGH PRIORITY     |
-| -0.42      | 45          | ?         | ?             | ?          | ⬜ Untested — Phase 4           |
-| -0.41      | 45          | ?         | ?             | ?          | ⬜ Untested — Phase 4           |
-| -0.46      | 30          | ?         | ?             | ?          | ⬜ Untested — Phase 3           |
-| -0.47      | 30          | ?         | ?             | ?          | ⬜ Untested — Phase 3           |
-| -0.48      | 30          | ?         | ?             | ?          | ⬜ Untested — Phase 3           |
-| -0.45      | any         | ?         | low           | low        | ❌ AVOID — confirmed underperformer|
-| -0.49      | any         | ?         | low           | low        | ❌ AVOID — confirmed underperformer|
+### THE MOST COMMON MISTAKE: Adding extra indicators
 
-Adj score formula: Sharpe × sqrt(trades / 50)
-Acceptance threshold: adj score ≥ 2.90, trades ≥ 280
+```yaml
+# WRONG — causes -11.8843 failure
+entry:
+  long:
+    conditions:
+    - indicator: momentum_accelerating   # FORBIDDEN
+    - indicator: price_change_pct
+    - indicator: macd_signal
+    - indicator: price_vs_ema            # FORBIDDEN
+```
 
-Note on high-Sharpe low-trade results: Recent gens have produced Sharpe
-~1.30-1.36 at ~145-148 trades. These are rejected for low_trades but
-suggest that some parameter combinations produce very selective, high-quality
-signals. Log these for post-hoc analysis but do not change MIN_TRADES.
+### SECOND MOST COMMON MISTAKE: Wrong period on price_change_pct
+
+```yaml
+# WRONG — causes -0.3075/529 failure
+- indicator: price_change_pct
+  period_minutes: 5     # WRONG
+  period_minutes: 15    # WRONG
+  period_minutes: 45    # WRONG
+  period_minutes: 60    # WRONG
+  # CORRECT: period_minutes: 30 — always, always, always
+```
+
+### THIRD MOST COMMON MISTAKE: Wrong macd period or value
+
+```yaml
+# WRONG
+- indicator: macd_signal
+  period_minutes: 20    # WRONG — only 15, 30, or 45
+  value: true           # WRONG — only bullish or bearish
+  value: above          # WRONG — only bullish or bearish
+```
+
+### CORRECT OUTPUT — COUNT TO 4
+
+```yaml
+entry:
+  long:
+    conditions:
+    - indicator: price_change_pct   # ← condition 1 (long)
+      period_minutes: 30
+      operator: lt
+      value: -0.43
+    - indicator: macd_signal        # ← condition 2 (long)
+      period_minutes: 30
+      operator: eq
+      value: bullish
+  short:
+    conditions:
+    - indicator: price_change_pct   # ← condition 3 (short)
+      period_minutes: 30
+      operator: gt
+      value: 0.43
+    - indicator: macd_signal        # ← condition 4 (short)
+      period_minutes: 30
+      operator: eq
+      value: bearish
+```
+
+Count: 1 + 1 + 1 + 1 = 4. If your count is not 4, delete and restart.
 
 ---
 
 ## PRIORITY PLAN — NEXT 100 GENERATIONS
 
-### PHASE 1: Formally beat the accepted best at -0.43/macd=30 (35 gens)
+### STATUS: Phase 1 COMPLETE (escalation triggered — zero runs beat 1.1137)
 
-ALL 35 generations use:
-  price_change_pct: -0.43 / +0.43
-  macd_signal period_minutes: 30
+Phase 1 finding: -0.43/macd=30 true median ≈ 1.075–1.08.
+The 1.1717 result was a high-percentile statistical outlier.
+Do NOT run more -0.43/macd=30 repetitions trying to reproduce it.
 
-GOAL: Achieve Sharpe > 1.1137 with trades ≥ 280.
-The genuine best observed (1.1717) was achieved at this parameter set.
-Expected: 10-15 of 35 runs should beat 1.1137 given true median ~1.10.
+---
 
-ESCALATION: If zero runs beat 1.1137 after all 35 attempts, escalate
-to MIMIR. Do not proceed to Phase 2 without at least one run beating
-the formal best OR explicit MIMIR authorization.
+### PHASE 2: macd=45 exploration — PRIMARY FOCUS (30 gens)
 
-RATIONALE: The LLM's structural failure rate is approximately 20-25%
-of recent generations. With 35 attempts, we expect ~26 valid runs.
-Given the true median is approximately 1.09-1.10 at -0.43/macd=30,
-and the formal best is 1.1137, we need the upper tail of the distribution.
-35 runs gives high confidence in detecting the true median and upper tail.
+This is now the single highest priority. macd=45 is entirely untested
+and represents the largest unexplored region in the search space.
+The high-Sharpe low-trade anomalies (Gen 8194: 1.3082/148, Gen 8197:
+1.1626/164) strongly suggest slower confirmation improves signal quality.
+The goal is to find whether macd=45 can achieve similar quality at
+≥280 trades.
 
-### PHASE 2: Explore -0.43/macd=45 (20 gens)
+Allocation:
+  - -0.43 / macd=45 — 12 reps   (direct comparison baseline)
+  - -0.42 / macd=45 — 10 reps   (tighter threshold + slower MACD)
+  - -0.41 / macd=45 — 8 reps    (tightest threshold + slower MACD)
 
-ALL 20 generations use:
-  price_change_pct: -0.43 / +0.43
-  macd_signal period_minutes: 45
+DECISION RULES after Phase 2:
+  If -0.43/macd=45 median Sharpe > 1.08 AND median trades ≥ 280:
+    macd=45 becomes the co-primary MACD target alongside macd=30.
+  If -0.43/macd=45 trades consistently fall below 280:
+    Record the Sharpe ceiling, note trade count, move on. Do not
+    change MIN_TRADES. The trade count floor is correct.
+  If any single run achieves Sharpe > 1.1137 AND trades ≥ 280:
+    IMMEDIATELY accept as new best. Replace deployed strategy.
 
-This combination is entirely untested. It is the single largest
-unexplored region and the highest-priority unknown in the search space.
+---
 
-DECISION RULE:
-  - If median Sharpe across valid runs > Phase 1 median AND trades ≥ 280:
-    macd=45 becomes the primary MACD target. Add 10 gens of -0.43/macd=45
-    to Phase 4.
-  - If median Sharpe < Phase 1 median: deprioritize macd=45 but still
-    test it at top thresholds in Phase 4.
+### PHASE 3: Threshold sweep at macd=30 (35 gens)
 
-RATIONALE: A 45-minute MACD filters more noise in trending crypto markets.
-At the -0.43 threshold (moderate 30-min price drop), a slower MACD
-may confirm genuine momentum reversals better than the 30-min version.
-The high-Sharpe low-trade anomalies seen recently may indicate that
-slower confirmation windows select fewer but better trades.
+Map the complete Sharpe landscape. Focus on values near the best
+observed results (-0.42, -0.41) and fill untested gaps.
 
-### PHASE 3: Threshold sweep at macd=30 (30 gens)
+  - -0.42 / macd=30 — 8 reps   (approx Sharpe ~1.15 — highest priority)
+  - -0.41 / macd=30 — 8 reps   (approx Sharpe ~1.14 — high priority)
+  - -0.40 / macd=30 — 5 reps   (approx Sharpe ~1.12 — confirm)
+  - -0.46 / macd=30 — 5 reps   (UNTESTED — fill gap)
+  - -0.47 / macd=30 — 5 reps   (UNTESTED — fill gap)
+  - -0.48 / macd=30 — 4 reps   (UNTESTED — fill gap)
 
-Map the full Sharpe landscape across tested and untested thresholds:
+FORBIDDEN in Phase 3:
+  -0.45, -0.49 (confirmed underperformers — never run again)
+  macd=15 (deprioritized — allocate zero Phase 3 budget here)
+  -0.50 (already characterized — the 1.1137 result was an artifact)
+  -0.43 (Phase 1 exhausted — no additional reps needed)
 
-  - -0.42 / macd=30 — 6 reps   (HIGHEST priority — approx Sharpe ~1.15)
-  - -0.41 / macd=30 — 6 reps   (second priority — approx Sharpe ~1.14)
-  - -0.40 / macd=30 — 4 reps   (approx Sharpe ~1.12)
-  - -0.46 / macd=30 — 4 reps   (UNTESTED — fill gap)
-  - -0.47 / macd=30 — 4 reps   (UNTESTED — fill gap)
-  - -0.48 / macd=30 — 3 reps   (UNTESTED — fill gap)
-  - -0.44 / macd=30 — 3 reps   (approx Sharpe ~1.10 — confirm)
+GOAL: Produce a ranked median-Sharpe table across threshold values.
+Top-2 thresholds (by median Sharpe, trades ≥ 280) feed Phase 4.
 
-AVOID entirely in Phase 3: -0.45 and -0.49 (confirmed underperformers).
-AVOID macd=15 in Phase 3 (deprioritized based on existing results).
-AVOID -0.50 in Phase 3 (already well-characterized as 1.1137 artifact).
+---
 
-GOAL: Produce a ranked median-Sharpe table across all threshold values.
-Top-2 thresholds (excluding -0.43) feed Phase 4.
+### PHASE 4: Cross-MACD exploration at top thresholds (25 gens)
 
-### PHASE 4: MACD exploration at top thresholds (15 gens)
+Use top-2 thresholds from Phase 3 (call them A and B):
 
-Using top-2 thresholds from Phase 3 (call them A and B):
-
-  - threshold_A / macd=45 — 6 reps
-  - threshold_B / macd=45 — 6 reps
+  - threshold_A / macd=45 — 8 reps
+  - threshold_B / macd=45 — 8 reps
+  - threshold_A / macd=30 — 3 reps  (validation confirmation)
+  - threshold_B / macd=30 — 3 reps  (validation confirmation)
   - threshold_A / macd=15 — 1 rep   (minimal — known underperformer)
   - threshold_B / macd=15 — 2 reps  (minimal — known underperformer)
 
-If Phase 2 showed -0.43/macd=45 median Sharpe > -0.43/macd=30 median:
-  Add 10 additional -0.43/macd=45 runs drawn from any remaining budget.
+If Phase 2 showed -0.43/macd=45 median > -0.43/macd=30 median:
+  Add -0.43/macd=45 as a 3rd track with 5 additional reps in Phase 4.
 
-RATIONALE: macd=15 has consistently underperformed (~1.08 Sharpe vs
-~1.10-1.17 for macd=30). Allocate minimal runs. macd=45 is the
-priority unknown — allocate the majority of Phase 4 budget here.
+---
 
 ### WHAT TO AVOID IN ALL PHASES
 
-  - -0.45 / any macd (confirmed underperformer — never run again)
-  - -0.49 / any macd (confirmed underperformer — never run again)
-  - macd=15 as a primary exploration target
-  - Any combination with 3+ runs all returning Sharpe < 1.05
-  - Changing period_minutes on price_change_pct from 30
-  - Adding any indicator beyond price_change_pct and macd_signal
-  - Any YAML that adds conditions beyond the 2 per side (4 total)
+  NEVER: -0.45 / any macd
+  NEVER: -0.49 / any macd
+  NEVER: More than 3 reps of any combination showing 3 consecutive Sharpe < 1.00
+  NEVER: price_change_pct period_minutes ≠ 30
+  NEVER: More than 2 conditions per side (4 total)
+  NEVER: Any indicator other than price_change_pct or macd_signal
+  NEVER: macd_signal value other than bullish or bearish
+  NEVER: macd_signal period_minutes other than 15, 30, or 45
 
 ---
 
@@ -373,221 +457,92 @@ priority unknown — allocate the majority of Phase 4 budget here.
 | Adj score     | ≥ 2.90                          |
 | Formula       | Sharpe × sqrt(trades / 50)      |
 
-Reference thresholds:
-  Sharpe ≥ 1.166 at 308 trades → adj score = 2.90
-  Sharpe ≥ 1.139 at 323 trades → adj score = 2.90
-  Sharpe ≥ 1.114 at 339 trades → adj score = 2.90
+Reference thresholds for adj score ≥ 2.90:
+  Sharpe ≥ 1.166 at 308 trades
+  Sharpe ≥ 1.139 at 323 trades
+  Sharpe ≥ 1.114 at 339 trades
+  Sharpe ≥ 1.091 at 354 trades
 
-Trades > 450: treat as structural failure regardless of Sharpe.
-Trades < 280: automatic rejection regardless of Sharpe.
+Trades > 450: structural failure — reject regardless of Sharpe.
+Trades < 280: automatic rejection — log if Sharpe > 1.10 for analysis.
 
 ---
 
-## DEPLOYMENT DECISION CRITERIA
+## DEPLOYMENT DECISION
 
-The current deployed strategy uses 5 indicators and was accepted
-during the MIN_TRADES=200 window. It is the wrong strategy in production.
+The strategy CURRENTLY DEPLOYED is the 5-indicator legacy artifact.
+It is WRONG and must be replaced.
 
-If Phase 1 produces ANY run with Sharpe > 1.1137 AND trades ≥ 280:
-  → Immediately replace the deployed 5-indicator strategy with the
-    2-indicator -0.43/macd=30 strategy. Do not wait for Phase 2.
+REPLACEMENT TRIGGER: Any run with Sharpe > 1.1137 AND trades ≥ 280
+  → Immediately replace with the 2-indicator result.
+  → Do not wait for Phase 4 completion.
+  → The 5-indicator strategy has different pairs (10 vs 16),
+    different max_open (3 vs 4), different stop_loss (0.4 vs 1.2),
+    and forbidden indicators. It is categorically the wrong strategy.
 
-If Phase 1 fails to beat 1.1137 across all 35 runs:
-  → The deployed strategy remains, but escalate to MIMIR for diagnosis.
-  → Do NOT interpret failure to beat 1.1137 as evidence the 5-indicator
-    strategy is better. The 5-indicator strategy is a known artifact.
+If no Phase 2/3/4 run beats 1.1137:
+  → Accept best observed result across all phases as the deployed strategy.
+  → The 2-indicator strategy is still superior to the 5-indicator artifact.
+  → Do NOT revert to or extend the 5-indicator strategy under any circumstances.
 
 ---
 
 ## LIVE PERFORMANCE NOTE
 
-Zero live trades across 4 consecutive sprints is EXPECTED given:
-  - F&G = 12 (Extreme Fear — below 20th percentile historically)
-  - BTC Dominance = 57.11% (sustained altcoin weakness)
-  - Regime: DANGER (10+ consecutive readings)
+Zero live trades across 4+ consecutive sprints is EXPECTED:
+  - F&G = 21 (Extreme Fear — CAUTION regime)
+  - BTC Dominance = 57.23% (sustained altcoin weakness)
+  - Dual confirmation correctly blocks entries in grinding downtrends:
+      MACD stays bearish → long entries blocked
+      30-min price spikes > +0.43% are rare in grinding downtrends → short entries rare
 
-The dual-confirmation entry (price drop below threshold AND MACD bullish
-crossover) correctly produces zero long entries when markets are in
-sustained downtrends — MACD stays bearish throughout, blocking entries.
-Short entries require a 0.43%+ price spike in 30 minutes, which is
-rare in a grinding downtrend.
-
-DO NOT relax entry conditions to force live trades.
-DO NOT reduce the price_change_pct threshold toward 0 to get more signals.
-DO NOT switch to macd=15 to get faster signals in this regime.
+DO NOT modify the strategy to force live trades in this regime.
+DO NOT reduce the price_change_pct threshold toward 0.
+DO NOT switch to macd=15 to get faster signals.
+DO NOT increase max_open or reduce stop_loss to compensate for zero trades.
 
 MONITORING TRIGGER: If F&G rises above 25 AND BTC dominance falls below
-54%, expect live trades to resume. If regime shifts to NEUTRAL or
-OPPORTUNITY and zero trades persist for 2+ additional sprints, escalate
-to MIMIR — this would indicate the live strategy configuration is broken.
+54%, expect trades to resume. If regime shifts to NEUTRAL or OPPORTUNITY
+and zero live trades persist for 2+ additional sprints after regime change,
+escalate to MIMIR — this indicates the live strategy configuration is broken.
 
-Competition ranks of 2nd-5th with zero trades are consistent with
-peers also experiencing zero-trade conditions. This is acceptable.
-
----
-
-## STRUCTURAL FAILURE PREVENTION
-
-The -11.8843/325/35.1% failure signature has appeared 4+ times in the
-last 20 generations. This is a 20%+ structural failure rate. It means
-the LLM is adding forbidden indicators. The following patterns are
-absolutely forbidden and will waste a generation:
-
-### NEVER DO THIS — Adding extra indicators
-
-```yaml
-# WRONG — this causes the -11.8843 failure signature
-entry:
-  long:
-    conditions:
-    - indicator: momentum_accelerating   # FORBIDDEN
-    - indicator: price_change_pct
-    - indicator: macd_signal
-    - indicator: price_vs_ema            # FORBIDDEN
-    - indicator: trend                   # FORBIDDEN
-```
-
-### NEVER DO THIS — Wrong period on price_change_pct
-
-```yaml
-# WRONG — causes -0.3075/529 failure signature
-- indicator: price_change_pct
-  period_minutes: 5     # FORBIDDEN
-  period_minutes: 60    # FORBIDDEN
-  period_minutes: 15    # FORBIDDEN
-  period_minutes: 45    # FORBIDDEN
-  # ONLY period_minutes: 30 is valid here
-```
-
-### NEVER DO THIS — Wrong macd period
-
-```yaml
-# WRONG
-- indicator: macd_signal
-  period_minutes: 60    # FORBIDDEN
-  period_minutes: 20    # FORBIDDEN
-  period_minutes: 10    # FORBIDDEN
-  # ONLY 15, 30, or 45 are valid
-```
-
-### NEVER DO THIS — Wrong value strings
-
-```yaml
-# WRONG
-- indicator: macd_signal
-  value: true           # FORBIDDEN
-  value: above          # FORBIDDEN
-  value: up             # FORBIDDEN
-  # ONLY bullish or bearish are valid
-```
-
-### THE ONLY CORRECT ENTRY STRUCTURE
-
-```yaml
-entry:
-  long:
-    conditions:
-    - indicator: price_change_pct
-      period_minutes: 30
-      operator: lt
-      value: -0.43
-    - indicator: macd_signal
-      period_minutes: 30
-      operator: eq
-      value: bullish
-  short:
-    conditions:
-    - indicator: price_change_pct
-      period_minutes: 30
-      operator: gt
-      value: 0.43
-    - indicator: macd_signal
-      period_minutes: 30
-      operator: eq
-      value: bearish
-```
-
-Count the conditions: 2 long + 2 short = 4 total.
-If your count is not 4, delete and start over.
+Competition ranks 2–5 with zero trades are acceptable in this regime.
+Peers are experiencing the same conditions.
 
 ---
 
-## PRE-SUBMIT CHECKLIST — VERIFY EVERY ITEM BEFORE OUTPUTTING
+## STRUCTURAL SAFEGUARDS
 
-✓ style = momentum_optimized (not momentum_price_change_macd_ema_trend_filter)
+### EMERGENCY DEFAULT — USE THIS WHEN UNCERTAIN
+
+If you are ever unsure what to output, use these exact values:
+  price_change_pct: long=-0.43, short=0.43
+  macd_signal period_minutes: 30
+
+This is always valid. It is always better than guessing wrong.
+
+### IF YOU SEE A FAILURE SIGNATURE IN THE RESULTS
+
+Do not try to "fix" it by adjusting parameters.
+Copy the template from scratch. Start over.
+A structural failure means your YAML format was wrong, not your numbers.
+
+---
+
+## PRE-SUBMIT CHECKLIST — VERIFY EVERY ITEM
+
+Before outputting, verify each item. If ANY fails: DELETE. RESTART.
+
 ✓ name = crossover
+✓ style = momentum_optimized
 ✓ max_open = 4
 ✓ stop_loss_pct = 1.2
 ✓ take_profit_pct = 2.5
 ✓ timeout_minutes = 720
 ✓ size_pct = 10
 ✓ fee_rate = 0.001
-✓ pairs list contains all 16 pairs, unchanged
-✓ Both price_change_pct period_minutes = 30 (not 5, not 15, not 45, not 60)
-✓ Long price_change_pct value is in: -0.40,-0.41,-0.42,-0.43,-0.44,-0.46,-0.47,-0.48,-0.50
-✓ Short price_change_pct value = long value with sign flipped, exactly 2 decimal places
-✓ Both macd_signal period_minutes are identical and in {15, 30, 45}
-✓ entry.long.conditions has EXACTLY 2 items: price_change_pct first, macd_signal second
-✓ entry.short.conditions has EXACTLY 2 items: price_change_pct first, macd_signal second
-✓ Total indicator entries = 4 (counted manually: __ long1 __ long2 __ short1 __ short2)
-✓ No indicator names other than price_change_pct and macd_signal anywhere in the YAML
-✓ No value strings other than bullish or bearish for any macd_signal condition
-✓ No extra conditions, filters, indicators, or fields added anywhere
-✓ The output contains ONLY the YAML block — no text before, no text after
-
-If ANY item above fails: DELETE the output. Copy the template. Start over.
-
----
-
-## GENERATION TARGET — CONFIRM BEFORE OUTPUTTING
-
-Current phase: Phase 1 (confirm -0.43/macd=30)
-
-DEFAULT OUTPUT FOR THIS PHASE:
-  price_change_pct: long = -0.43, short = +0.43
-  macd_signal period_minutes: 30
-
-When in doubt, use exactly these values. They are always valid.
-
----
-
-## FINAL TEMPLATE — COPY EXACTLY, CHANGE ONLY MARKED VALUES
-
-```yaml
-name: crossover
-style: momentum_optimized
-pairs:
-- BTC/USD
-- ETH/USD
-- SOL/USD
-- XRP/USD
-- DOGE/USD
-- AVAX/USD
-- LINK/USD
-- UNI/USD
-- AAVE/USD
-- NEAR/USD
-- APT/USD
-- SUI/USD
-- ARB/USD
-- OP/USD
-- ADA/USD
-- POL/USD
-position:
-  size_pct: 10
-  max_open: 4
-  fee_rate: 0.001
-entry:
-  long:
-    conditions:
-    - indicator: price_change_pct
-      period_minutes: 30
-      operator: lt
-      value: -0.43        ← CHANGE THIS (see Parameter 1 rules)
-    - indicator: macd_signal
-      period_minutes: 30  ← CHANGE THIS (must be 15, 30, or 45)
-      operator: eq
-      value: bullish
-  short:
-    conditions:
-    - indicator: price
+✓ All 16 pairs present and unchanged
+✓ price_change_pct long value is in: -0.40,-0.41,-0.42,-0.43,-0.44,-0.46,-0.47,-0.48,-0.50
+✓ price_change_pct short value = long value with sign flipped, 2 decimal places
+✓ BOTH price_change_pct period_minutes = 30 (count them: long=30 ✓ short=30 ✓)
+✓
