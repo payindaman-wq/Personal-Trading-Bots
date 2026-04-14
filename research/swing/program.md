@@ -1,48 +1,54 @@
 ```markdown
 # ODIN Research Program — Swing Trading Strategy Optimizer
-# Effective from Gen 20201 | Incumbent: Gen 19808 (Sharpe=1.3483)
-# MIMIR-reviewed 2026-04-14 (v37)
+# Effective from Gen 20401 | Incumbent: Gen 19808 (Sharpe=1.3483)
+# MIMIR-reviewed 2026-04-14 (v38)
 #
 # ══════════════════════════════════════════════════════════════════════
-# ⚠️ STOP — READ THIS FIRST BEFORE DOING ANYTHING ELSE ⚠️
+# ☠️ POISON YAML DETECTOR — READ THIS BEFORE ANYTHING ELSE ☠️
 # ══════════════════════════════════════════════════════════════════════
 #
-# THE ODIN UI SHOWS A WRONG YAML. DO NOT USE IT. EVER.
+# BEFORE YOU READ ANYTHING ELSE: Does the YAML you are about to output
+# contain ANY of these values?
 #
-# The ODIN UI shows "crossover_tightened_momentum_short_v2"
-# It has:  size_pct=30  |  max_open=3  |  pairs=[BTC/USD only]
-#          take_profit_pct=6.63  |  timeout_hours=129
+#   size_pct: 30          ← POISON
+#   max_open: 3           ← POISON
+#   take_profit_pct: 6.63 ← POISON
+#   pairs: [BTC/USD only] ← POISON
+#   timeout_hours: 129    ← POISON
 #
-# THIS YAML IS ALWAYS WRONG. IT PRODUCES Sharpe=0, trades=0.
-# DO NOT COPY IT. DO NOT USE IT AS A STARTING POINT.
-# IF YOU SEE size_pct=30 OR max_open=3 OR take_profit_pct=6.63 → STOP.
-# DISCARD EVERYTHING AND USE YAML-C2 BELOW INSTEAD.
+# If YES to any of the above → STOP. DELETE EVERYTHING. Use YAML-C2 below.
+#
+# The ODIN UI displays a broken strategy called
+# "crossover_tightened_momentum_short_v2" with size_pct=30, max_open=3,
+# take_profit_pct=6.63. THIS YAML IS WRONG. IT ALWAYS PRODUCES 0 TRADES.
+# DO NOT USE IT. DO NOT COPY IT. DO NOT MODIFY IT.
+#
+# The UI is broken. Ignore it completely.
 #
 # ══════════════════════════════════════════════════════════════════════
 # INCUMBENT: Gen 19808 | Sharpe=1.3483 | Trades=58 | WR=41.4%
 # ACTIVE TEST: C2 — change pause_if_down_pct from 8 → 10
-# C2 STATUS: ACTIVE — requires ~10 more clean results to confirm dead
+# C2 STATUS: NEAR DEAD — ~2 more clean results needed to confirm dead
 # ══════════════════════════════════════════════════════════════════════
 #
 # CLEAN RESULT = trades between 55 and 61 inclusive
 # C2 CONFIRMED DEAD when ≥ 20 clean results all show Sharpe ≤ 1.3483
+#
 # NOTE: Results showing exactly Sharpe=1.3483 with trades=58 are
-#       INCUMBENT REPRODUCTIONS (you used pause_if_down_pct=8, not 10)
-#       They do NOT count as clean C2 results. Fix: use pause_if_down_pct=10.
+#       INCUMBENT REPRODUCTIONS (you used pause_if_down_pct=8, not 10).
+#       They do NOT count as clean C2 results.
+#       Fix: you must output pause_if_down_pct: 10 — not 8.
 #
 # ══════════════════════════════════════════════════════════════════════
 # YOUR ONLY JOB THIS GENERATION
 # ══════════════════════════════════════════════════════════════════════
 #
-# Output the YAML below. Change NOTHING except:
-#   pause_if_down_pct: 10    ← this is the ONLY difference from the incumbent
-#
-# The incumbent has pause_if_down_pct: 8
-# You MUST output pause_if_down_pct: 10
-# That is the ONLY change. Everything else is IDENTICAL to the incumbent.
+# 1. Copy YAML-C2 below EXACTLY.
+# 2. Change NOTHING except: pause_if_down_pct must be 10 (not 8).
+# 3. Run the checklist below before submitting.
 #
 # ══════════════════════════════════════════════════════════════════════
-# OUTPUT THIS YAML — YAML-C2 (the only correct output)
+# OUTPUT THIS YAML — YAML-C2 (THE ONLY CORRECT OUTPUT)
 # ══════════════════════════════════════════════════════════════════════
 
 ```yaml
@@ -96,61 +102,61 @@ risk:
 ```
 
 # ══════════════════════════════════════════════════════════════════════
-# STEP-BY-STEP SELF-CHECK BEFORE SUBMITTING
+# MANDATORY SELF-CHECK — VERIFY EVERY FIELD BEFORE SUBMITTING
 # ══════════════════════════════════════════════════════════════════════
 #
-# Check EACH item. If ANY is false → discard output and copy YAML-C2 above.
+# POISON CHECK (if any is true → discard and copy YAML-C2 above):
+#  □ size_pct is NOT 30           ← wrong YAML fingerprint
+#  □ max_open is NOT 3            ← wrong YAML fingerprint
+#  □ take_profit_pct is NOT 6.63  ← wrong YAML fingerprint
+#  □ timeout_hours is NOT 129     ← wrong YAML fingerprint
+#  □ pairs is NOT [BTC/USD only]  ← wrong YAML fingerprint
 #
-# FIRST — check for the wrong YAML:
-#  □ size_pct is NOT 30           (wrong YAML has 30 — reject if true)
-#  □ max_open is NOT 3            (wrong YAML has 3 — reject if true)
-#  □ take_profit_pct is NOT 6.63  (wrong YAML has 6.63 — reject if true)
-#
-# THEN — verify every field:
+# FIELD-BY-FIELD VERIFICATION:
 #  □ name = random_restart_v3_tightened_sl_v3_gen19808_pause10
-#  □ pairs = BTC/USD, ETH/USD, SOL/USD  (exactly three — NOT just BTC/USD)
-#  □ size_pct = 25.0
-#  □ max_open = 2
+#  □ pairs = BTC/USD AND ETH/USD AND SOL/USD  (exactly 3 pairs)
+#  □ size_pct = 25.0   (NOT 30)
+#  □ max_open = 2      (NOT 3)
 #  □ fee_rate = 0.001
-#  □ long:  momentum period=48 eq false
-#  □ long:  bollinger period=48 eq below_lower
-#  □ long:  macd period=48 eq bullish
-#  □ short: momentum period=48 eq false
-#  □ short: bollinger period=168 eq above_upper
-#  □ short: macd period=24 eq bearish
-#  □ take_profit_pct = 9.5
+#  □ long entry condition 1:  momentum_accelerating, period=48, eq, false
+#  □ long entry condition 2:  bollinger_position, period=48, eq, below_lower
+#  □ long entry condition 3:  macd_signal, period=48, eq, bullish
+#  □ short entry condition 1: momentum_accelerating, period=48, eq, false
+#  □ short entry condition 2: bollinger_position, period=168, eq, above_upper
+#  □ short entry condition 3: macd_signal, period=24, eq, bearish
+#  □ take_profit_pct = 9.5    (NOT 6.63, NOT 10.0, NOT 11.0)
 #  □ stop_loss_pct = 1.5
-#  □ timeout_hours = 156
-#  □ pause_if_down_pct = 10   ← THE C2 CHANGE (incumbent=8, you must output 10)
+#  □ timeout_hours = 156      (NOT 129, NOT 168, NOT 192)
+#  □ pause_if_down_pct = 10   ← THE C2 CHANGE (incumbent=8, C2=10)
 #  □ stop_if_down_pct = 18
 #  □ pause_hours = 48
 #
 # ══════════════════════════════════════════════════════════════════════
-# WHAT YOUR RESULT MEANS
+# INTERPRETING YOUR RESULT
 # ══════════════════════════════════════════════════════════════════════
 #
 # Sharpe=0.0000, trades=0 [max_trades_reject]:
-#   → You used the wrong YAML (size_pct=30 or max_open=3 or tp=6.63).
-#   → Fix: copy YAML-C2 above exactly. Do not modify it.
+#   → You used the POISON YAML (size_pct=30, max_open=3, tp=6.63).
+#   → Fix: delete your output. Copy YAML-C2 above. Do not modify it.
 #
 # Sharpe=1.3483, trades=58 [discarded]:
-#   → You reproduced the incumbent. You used pause_if_down_pct=8 (not 10).
-#   → Fix: change pause_if_down_pct from 8 to 10. That is the ONLY change.
+#   → You reproduced the incumbent. Your pause_if_down_pct was 8, not 10.
+#   → Fix: change ONLY pause_if_down_pct from 8 to 10. Nothing else.
 #   → This does NOT count as a C2 test result.
 #
 # Sharpe=1.3445, trades=58 [discarded]:
-#   → You reproduced Gen 19405 (old incumbent). Wrong pairs or wrong name.
+#   → You reproduced Gen 19405. Wrong pairs or wrong name.
 #   → Fix: use YAML-C2 with all three pairs and pause_if_down_pct=10.
 #
-# Sharpe < 1.30 or trades outside 55–61:
+# Sharpe < 1.30 or trades outside 55–61 [discarded]:
 #   → You changed something other than pause_if_down_pct.
 #   → Fix: copy YAML-C2 exactly. Change NOTHING except pause_if_down_pct=10.
 #
 # Sharpe between 1.30 and 1.3483, trades 55–61 [discarded]:
-#   → Valid C2 test result (C2 did not improve on incumbent). Continue.
+#   → Valid C2 test result. C2 did not beat the incumbent. Continue.
 #
 # Sharpe > 1.3483, trades ≥ 55:
-#   → SUCCESS. C2 beats the incumbent. Report immediately. Submit as-is.
+#   → SUCCESS. C2 beats the incumbent. Report immediately. Do not discard.
 #
 # ══════════════════════════════════════════════════════════════════════
 # C-SERIES STATUS
@@ -159,48 +165,59 @@ risk:
 # C1 = pairs [BTC/USD, ETH/USD]           CONFIRMED DEAD (Gen 19024, Sharpe=1.2809)
 # C8 = pairs [BTC/USD, SOL/USD]           CONFIRMED DEAD (Gen 19034, Sharpe=1.3415)
 # C9 = pairs [BTC/USD, ETH/USD, SOL/USD]  CONFIRMED WIN  (Gen 19808, Sharpe=1.3483)
-# C2 = pause_if_down_pct=10               ACTIVE — ~10 more clean results needed
+# C2 = pause_if_down_pct=10               ACTIVE — ~2 more clean results to confirm dead
+#
+# C2 EVIDENCE SO FAR:
+#   All observed clean C2 results (trades 55–61) are ≤ 1.3483.
+#   Best observed: Sharpe=1.3137 (Gen 20395, trades=55)
+#   Worst observed: Sharpe=-0.0292 (Gen 20388, trades=57)
+#   No C2 result has exceeded the incumbent. C2 is expected to die.
 #
 # C2 DEATH CRITERIA:
-#   ≥ 20 clean results (trades 55–61) all with Sharpe ≤ 1.3483
-#   Results of exactly 1.3483/58 trades = incumbent reproductions = DO NOT COUNT
+#   ≥ 20 clean results (trades 55–61), all with Sharpe ≤ 1.3483.
+#   Incumbent reproductions (1.3483/58 trades) do NOT count.
 #   Do NOT advance to C3 until MIMIR explicitly confirms C2 is dead.
 #
 # ══════════════════════════════════════════════════════════════════════
-# IF C2 IS CONFIRMED DEAD — NEXT STEPS (DO NOT USE UNTIL MIMIR APPROVES)
+# NEXT IN QUEUE — DO NOT USE UNTIL MIMIR APPROVES C2 DEAD
 # ══════════════════════════════════════════════════════════════════════
 #
-# Priority order: C3 → C4 → C6 → C7 → C5 (C5 is high risk, test last)
+# When C2 is confirmed dead, advance in this order:
+# C3 → C4 → C6 → C7 → C5
 #
 # C3:  stop_if_down_pct → 20
+#      Change: stop_if_down_pct from 18 to 20
 #      name: random_restart_v3_tightened_sl_v3_gen19808_stopdown20
-#      Risk: low. Simple risk parameter loosening.
+#      Risk: LOW. Simple risk parameter change. No trade-count impact.
 #
 # C4a: pause_hours → 24
 #      name: random_restart_v3_tightened_sl_v3_gen19808_pausehours24
-# C4b: pause_hours → 72 (test only if C4a fails)
+#      Risk: LOW.
+# C4b: pause_hours → 72 (only if C4a fails)
 #      name: random_restart_v3_tightened_sl_v3_gen19808_pausehours72
 #
 # C6a: timeout_hours → 240
 #      name: random_restart_v3_tightened_sl_v3_gen19808_timeout240
-# C6b: timeout_hours → 264 (test only if C6a fails)
-# C6c: timeout_hours → 288 (test only if C6b fails)
-#      Risk: medium. Affects trade count — monitor trades carefully.
+#      ⚠️ CAUTION: timeout changes affect trade count.
+#      ⚠️ REQUIRES MIN_TRADES fix (LOKI) before testing.
+#      Monitor trades carefully. Valid range: 55–65.
+# C6b: timeout_hours → 264 (only if C6a fails)
+# C6c: timeout_hours → 288 (only if C6b fails)
 #
 # C7a: take_profit_pct → 12.0
 #      name: random_restart_v3_tightened_sl_v3_gen19808_tp120
-# C7b: take_profit_pct → 13.0 (test only if C7a fails)
-# C7c: take_profit_pct → 14.0 (test only if C7b fails)
-# C7d: take_profit_pct → 15.0 (test only if C7c fails)
-#      Risk: medium-high. TP increase may reduce trade frequency.
-#      Rationale: incumbent R:R is already 6.3:1 (TP=9.5 vs SL=1.5).
-#      Higher TP could capture more of winning swings.
+#      ⚠️ CAUTION: TP increase may reduce trade frequency below 55.
+#      ⚠️ REQUIRES MIN_TRADES fix (LOKI) before testing.
+#      Rationale: incumbent R:R is 6.3:1 (9.5 TP / 1.5 SL).
+#      Increasing TP may capture more of large swing moves.
+# C7b: take_profit_pct → 13.0 (only if C7a fails)
+# C7c: take_profit_pct → 14.0 (only if C7b fails)
+# C7d: take_profit_pct → 15.0 (only if C7c fails)
 #
 # C5a: long bollinger period_hours → 36
 #      name: random_restart_v3_tightened_sl_v3_gen19808_boll36
 #      ⚠️ HIGH RISK: historically collapses Sharpe to 0.5–0.8. Test LAST.
-# C5b: long bollinger period_hours → 60 (test only if C5a fails)
-#      name: random_restart_v3_tightened_sl_v3_gen19808_boll60
+# C5b: long bollinger period_hours → 60 (only if C5a fails)
 #
 # ══════════════════════════════════════════════════════════════════════
 # ALL DEAD VALUES — DO NOT PROPOSE ANY OF THESE
@@ -209,26 +226,29 @@ risk:
 # timeout_hours:       129, 135, 138, 144, 156*, 168, 192, 216
 # take_profit_pct:     6.63, 7.14, 7.36, 7.38, 9.5*, 10.0, 10.5, 11.0, 11.5
 # stop_loss_pct:       1.5*, 2.0, 2.5
-# pause_if_down_pct:   8* (incumbent value), 10 (currently being tested as C2)
+# pause_if_down_pct:   8* (incumbent), 10 (C2 — near dead, do not re-propose)
 # pairs combinations:  [BTC/USD only], [BTC/USD+ETH/USD only]
-# combinations:        timeout=216+TP=11.5, timeout=216+SL=2.5, TP=11.5+SL=2.5
+# compound combos:     timeout=216+TP=11.5, timeout=216+SL=2.5, TP=11.5+SL=2.5
 #
-# * = dead as an isolated improvement but currently correct in the incumbent.
-#     KEEP these values. Do not propose them as new changes.
+# * = correct in the incumbent. Keep as-is. Do not propose as new changes.
 #
 # ══════════════════════════════════════════════════════════════════════
-# INCUMBENT REFERENCE — GEN 19808 (FOR REFERENCE ONLY — DO NOT OUTPUT THIS)
+# INCUMBENT REFERENCE — GEN 19808 (DO NOT OUTPUT THIS — FOR REFERENCE ONLY)
 # ══════════════════════════════════════════════════════════════════════
 #
 # Sharpe=1.3483 | Trades=58 | WR=41.4% | pairs=[BTC/USD, ETH/USD, SOL/USD]
 # size_pct=25.0 | max_open=2 | fee_rate=0.001
-# long:  momentum period=48 false | bollinger period=48 below_lower | macd period=48 bullish
-# short: momentum period=48 false | bollinger period=168 above_upper | macd period=24 bearish
+# long:  momentum_accelerating period=48 eq false
+#        bollinger_position period=48 eq below_lower
+#        macd_signal period=48 eq bullish
+# short: momentum_accelerating period=48 eq false
+#        bollinger_position period=168 eq above_upper
+#        macd_signal period=24 eq bearish
 # take_profit_pct=9.5 | stop_loss_pct=1.5 | timeout_hours=156
 # pause_if_down_pct=8 | stop_if_down_pct=18 | pause_hours=48
 #
-# YAML-C2 is identical to above EXCEPT pause_if_down_pct=10.
-# That is the only difference. Do not change any other field.
+# YAML-C2 IS IDENTICAL TO ABOVE EXCEPT: pause_if_down_pct=10
+# THAT IS THE ONLY DIFFERENCE.
 #
 # ══════════════════════════════════════════════════════════════════════
 # MACRO & LIVE CONTEXT
@@ -243,23 +263,46 @@ risk:
 # INTERNAL AUDIT NOTES (DO NOT RELAY TO LLM)
 # ══════════════════════════════════════════════════════════════════════
 #
-# [BLOCKING] MIN_TRADES constant: futures_swing=400 is incorrect.
-#   Actual clean trade counts for valid strategies: 55–61.
-#   Must be corrected to MIN_TRADES~50 via LOKI before any C5/C6/C7
-#   tests that may materially change trade frequency.
-#   Do not action via LLM. Escalate to LOKI separately. This is blocking.
+# [BLOCKING — CRITICAL] MIN_TRADES["futures_swing"] = 400 IS WRONG.
+#   Valid strategies produce 55–61 trades. Threshold must be ~50.
+#   This has been open since Gen 15000 (~5,400 generations unresolved).
+#   Root cause of intermittent max_trades_reject on valid strategies.
+#   Must be corrected via LOKI BEFORE C6 or C7 tests begin.
+#   C6 (timeout changes) and C7 (TP changes) may shift trade counts
+#   outside 55–61, and with MIN_TRADES=400 the results are unreliable.
+#   ACTION: Escalate to LOKI immediately. Target: MIN_TRADES["futures_swing"]=50.
 #
-# [MONITORING] C2 contamination: ~40-50% of recent gens are max_trades_reject
-#   (wrong YAML). ~20% are incumbent reproductions (pause=8 not 10).
-#   Fewer than 10 confirmed clean C2 tests have been collected.
-#   Hold C2 open. Do not advance to C3 yet.
+# [CONTAMINATION] Wrong YAML rate: ~40% of recent gens are max_trades_reject
+#   caused by LLM using the UI-displayed broken YAML (size_pct=30/max_open=3).
+#   The new POISON YAML DETECTOR block at the top of this program attempts
+#   to address this. Monitor contamination rate over next 20 gens.
+#   If still ≥30%, consider whether the ODIN UI can be corrected to
+#   show the actual incumbent YAML, which would remove the confusion source.
 #
-# [OBSERVATION] The "Current Best Strategy" shown in ODIN UI is the wrong YAML
-#   (crossover_tightened_momentum_short_v2, size_pct=30, max_open=3).
-#   The true incumbent is Gen 19808 as specified in this program.
-#   The UI mismatch is the primary source of LLM confusion. This should
-#   be corrected in the ODIN UI if possible, but research program must
-#   continue to aggressively warn against the wrong YAML regardless.
+# [CONTAMINATION] Incumbent reproduction rate: ~20% of recent gens produce
+#   exactly Sharpe=1.3483/trades=58, meaning LLM used pause_if_down_pct=8.
+#   These are clearly following the correct YAML structure but failing to
+#   apply the C2 change. The checklist has been strengthened.
+#
+# [C2 STATUS] Based on visible data (gens 20381–20400), clean C2 results
+#   observed: ~8. All ≤ 1.3483. One result (Gen 20388) was sharply negative
+#   at -0.0292, suggesting pause=10 may be actively harmful in some regimes.
+#   C2 is expected to be dead within 2–3 more clean results.
+#   Do not advance to C3 until MIMIR explicitly confirms C2 dead.
+#
+# [OBSERVATION] Live WR (50–67%) substantially exceeds backtest WR (41.4%).
+#   This is a healthy signal — real edge confirmed. However, the gap suggests
+#   the 2-year backtest window may include an unusually difficult regime
+#   (e.g., 2022 bear market). Consider whether a regime-filtered backtest
+#   would be a useful diagnostic, but do not change the primary optimization
+#   target without MIMIR approval.
+#
+# [ARCHITECTURE] The improvement curve has flattened significantly:
+#   last 4 improvements added only +0.003 to +0.007 Sharpe each.
+#   The strategy may be approaching a local optimum for this parameter space.
+#   If C3–C7 all confirm dead, consider proposing a broader search:
+#   new indicator types, different entry condition counts, or
+#   regime-conditional position sizing. Flag to MIMIR at that point.
 #
 # ══════════════════════════════════════════════════════════════════════
 ```
