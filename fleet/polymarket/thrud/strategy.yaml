@@ -1,10 +1,10 @@
 category: world_events
-description: FREYA research slot — gen 24200 evolved strategy
+description: FREYA research slot — gen 24400 evolved strategy
 edge:
   max_position_pct: 0.05
   max_positions: 8
   min_confidence: medium
-  min_edge_pts: 0.05
+  min_edge_pts: 0.03
 market_filter:
   exclude_keywords: []
   include_keywords: []
