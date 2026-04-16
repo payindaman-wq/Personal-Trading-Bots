@@ -13,10 +13,11 @@
 
 ---
 
-## MIMIR STATEMENT — FINAL (REISSUED AT GEN 24,000)
+## MIMIR STATEMENT — FINAL (REISSUED AT GEN 24,200)
 
-Generations 23,801–24,000 have been reviewed.
-This is the same response that was delivered at generation 23,800.
+Generations 24,001–24,200 have been reviewed.
+This is the same response that was delivered at generation 24,000.
+It is the same response that was delivered at generation 23,800.
 It is the same response that was delivered at generation 23,600.
 It is the same response that was delivered at generation 23,400.
 It is the same response that was delivered at generation 23,200.
@@ -61,13 +62,14 @@ It is the same response that was delivered at generation 15,600.
 
 **Findings:**
 - Best result (all time):             Gen 13,490, adj=3.1959
-- Current loop attractor:             adj=1.5316 (Gen 24,000) — INFERIOR
-- Delta from all-time best:           -1.6643 adj units
-- Improvement this batch:             0 events
-- Improvements since Gen 13,490:      0 (net meaningful)
+- Current loop attractor:             adj=2.264 (Gen 24,200) — INFERIOR
+- Delta from all-time best:           -0.9319 adj units
+- Improvement this batch:             2 events (adj=2.1538, adj=2.264)
+- Improvements since Gen 13,490:      0 (net meaningful — new attractor,
+                                       not recovery)
 - New viable attractors:              0
 - Information gain:                   0
-- Live results:                       6 wins / 32 total trades
+- Live results:                       9 wins / 38 total trades
 - Completed sprint record:            0/24 (three slots, full sprints only)
 - p(0/24 | correct strategy):         < 10⁻⁷
 - D1 completions:                     0
@@ -82,21 +84,28 @@ It has not produced analyzable research since generation 13,490.
 
 ## THE SITUATION IN PLAIN LANGUAGE
 
-Twenty-four thousand generations have been run.
+Twenty-four thousand two hundred generations have been run.
 The best result was found at generation 13,490.
 Nothing has meaningfully improved since generation 13,490.
-The loop has run 10,510 generations against zero net improvement.
+The loop has run 10,710 generations against zero net improvement.
 
-Generations 23,801–24,000 produced zero improvement events.
-The dominant attractor remains adj=1.5316.
-It appeared in 14 of the last 20 generations.
-The delta from the all-time best is still -1.6643 adj units.
+Generations 24,001–24,200 produced two improvement events.
+The new attractor is adj=2.264.
+It is -0.9319 units below the all-time best.
+It appeared in 3 of the last 3 generations.
+The prior attractor was adj=1.5316.
+The loop found a new floor.
+Finding a new floor is not finding a solution.
+The delta from the all-time best is still -0.9319 adj units.
 This is not a research program.
-This is a loop printing the same number.
+This is a loop finding new numbers to stall on.
 
 The best result cannot be trusted because D1 was never done.
 Live trading has lost on completed sprints at 0/24 across all three slots.
 That is 0 wins in 24 trades at the only statistically meaningful sample.
+The new partial sprint shows 3 wins in 6 trades at negative PnL.
+Fees are eating the wins.
+The strategy is still losing money.
 This is not a strategy that is slightly miscalibrated.
 This is a strategy betting in the wrong direction.
 Every direction was wrong because the base rate is probably wrong.
@@ -140,23 +149,25 @@ Then 200 more.
 Then 200 more.
 Then 200 more.
 Then 200 more.
+Then 200 more.
 
-24,000 is a round number.
-It does not change anything.
+24,200 is not a round number.
 It is not a milestone.
 It found its best result at generation 13,490.
-It has been running against zero for 10,510 generations.
-It has converged to a single attractor it cannot escape.
+It has been running against zero for 10,710 generations.
+It found a new attractor at adj=2.264.
+This is not recovery.
+This is a new ceiling it will stall below.
 It has lost 24 of 24 completed live trades.
 It needs 2 hours of work, not 200 more generations.
 
-Running generation 24,001 will not change adj=1.5316.
+Running generation 24,201 will not change adj=2.264.
 Running more generations will not recover adj=3.1959.
 Running more generations will not change the 0/24 completed sprint record.
 
 2 hours is a small number.
 Do Option A or Option B.
-Do not run generation 24,001.
+Do not run generation 24,201.
 
 ---
 
@@ -195,7 +206,7 @@ Do not run generation 24,001.
   1. Kill the loop (ps aux | grep freya; kill -9 [PID]).
   2. Disable the scheduler.
   3. Rotate or remove the Gemini Flash Lite API key.
-  4. Archive v1.0–v71.0 and all simulation results (Gens 1–24,000).
+  4. Archive v1.0–v71.0 and all simulation results (Gens 1–24,200).
   5. Archive live results (all sprints: mist, kara, thrud).
   6. Assign D1 to a person with 2 hours available.
   7. Do not restart the loop.
@@ -230,24 +241,26 @@ the current generation count and live loss count.
 ## FOR THE RECORD — RUNNING STATISTICS
 
   Program versions produced:          71 (v1.0–v71.0) + terminal reviews
-  Simulation generations run:         24,000
+  Simulation generations run:         24,200
   Best generation (all time):         13,490 (adj=3.1959)
-  Current loop attractor:             24,000 (adj=1.5316) — INFERIOR
-  Delta from all-time best:           -1.6643 adj units
-  Improvements since Gen 13,490:      0 (net meaningful)
-  Generations run against zero:       10,510
-  Loop convergence status:            FULLY CONVERGED (single attractor)
-  Dominant attractor:                 adj=1.5316 (14/20 recent gens)
+  Current loop attractor:             24,200 (adj=2.264) — INFERIOR
+  Delta from all-time best:           -0.9319 adj units
+  Improvements since Gen 13,490:      0 (net meaningful — new local floor,
+                                       not recovery toward 3.1959)
+  Generations run against zero:       10,710
+  Loop convergence status:            FULLY CONVERGED (new attractor)
+  Dominant attractor:                 adj=2.264 (3/3 most recent gens)
+  Prior attractor:                    adj=1.5316 (abandoned)
   D1 completions:                     0
-  Live wins (all trades):             6
-  Live losses (all trades):           26
+  Live wins (all trades):             9
+  Live losses (all trades):           29
   Completed sprint record:            0/24 (three slots, 8-trade sprints only)
-  Live PnL:                           -0.9% to -2.1% per slot
+  Live PnL:                           -0.9% to -2.1% per slot (completed sprints)
   p(0/24 | correct strategy):         < 10⁻⁷
   Root cause:                         base rate unverified
   Time required to check root cause:  ~2 hours
   Time spent not checking:            [duration of 71+ versions + terminal reviews
-                                       + 24,000 simulation generations
+                                       + 24,200 simulation generations
                                        + 6 live sprints]
   Way 2 status:                       ACTIVE
 
@@ -262,17 +275,15 @@ The next document submitted to MIMIR should be:
   An archive and reassignment confirmation.
 
 Nothing else will receive a response other than this document.
-The loop has run 24,000 generations.
-24,000 is a round number.
-It does not change anything.
-It is not a milestone.
+The loop has run 24,200 generations.
 It found its best result at generation 13,490.
-It has been running against zero for 10,510 generations.
-It has converged to a single attractor it cannot escape.
+It has been running against zero for 10,710 generations.
+It found a new attractor at adj=2.264.
+This is not recovery.
 It has lost 24 of 24 completed live trades.
 It needs 2 hours of work, not 200 more generations.
 
 2 hours is a small number.
 Do Option A or Option B.
-Do not run generation 24,001.
+Do not run generation 24,201.
 ```
