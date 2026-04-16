@@ -1,7 +1,7 @@
 ```markdown
 # ODIN Research Program — Swing Trading Strategy Optimizer
-# Effective from Gen 20601 | Incumbent: Gen 20502 (Sharpe=1.6060)
-# MIMIR-reviewed 2026-04-15 (v40)
+# Effective from Gen 21401 | Incumbent: Gen 20502 (Sharpe=1.6060)
+# MIMIR-reviewed 2026-04-15 (v41)
 #
 # ══════════════════════════════════════════════════════════════════════
 # ☠️ POISON YAML DETECTOR — READ THIS BEFORE ANYTHING ELSE ☠️
@@ -20,24 +20,26 @@
 # If YES to any of the above → STOP. DELETE EVERYTHING. Start over
 # from YAML-INCUMBENT below. Do not copy from the UI. The UI is broken.
 # The UI has ALWAYS shown the wrong YAML. Ignore it completely.
+# The correct YAML is ONLY the one printed below as YAML-INCUMBENT.
 #
 # ══════════════════════════════════════════════════════════════════════
-# 🚨 NEW CONTAMINATION SIGNATURE — CRITICAL 🚨
+# 🚨 NEAR-INCUMBENT REPRODUCTION DETECTOR 🚨
 # ══════════════════════════════════════════════════════════════════════
 #
-# If your result is: Sharpe=1.6027, trades=54, WR=44.4%
+# The following results are KNOWN BAD OUTCOMES — NOT improvements:
 #
-# This is a KNOWN BAD RESULT. It means you output a near-copy of the
-# incumbent but with a small unintended difference. This is NOT the
-# incumbent (which is Sharpe=1.6060). This is NOT an improvement.
-# ODIN will discard it.
+#   Sharpe=1.6027, trades=54, WR=44.4%  → DISCARD (near-incumbent)
+#   Sharpe=1.6028, trades=54, WR=44.4%  → DISCARD (near-incumbent)
 #
-# If you see this result, it means:
-#   (a) You did not apply the intended change correctly, OR
-#   (b) You applied an unintended change that degraded Sharpe slightly.
+# These are NOT the incumbent (Sharpe=1.6060). They appear when:
+#   (a) You reproduced the approximation YAML without applying the
+#       intended change, OR
+#   (b) The intended change had no measurable effect.
 #
-# Fix: Re-read YAML-INCUMBENT below. Apply EXACTLY ONE change as
-# specified in YOUR ONLY JOB THIS GENERATION. Nothing else.
+# The true incumbent is Sharpe=1.6060. Anything below that is DISCARD.
+#
+# If you see 1.6027 or 1.6028: your change did not improve the strategy.
+# ODIN will discard it. Move to the next D-series item.
 #
 # ══════════════════════════════════════════════════════════════════════
 # 🚨 CRITICAL SYSTEM NOTICE 🚨
@@ -45,10 +47,14 @@
 #
 # THE INCUMBENT IS GEN 20502: Sharpe=1.6060 | Trades=54 | WR=44.4%
 #
-# ⚠️ YAML-INCUMBENT STATUS: PENDING RECOVERY FROM BACKTEST LOGS ⚠️
+# ⚠️ YAML-INCUMBENT STATUS: APPROXIMATION — PENDING EXACT RECOVERY ⚠️
 #
-# The exact Gen 20502 YAML has not yet been recovered.
-# The YAML-INCUMBENT below is the best available approximation.
+# The exact Gen 20502 YAML has not been recovered. The YAML below is
+# the best available approximation. It reproduces at Sharpe=1.6027–1.6028,
+# NOT 1.6060. This 0.003 gap is structural and consistent across 800+
+# generations. The approximation is wrong in at least one entry condition
+# parameter. Most likely candidate: rsi value (currently 32.96 in
+# approximation; Gen 20502 may have changed this).
 #
 # KNOWN FACTS ABOUT GEN 20502 (confirmed from backtest trajectory):
 #   pairs             = [BTC/USD, ETH/USD, SOL/USD]  ← confirmed
@@ -61,22 +67,19 @@
 #   stop_if_down_pct  = 18                            ← confirmed
 #   pause_hours       = 48                            ← confirmed
 #   pause_if_down_pct = 8                             ← assumed (pending recovery)
-#   Entry conditions  = UNKNOWN (pending recovery)
-#
-# UNTIL THE YAML IS RECOVERED:
-#   - Use the YAML-INCUMBENT below as the working base
-#   - Apply your assigned change to it
-#   - Document any result precisely so recovery can be inferred
+#   Entry conditions  = APPROXIMATE (see YAML below)
 #
 # MIMIR ACTION REQUIRED: Retrieve Gen 20502 YAML from ODIN backtest
-# logs and replace the YAML-INCUMBENT placeholder below.
+# logs to resolve the 0.003 Sharpe gap before D-series results can be
+# compared to a clean baseline.
 #
 # ══════════════════════════════════════════════════════════════════════
 # YAML-INCUMBENT — GEN 20502 (APPROXIMATION — PENDING EXACT RECOVERY)
 # ══════════════════════════════════════════════════════════════════════
 #
-# This is the base you must copy exactly and modify by ONE parameter.
-# DO NOT change anything not specified in YOUR ONLY JOB THIS GENERATION.
+# This is the base you must copy EXACTLY and modify by EXACTLY ONE
+# parameter as specified in YOUR ONLY JOB THIS GENERATION.
+# DO NOT change anything not specified. DO NOT copy from the UI.
 #
 # ```yaml
 # name: gen20502_base
@@ -140,13 +143,6 @@
 #   pause_hours: 48
 # ```
 #
-# ⚠️ IMPORTANT: The entry conditions above are the BEST APPROXIMATION
-# based on the known trajectory. Gen 20502 improved over Gen 19808 via
-# entry condition changes that are not yet confirmed. The above may
-# reproduce at Sharpe≈1.6027 (not 1.6060) if the entry conditions are
-# slightly wrong. This is expected until YAML recovery is complete.
-# Continue testing — the relative improvement direction is still valid.
-#
 # ══════════════════════════════════════════════════════════════════════
 # INCUMBENT TRAJECTORY
 # ══════════════════════════════════════════════════════════════════════
@@ -161,15 +157,22 @@
 # This is a quality signal — fewer, better trades.
 #
 # CLEAN RESULT = trades between 50 and 60 inclusive
+# BEST KNOWN SHARPE = 1.6060 — anything below this is DISCARD
 #
 # ══════════════════════════════════════════════════════════════════════
 # YOUR ONLY JOB THIS GENERATION
 # ══════════════════════════════════════════════════════════════════════
 #
-# ACTIVE TEST: D1
-# TEST NAME: gen20502_pause10
-# CHANGE: pause_if_down_pct from 8 → 10
+# ACTIVE TEST: D2
+# TEST NAME: gen20502_stopdown20
+# CHANGE: stop_if_down_pct from 18 → 20
 # EXACTLY ONE FIELD CHANGES. EVERYTHING ELSE IS IDENTICAL TO YAML-INCUMBENT.
+#
+# WHY D2: D1 (pause_if_down_pct=10) was tested across 800+ generations
+# (Gens 20601–21400) and produced no improvement over the approximation
+# baseline. D1 is formally closed as DEAD. Advancing to D2.
+# NOTE: C2 (same pause_if_down_pct=10 test) was also dead vs Gen 19808.
+# This is consistent — D1 is genuinely dead.
 #
 # Expected result if change is neutral:  Sharpe≈1.6027–1.6060, trades≈54
 # Expected result if change is positive: Sharpe > 1.6060, trades ≥ 50
@@ -178,7 +181,7 @@
 # OUTPUT THIS YAML:
 #
 # ```yaml
-# name: gen20502_pause10
+# name: gen20502_stopdown20
 # style: randomly generated
 # pairs:
 # - BTC/USD
@@ -234,8 +237,8 @@
 #   stop_loss_pct: 1.5
 #   timeout_hours: 156
 # risk:
-#   pause_if_down_pct: 10        ← THIS IS THE ONLY CHANGE
-#   stop_if_down_pct: 18
+#   pause_if_down_pct: 8
+#   stop_if_down_pct: 20        ← THIS IS THE ONLY CHANGE
 #   pause_hours: 48
 # ```
 #
@@ -248,35 +251,28 @@
 #   → Fix: delete output. Copy YAML-INCUMBENT above exactly. Apply
 #     only the one change specified in YOUR ONLY JOB THIS GENERATION.
 #
-# Sharpe=1.6027, trades=54, WR=44.4% [discarded]:
-#   → You reproduced the near-incumbent approximation exactly.
-#   → The D1 change (pause_if_down_pct=10) was either not applied
-#     or had no effect on this metric.
-#   → This does NOT mean D1 is dead — it means the base YAML may
-#     still be slightly wrong. Report this result precisely.
-#   → Proceed to D2 on next generation.
+# Sharpe=1.6027 or 1.6028, trades=54, WR=44.4% [near-incumbent — discard]:
+#   → You reproduced the approximation without applying the change, OR
+#     the change (stop_if_down_pct=20) had no effect.
+#   → Either way: DISCARD. Mark D2 dead. Proceed to D3.
 #
-# Sharpe≈1.6060, trades=54, WR=44.4% [discarded — reproduction]:
-#   → You reproduced Gen 20502 exactly. Good for one confirmation.
-#   → For the actual D1 test: ensure pause_if_down_pct=10 is set.
+# Sharpe≈1.6060, trades=54, WR=44.4% [reproduction — discard]:
+#   → You reproduced the approximation at its upper bound.
+#   → This means stop_if_down_pct=20 was neutral vs incumbent.
+#   → Mark D2 dead. Proceed to D3.
 #
-# Sharpe=1.3483, trades=58 [discarded]:
-#   → You reproduced the OLD Gen 19808 incumbent. Wrong base YAML.
-#   → Fix: use YAML-INCUMBENT above, not Gen 19808.
-#
-# Sharpe between 1.30 and 1.6060, trades 50–60 [discarded]:
-#   → Valid test. Change did not beat Gen 20502. Mark D1 dead.
-#   → Proceed to D2.
+# Sharpe between 1.30 and 1.6060, trades 50–60 [valid — discard]:
+#   → Valid test. Change did not beat Gen 20502. Mark D2 dead.
+#   → Proceed to D3.
 #
 # Sharpe > 1.6060, trades ≥ 50 [NEW BEST]:
 #   → SUCCESS. New incumbent. Report immediately.
-#   → Recover the YAML. Do not proceed to D2 until new incumbent
-#     is documented.
+#   → Recover the YAML. Update YAML-INCUMBENT. Do not proceed to D3
+#     until new incumbent is documented.
 #
-# trades < 50 [low_trades]:
-#   → Entry conditions are too restrictive or were accidentally changed.
-#   → Do NOT count as a valid test. Check your YAML for accidental
-#     entry condition modifications.
+# trades < 50 [low_trades — invalid]:
+#   → Entry conditions were accidentally changed or are too restrictive.
+#   → Do NOT count as valid. Check YAML for accidental entry changes.
 #
 # Sharpe < 0 [catastrophic]:
 #   → Entry conditions were accidentally inverted or severely changed.
@@ -292,12 +288,11 @@
 #
 # ── PHASE 1: RISK PARAMETER VARIATIONS (LOW RISK) ──────────────────
 #
-# D1: pause_if_down_pct → 10            ← ACTIVE TEST THIS GENERATION
-#     name: gen20502_pause10
-#     Change: pause_if_down_pct 8 → 10
-#     Risk: LOW. No trade-count impact expected.
+# D1: pause_if_down_pct → 10            ✅ DEAD
+#     Tested 800+ gens (20601–21400). Never improved over baseline.
+#     Also dead vs Gen 19808 (C2). Confirmed dead. Do not re-test.
 #
-# D2: stop_if_down_pct → 20
+# D2: stop_if_down_pct → 20             ← ACTIVE TEST THIS GENERATION
 #     name: gen20502_stopdown20
 #     Change: stop_if_down_pct 18 → 20
 #     Risk: LOW.
@@ -305,7 +300,7 @@
 # D3a: pause_hours → 24
 #      name: gen20502_pausehours24
 #      Risk: LOW.
-# D3b: pause_hours → 72 (only if D3a fails)
+# D3b: pause_hours → 72 (only if D3a dead)
 #      name: gen20502_pausehours72
 #
 # ── PHASE 2: EXIT PARAMETER VARIATIONS (MEDIUM RISK) ───────────────
@@ -313,57 +308,74 @@
 #
 # D4a: timeout_hours → 240
 #      name: gen20502_timeout240
-# D4b: timeout_hours → 264 (only if D4a fails)
-# D4c: timeout_hours → 288 (only if D4b fails)
-# D4d: timeout_hours → 192 (only if D4c fails — shorter direction)
+#      Rationale: 156h timeout may be cutting winners short. 240h = 10 days,
+#      consistent with BTC swing cycle lengths.
+# D4b: timeout_hours → 264 (only if D4a dead)
+# D4c: timeout_hours → 288 (only if D4b dead)
+# D4d: timeout_hours → 192 (only if D4c dead — shorter direction)
 #
 # D5a: take_profit_pct → 12.0
 #      name: gen20502_tp120
 #      Rationale: incumbent R:R is 6.3:1 (9.5/1.5). Larger TP may
 #      capture more of swing moves given improved entry quality.
-# D5b: take_profit_pct → 13.0 (only if D5a fails)
-# D5c: take_profit_pct → 14.0 (only if D5b fails)
-# D5d: take_profit_pct → 15.0 (only if D5c fails)
+#      The dead list shows 10.0, 10.5, 11.0, 11.5 are all dead —
+#      but 12.0+ has not been tested and is a meaningful step change.
+# D5b: take_profit_pct → 13.0 (only if D5a dead)
+# D5c: take_profit_pct → 14.0 (only if D5b dead)
+# D5d: take_profit_pct → 15.0 (only if D5c dead)
 #
 # ── PHASE 3: ENTRY CONDITION VARIATIONS (HIGH RISK / HIGH REWARD) ──
 # ⚠️ Entry changes have highest variance. Test after Phases 1–2.
-# ⚠️ Monitor trades carefully. Adding conditions can collapse count.
 # ⚠️ Change only ONE condition parameter at a time.
+# ⚠️ Monitor trades carefully — adding selectivity can collapse count.
 # ⚠️ Do NOT add more than one new condition per generation.
+# ⚠️ NOTE: The biggest Sharpe jumps in this run came from entry changes.
+#    Phase 3 is HIGH PRIORITY once Phases 1–2 are exhausted.
 #
 # D6a: long bollinger period_hours → 36
 #      name: gen20502_boll36
 #      Risk: HIGH.
-# D6b: long bollinger period_hours → 60 (only if D6a fails)
+# D6b: long bollinger period_hours → 60 (only if D6a dead)
 #
-# D7: RSI threshold exploration
-#     D7a: rsi value → 30.0 (tighten long entry)
-#          name: gen20502_rsi30
-#     D7b: rsi value → 35.0 (loosen long entry, only if D7a fails)
+# D7a: rsi value → 30.0 (tighten long entry)
+#      name: gen20502_rsi30
+#      Rationale: 32.96 may be the approximation error. Testing 30.0
+#      may both recover the true incumbent AND improve it.
+# D7b: rsi value → 35.0 (loosen, only if D7a dead)
+#      name: gen20502_rsi35
+# D7c: rsi value → 28.0 (tighten further, only if D7a dead + D7b dead)
+#      name: gen20502_rsi28
 #
-# D8: price_change_pct threshold exploration
-#     D8a: long price_change_pct value → -1.0 (tighten)
-#          name: gen20502_pricechg10
-#     D8b: long price_change_pct value → -0.3 (loosen, only if D8a fails)
+# D8a: long price_change_pct value → -1.0 (tighten)
+#      name: gen20502_pricechg10
+# D8b: long price_change_pct value → -0.3 (loosen, only if D8a dead)
+#      name: gen20502_pricechg03
+#
+# D9:  SHORT entry exploration (lower priority — longs drive performance)
+#      D9a: short price_change_pct value → 1.0 (tighten short trigger)
+#           name: gen20502_shortprice10
+#      D9b: short bollinger period_hours → 72 (if D9a dead)
 #
 # ── PHASE 4: BROADER SEARCH (IF ALL D-SERIES DEAD) ─────────────────
-# If D1–D8 all confirm dead within 500 gens from Gen 20502:
+# If D1–D9 all confirm dead within 500 gens from this update:
 #   - Escalate to MIMIR for broader search authorization
 #   - Consider: regime-conditional sizing, new indicator types,
-#     walk-forward validation, F&G index as entry filter
+#     walk-forward validation, F&G index as entry filter,
+#     position sizing tied to RSI distance from threshold
 #
 # ══════════════════════════════════════════════════════════════════════
 # D-SERIES STATUS
 # ══════════════════════════════════════════════════════════════════════
 #
-# D1: pause_if_down_pct=10              ACTIVE ← TEST THIS GENERATION
-# D2: stop_if_down_pct=20              NOT STARTED
-# D3: pause_hours variations           NOT STARTED
-# D4: timeout_hours variations         NOT STARTED
-# D5: take_profit_pct variations       NOT STARTED
-# D6: bollinger period variations      NOT STARTED
-# D7: rsi threshold variations         NOT STARTED
-# D8: price_change_pct variations      NOT STARTED
+# D1: pause_if_down_pct=10              ✅ DEAD (800+ gens, no improvement)
+# D2: stop_if_down_pct=20               ACTIVE ← TEST THIS GENERATION
+# D3: pause_hours variations            NOT STARTED
+# D4: timeout_hours variations          NOT STARTED
+# D5: take_profit_pct variations        NOT STARTED
+# D6: bollinger period variations       NOT STARTED
+# D7: rsi threshold variations          NOT STARTED (HIGH PRIORITY)
+# D8: price_change_pct variations       NOT STARTED
+# D9: short entry variations            NOT STARTED
 #
 # ══════════════════════════════════════════════════════════════════════
 # ALL DEAD VALUES — DO NOT PROPOSE ANY OF THESE
@@ -372,7 +384,7 @@
 # timeout_hours:       129, 135, 138, 144, 156*, 168, 192, 216
 # take_profit_pct:     6.63, 7.14, 7.36, 7.38, 9.5*, 10.0, 10.5, 11.0, 11.5
 # stop_loss_pct:       1.5*, 2.0, 2.5
-# pause_if_down_pct:   8* (incumbent baseline)
+# pause_if_down_pct:   8* (incumbent), 10 (D1 dead)
 # pairs combinations:  [BTC/USD only], [BTC/USD+ETH/USD only]
 #
 # * = incumbent value. Do not propose as a change.
@@ -390,7 +402,7 @@
 #  □ pairs is NOT [BTC/USD only]  ← wrong YAML
 #
 # FIELD-BY-FIELD VERIFICATION:
-#  □ name     = gen20502_pause10  (matches active test)
+#  □ name     = gen20502_stopdown20  (matches active test)
 #  □ pairs    = BTC/USD AND ETH/USD AND SOL/USD  (exactly 3 pairs)
 #  □ size_pct = 25.0   (NOT 30)
 #  □ max_open = 2      (NOT 3)
@@ -399,8 +411,8 @@
 #  □ take_profit_pct  = 9.5    (unchanged)
 #  □ stop_loss_pct    = 1.5    (unchanged)
 #  □ timeout_hours    = 156    (unchanged)
-#  □ pause_if_down_pct = 10   ← ONLY CHANGE FOR D1
-#  □ stop_if_down_pct = 18    (unchanged)
+#  □ pause_if_down_pct = 8    (unchanged — D1 is DEAD, do not set to 10)
+#  □ stop_if_down_pct = 20   ← ONLY CHANGE FOR D2
 #  □ pause_hours      = 48    (unchanged)
 #  □ Count of changed fields = EXACTLY 1
 #
@@ -412,19 +424,21 @@
 # C8 = pairs [BTC/USD, SOL/USD]           CONFIRMED DEAD (Gen 19034, Sharpe=1.3415)
 # C9 = pairs [BTC/USD, ETH/USD, SOL/USD]  CONFIRMED WIN  (Gen 19808, Sharpe=1.3483)
 # C2 = pause_if_down_pct=10 vs Gen 19808  CONFIRMED DEAD vs 19808 (best=1.3137)
-#      NOTE: C2 must be re-tested against Gen 20502 as D1. Gen 19808 result
-#      does not carry over — the new incumbent is significantly different.
+#      Reconfirmed dead vs Gen 20502 as D1. 800+ gens, no improvement.
 #
 # ══════════════════════════════════════════════════════════════════════
 # MACRO & LIVE CONTEXT
 # ══════════════════════════════════════════════════════════════════════
 #
-# Regime: CAUTION | F&G=23 (Extreme Fear) | BTC Dominance=57.35%
+# Regime: CAUTION | F&G=23 (Extreme Fear) | BTC Dominance=57.29%
 # TYR Directive: Reduce LIVE position sizes to 50% (live size_pct ≈ 12.5)
 # Backtest optimization continues at size_pct=25.0 — do NOT change this.
 # Live performance: WR 50–67% live vs 41–44% backtest — real edge confirmed.
 # Note: Live outperformance may partly reflect favorable regime since deployment.
 #       Do not optimize for live WR — optimize for backtest Sharpe.
+# F&G Extreme Fear (23): historically a long entry signal. Current strategy's
+#   mean-reversion long entry stack may be well-suited to this environment.
+#   Do not add F&G as an explicit filter — risk of overfitting to current regime.
 #
 # ══════════════════════════════════════════════════════════════════════
 # INTERNAL AUDIT NOTES (DO NOT RELAY TO LLM)
@@ -435,35 +449,5 @@
 #
 # [CRITICAL — BLOCKING] GEN 20502 YAML NOT RECOVERED.
 #   The YAML-INCUMBENT contains an approximation only. Evidence:
-#   - Gens 20584–20600 consistently reproduce at Sharpe=1.6027, not 1.6060.
-#   - The 0.0033 gap is consistent and repeatable — this is structural, not noise.
-#   - The approximation is therefore slightly wrong in at least one parameter.
-#   - Most likely discrepancy: one entry condition parameter (rsi threshold,
-#     price_change_pct threshold, or bollinger period_hours).
-#   - MIMIR must retrieve the exact Gen 20502 YAML from backtest logs.
-#   - Until recovered: D-series results are valid for relative direction
-#     but absolute Sharpe targets may be off by ~0.003.
-#   PRIORITY: CRITICAL. Blocks all D-series from having clean baselines.
-#
-# [CONTAMINATION — UI DISPLAY] ODIN UI still shows broken YAML
-#   (size_pct=30, max_open=3, tp=6.63, pairs=[BTC/USD], timeout=135).
-#   Approximately 20% of gens still produce max_trades_reject from this.
-#   Last 20 gens: 4/20 = 20% contamination rate — unchanged from prior review.
-#   Root fix required: update ODIN UI to display actual incumbent YAML.
-#   Priority: HIGH. The POISON YAML DETECTOR is containing but not eliminating.
-#
-# [CONTAMINATION — NEAR-INCUMBENT REPRODUCTION] 8/20 recent gens produced
-#   Sharpe=1.6027 (near-incumbent reproduction without improvement).
-#   This is the dominant failure mode, now at 40% of gens.
-#   Cause: LLM has converged on the approximation YAML as its baseline.
-#   The full YAML with explicit test output in the research program should
-#   reduce this — the LLM has less ambiguity about what to output.
-#   Monitor: if reproduction rate exceeds 50% of non-poison gens, consider
-#   adding a stronger "do not reproduce" directive.
-#
-# [ANALYTICAL — 1.6027 vs 1.6060 GAP]
-#   This gap first appeared at Gen 20584 and has been perfectly consistent
-#   for 12+ generations. The approximation YAML is wrong by exactly this margin.
-#   Hypothesis ranking for where the approximation differs from truth:
-#   (1) rsi threshold: approximation uses 32.96 (copied from old YAML).
-#       Gen 20502 may have changed this. Most likely
+#   - Gens 20584–21400 consistently reproduce at Sharpe=1.6027–1.6028, not 1.6060.
+#   - The 0.003–
