@@ -52,9 +52,9 @@ entry:
         operator: eq
         value: true
 exit:
-  take_profit_pct: 3.0
-  stop_loss_pct: 0.8
-  timeout_minutes: 120
+  take_profit_pct: 0.65
+  stop_loss_pct: 0.35
+  timeout_minutes: 75
 risk:
   pause_if_down_pct: 5
   pause_minutes: 60

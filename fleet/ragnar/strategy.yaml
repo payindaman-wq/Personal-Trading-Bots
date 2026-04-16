@@ -66,9 +66,9 @@ entry:
       operator: eq
       value: bearish
 exit:
-  take_profit_pct: 2.0
-  stop_loss_pct: 0.6
-  timeout_minutes: 90
+  take_profit_pct: 0.5
+  stop_loss_pct: 0.3
+  timeout_minutes: 60
 risk:
   pause_if_down_pct: 4
   pause_minutes: 60

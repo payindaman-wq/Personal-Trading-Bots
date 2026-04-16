@@ -1,7 +1,6 @@
 name: harald
 style: rsi_mean_reversion
-inspiration: Scott Melker -- RSI pullback within confirmed trend, buys when short-term
-  RSI oversold but macro direction intact
+inspiration: Scott Melker -- RSI pullback within confirmed trend, buys when short-term RSI oversold but macro direction intact
 pairs:
   - BTC/USD
   - ETH/USD
@@ -59,9 +58,9 @@ entry:
       - above
       - at
 exit:
-  take_profit_pct: 2.2
-  stop_loss_pct: 0.7
-  timeout_minutes: 120
+  take_profit_pct: 0.5
+  stop_loss_pct: 0.3
+  timeout_minutes: 60
 risk:
   pause_if_down_pct: 4
   pause_minutes: 60

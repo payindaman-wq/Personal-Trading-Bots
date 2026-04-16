@@ -44,9 +44,9 @@ entry:
         operator: eq
         value: above_upper
 exit:
-  take_profit_pct: 3.5
-  stop_loss_pct: 1.0
-  timeout_minutes: 180
+  take_profit_pct: 0.8
+  stop_loss_pct: 0.4
+  timeout_minutes: 90
 risk:
   pause_if_down_pct: 5
   pause_minutes: 60

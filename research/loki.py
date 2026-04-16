@@ -829,6 +829,18 @@ def handle_all_cycle_reviews():
                 cs = json.load(f)
             if cs.get("status") != "awaiting_review":
                 continue
+            # Skip restructure if manually flagged (e.g. manual strategy overhaul)
+            if cs.get("skip_loki_restructure"):
+                cycle = cs.get("cycle", 1)
+                print(f"  [loki] {league.upper()} Cycle {cycle}: skip_loki_restructure set — {cs.get('skip_reason', 'no reason')}. Advancing without tuning.")
+                # Remove the flag so next cycle proceeds normally
+                cs.pop("skip_loki_restructure", None)
+                cs.pop("skip_reason", None)
+                with open(cfg["cycle_state"], "w") as wf:
+                    json.dump(cs, wf, indent=2)
+                write_cycle_review_entry(league, cycle, ["skipped: manual overhaul"])
+                run_cycle_advance_and_start(league, cfg, cycle)
+                continue
             cycle = cs.get("cycle", 1)
             if (league, cycle) in already_reviewed:
                 # Strategies done — retry advance/start only (previous run may have failed mid-way)

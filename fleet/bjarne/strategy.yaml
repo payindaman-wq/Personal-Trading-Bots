@@ -52,9 +52,9 @@ entry:
         operator: gt
         value: 42
 exit:
-  take_profit_pct: 2.0
-  stop_loss_pct: 0.6
-  timeout_minutes: 90
+  take_profit_pct: 0.45
+  stop_loss_pct: 0.25
+  timeout_minutes: 45
 risk:
   pause_if_down_pct: 4
   pause_minutes: 60

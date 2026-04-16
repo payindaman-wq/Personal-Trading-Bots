@@ -52,9 +52,9 @@ def get_pairs(league):
     return ALL_PAIRS
 
 DAY_RANGES = {
-    "take_profit_pct": (0.8, 6.0),
-    "stop_loss_pct": (0.8, 4.0),
-    "timeout_minutes": (60, 720),
+    "take_profit_pct": (0.2, 1.0),
+    "stop_loss_pct": (0.15, 0.5),
+    "timeout_minutes": (20, 90),
     "size_pct": (10, 35),
     "max_open": (1, 4),
 }

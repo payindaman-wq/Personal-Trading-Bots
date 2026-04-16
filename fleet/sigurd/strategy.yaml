@@ -60,9 +60,9 @@ entry:
         operator: in
         value: [above, at]
 exit:
-  take_profit_pct: 2.5
-  stop_loss_pct: 0.7
-  timeout_minutes: 90
+  take_profit_pct: 0.55
+  stop_loss_pct: 0.3
+  timeout_minutes: 60
 risk:
   pause_if_down_pct: 5
   pause_minutes: 60
