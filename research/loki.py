@@ -330,6 +330,130 @@ def _maintenance_log(league, kind, detail, phase, result="", fix_hint=""):
         print(f"  [loki/maintenance_log] failed: {_e}")
 
 
+# ── Sprint integrity path tables (shared across fix handlers) ────────────────
+_CS_PATHS = {
+    "day":           "/root/.openclaw/workspace/competition/cycle_state.json",
+    "swing":         "/root/.openclaw/workspace/competition/swing/swing_cycle_state.json",
+    "futures_day":   "/root/.openclaw/workspace/competition/futures_day/cycle_state.json",
+    "futures_swing": "/root/.openclaw/workspace/competition/futures_swing/cycle_state.json",
+    "polymarket":    "/root/.openclaw/workspace/competition/polymarket/polymarket_cycle_state.json",
+}
+_ACTIVE_PATHS = {
+    "day":           ("/root/.openclaw/workspace/competition/active",               "/root/.openclaw/workspace/competition/results"),
+    "swing":         ("/root/.openclaw/workspace/competition/swing/active",         "/root/.openclaw/workspace/competition/swing/results"),
+    "futures_day":   ("/root/.openclaw/workspace/competition/futures_day/active",   "/root/.openclaw/workspace/competition/futures_day/results"),
+    "futures_swing": ("/root/.openclaw/workspace/competition/futures_swing/active", "/root/.openclaw/workspace/competition/futures_swing/results"),
+}
+# (results_dir, archive_root, archive_pattern) for leagues that use cycle archives.
+_ARCHIVE_PATHS = {
+    "day":        ("/root/.openclaw/workspace/competition/results",              "/root/.openclaw/workspace/competition/archive",              "cycle-{n}"),
+    "swing":      ("/root/.openclaw/workspace/competition/swing/results",        "/root/.openclaw/workspace/competition/swing/archive",        "cycle-{n}"),
+    "polymarket": ("/root/.openclaw/workspace/competition/polymarket/auto_results", "/root/.openclaw/workspace/competition/polymarket/sprint_results", "cycle_{n}_archive"),
+}
+
+ESCALATION_DEDUPE_FILE = os.path.join(RESEARCH, "loki_escalation_dedupe.json")
+ESCALATION_COOLDOWN_MIN = 360  # 6h — don't re-escalate the same anomaly within this window
+
+
+def _load_escalation_dedupe():
+    try:
+        with open(ESCALATION_DEDUPE_FILE) as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def _save_escalation_dedupe(state):
+    try:
+        with open(ESCALATION_DEDUPE_FILE, "w") as f:
+            json.dump(state, f, indent=2)
+    except Exception as e:
+        print(f"  [loki/dedupe] save failed: {e}")
+
+
+def _should_escalate(key):
+    """Return True if this anomaly hasn't been escalated in the last ESCALATION_COOLDOWN_MIN."""
+    state = _load_escalation_dedupe()
+    now_dt = datetime.now(timezone.utc)
+    last = state.get(key)
+    if last:
+        try:
+            last_dt = datetime.fromisoformat(last)
+            if last_dt.tzinfo is None:
+                last_dt = last_dt.replace(tzinfo=timezone.utc)
+            if (now_dt - last_dt).total_seconds() / 60.0 < ESCALATION_COOLDOWN_MIN:
+                return False
+        except Exception:
+            pass
+    # Also purge stale entries older than cooldown so the file doesn't grow forever
+    cutoff = now_dt.timestamp() - (ESCALATION_COOLDOWN_MIN * 60)
+    fresh = {}
+    for k, v in state.items():
+        try:
+            t = datetime.fromisoformat(v)
+            if t.tzinfo is None:
+                t = t.replace(tzinfo=timezone.utc)
+            if t.timestamp() >= cutoff:
+                fresh[k] = v
+        except Exception:
+            pass
+    fresh[key] = now_dt.isoformat()
+    _save_escalation_dedupe(fresh)
+    return True
+
+
+def _current_cycle_sprints(league):
+    """Return (cycle_number, set_of_sprint_ids_in_current_cycle). Empty set on error."""
+    path = _CS_PATHS.get(league)
+    if not path or not os.path.exists(path):
+        return 1, set()
+    try:
+        st = json.load(open(path))
+        return int(st.get("cycle", 1)), set(st.get("sprints", []))
+    except Exception:
+        return 1, set()
+
+
+def _archive_orphans(league, target_cycle_n, orphan_ids=None):
+    """Move sprint dirs in results/ into archive/cycle-N/. Returns (moved_list, error_or_None).
+
+    If orphan_ids given, move exactly those. Otherwise infer from results/ minus current-cycle sprints.
+    """
+    import shutil as _sh, os as _o
+    paths = _ARCHIVE_PATHS.get(league)
+    if not paths:
+        return [], f"no archive config for league {league}"
+    results_dir, archive_root, pattern = paths
+    if not _o.path.isdir(results_dir):
+        return [], f"results_dir missing: {results_dir}"
+    _, current_sprints = _current_cycle_sprints(league)
+    if orphan_ids is None:
+        orphan_ids = [
+            d for d in _o.listdir(results_dir)
+            if _o.path.isdir(_o.path.join(results_dir, d))
+            and not d.startswith("cycle")
+            and not d.endswith("_archive")
+            and d not in current_sprints
+        ]
+    if not orphan_ids:
+        return [], None
+    dest_dir = _o.path.join(archive_root, pattern.format(n=target_cycle_n))
+    _o.makedirs(dest_dir, exist_ok=True)
+    moved = []
+    for sid in orphan_ids:
+        src = _o.path.join(results_dir, sid)
+        if not _o.path.isdir(src):
+            continue
+        dst = _o.path.join(dest_dir, sid)
+        if _o.path.exists(dst):
+            _sh.rmtree(src)
+            moved.append(sid + "(dup)")
+        else:
+            _sh.move(src, dst)
+            moved.append(sid)
+    return moved, None
+
+
 def _apply_sprint_integrity_fix(anomalies):
     """For each anomaly, log to maintenance_log; auto-apply safe fixes, escalate the rest."""
     import shutil, os as _o
@@ -343,15 +467,8 @@ def _apply_sprint_integrity_fix(anomalies):
 
         if kind == "counter_drift":
             # Safe: sync sprint_in_cycle to len(sprints)
-            cs_paths = {
-                "day":           "/root/.openclaw/workspace/competition/cycle_state.json",
-                "swing":         "/root/.openclaw/workspace/competition/swing/swing_cycle_state.json",
-                "futures_day":   "/root/.openclaw/workspace/competition/futures_day/cycle_state.json",
-                "futures_swing": "/root/.openclaw/workspace/competition/futures_swing/cycle_state.json",
-                "polymarket":    "/root/.openclaw/workspace/competition/polymarket/polymarket_cycle_state.json",
-            }
             try:
-                cpath = cs_paths[league]
+                cpath = _CS_PATHS[league]
                 st = json.load(open(cpath))
                 st["sprint_in_cycle"] = len(st.get("sprints", []))
                 json.dump(st, open(cpath, "w"), indent=2)
@@ -363,14 +480,8 @@ def _apply_sprint_integrity_fix(anomalies):
 
         elif kind == "multiple_active":
             # Safe: move all but the latest active dir into results
-            active_paths = {
-                "day":           ("/root/.openclaw/workspace/competition/active", "/root/.openclaw/workspace/competition/results"),
-                "swing":         ("/root/.openclaw/workspace/competition/swing/active", "/root/.openclaw/workspace/competition/swing/results"),
-                "futures_day":   ("/root/.openclaw/workspace/competition/futures_day/active", "/root/.openclaw/workspace/competition/futures_day/results"),
-                "futures_swing": ("/root/.openclaw/workspace/competition/futures_swing/active", "/root/.openclaw/workspace/competition/futures_swing/results"),
-            }
             try:
-                adir, rdir = active_paths[league]
+                adir, rdir = _ACTIVE_PATHS[league]
                 dirs = sorted([d for d in _o.listdir(adir) if _o.path.isdir(_o.path.join(adir, d))])
                 to_move = dirs[:-1]  # keep the most recent (lex-sorted by date-suffix name)
                 moved = []
@@ -389,14 +500,64 @@ def _apply_sprint_integrity_fix(anomalies):
                 _maintenance_log(league, kind, detail, "failed", result=str(e))
                 outcomes.append(f"{league}:multiple_active:fail:{e}")
 
+        elif kind == "missing_archive_cycle":
+            # Safe: create archive/cycle-N/ and move orphaned results/ dirs into it.
+            # Never touches cycle_state.json, never modifies sprint counters.
+            try:
+                target_n = int(a.get("missing_cycle", 0)) or None
+                if not target_n:
+                    # Fall back: derive from detail "cycle=X" if parseable
+                    m = re.search(r"cycle=(\d+)", detail)
+                    if m:
+                        cur = int(m.group(1))
+                        target_n = max(1, cur - 1)
+                if not target_n:
+                    raise ValueError("could not determine target cycle number")
+                moved, err = _archive_orphans(league, target_n, orphan_ids=None)
+                if err:
+                    _maintenance_log(league, kind, detail, "failed", result=err)
+                    outcomes.append(f"{league}:missing_archive_cycle:fail:{err}")
+                else:
+                    _maintenance_log(league, kind, detail, "fixed",
+                        result=f"archived cycle-{target_n}: moved {len(moved)} sprint dirs")
+                    outcomes.append(f"{league}:missing_archive_cycle:fixed:{len(moved)}")
+            except Exception as e:
+                _maintenance_log(league, kind, detail, "failed", result=str(e))
+                outcomes.append(f"{league}:missing_archive_cycle:fail:{e}")
+
+        elif kind == "orphan_results":
+            # Safe: move orphan sprint dirs from results/ into archive/cycle-(current-1)/.
+            # Never touches cycle_state.json, never modifies sprint counters.
+            try:
+                current_n, _ = _current_cycle_sprints(league)
+                target_n = max(1, current_n - 1)
+                orphan_ids = a.get("orphan_ids") or None
+                moved, err = _archive_orphans(league, target_n, orphan_ids=orphan_ids)
+                if err:
+                    _maintenance_log(league, kind, detail, "failed", result=err)
+                    outcomes.append(f"{league}:orphan_results:fail:{err}")
+                else:
+                    _maintenance_log(league, kind, detail, "fixed",
+                        result=f"archived into cycle-{target_n}: moved {len(moved)} orphan dirs")
+                    outcomes.append(f"{league}:orphan_results:fixed:{len(moved)}")
+            except Exception as e:
+                _maintenance_log(league, kind, detail, "failed", result=str(e))
+                outcomes.append(f"{league}:orphan_results:fail:{e}")
+
         else:
-            # Risky fixes (orphan_results, missing_archive_cycle, phantom_sprint) — escalate
-            write_escalation_log("syn_sprint_integrity", league, 0,
-                f"{kind}: {detail} | hint: {hint}")
-            _maintenance_log(league, kind, detail, "escalated", result="logged to loki_escalation_log for human review")
-            outcomes.append(f"{league}:{kind}:escalated")
+            # Remaining risky fixes (phantom_sprint, cycle_state_missing, unknown) — escalate with dedupe.
+            dedupe_key = f"{league}|{kind}|{detail}"
+            if _should_escalate(dedupe_key):
+                write_escalation_log("syn_sprint_integrity", league, 0,
+                    f"{kind}: {detail} | hint: {hint}")
+                _maintenance_log(league, kind, detail, "escalated", result="logged to loki_escalation_log for human review")
+                outcomes.append(f"{league}:{kind}:escalated")
+            else:
+                outcomes.append(f"{league}:{kind}:escalation_suppressed_cooldown")
 
     return outcomes
+
+
 
 def process_pending_actions():
     if not os.path.exists(LOKI_PENDING_ACTIONS):

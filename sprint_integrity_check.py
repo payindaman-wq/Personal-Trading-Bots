@@ -236,14 +236,21 @@ def main():
     seen = {k: v for k, v in seen.items() if k in still_active}
 
     if new_anoms:
-        summary = "; ".join(f"{a['league']}:{a['kind']}" for a in new_anoms[:5])
-        append_jsonl(SYN_INBOX, {
-            "ts": now,
-            "source": "sprint_integrity",
-            "severity": "warning",
-            "msg": f"[SYN] sprint integrity anomalies ({len(new_anoms)}): {summary}",
-            "anomalies": new_anoms,
-        })
+        # Split: LOKI auto-fixable vs requires human review. Only human-review anomalies
+        # go to SYN_INBOX with severity=error (Telegram alert). Auto-fixable kinds are
+        # handled silently by LOKI; dashboard Maintenance tab still sees them via MAINTENANCE_LOG.
+        AUTO_FIXABLE_KINDS = {"counter_drift", "multiple_active", "missing_archive_cycle", "orphan_results"}
+        human_anoms = [a for a in new_anoms if a.get("kind") not in AUTO_FIXABLE_KINDS]
+
+        if human_anoms:
+            human_summary = "; ".join(f"{a['league']}:{a['kind']}" for a in human_anoms[:5])
+            append_jsonl(SYN_INBOX, {
+                "ts": now,
+                "source": "sprint_integrity",
+                "severity": "error",
+                "msg": f"[SYN] sprint integrity needs human review ({len(human_anoms)}): {human_summary}",
+                "anomalies": human_anoms,
+            })
 
         append_jsonl(LOKI_PENDING, {
             "ts": now,
@@ -266,7 +273,7 @@ def main():
                 "fix_hint": a.get("fix_hint", ""),
             })
 
-        print(f"[sprint_integrity] {len(new_anoms)} new anomaly/ies queued for Mimir+LOKI")
+        print(f"[sprint_integrity] {len(new_anoms)} new anomaly/ies queued for LOKI ({len(human_anoms)} need human review)")
         for a in new_anoms:
             print(f"  {a['league']}/{a['kind']}: {a['detail']}")
     else:
