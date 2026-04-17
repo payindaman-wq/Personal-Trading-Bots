@@ -209,17 +209,17 @@ def start_new():
         json.dump(meta, f, indent=2)
 
     cycle_state = load_cycle_state()
-    new_sprint_n = cycle_state.get('sprint_in_cycle', 0) + 1
     sprints = cycle_state.get('sprints', [])
     if comp_id not in sprints:
         sprints.append(comp_id)
-    cycle_state['sprint_in_cycle'] = new_sprint_n
+    # Derive sprint_in_cycle from list length — prevents counter drift
+    cycle_state['sprint_in_cycle'] = len(sprints)
     cycle_state['sprints'] = sprints
     if not cycle_state.get('cycle_started_at'):
         cycle_state['cycle_started_at'] = now.isoformat()
     save_cycle_state(cycle_state)
 
-    print(f'  Started: {comp_id} (Cycle {cycle_state["cycle"]}, Sprint {new_sprint_n})')
+    print(f'  Started: {comp_id} (Cycle {cycle_state["cycle"]}, Sprint {cycle_state["sprint_in_cycle"]})')
     return comp_id
 
 
@@ -229,7 +229,7 @@ def main():
 
     # Cycle boundary: pause for LOKI review when all sprints in cycle are done
     cs       = load_cycle_state()
-    sprint_n = cs.get('sprint_in_cycle', 0)
+    sprint_n = len(cs.get('sprints', []))  # derived — not the stored counter
     spc      = cs.get('sprints_per_cycle', 7)
     if sprint_n >= spc and cs.get('status') != 'awaiting_review':
         cs['status'] = 'awaiting_review'

@@ -126,6 +126,11 @@ def main():
                         "direction":    t.get("outcome", ""),
                         "outcome":      "win" if (t.get("pnl_usd") or 0) >= 0 else "loss",
                         "pnl_usd":      t.get("pnl_usd", 0),
+                        "pnl_pct":      t.get("pnl_pct", 0),
+                        "entry_price":  t.get("entry_price"),
+                        "exit_price":   t.get("exit_price"),
+                        "cost_usd":     t.get("cost_usd"),
+                        "reason":       t.get("reason", ""),
                         "closed_at":    ts,
                         "source":       t.get("source", "kalshi"),
                     })
@@ -139,6 +144,11 @@ def main():
                         "direction":    t.get("outcome", ""),
                         "outcome":      "win" if (t.get("pnl_usd") or 0) >= 0 else "loss",
                         "pnl_usd":      t.get("pnl_usd", 0),
+                        "pnl_pct":      t.get("pnl_pct", 0),
+                        "entry_price":  t.get("entry_price"),
+                        "exit_price":   t.get("exit_price"),
+                        "cost_usd":     t.get("cost_usd"),
+                        "reason":       t.get("reason", ""),
                         "closed_at":    ts,
                         "source":       "polymarket",
                     })

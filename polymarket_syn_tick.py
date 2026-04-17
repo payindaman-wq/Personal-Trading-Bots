@@ -877,6 +877,9 @@ def write_dashboard(state):
                 "outcome":      "win" if t.get("pnl_usd", 0) > 0 else "loss",
                 "pnl_usd":      t.get("pnl_usd"),
                 "pnl_pct":      t.get("pnl_pct"),
+                "entry_price":  t.get("entry_price"),
+                "exit_price":   t.get("exit_price"),
+                "cost_usd":     t.get("cost_usd"),
                 "closed_at":    t.get("closed_at", ""),
                 "reason":       t.get("reason", ""),
             })

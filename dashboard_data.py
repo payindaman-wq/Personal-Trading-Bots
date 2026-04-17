@@ -425,11 +425,22 @@ def get_activity_feed(day_active_id, swing_active_id, arb_active_id=None, spread
             active_dir = os.path.join(ACTIVE_DIRS[league], active_id)
             _scan_portfolios(league, active_dir, events, open_only=False)
 
-    # Open positions first, then closed sorted newest-first
+    # Open positions first, then closed sorted newest-first.
+    # Cap per league (not globally) so high-volume leagues don't crowd out others.
     position_events = [e for e in events if e["type"] == "position_open"]
     closed_events   = [e for e in events if e["type"] == "position_close"]
     closed_events.sort(key=lambda e: e.get("timestamp") or "", reverse=True)
-    return position_events + closed_events[:50]
+    per_league: dict = {}
+    for e in closed_events:
+        lg = e.get("league", "")
+        per_league.setdefault(lg, [])
+        if len(per_league[lg]) < 30:
+            per_league[lg].append(e)
+    limited = []
+    for evts in per_league.values():
+        limited.extend(evts)
+    limited.sort(key=lambda e: e.get("timestamp") or "", reverse=True)
+    return position_events + limited
 
 
 def get_sprint_archive():
