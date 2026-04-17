@@ -305,6 +305,99 @@ def apply_structural_change(league, description, patches):
     return True, f"applied {len(patches)} patches to {os.path.basename(target)}"
 
 
+
+# ── Sprint integrity fixes (SYN-queued) ───────────────────────────────────────
+MAINTENANCE_LOG_PATH = "/root/.openclaw/workspace/maintenance_log.jsonl"
+
+
+def _maintenance_log(league, kind, detail, phase, result="", fix_hint=""):
+    try:
+        import json as _j, os as _o
+        from datetime import datetime as _dt, timezone as _tz
+        rec = {
+            "ts":       _dt.now(_tz.utc).strftime("%Y-%m-%dT%H:%M"),
+            "phase":    phase,
+            "source":   "LOKI",
+            "league":   league,
+            "kind":     kind,
+            "detail":   detail,
+            "result":   result,
+            "fix_hint": fix_hint,
+        }
+        with open(MAINTENANCE_LOG_PATH, "a") as _f:
+            _f.write(_j.dumps(rec) + "\n")
+    except Exception as _e:
+        print(f"  [loki/maintenance_log] failed: {_e}")
+
+
+def _apply_sprint_integrity_fix(anomalies):
+    """For each anomaly, log to maintenance_log; auto-apply safe fixes, escalate the rest."""
+    import shutil, os as _o
+    outcomes = []
+    for a in anomalies:
+        league = a.get("league", "?")
+        kind   = a.get("kind", "?")
+        detail = a.get("detail", "")
+        hint   = a.get("fix_hint", "")
+        _maintenance_log(league, kind, detail, "attempted", fix_hint=hint)
+
+        if kind == "counter_drift":
+            # Safe: sync sprint_in_cycle to len(sprints)
+            cs_paths = {
+                "day":           "/root/.openclaw/workspace/competition/cycle_state.json",
+                "swing":         "/root/.openclaw/workspace/competition/swing/swing_cycle_state.json",
+                "futures_day":   "/root/.openclaw/workspace/competition/futures_day/cycle_state.json",
+                "futures_swing": "/root/.openclaw/workspace/competition/futures_swing/cycle_state.json",
+                "polymarket":    "/root/.openclaw/workspace/competition/polymarket/polymarket_cycle_state.json",
+            }
+            try:
+                cpath = cs_paths[league]
+                st = json.load(open(cpath))
+                st["sprint_in_cycle"] = len(st.get("sprints", []))
+                json.dump(st, open(cpath, "w"), indent=2)
+                _maintenance_log(league, kind, detail, "fixed", result=f"synced sprint_in_cycle={st['sprint_in_cycle']}")
+                outcomes.append(f"{league}:counter_drift:fixed")
+            except Exception as e:
+                _maintenance_log(league, kind, detail, "failed", result=str(e))
+                outcomes.append(f"{league}:counter_drift:fail:{e}")
+
+        elif kind == "multiple_active":
+            # Safe: move all but the latest active dir into results
+            active_paths = {
+                "day":           ("/root/.openclaw/workspace/competition/active", "/root/.openclaw/workspace/competition/results"),
+                "swing":         ("/root/.openclaw/workspace/competition/swing/active", "/root/.openclaw/workspace/competition/swing/results"),
+                "futures_day":   ("/root/.openclaw/workspace/competition/futures_day/active", "/root/.openclaw/workspace/competition/futures_day/results"),
+                "futures_swing": ("/root/.openclaw/workspace/competition/futures_swing/active", "/root/.openclaw/workspace/competition/futures_swing/results"),
+            }
+            try:
+                adir, rdir = active_paths[league]
+                dirs = sorted([d for d in _o.listdir(adir) if _o.path.isdir(_o.path.join(adir, d))])
+                to_move = dirs[:-1]  # keep the most recent (lex-sorted by date-suffix name)
+                moved = []
+                for d in to_move:
+                    src_p = _o.path.join(adir, d)
+                    dst_p = _o.path.join(rdir, d)
+                    if not _o.path.exists(dst_p):
+                        shutil.move(src_p, dst_p)
+                        moved.append(d)
+                    else:
+                        shutil.rmtree(src_p)
+                        moved.append(d + "(dup)")
+                _maintenance_log(league, kind, detail, "fixed", result=f"moved {moved} from active/ to results/")
+                outcomes.append(f"{league}:multiple_active:fixed:{len(moved)}")
+            except Exception as e:
+                _maintenance_log(league, kind, detail, "failed", result=str(e))
+                outcomes.append(f"{league}:multiple_active:fail:{e}")
+
+        else:
+            # Risky fixes (orphan_results, missing_archive_cycle, phantom_sprint) — escalate
+            write_escalation_log("syn_sprint_integrity", league, 0,
+                f"{kind}: {detail} | hint: {hint}")
+            _maintenance_log(league, kind, detail, "escalated", result="logged to loki_escalation_log for human review")
+            outcomes.append(f"{league}:{kind}:escalated")
+
+    return outcomes
+
 def process_pending_actions():
     if not os.path.exists(LOKI_PENDING_ACTIONS):
         return
@@ -343,6 +436,10 @@ def process_pending_actions():
                 status = "ok" if ok else "fail"
                 results.append(f"structural:{status}:{desc[:60]}")
                 print(f"  [loki/pending] structural: {desc}")
+            elif atype == "sprint_integrity_fix":
+                anoms = action.get("anomalies", [])
+                fix_results = _apply_sprint_integrity_fix(anoms)
+                results.extend(fix_results)
             elif atype == "escalate":
                 esc_desc = action.get("description", "")
                 write_escalation_log("syn_alert", league, 0, esc_desc)

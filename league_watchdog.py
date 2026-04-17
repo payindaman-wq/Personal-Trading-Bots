@@ -309,6 +309,13 @@ def main():
     if health_dirty:
         save_health_state(health_state)
 
+    # Sprint integrity check (SYN) — detects orphan/phantom sprints, counter drift, missing archives
+    try:
+        subprocess.run(['python3', os.path.join(WORKSPACE, 'sprint_integrity_check.py')], timeout=30, check=False)
+    except Exception as e:
+        print(f'  [sprint_integrity] check failed: {e}')
+
+
 
 if __name__ == "__main__":
     main()

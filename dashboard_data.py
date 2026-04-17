@@ -808,6 +808,47 @@ def get_loki_state():
     return state
 
 
+
+
+# ── Maintenance log (SYN-detected integrity bugs + LOKI fixes) ────────────────
+MAINTENANCE_LOG_PATH = "/root/.openclaw/workspace/maintenance_log.jsonl"
+
+
+def get_maintenance_state():
+    entries = []
+    if os.path.exists(MAINTENANCE_LOG_PATH):
+        with open(MAINTENANCE_LOG_PATH) as f:
+            for line in f:
+                line = line.strip()
+                if line:
+                    try:
+                        entries.append(json.loads(line))
+                    except Exception:
+                        pass
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=14)).strftime("%Y-%m-%dT%H:%M")
+    recent = [e for e in entries if e.get("ts", "") >= cutoff]
+    by_key = {}
+    for e in recent:
+        k = f"{e.get('league','?')}|{e.get('kind','?')}|{e.get('detail','')[:60]}"
+        if k not in by_key:
+            by_key[k] = {"league": e.get("league"), "kind": e.get("kind"), "detail": e.get("detail"), "events": []}
+        by_key[k]["events"].append({
+            "ts": e.get("ts"),
+            "phase": e.get("phase"),
+            "source": e.get("source"),
+            "fix_hint": e.get("fix_hint", ""),
+            "result": e.get("result", ""),
+        })
+    issues = list(by_key.values())
+    for i in issues:
+        i["events"].sort(key=lambda x: x.get("ts", ""))
+        last = i["events"][-1]
+        i["status"] = last.get("phase", "detected")
+        i["last_ts"] = last.get("ts")
+        i["first_ts"] = i["events"][0].get("ts")
+    issues.sort(key=lambda x: x.get("last_ts") or "", reverse=True)
+    return {"issues": issues, "total": len(issues)}
+
 def get_tyr_state():
     """Read TYR macro watchdog state for the TYR dashboard tab."""
     if os.path.exists(TYR_STATE_PATH):
@@ -1115,6 +1156,7 @@ def build():
     dashboard["odin_research"]     = get_odin_research()
     dashboard["mimir_state"]       = get_mimir_state()
     dashboard["loki_state"]        = get_loki_state()
+    dashboard["maintenance_state"] = get_maintenance_state()
     dashboard["tyr_state"]         = get_tyr_state()
     dashboard["heimdall_state"]     = get_heimdall_state()
     dashboard["cycle_state"]       = get_cycle_state()
