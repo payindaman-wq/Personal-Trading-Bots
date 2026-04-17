@@ -32,6 +32,14 @@ PM_RESEARCH_DIR  = os.path.join(RESEARCH, "pm")
 PM_FLEET_DIR     = os.path.join(WORKSPACE, "fleet", "polymarket")
 
 FREYA_SLOTS = ["mist", "kara", "thrud"]
+
+ANTHROPIC_SECRET        = "/root/.openclaw/secrets/anthropic.json"
+ANTHROPIC_URL           = "https://api.anthropic.com/v1/messages"
+ANTHROPIC_MODEL_LOKI    = "claude-sonnet-4-6"
+LOKI_PENDING_ACTIONS    = os.path.join(RESEARCH, "loki_pending_actions.jsonl")
+STRUCTURAL_RATE_FILE    = os.path.join(RESEARCH, "loki_structural_rate.json")
+STRUCTURAL_MONITOR_FILE = os.path.join(RESEARCH, "loki_structural_monitor.json")
+STRUCTURAL_RATE_MIN     = 360   # 6h between structural code changes per league
 PM_PERSONAS = {
     "sports":       "You are a sports analytics expert specializing in predicting sporting event outcomes.",
     "politics":     "You are a political analyst specializing in predicting electoral and policy outcomes.",
@@ -110,7 +118,251 @@ def call_gemini(prompt, max_tokens=500, temperature=0.1):
     return data["candidates"][0]["content"]["parts"][0]["text"].strip()
 
 
-# ── State tracking ─────────────────────────────────────────────────────────────
+def load_anthropic_key():
+    with open(ANTHROPIC_SECRET) as f:
+        return json.load(f)["anthropic_api_key"]
+
+
+def call_claude_loki(prompt, api_key, max_tokens=4000):
+    payload = json.dumps({
+        "model":      ANTHROPIC_MODEL_LOKI,
+        "max_tokens": max_tokens,
+        "messages":   [{"role": "user", "content": prompt}],
+    }).encode()
+    req = urllib.request.Request(
+        ANTHROPIC_URL, data=payload,
+        headers={
+            "Content-Type":      "application/json",
+            "x-api-key":         api_key,
+            "anthropic-version": "2023-06-01",
+        },
+    )
+    with urllib.request.urlopen(req, timeout=120) as r:
+        data = json.loads(r.read())
+    return data["content"][0]["text"].strip()
+
+
+def load_structural_rate():
+    if os.path.exists(STRUCTURAL_RATE_FILE):
+        try:
+            with open(STRUCTURAL_RATE_FILE) as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {}
+
+
+def save_structural_rate(rate):
+    with open(STRUCTURAL_RATE_FILE, "w") as f:
+        json.dump(rate, f)
+
+
+def load_structural_monitor():
+    if os.path.exists(STRUCTURAL_MONITOR_FILE):
+        try:
+            with open(STRUCTURAL_MONITOR_FILE) as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {}
+
+
+def save_structural_monitor(m):
+    with open(STRUCTURAL_MONITOR_FILE, "w") as f:
+        json.dump(m, f)
+
+
+def check_structural_monitors():
+    monitor = load_structural_monitor()
+    if not monitor:
+        return
+    changed = False
+    for league, m in list(monitor.items()):
+        try:
+            ts = datetime.fromisoformat(m["ts"]).replace(tzinfo=timezone.utc)
+        except Exception:
+            del monitor[league]
+            changed = True
+            continue
+        age_min = (datetime.now(timezone.utc) - ts).total_seconds() / 60
+        if age_min < 12:
+            continue
+        unit   = m.get("unit")
+        backup = m.get("backup")
+        target = m.get("target")
+        if age_min > 120:
+            del monitor[league]
+            changed = True
+            continue
+        result = subprocess.run(
+            ["systemctl", "is-active", unit], capture_output=True, text=True, timeout=5
+        )
+        if result.stdout.strip() != "active":
+            print(f"  [loki-structural] ROLLBACK: {unit} died after patch")
+            if backup and target and os.path.exists(backup):
+                shutil.copy2(backup, target)
+                subprocess.run(["systemctl", "restart", unit], timeout=15, check=False)
+            tg_send(f"LOKI rollback: {unit} died after structural patch", "error")
+            del monitor[league]
+            changed = True
+        else:
+            print(f"  [loki-structural] {unit} healthy at {age_min:.0f}m post-patch")
+            del monitor[league]
+            changed = True
+    if changed:
+        save_structural_monitor(monitor)
+
+
+SERVICE_MAP = {
+    "day":           "odin_day.service",
+    "swing":         "odin_swing.service",
+    "futures_day":   "odin_futures_day.service",
+    "futures_swing": "odin_futures_swing.service",
+    "pm":            "freya.service",
+}
+
+
+def apply_structural_change(league, description, analysis_context):
+    rate    = load_structural_rate()
+    last_ts = rate.get(league or "global")
+    if last_ts:
+        last_dt = datetime.fromisoformat(last_ts).replace(tzinfo=timezone.utc)
+        age_min = (datetime.now(timezone.utc) - last_dt).total_seconds() / 60
+        if age_min < STRUCTURAL_RATE_MIN:
+            wait = int(STRUCTURAL_RATE_MIN - age_min)
+            return False, f"rate limited: {wait}m until next structural change for {league}"
+
+    target = RESEARCHER if league in ("day", "swing", "futures_day", "futures_swing") else FREYA_RESEARCHER
+    if not os.path.exists(target):
+        return False, f"target file not found: {os.path.basename(target)}"
+
+    with open(target) as f:
+        code = f.read()
+
+    api_key = load_anthropic_key()
+    prompt = (
+        "You are LOKI, an automated code patcher for a crypto trading research system.\n\n"
+        f"Problem identified by Mimir:\n{description}\n\n"
+        f"Analysis context:\n{analysis_context[:1500]}\n\n"
+        f"Current {os.path.basename(target)}:\n"
+        f"```python\n{code[:6000]}\n```\n\n"
+        "Generate a minimal targeted patch. Output ONLY a JSON array of search/replace pairs:\n"
+        '[{"old": "exact unique string to replace", "new": "replacement string"}]\n\n'
+        "Rules: each old must appear exactly once; max 3 pairs; "
+        "no new imports; no signature changes; must be valid Python. "
+        'If too complex, output: {"error": "reason"}'
+    )
+    try:
+        response   = call_claude_loki(prompt, api_key)
+        m          = re.search(r'\[\s*\{[\s\S]*\}\s*\]', response)
+        if not m:
+            err    = re.search(r'\{"error"\s*:\s*"([^"]+)"\}', response)
+            reason = err.group(1) if err else "no patch in response"
+            return False, f"Claude declined: {reason}"
+        patches = json.loads(m.group())
+    except Exception as e:
+        return False, f"Claude API error: {e}"
+
+    if not patches:
+        return False, "empty patch list"
+
+    new_code = code
+    for i, patch in enumerate(patches):
+        old_str = patch.get("old", "")
+        new_str = patch.get("new", "")
+        if not old_str:
+            return False, f"patch {i}: empty old string"
+        count = code.count(old_str)
+        if count != 1:
+            return False, f"patch {i}: old string found {count}x (need exactly 1)"
+        new_code = new_code.replace(old_str, new_str, 1)
+
+    try:
+        import ast
+        ast.parse(new_code)
+    except SyntaxError as e:
+        return False, f"patch fails syntax check: {e}"
+
+    if DRY_RUN:
+        return True, f"DRY_RUN: would apply {len(patches)} patches to {os.path.basename(target)}"
+
+    ts_str = datetime.now().strftime('%Y%m%d_%H%M')
+    backup = target + f".structural_{ts_str}.bak"
+    shutil.copy2(target, backup)
+    with open(target, "w") as f:
+        f.write(new_code)
+
+    unit = SERVICE_MAP.get(league)
+    if unit:
+        subprocess.run(["systemctl", "restart", unit], timeout=15, check=False)
+
+    monitor = load_structural_monitor()
+    monitor[league] = {
+        "ts":     datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
+        "unit":   unit,
+        "backup": backup,
+        "target": target,
+        "desc":   description[:80],
+    }
+    save_structural_monitor(monitor)
+    rate[league or "global"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
+    save_structural_rate(rate)
+    rel = os.path.relpath(target, WORKSPACE)
+    git_commit([rel], f"[loki-structural] {league}: {description[:60]}")
+    return True, f"applied {len(patches)} patches to {os.path.basename(target)}"
+
+
+def process_pending_actions():
+    if not os.path.exists(LOKI_PENDING_ACTIONS):
+        return
+    with open(LOKI_PENDING_ACTIONS) as f:
+        entries = [json.loads(l) for l in f if l.strip()]
+    unprocessed = [e for e in entries if not e.get("processed")]
+    if not unprocessed:
+        return
+    print(f"[loki] {len(unprocessed)} pending SYN-Mimir action(s)")
+    for entry in unprocessed:
+        league  = entry.get("league", "unknown")
+        results = []
+        for action in entry.get("actions", []):
+            atype = action.get("type")
+            if atype == "restart_service":
+                unit = action.get("unit", "")
+                try:
+                    subprocess.run(["systemctl", "restart", unit], timeout=15, check=False)
+                    results.append(f"restarted:{unit}")
+                except Exception:
+                    results.append(f"restart_fail:{unit}")
+            elif atype == "update_constant":
+                const  = action.get("constant", "")
+                subkey = action.get("subkey")
+                newval = action.get("new_value")
+                if const in ALLOWED_CONSTANTS and newval is not None:
+                    ok, desc = apply_constant_change(const, subkey, newval)
+                    status = "ok" if ok else "skip"
+                    results.append(f"constant:{status}:{desc[:60]}")
+                else:
+                    results.append(f"constant:blocked:{const}")
+            elif atype == "structural":
+                ok, desc = apply_structural_change(
+                    league, action.get("description", ""), action.get("analysis", ""),
+                )
+                status = "ok" if ok else "fail"
+                results.append(f"structural:{status}:{desc[:60]}")
+                print(f"  [loki/pending] structural: {desc}")
+            elif atype == "escalate":
+                esc_desc = action.get("description", "")
+                write_escalation_log("syn_alert", league, 0, esc_desc)
+                results.append(f"escalated:{esc_desc[:50]}")
+        entry["processed"]    = True
+        entry["processed_ts"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
+        entry["results"]      = results
+    with open(LOKI_PENDING_ACTIONS, "w") as f:
+        for e in entries:
+            f.write(json.dumps(e) + "\n")
+
+
+# ── State tracking ─
 
 def load_processed():
     """Return set of (ts, league) tuples LOKI has already handled."""
@@ -457,8 +709,12 @@ def process_pm_entry(entry):
                     actions.append(f"freya_code-skip: {desc}")
         elif change.get("type") == "structural":
             desc = change.get("description", "see Mimir analysis")
-            write_escalation_log(ts, "pm", gen, desc)
-            actions.append(f"escalated(Phase2): {desc[:60]}")
+            ok, patch_desc = apply_structural_change("pm", desc, analysis)
+            if ok:
+                actions.append(f"structural: {patch_desc}")
+            else:
+                write_escalation_log(ts, "pm", gen, desc)
+                actions.append(f"escalated(Phase2): {patch_desc[:60]}")
     else:
         print(f"  [loki] No PM code change keywords — program.md only")
 
@@ -911,9 +1167,14 @@ def process_entry(entry):
 
         elif change.get("type") == "structural":
             desc = change.get("description", "see Mimir analysis")
-            write_escalation_log(ts, league, gen, desc)
-            actions.append(f"escalated(Phase2): {desc[:60]}")
-            print(f"  [loki] Structural change logged to escalation log — visible in dashboard")
+            ok, patch_desc = apply_structural_change(league, desc, analysis)
+            if ok:
+                actions.append(f"structural: {patch_desc}")
+                print(f"  [loki] Structural change applied: {patch_desc}")
+            else:
+                write_escalation_log(ts, league, gen, desc)
+                actions.append(f"escalated(Phase2): {patch_desc[:60]}")
+                print(f"  [loki] Structural escalated: {patch_desc}")
     else:
         print(f"  [loki] No code change keywords — program.md only")
 
@@ -924,6 +1185,8 @@ def main():
     if DRY_RUN:
         print("[loki] *** DRY-RUN MODE — no changes will be applied ***")
 
+    check_structural_monitors()  # verify recently patched services are alive
+    process_pending_actions()    # execute actions queued by SYN-Mimir pipeline
     handle_all_cycle_reviews()
 
     if not os.path.exists(MIMIR_LOG):

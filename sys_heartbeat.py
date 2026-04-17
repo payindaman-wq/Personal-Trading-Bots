@@ -22,7 +22,10 @@ CHAT_ID    = "8154505910"
 
 COOLDOWN_MIN        = 1440    # min gap between repeated alerts for the same problem (24h)
 SERVICE_COOLDOWN_MIN = 1440
-GEMINI_COOLDOWN_MIN = 1440   # Gemini quota alerts fire at most once per day
+GEMINI_COOLDOWN_MIN  = 1440   # Gemini quota alerts fire at most once per day
+MIMIR_COOLDOWN_MIN   = 360    # min between SYN->Mimir triggers per league+type (6h)
+SYN_MIMIR_QUEUE      = f"{WORKSPACE}/research/syn_mimir_queue.jsonl"
+MIMIR_SCRIPT         = f"{WORKSPACE}/research/mimir.py"
 PAUSE_FLAG          = f"{WORKSPACE}/competition/heartbeat_paused"
 
 # ── League definitions ──────────────────────────────────────────────────────
@@ -63,10 +66,13 @@ LEAGUES = [
 ]
 
 SERVICES = [
-    {"name": "odin_day",   "unit": "odin_day.service"},
-    {"name": "odin_swing", "unit": "odin_swing.service"},
-    {"name": "kalshi_copy",    "unit": "kalshi_copy.service"},
-    {"name": "polymarket_syn", "unit": "polymarket_syn.service"},
+    {"name": "odin_day",           "unit": "odin_day.service"},
+    {"name": "odin_swing",         "unit": "odin_swing.service"},
+    {"name": "odin_futures_day",   "unit": "odin_futures_day.service"},
+    {"name": "odin_futures_swing", "unit": "odin_futures_swing.service"},
+    {"name": "freya",              "unit": "freya.service"},
+    {"name": "kalshi_copy",        "unit": "kalshi_copy.service"},
+    {"name": "polymarket_syn",     "unit": "polymarket_syn.service"},
 ]
 
 # ── State / cooldown ────────────────────────────────────────────────────────
@@ -161,6 +167,40 @@ def git_commit_push(message):
     except Exception as e:
         print(f"  [git] push failed: {e}")
 
+
+
+
+def write_syn_mimir_alert(state, league, error_type, message, context=None):
+    """Write a structured alert to the SYN-Mimir queue and launch Mimir analysis."""
+    cooldown_key = f"mimir_{league}_{error_type}"
+    last = state["last_alerted"].get(cooldown_key)
+    if last:
+        last_dt = datetime.fromisoformat(last)
+        if datetime.now(timezone.utc) - last_dt < timedelta(minutes=MIMIR_COOLDOWN_MIN):
+            return
+    entry = {
+        "ts":         datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
+        "source":     "syn_heartbeat",
+        "league":     league,
+        "error_type": error_type,
+        "message":    message,
+        "context":    context or {},
+        "processed":  False,
+    }
+    try:
+        os.makedirs(os.path.dirname(SYN_MIMIR_QUEUE), exist_ok=True)
+        with open(SYN_MIMIR_QUEUE, "a") as f:
+            f.write(json.dumps(entry) + "\n")
+        import subprocess as _sp
+        _sp.Popen(
+            ["python3", MIMIR_SCRIPT, "--mode", "syn_alert"],
+            stdout=open(f"{WORKSPACE}/research/mimir_syn_alert.log", "a"),
+            stderr=_sp.STDOUT,
+        )
+        state["last_alerted"][cooldown_key] = datetime.now(timezone.utc).isoformat()
+        print(f"  [syn->mimir] queued {error_type} for {league}, launched Mimir syn_alert")
+    except Exception as e:
+        print(f"  [syn->mimir] failed: {e}")
 
 
 def check_tick_freshness(league):
@@ -567,6 +607,20 @@ def main():
         tg_send("\n".join(lines))
     else:
         print("  All systems nominal.")
+
+    # SYN->Mimir escalation for research problems requiring analysis
+    MIMIR_ESCALATE = ("backtest_errors", "program_halt", "research_stall")
+    for key, msg in problems:
+        for lg in ["day", "swing", "futures_day", "futures_swing"]:
+            for etype in MIMIR_ESCALATE:
+                if key == f"odin_{lg}_{etype}":
+                    ctx = {}
+                    gs = f"{WORKSPACE}/research/{lg}/gen_state.json"
+                    if os.path.isfile(gs):
+                        try:
+                            with open(gs) as f: ctx["gen_state"] = json.load(f)
+                        except Exception: pass
+                    write_syn_mimir_alert(state, lg, etype, msg, context=ctx)
 
     save_state(state)
 

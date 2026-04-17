@@ -22,7 +22,9 @@ RESEARCH          = os.path.join(WORKSPACE, "research")
 ANTHROPIC_SECRET  = "/root/.openclaw/secrets/anthropic.json"
 ANTHROPIC_MODEL   = "claude-sonnet-4-6"  # overridden by --model flag
 ANTHROPIC_URL     = "https://api.anthropic.com/v1/messages"
-MIMIR_LOG         = os.path.join(RESEARCH, "mimir_log.jsonl")
+MIMIR_LOG            = os.path.join(RESEARCH, "mimir_log.jsonl")
+SYN_MIMIR_QUEUE      = os.path.join(RESEARCH, "syn_mimir_queue.jsonl")
+LOKI_PENDING_ACTIONS = os.path.join(RESEARCH, "loki_pending_actions.jsonl")
 
 DAY_RESULTS_DIR   = os.path.join(WORKSPACE, "competition", "results")
 SWING_RESULTS_DIR         = os.path.join(WORKSPACE, "competition", "swing", "results")
@@ -515,12 +517,119 @@ def parse_response(response):
     return analysis, program
 
 
+def process_syn_alerts():
+    """Read SYN alert queue, analyze each with Claude, write structured actions to LOKI."""
+    if not os.path.exists(SYN_MIMIR_QUEUE):
+        print("[mimir/syn_alert] No queue file — nothing to do")
+        return
+
+    api_key = load_anthropic_key()
+
+    with open(SYN_MIMIR_QUEUE) as f:
+        entries = [json.loads(l) for l in f if l.strip()]
+
+    unprocessed = [e for e in entries if not e.get("processed")]
+    if not unprocessed:
+        print("[mimir/syn_alert] No unprocessed alerts")
+        return
+
+    print(f"[mimir/syn_alert] Processing {len(unprocessed)} alert(s)")
+
+    for entry in unprocessed:
+        league     = entry.get("league", "unknown")
+        error_type = entry.get("error_type", "unknown")
+        message    = entry.get("message", "")
+        context    = entry.get("context", {})
+        print(f"  [{league}/{error_type}] analyzing...")
+
+        # Gather research context
+        results_tail = ""
+        results_path = os.path.join(RESEARCH, league, "results.tsv")
+        if os.path.exists(results_path):
+            with open(results_path) as f:
+                lines = f.readlines()
+            results_tail = "".join(lines[-20:])
+
+        gen_state = context.get("gen_state", {})
+        prog_path = os.path.join(RESEARCH, league, "program.md")
+        prog_snippet = ""
+        if os.path.exists(prog_path):
+            with open(prog_path) as f:
+                prog_snippet = f.read()[-2000:]
+
+        prompt = f"""You are Mimir, analysis officer for a crypto trading research system.
+
+SYN (system monitor) detected:
+League: {league}
+Error type: {error_type}
+Message: {message}
+Gen state: {json.dumps(gen_state)}
+
+Recent research results (last 20 gens):
+{results_tail}
+
+Bottom of program.md:
+{prog_snippet}
+
+Diagnose the root cause and output a JSON object with recommended LOKI actions:
+{{
+  "analysis": "brief root cause diagnosis (2-3 sentences)",
+  "actions": [
+    {{"type": "restart_service", "unit": "service_name.service", "reason": "..."}},
+    {{"type": "update_constant", "constant": "NAME", "subkey": "key_or_null", "new_value": 50, "reason": "..."}},
+    {{"type": "structural", "description": "specific change needed", "analysis": "detailed context for code patch generation"}},
+    {{"type": "escalate", "description": "what needs human attention"}}
+  ]
+}}
+
+Only include actions that directly address the detected problem. Be conservative.
+Output the JSON object only — no surrounding text."""
+
+        try:
+            response = call_claude(prompt, api_key)
+            import re as _re
+            m = _re.search(r'\{[\s\S]*\}', response)
+            rec = json.loads(m.group()) if m else {"analysis": response[:200], "actions": [{"type": "escalate", "description": "Could not parse Mimir response"}]}
+        except Exception as e:
+            rec = {"analysis": f"Mimir analysis error: {e}", "actions": [{"type": "escalate", "description": str(e)}]}
+
+        pending = {
+            "ts":             datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
+            "source":         "syn_alert",
+            "league":         league,
+            "error_type":     error_type,
+            "mimir_analysis": rec.get("analysis", ""),
+            "actions":        rec.get("actions", []),
+            "processed":      False,
+        }
+        with open(LOKI_PENDING_ACTIONS, "a") as f:
+            f.write(json.dumps(pending) + "\n")
+
+        entry["processed"]    = True
+        entry["processed_ts"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
+        print(f"  [{league}/{error_type}] -> {len(rec.get('actions', []))} action(s) queued for LOKI")
+
+    # Rewrite queue with processed flags
+    with open(SYN_MIMIR_QUEUE, "w") as f:
+        for e in entries:
+            f.write(json.dumps(e) + "\n")
+    print("[mimir/syn_alert] Done")
+
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--league",      choices=["day", "swing", "pm", "futures_day", "futures_swing"], required=True)
-    parser.add_argument("--generation",  type=int,                       required=True)
+    parser.add_argument("--league",      choices=["day", "swing", "pm", "futures_day", "futures_swing"], required=False)
+    parser.add_argument("--generation",  type=int,                       required=False)
     parser.add_argument("--model",       default=None, help="Override Claude model (e.g. claude-opus-4-6)")
+    parser.add_argument("--mode",        choices=["standard", "syn_alert"], default="standard")
     args = parser.parse_args()
+
+    if args.mode == "syn_alert":
+        process_syn_alerts()
+        return
+
+    if not args.league or args.generation is None:
+        parser.error("--league and --generation are required in standard mode")
 
     league     = args.league
     generation = args.generation
