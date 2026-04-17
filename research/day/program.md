@@ -1,6 +1,6 @@
 ```markdown
 # ODIN Research Program — Crypto Day Trading Strategy Optimizer
-# Version: 9200-MIMIR-AUDIT-7
+# Version: 9325-MIMIR-AUDIT-8
 
 ---
 
@@ -11,6 +11,10 @@
 **SHORT_VALUE = 0.43**
 **MACD_PERIOD = 45**
 **Rep target: 8 reps total**
+
+⚠️ NEW BEST ACHIEVED: Gen 9325 produced Sharpe=1.1227, trades=309.
+This is the new formal best. Deploy it before continuing Block A.
+Continue A1 reps after deployment confirmation.
 
 Your ONLY job is to output the YAML below with these three values substituted.
 Nothing else. No creativity. No other changes.
@@ -26,8 +30,10 @@ Write this BEFORE your YAML, every time:
   SHORT_VALUE: 0.43
   MACD_PERIOD: 45
   Rep number: [N of 8]
+  Valid reps completed so far: [count — trades ≤ 450]
+  Structural failures so far this target: [count — trades > 450]
 
-If you do not know your rep number, write UNKNOWN. Do not skip.
+If you do not know your rep number, write UNKNOWN. Do not skip this block.
 
 ---
 
@@ -89,7 +95,7 @@ risk:
 ```
 
 This is the correct output for A1. Submit it exactly as shown above.
-Replace only the three values when the target changes.
+Replace only the three values (LONG_VALUE, SHORT_VALUE, MACD_PERIOD) when the target changes.
 
 ---
 
@@ -115,17 +121,23 @@ If trades < 100 in results: you answered Q1 wrong. The threshold is missing or z
 
 ---
 
-## WHY THESE CHECKS MATTER
+## WHY THESE CHECKS MATTER — FAILURE SIGNATURES
 
 Confirmed failure signatures from recent generations:
 
-  trades=818, sharpe=-4.78  → long operator was "gt" instead of "lt" (inverted)
-  trades=1006, sharpe=-0.34 → long value was 0 or positive (threshold collapsed)
-  trades=519, sharpe=-23.25 → condition was missing entirely
+  trades=818, sharpe=-4.78   → long operator was "gt" instead of "lt" (inverted)
+                                Observed 5+ times in gens 9307–9319.
+  trades=1006, sharpe=-0.34  → long value was 0 or positive (threshold collapsed)
+  trades=519, sharpe=-23.25  → condition was missing entirely
+  trades=0, sharpe=-999      → YAML structurally malformed (gens 9315, 9322)
 
-These failures were observed at gens 9183–9189, 9193, 9196, 9181.
-They are ALL caused by getting Q1, Q2, or Q3 wrong above.
+These failures are ALL caused by getting Q1, Q2, or Q3 wrong above.
 There is no other cause. Check those three things first.
+
+⚠️ The trades=818 / sharpe=-4.7772 result is an exact fingerprint.
+   If you see this result: your long-side operator is "gt". Fix it to "lt".
+   This exact result appeared 5 times in 20 generations without escalation.
+   Do not let it appear again.
 
 ---
 
@@ -171,39 +183,51 @@ MACD_PERIOD: controls macd_signal lookback.
 | Metric | Threshold                        |
 |--------|----------------------------------|
 | Trades | ≥ 280 (hard floor)               |
-| Sharpe | > 1.1137 (current formal best)   |
+| Sharpe | > 1.1227 (current formal best)   |
 
 Result classification:
   trades > 450                    → [structural_failure] — does NOT count as a rep
   trades < 280                    → [low_trades] — DOES count as a rep
-  trades 280–450, Sharpe > 1.1137 → [new_best] — deploy immediately
+  trades 280–450, Sharpe > 1.1227 → [new_best] — deploy immediately
   trades < 280, Sharpe > 1.10    → [high_signal_low_volume] — log, continue
 
-MIN_TRADES = 280. This will NOT be changed again.
-(Previous changes: 200→350→280. The 350 threshold would have rejected the
-formal best at trades=288. The 280 floor is correct and final.)
+MIN_TRADES = 280. This is final.
+
+⚠️ HISTORY OF MIN_TRADES CHANGES — DO NOT REPEAT THESE ERRORS:
+  Gen 5400: Changed 280 → 200  (loosened; acceptable)
+  Gen 6200: Changed 200 → 350  ← THIS WAS AN ERROR. It would have rejected
+                                   the formal best (trades=288) and the new best
+                                   (trades=309). Do not raise above 280 again.
+  Gen 6600: Changed 350 → 280  (corrected the gen 6200 error)
+  The 280 floor is correct and final. Do not change it.
 
 ---
 
-## ESCALATION TRIGGERS
+## ESCALATION TRIGGERS — UPDATED
 
-STOP and escalate to MIMIR if:
-  → 3 or more consecutive results show trades > 450
-  → 5 or more consecutive results show the same Sharpe value
-  → Any YAML parse error occurs
+STOP and escalate to MIMIR if ANY of the following:
 
-Recent confirmed escalation events:
-  Gens 9183–9189: 7 consecutive trades=818 results → [structural_failure_streak]
-  Gens 9182/9190/9192/9199/9200: Sharpe=1.0775 repeated → [queue_drift]
+  TRIGGER 1: trades > 450 appears 3 or more times in the last 10 generations
+             (does NOT need to be consecutive — distributed failures count)
+  TRIGGER 2: The same Sharpe value appears 5 or more times in any 10-generation window
+  TRIGGER 3: Any YAML parse error occurs
+  TRIGGER 4: trades=0 appears 2 or more times in the last 10 generations
 
-Both of these required escalation. They were not escalated. Do not repeat this error.
+⚠️ PREVIOUS VERSION USED "3 CONSECUTIVE" FOR TRIGGER 1.
+   That was too strict. Interleaved valid results were resetting the counter
+   while structural failures continued. Gens 9307–9319 showed 5 trades=818
+   results in 13 generations without triggering escalation. Fixed above.
+
+Recent confirmed escalation events (did not escalate — do not repeat):
+  Gens 9307–9319: 5 trades=818 results in 13 gens → [structural_failure_streak]
+  Gens 9182–9200: Sharpe=1.0775 repeated 7+ times → [queue_drift]
 
 ---
 
 ## FULL TARGET QUEUE
 
 Execute in order. Do not skip. Do not repeat unless [structural_failure].
-Track rep numbers explicitly.
+Track rep numbers explicitly in every state declaration.
 
 A rep counts if: trades ≤ 450 (even if trades < 280 or Sharpe < 0).
 A rep does NOT count if: trades > 450 ([structural_failure]).
@@ -245,62 +269,77 @@ SKIP LIST — never test these:
 
 ## KEY PRIOR RESULTS (READ BEFORE CLAIMING A NEW BEST)
 
-Formal best (current deployment target):
-  Sharpe=1.1137, threshold=-0.50, macd=30, trades=288
-  To beat this: need Sharpe > 1.1137 AND trades ≥ 280.
+Current formal best (deploy immediately if not yet deployed):
+  Sharpe=1.1227, threshold=-0.43, macd=45, trades=309  ← GEN 9325, NEW BEST
+  Previous best: Sharpe=1.1137, threshold=-0.50, macd=30, trades=288
+  To beat the new best: need Sharpe > 1.1227 AND trades ≥ 280.
 
-High-signal anomalies (macd=45, trade count too low):
-  Sharpe=1.3614, trades=176  → likely -0.43 or tighter
-  Sharpe=1.3082, trades=148  → likely -0.43 or tighter
-  Sharpe=1.1626, trades=164  → likely -0.42 or tighter
-  Interpretation: macd=45 sharply improves Sharpe. Block A finds the
-  threshold that brings trade count to ≥280 while preserving this signal.
-  Expected crossover: between -0.40 and -0.42.
+High-signal anomalies (macd=45, trade count too low to deploy):
+  Sharpe=1.3614, trades=176  → likely -0.43 or tighter / macd=45
+  Sharpe=1.3082, trades=148  → likely -0.43 or tighter / macd=45
+  Sharpe=1.1626, trades=164  → likely -0.42 or tighter / macd=45
+  Interpretation: macd=45 sharply improves Sharpe vs macd=30.
+  Block A finds the threshold that brings trade count to ≥280 while
+  preserving this signal. Expected crossover: between -0.40 and -0.42.
+  Gen 9325 confirms -0.43/macd=45 can reach 309 trades with Sharpe=1.1227.
+
+⚠️ NOTE ON HIGH-SIGNAL ANOMALIES:
+  Sharpe > 1.30 at trades < 280 is flagged [high_signal_low_volume].
+  These are NOT discarded — they are logged as directional evidence.
+  If 3+ anomalies cluster at the same threshold, flag for MIMIR review.
+  A separate low-volume investigation (MIN_TRADES=150) may be warranted.
 
 Stable macd=30 region (fully characterized):
   -0.43 / macd=30: Sharpe 1.07–1.08, trades 305–326
   -0.42 / macd=30: Sharpe ~1.07–1.08, trades ~308
 
-Recent repeated result (queue drift signature):
+Queue drift signature (do not submit this result again):
   Sharpe=1.0775, trades=308 — appeared 7+ times in gens 9182–9200.
-  This is NOT a new best. This is a drift artifact.
-  If you are about to submit Sharpe=1.0775 again: check your queue position.
+  This is NOT a new best. If you are about to submit Sharpe=1.0775: check queue position.
+
+Structural failure fingerprint (do not submit YAML that produces this):
+  trades=818, sharpe=-4.7772, win_rate=38.8% — appeared 5+ times in gens 9307–9319.
+  Caused by: long-side operator is "gt" instead of "lt". Fix immediately.
 
 ---
 
-## DEPLOYMENT STATUS — ACTION REQUIRED BEFORE BLOCK B
+## DEPLOYMENT STATUS — ACTION REQUIRED NOW
 
 DEPLOYED:        Legacy artifact (momentum_price_change_macd_ema_trend_filter)
-RESEARCH BEST:   Sharpe=1.1137, threshold=-0.50, macd=30, trades=288
-GAP STATUS:      UNRESOLVED (flagged gen 8000, gen 8200, not yet closed)
+RESEARCH BEST:   Sharpe=1.1227, threshold=-0.43, macd=45, trades=309 (gen 9325)
+GAP STATUS:      CRITICAL — deploy before continuing Block A
 
-The legacy artifact has:
+The legacy artifact has known deficiencies vs. the research best:
   - Asymmetric conditions (long uses 5-min period, short uses 30-min period)
   - 5 conditions per side vs. 2 in the research strategy
-  - Tight stop_loss=0.4% vs. research best's 1.2%
+  - Tight stop_loss=0.37% vs. research best's 1.2%
   - Only 10 pairs vs. research best's 16
+  - Sharpe substantially lower in backtest
 
-The research best is strictly superior in backtest. Deploy it.
-Do not begin Block B under the legacy artifact.
+The research best is strictly superior. Deploy it.
+The CAUTION regime (F&G=21, low live trade volume) is the correct deployment window.
+Deployment risk is minimal. There is no reason to delay.
 
-Deploy trigger: immediately. CAUTION regime means low live trade volume
-= low deployment risk. This is the correct window.
+⚠️ This gap was flagged at gen 8000 and gen 8200. It has still not been closed.
+   Two MIMIR escalations have identified this. Act on it now.
 
 ---
 
 ## LIVE COMPETITION CONTEXT
 
-Current Regime: CAUTION (F&G=23, BTC_DOM=57.01%)
-Expected live trades: zero. This is correct behavior for CAUTION regime.
+Current Regime: CAUTION (F&G=21, BTC_DOM=56.99%)
+Expected live trades: zero to minimal. This is correct behavior for CAUTION regime.
 Resume trigger: F&G > 25 AND BTC dominance < 54%.
 
-Competition performance:
-  6 of last 7 sprints: zero trades (regime-appropriate)
-  1 trade: -0.07% (minor loss, within expected variance for CAUTION)
+Competition performance (last 7 sprints):
+  6 of 7 sprints: zero trades (regime-appropriate, no action required)
+  1 trade: -0.07% (within expected variance for CAUTION)
   Assessment: consistent with directive. No action required on live side.
 
 If zero trades persist 2+ sprints after regime shifts to NEUTRAL:
   → Escalate to MIMIR immediately.
+  → Likely cause: legacy artifact's tight stop_loss (0.37%) suppressing entries.
+    This is another reason to deploy the research best promptly.
 
 ---
 
@@ -336,9 +375,15 @@ VALUES:
 ✓ Both macd_signal: same period_minutes value (30 or 45 only, never 15)
 
 QUEUE:
-✓ State declaration written above YAML
+✓ State declaration written above YAML (all 5 fields including rep counts)
 ✓ Current target matches A1 (or document why advancing)
 ✓ Rep number tracked
+✓ Count of valid reps and structural failures tracked separately
+
+OPERATOR DOUBLE-CHECK (do this last, every time):
+✓ Long-side operator is "lt" — NOT "gt"
+✓ Short-side operator is "gt" — NOT "lt"
+✓ If either is wrong: DELETE. Start over.
 
 ---
 
@@ -363,6 +408,8 @@ State declaration:
   SHORT_VALUE: 0.43
   MACD_PERIOD: 45
   Rep number: 1 of 8
+  Valid reps completed so far: 0
+  Structural failures so far this target: 0
 
 ```yaml
 name: crossover
@@ -420,7 +467,7 @@ risk:
 ```
 
 Your output must be identical to this example for target A1.
-When advancing to A2, change ONLY: value: -0.43 → -0.42 and value: 0.43 → 0.42.
-When advancing to A3, change ONLY: value: -0.43 → -0.41 and value: 0.43 → 0.41.
+When advancing to A2: change ONLY value: -0.43 → -0.42 and value: 0.43 → 0.42.
+When advancing to A3: change ONLY value: -0.43 → -0.41 and value: 0.43 → 0.41.
 No other changes. Ever.
 ```
