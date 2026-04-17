@@ -1,3 +1,7 @@
+<!-- LOKI_FRESHNESS_BEGIN -->
+> **LOKI freshness note:** Odin at Gen ~3650 — last Mimir audit Gen 3600 (~50 gens behind, ~375 gens since new best). Champion prose below may be stale; `best_strategy.yaml` is authoritative.
+<!-- LOKI_FRESHNESS_END -->
+
 ```markdown
 # ODIN Research Program — FUTURES DAY (v31.0)
 #

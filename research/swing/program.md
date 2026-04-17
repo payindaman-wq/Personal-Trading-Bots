@@ -1,3 +1,7 @@
+<!-- LOKI_FRESHNESS_BEGIN -->
+> **LOKI freshness note:** Odin at Gen ~22525 — last Mimir audit Gen 22400 (~125 gens behind, ~150 gens since new best). Champion prose below may be stale; `best_strategy.yaml` is authoritative.
+<!-- LOKI_FRESHNESS_END -->
+
 ```markdown
 # ODIN Research Program — Swing Trading Strategy Optimizer
 # Effective from Gen 22401 | Incumbent: Gen 20502 (Sharpe=1.6060)
