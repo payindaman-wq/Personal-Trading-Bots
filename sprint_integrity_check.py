@@ -108,6 +108,12 @@ def sprint_has_results(league_cfg, sprint_id):
             return True
     if os.path.isdir(os.path.join(rdir, sprint_id)):
         return True
+    archive_root = league_cfg.get("archive_root")
+    if archive_root and os.path.isdir(archive_root):
+        for sub in os.listdir(archive_root):
+            full = os.path.join(archive_root, sub)
+            if os.path.isdir(full) and os.path.isdir(os.path.join(full, sprint_id)):
+                return True
     if league_cfg["is_score_file_archive"]:
         score = os.path.join(rdir, f"{sprint_id}_score.json")
         auto = os.path.join(rdir, f"{sprint_id}_auto.json")

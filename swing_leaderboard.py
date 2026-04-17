@@ -296,6 +296,12 @@ def main():
     if active and not args.no_live:
         all_sprints.append(active)
 
+    # Filter to current cycle only: include sprints listed in cycle_state.sprints[].
+    _cycle_st = load_cycle_state()
+    _cycle_sprint_ids = set(_cycle_st.get("sprints", []))
+    if _cycle_sprint_ids:
+        all_sprints = [_s for _s in all_sprints if _s.get("comp_id") in _cycle_sprint_ids]
+
     if args.sprint:
         match = next((s for s in all_sprints if s["comp_id"] == args.sprint), None)
         if match:
