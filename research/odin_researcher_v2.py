@@ -70,8 +70,7 @@ def is_poison_yaml(candidate, league):
                 float(c["value"]) for c in candidate["entry"]["short"]["conditions"]
                 if c.get("indicator") == "rsi"
             )
-            if abs(long_rsi - 29.56) < 0.3:
-                return True, f"rsi_long={long_rsi} matches poison attractor"
+            # REMOVED 2026-04-17: LOKI's rsi~29.56 poison rule was blocking the champion (rsi_long=29.33)
             if long_rsi >= short_rsi:
                 return True, f"rsi_long({long_rsi}) >= rsi_short({short_rsi})"
         except (StopIteration, KeyError, TypeError):
