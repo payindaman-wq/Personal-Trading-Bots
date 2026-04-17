@@ -55,7 +55,27 @@ def call_claude(prompt, api_key):
         },
     )
     with urllib.request.urlopen(req, timeout=300) as r:
+        resp_headers = dict(r.headers)
         data = json.loads(r.read())
+    try:
+        import datetime as _dt
+        usage = data.get("usage", {}) or {}
+        rec = {
+            "ts": _dt.datetime.now(_dt.timezone.utc).isoformat(),
+            "caller": "mimir",
+            "model": ANTHROPIC_MODEL,
+            "input_tokens": usage.get("input_tokens", 0),
+            "output_tokens": usage.get("output_tokens", 0),
+            "cache_creation_input_tokens": usage.get("cache_creation_input_tokens", 0),
+            "cache_read_input_tokens": usage.get("cache_read_input_tokens", 0),
+            "rl_requests_remaining": resp_headers.get("anthropic-ratelimit-requests-remaining"),
+            "rl_input_tokens_remaining": resp_headers.get("anthropic-ratelimit-input-tokens-remaining"),
+            "rl_output_tokens_remaining": resp_headers.get("anthropic-ratelimit-output-tokens-remaining"),
+        }
+        with open("/root/.openclaw/workspace/research/anthropic_usage.jsonl", "a") as _uf:
+            _uf.write(json.dumps(rec) + "\n")
+    except Exception:
+        pass
     return data["content"][0]["text"].strip()
 
 
