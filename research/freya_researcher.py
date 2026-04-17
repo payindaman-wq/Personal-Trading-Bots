@@ -42,6 +42,7 @@ RESEARCHER_LOG  = os.path.join(PM_RESEARCH, "researcher.log")
 
 POPULATION_SIZE   = 5
 MIMIR_INTERVAL    = 200
+MIMIR_MIN_GAP_HRS = 6   # min wall-clock hours between Mimir calls
 SUSPICIOUS_SHARPE = 8.0
 MIN_BETS          = 20
 # Kalshi taker fee: 2.5% of potential profit per contract
@@ -499,6 +500,7 @@ def main():
     gen           = gen_state["gen"]
     gens_no_best  = gen_state["gens_since_best"]
     stall_alerted = gen_state.get("stall_alerted", False)
+    last_mimir_ts = gen_state.get("last_mimir_ts")
 
     log(f"Gen {gen}: best adj={best_score:.4f} sharpe={best_metrics['sharpe']:.4f} "
         f"n_bets={best_metrics['n_bets']}")
@@ -562,11 +564,24 @@ def main():
 
 
         if gen % MIMIR_INTERVAL == 0:
-            trigger_mimir(gen)
-            if os.path.exists(PROGRAM_MD):
-                program_md = open(PROGRAM_MD).read()
+            now_utc = datetime.now(timezone.utc)
+            gap_ok  = True
+            if last_mimir_ts:
+                try:
+                    last_dt = datetime.fromisoformat(last_mimir_ts).replace(tzinfo=timezone.utc)
+                    gap_hrs = (now_utc - last_dt).total_seconds() / 3600
+                    if gap_hrs < MIMIR_MIN_GAP_HRS:
+                        gap_ok = False
+                        log(f"  Mimir skipped at gen {gen}: cooldown {gap_hrs:.1f}/{MIMIR_MIN_GAP_HRS}h")
+                except Exception:
+                    pass
+            if gap_ok:
+                trigger_mimir(gen)
+                last_mimir_ts = now_utc.strftime("%Y-%m-%dT%H:%M")
+                if os.path.exists(PROGRAM_MD):
+                    program_md = open(PROGRAM_MD).read()
 
-        save_gen_state({"gen": gen, "gens_since_best": gens_no_best})
+        save_gen_state({"gen": gen, "gens_since_best": gens_no_best, "last_mimir_ts": last_mimir_ts})
 
         if gen % 10 == 0:
             log(f"  Gen {gen}: best adj={best_score:.4f} "
