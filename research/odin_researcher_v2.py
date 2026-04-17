@@ -38,6 +38,7 @@ SUSPICIOUS_SHARPE   = 3.5
 POPULATION_SIZE     = 10
 MIN_TRADES = {"day": 280, "futures_day": 50, "futures_swing": 400}
 SWING_MIN_TRADES    = 30   # IMMUTABLE - DO NOT MODIFY via LOKI (Item 4)
+MIMIR_MIN_GAP_HRS   = 6    # min wall-clock hours between Mimir calls per league
 SWING_MAX_TRADES    = 60   # swing hard upper bound (Item 3)
 SWING_ALLOWED_PAIRS = frozenset({"BTC/USD", "ETH/USD", "SOL/USD"})  # Item 7
 
@@ -683,6 +684,7 @@ def main():
     gen = len(results_history) + 1
     gens_since_best = 0
     last_mimir_gen = 0
+    last_mimir_ts  = None
     if os.path.exists(state_path):
         try:
             with open(state_path) as f:
@@ -690,6 +692,7 @@ def main():
             gen = gs.get("gen", gen)
             gens_since_best = gs.get("gens_since_best", 0)
             last_mimir_gen = gs.get("last_mimir_gen", 0)
+            last_mimir_ts  = gs.get("last_mimir_ts")
         except Exception:
             pass
 
@@ -818,7 +821,7 @@ def main():
             log_result(league, gen, {}, "poison_reject", _poison_reason[:80])
             gen += 1
             with open(state_path, "w") as f:
-                json.dump({"gen": gen, "gens_since_best": gens_since_best, "last_mimir_gen": last_mimir_gen}, f)
+                json.dump({"gen": gen, "gens_since_best": gens_since_best, "last_mimir_gen": last_mimir_gen, "last_mimir_ts": last_mimir_ts}, f)
             time.sleep(args.sleep)
             continue
 
@@ -851,7 +854,7 @@ def main():
             log_result(league, gen, result, "poison_reject", f"attractor sharpe={sharpe:.4f}")
             gen += 1
             with open(state_path, "w") as f:
-                json.dump({"gen": gen, "gens_since_best": gens_since_best, "last_mimir_gen": last_mimir_gen}, f)
+                json.dump({"gen": gen, "gens_since_best": gens_since_best, "last_mimir_gen": last_mimir_gen, "last_mimir_ts": last_mimir_ts}, f)
             time.sleep(args.sleep)
             continue
 
@@ -867,7 +870,7 @@ def main():
             log_result(league, gen, result, "low_trades", f"trades={trades}")
             gen += 1
             with open(state_path, "w") as f:
-                json.dump({"gen": gen, "gens_since_best": gens_since_best, "last_mimir_gen": last_mimir_gen}, f)
+                json.dump({"gen": gen, "gens_since_best": gens_since_best, "last_mimir_gen": last_mimir_gen, "last_mimir_ts": last_mimir_ts}, f)
             time.sleep(args.sleep)
             continue
 
@@ -910,25 +913,39 @@ def main():
             results_history = results_history[-300:]
 
         # Mimir milestone: deep analysis every 200 gens (baseline cadence)
-        # or immediately after a breakthrough (min 100 gens since last Mimir)
+        # or immediately after a breakthrough (min 100 gens since last Mimir).
+        # Wall-clock cooldown (MIMIR_MIN_GAP_HRS) caps per-league Claude spend.
         trigger_mimir = (gen % 200 == 0) or (is_new_best and (gen - last_mimir_gen) >= 100)
         if trigger_mimir:
-            last_mimir_gen = gen
-            reason = "milestone" if gen % 200 == 0 else "breakthrough"
-            print(f"  [mimir] Gen {gen} {reason} — launching deep analysis...")
-            try:
-                subprocess.Popen(
-                    ["python3", os.path.join(RESEARCH, "mimir.py"),
-                     "--league", league, "--generation", str(gen)],
-                    stdout=open(os.path.join(league_dir(league), "mimir.log"), "a"),
-                    stderr=subprocess.STDOUT,
-                )
-            except Exception as e:
-                print(f"  [mimir] Failed to launch: {e}")
+            now_utc = datetime.now(timezone.utc)
+            gap_ok  = True
+            if last_mimir_ts:
+                try:
+                    last_dt = datetime.fromisoformat(last_mimir_ts).replace(tzinfo=timezone.utc)
+                    gap_hrs = (now_utc - last_dt).total_seconds() / 3600
+                    if gap_hrs < MIMIR_MIN_GAP_HRS:
+                        gap_ok = False
+                        print(f"  [mimir] Gen {gen} skipped: cooldown {gap_hrs:.1f}/{MIMIR_MIN_GAP_HRS}h")
+                except Exception:
+                    pass
+            if gap_ok:
+                last_mimir_gen = gen
+                last_mimir_ts  = now_utc.strftime("%Y-%m-%dT%H:%M")
+                reason = "milestone" if gen % 200 == 0 else "breakthrough"
+                print(f"  [mimir] Gen {gen} {reason} — launching deep analysis...")
+                try:
+                    subprocess.Popen(
+                        ["python3", os.path.join(RESEARCH, "mimir.py"),
+                         "--league", league, "--generation", str(gen)],
+                        stdout=open(os.path.join(league_dir(league), "mimir.log"), "a"),
+                        stderr=subprocess.STDOUT,
+                    )
+                except Exception as e:
+                    print(f"  [mimir] Failed to launch: {e}")
 
         gen += 1
         with open(state_path, "w") as f:
-            json.dump({"gen": gen, "gens_since_best": gens_since_best, "last_mimir_gen": last_mimir_gen}, f)
+            json.dump({"gen": gen, "gens_since_best": gens_since_best, "last_mimir_gen": last_mimir_gen, "last_mimir_ts": last_mimir_ts}, f)
         time.sleep(args.sleep)
 
 
