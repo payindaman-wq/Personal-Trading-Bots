@@ -339,7 +339,14 @@ Output EXACTLY two sections, using these exact headers:
 (3-5 paragraphs of findings)
 
 ### UPDATED PROGRAM
-(The complete rewritten program.md — same structure, improved guidance)"""
+(The complete rewritten program.md — same structure, improved guidance)
+
+If you identify a specific structural code change needed in odin_researcher_v2.py (a logic error, a missing guard, a counterproductive behavior — NOT a constant value), add an optional third section:
+
+### STRUCTURAL_PATCH
+[{"old": "exact unique string to replace", "new": "replacement string"}]
+
+Rules: each "old" string must appear exactly once in the file; max 3 pairs; no new imports; no signature changes; Python must remain valid. Omit this section entirely if no structural change is needed."""
 
 
 def load_pm_research_results(n=200):
@@ -505,6 +512,7 @@ Output EXACTLY two sections:
 def parse_response(response):
     analysis = ""
     program  = ""
+    patch    = []
     if "### ANALYSIS" in response and "### UPDATED PROGRAM" in response:
         parts    = response.split("### UPDATED PROGRAM", 1)
         analysis = parts[0].replace("### ANALYSIS", "").strip()
@@ -514,7 +522,18 @@ def parse_response(response):
         program = parts[1].strip()
     else:
         analysis = response
-    return analysis, program
+    if "### STRUCTURAL_PATCH" in program:
+        prog_parts = program.split("### STRUCTURAL_PATCH", 1)
+        program    = prog_parts[0].strip()
+        patch_text = prog_parts[1].strip()
+        try:
+            import re as _re2
+            m = _re2.search(r'\[\s*\{[\s\S]*\}\s*\]', patch_text)
+            if m:
+                patch = json.loads(m.group())
+        except Exception:
+            pass
+    return analysis, program, patch
 
 
 def process_syn_alerts():
@@ -577,7 +596,7 @@ Diagnose the root cause and output a JSON object with recommended LOKI actions:
   "actions": [
     {{"type": "restart_service", "unit": "service_name.service", "reason": "..."}},
     {{"type": "update_constant", "constant": "NAME", "subkey": "key_or_null", "new_value": 50, "reason": "..."}},
-    {{"type": "structural", "description": "specific change needed", "analysis": "detailed context for code patch generation"}},
+    {{"type": "structural", "description": "specific change needed", "patch": [{{"old": "exact unique string to replace", "new": "replacement string"}}]}},
     {{"type": "escalate", "description": "what needs human attention"}}
   ]
 }}
@@ -685,7 +704,7 @@ def main():
         print(f"  ERROR calling Claude: {e}")
         return
 
-    analysis, new_program = parse_response(response)
+    analysis, new_program, patch = parse_response(response)
 
     program_updated = False
     if new_program and len(new_program) > 200:
@@ -695,6 +714,8 @@ def main():
             f.write(new_program)
         program_updated = True
         print(f"  program.md updated (backup: {backup})")
+        if patch:
+            print(f"  structural patch included: {len(patch)} pair(s)")
     else:
         print("  WARNING: No valid updated program in response — keeping existing.")
 
@@ -706,6 +727,7 @@ def main():
         "model":           ANTHROPIC_MODEL,
         "analysis":        analysis,
         "program_updated": program_updated,
+        "patch":           patch or [],
     }
     with open(MIMIR_LOG, "a") as f:
         f.write(json.dumps(log_entry) + "\n")
