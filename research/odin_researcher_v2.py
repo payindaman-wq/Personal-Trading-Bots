@@ -41,6 +41,12 @@ SWING_MIN_TRADES    = 30   # IMMUTABLE - DO NOT MODIFY via LOKI (Item 4)
 SWING_MAX_TRADES    = 60   # swing hard upper bound (Item 3)
 SWING_ALLOWED_PAIRS = frozenset({"BTC/USD", "ETH/USD", "SOL/USD"})  # Item 7
 
+# Known-bad result fingerprints — sharpe values that always indicate a poison attractor.
+POISON_RESULT_FINGERPRINTS = {
+    "futures_day":   {-2.7990, -3.3113, -4.8702},
+    "futures_swing": {-1.0406, -0.8033},
+}
+
 ALL_PAIRS = [
     "BTC/USD",  "ETH/USD",  "SOL/USD",  "XRP/USD",
     "DOGE/USD", "AVAX/USD", "LINK/USD", "UNI/USD",
@@ -50,6 +56,26 @@ ALL_PAIRS = [
 
 def get_pairs(league):
     return ALL_PAIRS
+
+
+def is_poison_yaml(candidate, league):
+    if league == "futures_day":
+        try:
+            long_rsi = next(
+                float(c["value"]) for c in candidate["entry"]["long"]["conditions"]
+                if c.get("indicator") == "rsi"
+            )
+            short_rsi = next(
+                float(c["value"]) for c in candidate["entry"]["short"]["conditions"]
+                if c.get("indicator") == "rsi"
+            )
+            if abs(long_rsi - 29.56) < 0.3:
+                return True, f"rsi_long={long_rsi} matches poison attractor"
+            if long_rsi >= short_rsi:
+                return True, f"rsi_long({long_rsi}) >= rsi_short({short_rsi})"
+        except (StopIteration, KeyError, TypeError):
+            pass
+    return False, ""
 
 DAY_RANGES = {
     "take_profit_pct": (0.2, 1.0),
@@ -785,6 +811,17 @@ def main():
                 import yaml as _yaml2
                 candidate_yaml = _yaml2.dump(candidate, default_flow_style=False, sort_keys=False)
 
+        # Pre-backtest poison check
+        _poison, _poison_reason = is_poison_yaml(candidate, league)
+        if _poison:
+            print(f"| POISON_YAML: {_poison_reason}")
+            log_result(league, gen, {}, "poison_reject", _poison_reason[:80])
+            gen += 1
+            with open(state_path, "w") as f:
+                json.dump({"gen": gen, "gens_since_best": gens_since_best, "last_mimir_gen": last_mimir_gen}, f)
+            time.sleep(args.sleep)
+            continue
+
         # Backtest
         try:
             result = run_backtest(candidate, league, get_pairs(league))
@@ -808,6 +845,16 @@ def main():
         trades = result["total_trades"]
 
         # Filters
+        _fp = POISON_RESULT_FINGERPRINTS.get(league, set())
+        if _fp and round(sharpe, 4) in _fp:
+            print(f"| POISON_FP: sharpe={sharpe:.4f} matches known attractor")
+            log_result(league, gen, result, "poison_reject", f"attractor sharpe={sharpe:.4f}")
+            gen += 1
+            with open(state_path, "w") as f:
+                json.dump({"gen": gen, "gens_since_best": gens_since_best, "last_mimir_gen": last_mimir_gen}, f)
+            time.sleep(args.sleep)
+            continue
+
         if result["suspicious"]:
             print(f"| sharpe={sharpe:.4f} REJECTED (suspicious)")
             log_result(league, gen, result, "rejected_suspicious")
