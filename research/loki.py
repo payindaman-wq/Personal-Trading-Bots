@@ -1256,6 +1256,20 @@ def run_cycle_advance_and_start(league, cfg, old_cycle):
         print(f"  [loki] {league}: start handled by cron/watchdog")
         actions.append("start_deferred_to_cron")
 
+    # Pin regression_watch baselines for the new cycle (fire-and-forget — backtest can take minutes)
+    if league in ("day", "futures_day", "swing", "futures_swing") and not DRY_RUN:
+        try:
+            log_path = os.path.join(WORKSPACE, "competition", "regression_watch.log")
+            subprocess.Popen(
+                ["nohup", "python3", os.path.join(WORKSPACE, "regression_watch.py"),
+                 "--refresh-baseline", "--league", league],
+                stdout=open(log_path, "a"), stderr=subprocess.STDOUT,
+                start_new_session=True,
+            )
+            actions.append("regression_baseline_refresh_queued")
+        except Exception as e:
+            print(f"  [loki] regression baseline refresh queue failed: {e}")
+
     return actions
 
 
