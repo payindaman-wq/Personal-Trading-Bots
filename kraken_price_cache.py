@@ -45,10 +45,11 @@ def _fetch_from_kraken(pairs):
     for k, v in data['result'].items():
         label = KRAKEN_KEY_MAP.get(k, k)
         result[label] = {
-            'last': float(v['c'][0]),
-            'bid':  float(v['b'][0]),
-            'ask':  float(v['a'][0]),
-            'vwap': float(v['p'][0]) if 'p' in v else None,
+            'last':   float(v['c'][0]),
+            'bid':    float(v['b'][0]),
+            'ask':    float(v['a'][0]),
+            'vwap':   float(v['p'][0]) if 'p' in v else None,
+            'volume': float(v['v'][1]) if 'v' in v else None,
         }
     return result
 

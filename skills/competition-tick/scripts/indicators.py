@@ -216,6 +216,35 @@ def macd_signal(history, pair, period_minutes):
     return "neutral"
 
 
+
+def volume_above_avg(history, pair, period_minutes):
+    """
+    Ratio of latest tick-interval volume to avg over period_minutes.
+    Uses 24h-rolling volume deltas stored in price history.
+    Returns float ratio (current / avg) or None if insufficient history.
+    """
+    if pair not in history or len(history[pair]) < 2:
+        return None
+    ticks = [t for t in history[pair] if "volume" in t]
+    if len(ticks) < 2:
+        return None
+    now = datetime.now(timezone.utc)
+    cutoff_iso = (now - timedelta(minutes=period_minutes)).isoformat()
+    window = [t for t in ticks if t["ts"] >= cutoff_iso]
+    if len(window) < 2:
+        return None
+    deltas = []
+    for i in range(1, len(window)):
+        d = window[i]["volume"] - window[i - 1]["volume"]
+        if d >= 0:
+            deltas.append(d)
+    if not deltas:
+        return None
+    avg = sum(deltas[:-1]) / len(deltas[:-1]) if len(deltas) > 1 else deltas[0]
+    if avg == 0:
+        return None
+    return round(deltas[-1] / avg, 4)
+
 # ---------------------------------------------------------------------------
 # Dispatch + evaluation
 # ---------------------------------------------------------------------------
@@ -237,6 +266,8 @@ def compute_indicator(name, history, pair, period_minutes):
         return bollinger_position(history, pair, period_minutes)
     if name == "macd_signal":
         return macd_signal(history, pair, period_minutes)
+    if name == "volume_above_avg":
+        return volume_above_avg(history, pair, period_minutes)
     raise ValueError(f"Unknown indicator: {name}")
 
 

@@ -42,6 +42,8 @@ def append_prices(comp_dir, prices):
         tick = {"ts": now_iso, "last": data["last"]}
         if "vwap" in data and data["vwap"] is not None:
             tick["vwap"] = data["vwap"]
+        if "volume" in data and data["volume"] is not None:
+            tick["volume"] = data["volume"]
         history[pair].append(tick)
         history[pair] = [t for t in history[pair] if t["ts"] >= cutoff]
 
