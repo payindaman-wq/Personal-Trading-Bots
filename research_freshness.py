@@ -355,7 +355,48 @@ def check_loki(state, alerts):
             )
 
 
-# ── Check 5: TYR / HEIMDALL freshness ───────────────────────────────────────
+# ── Check 5: LOKI escalations awaiting human review ─────────────────────────
+
+LOKI_ESCALATION_LOG = f"{WORKSPACE}/research/loki_escalation_log.jsonl"
+
+def check_loki_escalations(state, alerts):
+    """Alert when LOKI has logged new escalations (MIMIR-recommended structural
+    code changes) that no human has acknowledged. LOKI won't auto-apply these
+    for safety; they sit in the log until reviewed. Dedup via last-seen ts.
+    """
+    if not os.path.exists(LOKI_ESCALATION_LOG):
+        return
+    try:
+        with open(LOKI_ESCALATION_LOG) as f:
+            entries = [json.loads(l) for l in f if l.strip()]
+    except Exception as e:
+        alerts.append(f"research_freshness: loki_escalation_log parse error: {e}")
+        return
+    if not entries:
+        return
+    last_seen_ts = state.get("loki_escalations_last_seen", {}).get("ts", "")
+    new_entries = [e for e in entries if e.get("ts", "") > last_seen_ts]
+    if not new_entries:
+        return
+    summary_lines = []
+    for e in new_entries[-5:]:
+        lg = e.get("league", "?")
+        gen = e.get("generation", "?")
+        desc = (e.get("description", "") or "")[:240].replace("\n", " ")
+        summary_lines.append(f"[{lg} gen {gen}] {desc}")
+    body = "\n  ".join(summary_lines)
+    extra = f" (+{len(new_entries) - 5} more)" if len(new_entries) > 5 else ""
+    alerts.append(
+        f"LOKI has {len(new_entries)} unreviewed escalation(s){extra} — "
+        f"MIMIR-recommended structural code changes that LOKI refuses to auto-apply:\n  {body}\n"
+        f"Review: /root/.openclaw/workspace/research/loki_escalation_log.jsonl"
+    )
+    # Record the latest ts so we only alert on newer entries next run.
+    latest_ts = max(e.get("ts", "") for e in new_entries)
+    state["loki_escalations_last_seen"] = {"ts": latest_ts, "recorded_at": now_ts()}
+
+
+# ── Check 6: TYR / HEIMDALL freshness ───────────────────────────────────────
 
 def check_tyr_heimdall(state, alerts):
     for officer in ["tyr", "heimdall"]:
@@ -389,6 +430,7 @@ def main():
     check_freya(state, alerts)
     check_mimir(state, alerts)
     check_loki(state, alerts)
+    check_loki_escalations(state, alerts)
     check_tyr_heimdall(state, alerts)
 
     if alerts:
