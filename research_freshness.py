@@ -2,16 +2,18 @@
 """
 research_freshness.py — detects silent research staleness.
 
-Runs hourly via cron. Alerts Telegram on:
-  - ODIN per-league: gens_since_best over threshold (stuck evolution)
-  - ODIN per-league: researcher.log mtime stale (process silent)
-  - FREYA (pm): stall + freshness (same as ODIN)
-  - MIMIR: log silent (no entry in N hours)
-  - MIMIR: same BUG-N flagged in 3+ of last 5 analyses for a league
-  - LOKI: cycle review missing or stale per league
-  - TYR / HEIMDALL: log mtime stale
+Runs hourly via cron. Logs every issue it finds; ONLY Telegrams items that are a
+call to action for Chris (not routine stalls, not service health, not informational
+status). Per feedback_syn_reporting.md: Telegram is reserved for signal, never
+noise.
 
-Dedup via freshness_state.json (24h cooldown per key, 48h for MIMIR escalations).
+Actionable (Telegram): new LOKI escalations awaiting human decision; MIMIR
+repeat-escalation of the same BUG across multiple analyses (terminal-state
+signal requiring Chris to decide whether to apply a prescribed patch or redesign).
+
+Informational (log only): ODIN/FREYA stall counts, researcher.log freshness,
+MIMIR/LOKI log mtime, cycle-review gaps, TYR/HEIMDALL freshness. These are
+covered by sys_heartbeat auto-remediation or are visible on the dashboard.
 """
 import json, os, re, time, urllib.parse, urllib.request
 from collections import Counter
@@ -26,33 +28,32 @@ COOLDOWN_MIN = 1440        # 24h
 MIMIR_ESCALATION_COOLDOWN_MIN = 2880  # 48h
 
 LEAGUES = ["day", "swing", "futures_day", "futures_swing"]
-STALL_THRESH = 500         # gens_since_best threshold (applies to ODIN + FREYA)
+STALL_THRESH = 500
 
 LOG_STALE_MIN = {
-    "odin":     30,   # researcher.log updates every ~10 min
-    "pm":       30,   # freya same
-    "mimir":    480,  # 8h — mimir only fires on gen%200 or breakthrough
-    "loki":     60,   # cron every 15 min
-    "tyr":      45,   # cron every 30 min
-    "heimdall": 45,   # cron every 30 min
+    "odin":     30,
+    "pm":       30,
+    "mimir":    480,
+    "loki":     60,
+    "tyr":      45,
+    "heimdall": 45,
 }
 
-LOKI_STALE_DAYS = {  # per league: days since last cycle review
+LOKI_STALE_DAYS = {
     "day": 2,
     "futures_day": 2,
     "swing": 10,
     "futures_swing": 10,
 }
 
-# Cycle-state paths so the freshness monitor can suppress false-positive
-# "never_reviewed" alerts when a league is still within its first cycle.
 CYCLE_STATE_PATHS = {
     "day":           f"{WORKSPACE}/competition/cycle_state.json",
     "swing":         f"{WORKSPACE}/competition/swing/swing_cycle_state.json",
     "futures_day":   f"{WORKSPACE}/competition/futures_day/cycle_state.json",
     "futures_swing": f"{WORKSPACE}/competition/futures_swing/cycle_state.json",
 }
-LOKI_REVIEW_LOG = f"{WORKSPACE}/research/loki_cycle_review_log.jsonl"
+LOKI_REVIEW_LOG     = f"{WORKSPACE}/research/loki_cycle_review_log.jsonl"
+LOKI_ESCALATION_LOG = f"{WORKSPACE}/research/loki_escalation_log.jsonl"
 
 
 def _load_cycle_state(league):
@@ -66,28 +67,22 @@ def _load_cycle_state(league):
 
 
 def _league_review_due(league):
-    """Return True if LOKI was *expected* to have reviewed at least one cycle
-    for this league by now. False suppresses 'never_reviewed' alerts when the
-    league is still inside cycle 1 OR when prior cycles predated LOKI.
-    """
+    """Suppresses false-positive 'never_reviewed' when still in first cycle or
+    when prior cycles predated LOKI deployment."""
     cs = _load_cycle_state(league)
     if cs is None:
         return False
     cycle = cs.get("cycle", 1)
     sprint_in_cycle = cs.get("sprint_in_cycle", 0)
     sprints_per_cycle = cs.get("sprints_per_cycle", 7)
-    # Still inside the first cycle — no review due yet.
     if cycle == 1 and sprint_in_cycle < sprints_per_cycle:
         return False
-    # For cycle > 1: only alert if the current cycle started AFTER LOKI's
-    # review log was created (prior cycles may predate LOKI deployment).
     if cycle > 1 and os.path.exists(LOKI_REVIEW_LOG):
         log_mtime = os.path.getmtime(LOKI_REVIEW_LOG)
         cycle_started = cs.get("cycle_started_at", "")
         try:
             started_dt = datetime.fromisoformat(cycle_started.replace("Z", "+00:00"))
-            started_epoch = started_dt.timestamp()
-            return started_epoch > log_mtime
+            return started_dt.timestamp() > log_mtime
         except Exception:
             return True
     return True
@@ -154,7 +149,18 @@ def mtime_age_min(path):
     return (time.time() - os.path.getmtime(path)) / 60
 
 
-# ── Check 1: ODIN per-league (stall + log freshness) ────────────────────────
+def info(alerts, msg):
+    """Log-only alert: no Telegram. For routine stall/freshness status."""
+    alerts.append((False, msg))
+
+
+def action(alerts, msg):
+    """Actionable alert: Telegram + log. Only for call-to-action items requiring
+    Chris's decision (per feedback_syn_reporting.md)."""
+    alerts.append((True, msg))
+
+
+# ── Check 1: ODIN per-league (stall + log freshness) — INFO ONLY ────────────
 
 def check_odin_leagues(state, alerts):
     for league in LEAGUES:
@@ -170,32 +176,27 @@ def check_odin_leagues(state, alerts):
                 if gsb >= STALL_THRESH:
                     key = f"odin_stall:{league}"
                     if should_alert(state, key):
-                        alerts.append(
-                            f"ODIN stalled [{league}]: {gsb} gens since last best "
-                            f"(current gen {gen}, threshold {STALL_THRESH}). "
-                            f"Inspect research/{league}/researcher.log + MIMIR guidance."
-                        )
+                        info(alerts, f"ODIN stalled [{league}]: {gsb} gens since last best "
+                                     f"(current gen {gen}).")
                         record_alert(state, key, f"gsb={gsb}")
             except Exception as e:
-                alerts.append(f"research_freshness: failed to parse {gs_path}: {e}")
+                info(alerts, f"parse error {gs_path}: {e}")
 
         age = mtime_age_min(log_path)
         if age is None:
             key = f"odin_log_missing:{league}"
             if should_alert(state, key):
-                alerts.append(f"ODIN log missing [{league}]: {log_path} does not exist.")
+                info(alerts, f"ODIN log missing [{league}]: {log_path}")
                 record_alert(state, key)
         elif age > LOG_STALE_MIN["odin"]:
             key = f"odin_log_stale:{league}"
             if should_alert(state, key):
-                alerts.append(
-                    f"ODIN log stale [{league}]: last updated {age:.0f} min ago "
-                    f"(threshold {LOG_STALE_MIN['odin']} min). Service may be dead or hung."
-                )
+                info(alerts, f"ODIN log stale [{league}]: {age:.0f} min "
+                             f"(threshold {LOG_STALE_MIN['odin']}).")
                 record_alert(state, key, f"age_min={age:.0f}")
 
 
-# ── Check 2: FREYA (pm) stall + freshness ───────────────────────────────────
+# ── Check 2: FREYA stall + freshness — INFO ONLY ────────────────────────────
 
 def check_freya(state, alerts):
     gs_path = f"{WORKSPACE}/research/pm/gen_state.json"
@@ -209,49 +210,40 @@ def check_freya(state, alerts):
             if gsb >= STALL_THRESH:
                 key = "freya_stall"
                 if should_alert(state, key):
-                    alerts.append(
-                        f"FREYA stalled: {gsb} gens since last best (current gen {gen}, "
-                        f"threshold {STALL_THRESH}). Consider wider price_range, different "
-                        f"category, or force random_restart."
-                    )
+                    info(alerts, f"FREYA stalled: {gsb} gens since last best (current gen {gen}).")
                     record_alert(state, key, f"gsb={gsb}")
         except Exception as e:
-            alerts.append(f"research_freshness: failed to parse {gs_path}: {e}")
+            info(alerts, f"parse error {gs_path}: {e}")
 
     age = mtime_age_min(log_path)
     if age is None:
         key = "freya_log_missing"
         if should_alert(state, key):
-            alerts.append(f"FREYA log missing: {log_path} does not exist.")
+            info(alerts, f"FREYA log missing: {log_path}")
             record_alert(state, key)
     elif age > LOG_STALE_MIN["pm"]:
         key = "freya_log_stale"
         if should_alert(state, key):
-            alerts.append(
-                f"FREYA log stale: last updated {age:.0f} min ago "
-                f"(threshold {LOG_STALE_MIN['pm']} min)."
-            )
+            info(alerts, f"FREYA log stale: {age:.0f} min (threshold {LOG_STALE_MIN['pm']}).")
             record_alert(state, key, f"age_min={age:.0f}")
 
 
-# ── Check 3: MIMIR freshness + repeat-complaint escalation ──────────────────
+# ── Check 3: MIMIR — freshness INFO; repeat-escalation ACTIONABLE ───────────
 
 BUG_RE = re.compile(r"\bBUG[- ]?(\d+)\b", re.IGNORECASE)
 
 def check_mimir(state, alerts):
     log = f"{WORKSPACE}/research/mimir_log.jsonl"
     if not os.path.exists(log):
-        alerts.append(f"MIMIR log missing: {log}")
+        info(alerts, f"MIMIR log missing: {log}")
         return
 
     age = mtime_age_min(log)
     if age is not None and age > LOG_STALE_MIN["mimir"]:
         key = "mimir_silent"
         if should_alert(state, key):
-            alerts.append(
-                f"MIMIR silent: mimir_log.jsonl last updated {age:.0f} min ago "
-                f"(threshold {LOG_STALE_MIN['mimir']} min). Analysis pipeline may be stuck."
-            )
+            info(alerts, f"MIMIR silent: log updated {age:.0f} min ago "
+                         f"(threshold {LOG_STALE_MIN['mimir']}).")
             record_alert(state, key, f"age_min={age:.0f}")
 
     try:
@@ -259,7 +251,7 @@ def check_mimir(state, alerts):
             lines = [l for l in f if l.strip()][-100:]
         entries = [json.loads(l) for l in lines]
     except Exception as e:
-        alerts.append(f"research_freshness: mimir_log parse error: {e}")
+        info(alerts, f"mimir_log parse error: {e}")
         return
 
     by_league = {}
@@ -280,31 +272,28 @@ def check_mimir(state, alerts):
             if cnt >= 3:
                 key = f"mimir_repeat:{league}:BUG-{bug}"
                 if should_alert(state, key, MIMIR_ESCALATION_COOLDOWN_MIN):
-                    alerts.append(
-                        f"MIMIR repeat-escalation [{league}]: BUG-{bug} flagged in "
-                        f"{cnt}/{len(last_n)} recent analyses. Likely unresolved "
-                        f"structural issue — see mimir_log.jsonl for prescription."
+                    action(alerts,
+                        f"MIMIR terminal-state signal [{league}]: BUG-{bug} flagged in "
+                        f"{cnt}/{len(last_n)} recent analyses. Decision needed — apply the "
+                        f"prescribed patch or redesign the search space.\n"
+                        f"Review: /root/.openclaw/workspace/research/mimir_log.jsonl"
                     )
                     record_alert(state, key, f"count={cnt}")
 
 
-# ── Check 4: LOKI cycle review staleness ────────────────────────────────────
+# ── Check 4: LOKI cycle-review gaps — INFO ONLY ─────────────────────────────
 
 def check_loki(state, alerts):
-    log = f"{WORKSPACE}/research/loki_cycle_review_log.jsonl"
-
     loki_log = f"{WORKSPACE}/research/loki.log"
     age_min = mtime_age_min(loki_log)
     if age_min is not None and age_min > LOG_STALE_MIN["loki"]:
         key = "loki_log_stale"
         if should_alert(state, key):
-            alerts.append(
-                f"LOKI log stale: loki.log last updated {age_min:.0f} min ago "
-                f"(threshold {LOG_STALE_MIN['loki']} min)."
-            )
+            info(alerts, f"LOKI log stale: {age_min:.0f} min (threshold {LOG_STALE_MIN['loki']}).")
             record_alert(state, key, f"age_min={age_min:.0f}")
 
     latest_per_league = {}
+    log = LOKI_REVIEW_LOG
     if os.path.exists(log):
         try:
             with open(log) as f:
@@ -318,7 +307,7 @@ def check_loki(state, alerts):
                     if lg not in latest_per_league or ts > latest_per_league[lg]:
                         latest_per_league[lg] = ts
         except Exception as e:
-            alerts.append(f"research_freshness: loki_cycle_review_log parse error: {e}")
+            info(alerts, f"loki_cycle_review_log parse error: {e}")
             return
 
     for league in LEAGUES:
@@ -326,14 +315,10 @@ def check_loki(state, alerts):
         threshold_days = LOKI_STALE_DAYS[league]
         if ts is None:
             if not _league_review_due(league):
-                continue  # still in first cycle, or prior cycles predated LOKI
+                continue
             key = f"loki_never_reviewed:{league}"
             if should_alert(state, key):
-                alerts.append(
-                    f"LOKI has never reviewed cycles for [{league}] since its first "
-                    f"post-LOKI cycle boundary. Losers not being retuned. "
-                    f"Inspect loki.log around the cycle_started_at timestamp."
-                )
+                info(alerts, f"LOKI never reviewed [{league}] since first post-LOKI cycle boundary.")
                 record_alert(state, key)
             continue
         try:
@@ -344,33 +329,27 @@ def check_loki(state, alerts):
             if age_days > threshold_days:
                 key = f"loki_stale:{league}"
                 if should_alert(state, key):
-                    alerts.append(
-                        f"LOKI cycle review stale [{league}]: last entry "
-                        f"{age_days:.1f}d ago (threshold {threshold_days}d)."
-                    )
+                    info(alerts, f"LOKI cycle review stale [{league}]: {age_days:.1f}d "
+                                 f"(threshold {threshold_days}d).")
                     record_alert(state, key, f"age_days={age_days:.1f}")
         except Exception as e:
-            alerts.append(
-                f"research_freshness: bad timestamp in loki log for {league} ({ts!r}): {e}"
-            )
+            info(alerts, f"bad timestamp in loki log for {league} ({ts!r}): {e}")
 
 
-# ── Check 5: LOKI escalations awaiting human review ─────────────────────────
-
-LOKI_ESCALATION_LOG = f"{WORKSPACE}/research/loki_escalation_log.jsonl"
+# ── Check 5: LOKI escalations awaiting human review — ACTIONABLE ────────────
 
 def check_loki_escalations(state, alerts):
-    """Alert when LOKI has logged new escalations (MIMIR-recommended structural
-    code changes) that no human has acknowledged. LOKI won't auto-apply these
-    for safety; they sit in the log until reviewed. Dedup via last-seen ts.
-    """
+    """LOKI logs structural-code recommendations from MIMIR into the escalation
+    log but won't auto-apply them. They sit unread until Chris reviews. This is
+    the definitive call-to-action: Chris needs to decide whether to apply each
+    recommended patch."""
     if not os.path.exists(LOKI_ESCALATION_LOG):
         return
     try:
         with open(LOKI_ESCALATION_LOG) as f:
             entries = [json.loads(l) for l in f if l.strip()]
     except Exception as e:
-        alerts.append(f"research_freshness: loki_escalation_log parse error: {e}")
+        info(alerts, f"loki_escalation_log parse error: {e}")
         return
     if not entries:
         return
@@ -385,18 +364,17 @@ def check_loki_escalations(state, alerts):
         desc = (e.get("description", "") or "")[:240].replace("\n", " ")
         summary_lines.append(f"[{lg} gen {gen}] {desc}")
     body = "\n  ".join(summary_lines)
-    extra = f" (+{len(new_entries) - 5} more)" if len(new_entries) > 5 else ""
-    alerts.append(
-        f"LOKI has {len(new_entries)} unreviewed escalation(s){extra} — "
-        f"MIMIR-recommended structural code changes that LOKI refuses to auto-apply:\n  {body}\n"
+    extra = f" (+{len(new_entries) - 5} older)" if len(new_entries) > 5 else ""
+    action(alerts,
+        f"LOKI has {len(new_entries)} unreviewed escalation(s){extra} — MIMIR-recommended "
+        f"structural code changes requiring your decision:\n  {body}\n"
         f"Review: /root/.openclaw/workspace/research/loki_escalation_log.jsonl"
     )
-    # Record the latest ts so we only alert on newer entries next run.
     latest_ts = max(e.get("ts", "") for e in new_entries)
     state["loki_escalations_last_seen"] = {"ts": latest_ts, "recorded_at": now_ts()}
 
 
-# ── Check 6: TYR / HEIMDALL freshness ───────────────────────────────────────
+# ── Check 6: TYR / HEIMDALL freshness — INFO ONLY ───────────────────────────
 
 def check_tyr_heimdall(state, alerts):
     for officer in ["tyr", "heimdall"]:
@@ -405,15 +383,13 @@ def check_tyr_heimdall(state, alerts):
         if age is None:
             key = f"{officer}_missing"
             if should_alert(state, key):
-                alerts.append(f"{officer.upper()} log missing: {log}")
+                info(alerts, f"{officer.upper()} log missing: {log}")
                 record_alert(state, key)
         elif age > LOG_STALE_MIN[officer]:
             key = f"{officer}_stale"
             if should_alert(state, key):
-                alerts.append(
-                    f"{officer.upper()} log stale: last updated {age:.0f} min ago "
-                    f"(threshold {LOG_STALE_MIN[officer]} min)."
-                )
+                info(alerts, f"{officer.upper()} log stale: {age:.0f} min "
+                             f"(threshold {LOG_STALE_MIN[officer]}).")
                 record_alert(state, key, f"age_min={age:.0f}")
 
 
@@ -424,7 +400,7 @@ def main():
     dry_run = "--dry-run" in sys.argv
 
     state = load_state()
-    alerts = []
+    alerts = []  # list of (actionable: bool, msg: str)
 
     check_odin_leagues(state, alerts)
     check_freya(state, alerts)
@@ -433,22 +409,38 @@ def main():
     check_loki_escalations(state, alerts)
     check_tyr_heimdall(state, alerts)
 
-    if alerts:
-        header = f"[research_freshness] {len(alerts)} issue(s) at {now_ts()}:"
-        body = "\n\n".join(f"- {a}" for a in alerts)
+    actionable = [m for a, m in alerts if a]
+    informational = [m for a, m in alerts if not a]
+
+    # Always log both tiers to stdout (→ research_freshness.log via cron redirect)
+    ts = now_ts()
+    if not alerts:
+        print(f"[research_freshness] {ts}: all research signals fresh.")
+    else:
+        print(f"[research_freshness] {ts}: {len(actionable)} actionable, "
+              f"{len(informational)} informational.")
+        if actionable:
+            print("  ACTIONABLE:")
+            for m in actionable:
+                print(f"    - {m}")
+        if informational:
+            print("  INFO:")
+            for m in informational:
+                print(f"    - {m}")
+
+    # Telegram ONLY actionable items (per feedback_syn_reporting.md)
+    if actionable and not dry_run:
+        header = f"[research_freshness] {len(actionable)} item(s) need your decision:"
+        body = "\n\n".join(f"- {m}" for m in actionable)
         msg = f"{header}\n\n{body}"
         if len(msg) > 3900:
             msg = msg[:3900] + "\n\n(truncated)"
-        print(msg)
-        if not dry_run:
-            telegram(msg)
-            save_state(state)
-        else:
-            print("\n[DRY RUN — no Telegram, no state saved]")
+        telegram(msg)
+
+    if not dry_run:
+        save_state(state)
     else:
-        print(f"[research_freshness] {now_ts()}: all research signals fresh.")
-        if not dry_run:
-            save_state(state)
+        print("\n[DRY RUN — no Telegram, no state saved]")
 
 
 if __name__ == "__main__":
