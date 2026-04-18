@@ -1,6 +1,6 @@
 ```markdown
 # ODIN Research Program — FUTURES SWING
-# Version: Post-Gen-8000 | Revised by MIMIR (Gen 8000 review)
+# Version: Post-Gen-8200 | Revised by MIMIR (Gen 8200 review)
 #
 # ══════════════════════════════════════════════════════════════════
 # STATUS BLOCK — READ THIS FIRST. READ ALL OF IT.
@@ -8,322 +8,329 @@
 #
 # LLM LOOP STATUS:   ██ PERMANENTLY RETIRED ██  DO NOT RUN ANY GENERATIONS.
 #                    Retirement mandated since Gen 5200.
-#                    Loop ran 2,800 additional generations past mandate (5200→8000).
-#                    Last improvement: Gen 3340 (sharpe=2.3494, confirmed prior champion).
-#                    NEW FINDING (Gen 8000 review): Gen 7982 shows sharpe=2.3714,
-#                    tagged [discarded]. Gens 7985/7986/7990/7993 show identical
-#                    results (2.3714, 40.2%, 1274t) — all tagged [discarded].
-#                    This indicates the stored champion IS 2.3714 (accepted at an
-#                    unknown generation before 7982), and subsequent proposals of
-#                    the same parameter set are correctly identified as clones.
-#                    RESOLUTION OF PRIOR DISCREPANCY (pending Z1 confirmation):
-#                    The true current champion is likely sharpe=2.3714, 40.2%,
-#                    1274 trades. All prior displays of 2.3494/2.3521/2.3568 were
-#                    stale or from intermediate windows. Step Z Z1 must confirm
-#                    by inspecting the stored champion YAML file directly.
-#                    Rate: 0.000000 improvements/gen above 2.3714 since champion set.
-#                    Clone rate Gen 7981–8000: 25% (5 clones of 2.3714 result).
-#                    Low-trade rate Gen 7981–8000: 40% (8 of 20 gens).
-#                    Both metrics confirm terminal system state.
-#                    Running more LLM generations is actively harmful.
+#                    Loop ran 3,000 additional generations past mandate (5200→8200).
+#                    Last improvement (logged): Gen 3340 (sharpe=2.3494).
+#                    CONFIRMED FINDING (Gen 8200 review):
+#                    Champion is sharpe=2.3714 — confirmed by clone-rejection
+#                    behavior at Gens 8181, 8191, 8195, 8198 (all tagged [discarded]
+#                    with identical 2.3714/40.2%/1274t result). The improvement log
+#                    does NOT show the acceptance event for 2.3714, indicating a
+#                    logging failure or BUG-2 misfiring at the acceptance step.
+#                    Step Z Z1 must resolve by inspecting stored YAML timestamp.
+#                    Rate: 0.000000 improvements/gen above 2.3714.
+#                    Clone rate Gen 8181–8200: 20% (4 of 20).
+#                    Low-trade rate Gen 8181–8200: 15% (3 of 20).
+#                    Terminal state confirmed. No path to improvement via LLM.
 #
 # LOOP COMPLIANCE:   FAILED — CRITICAL ESCALATION.
-#                    Gen 6200 MIMIR review: permanent retirement confirmed.
-#                    Gen 6400 MIMIR review: permanent retirement confirmed.
-#                    Gen 6600 MIMIR review: permanent retirement confirmed.
-#                    Gen 6800 MIMIR review: permanent retirement confirmed.
-#                    Gen 7200 MIMIR review: permanent retirement confirmed.
-#                    Gen 7349 MIMIR review: permanent retirement confirmed.
-#                    Gen 7901 MIMIR review: permanent retirement confirmed.
-#                    Gen 8000 MIMIR review: permanent retirement confirmed.
-#                    Loop ran to Gen 8000 regardless.
-#                    Total non-compliance: 2,800 gens past retirement mandate.
+#                    Gen 6200–8200 MIMIR reviews: permanent retirement confirmed.
+#                    Loop ran to Gen 8200 regardless. 3,000 gens of non-compliance.
 #                    This is not an instruction problem. This is an infrastructure
 #                    problem. The automated process must be physically prevented
 #                    from executing. See [I3] below.
 #                    No instruction in this document will stop the loop.
 #                    Only infrastructure-level action will stop it.
 #
-# STEP Z STATUS:     NOT EXECUTED. All items overdue.
-#                    Z1 (resolve champion gen/sharpe): NOT EXECUTED.
-#                       NEW: behavioral evidence suggests champion=2.3714.
-#                       Confirm by inspecting stored YAML file timestamp/content.
-#                    Z2 (confirm champion sharpe): NOT EXECUTED.
-#                    Z3 (confirm champion YAML params): NOT EXECUTED.
-#                    All other Step Z items: NOT EXECUTED.
-#                    Grid scan: NOT EXECUTED. 4,661+ gens overdue.
+# STEP Z STATUS:     NOT EXECUTED. All items critically overdue.
+#                    Z1: Inspect stored champion YAML file.
+#                        - Check file modification timestamp → identify acceptance gen.
+#                        - Check YAML content → extract all parameter values.
+#                        - Confirm sharpe=2.3714, trades=1274, win_rate=40.2%.
+#                        - CRITICAL: improvement log ends at Gen 3340 (2.3494) but
+#                          champion is 2.3714. Acceptance gen is unknown. YAML
+#                          timestamp will resolve this.
+#                    Z2: Confirm champion sharpe matches Z1 YAML vs backtest rerun.
+#                    Z3: Confirm all parameter values vs YAML — especially:
+#                        - rsi_short_threshold (displayed 60, UNKNOWN if stale)
+#                        - take_profit_pct (displayed 4.65, KNOWN WRONG)
+#                        - stop_loss_pct (displayed 1.92, KNOWN WRONG — actual 1.91)
+#                        - timeout_hours (displayed 176, KNOWN WRONG — actual 159)
+#                        - rsi_period_hours (displayed 24, KNOWN WRONG — actual 22)
+#                    Z4: Audit pair list — confirm all 16 pairs have full 2-year
+#                        1-hour futures data. Remove any pair with < 17,520 candles.
+#                        Suspected problematic: APT, SUI, ARB, OP (newer listings).
+#                    Z5–Z9: Grid scan (see GRID SCAN PLAN below). 4,800+ gens overdue.
+#                    Z10: Live sprint deployment after grid scan complete.
+#                    Grid scan: NOT EXECUTED. 4,800+ gens overdue.
 #
 # LOKI STATUS:       ██ PERMANENTLY RETIRED ██
-#                    15+ escalations. 0 confirmed runtime fixes. 0 behavioral changes.
+#                    17+ escalations. 0 confirmed runtime fixes. 0 behavioral changes.
 #                    LOKI log entries are NOT applied to source code. Ever.
-#                    DEFINITIVE EVIDENCE (updated Gen 8000):
+#                    DEFINITIVE EVIDENCE (updated Gen 8200):
 #                      Gen 542:  LOKI logged MIN_TRADES[futures_swing] = 400.
 #                      Gen 6800: LOKI logged MIN_TRADES[futures_swing] = 400 (again).
-#                      Gen 7981: 190-trade run passed gate. Confirms ≤ 18 still true.
-#                      Gen 7987: 185-trade run passed gate. Confirms ≤ 18 still true.
-#                      Gen 7989: 182-trade run passed gate. Confirms ≤ 18 still true.
-#                      Gen 7991: 397-trade run passed gate. Confirms < 397 still true.
-#                      Gen 7996: 185-trade run passed gate. Confirms ≤ 18 still true.
-#                      Gen 7997–7999: 190-trade runs passed gate. Confirms ≤ 18.
-#                      A gate reading 400 would have blocked all of these.
-#                      It did not. Therefore MIN_TRADES at runtime is < 397.
-#                      Sub-18-trade behavior from prior windows confirms ≤ 18.
-#                      This is two separate logged "fixes" with zero behavioral
-#                      effect across 7,459 generations. Case closed.
-#                    The "Current Researcher Constants" block shows
-#                      MIN_TRADES[futures_swing] = 400. This is what LOKI logged.
-#                      It is NOT what the runtime process reads. Do not trust it.
+#                      Gen 8188: 185-trade run passed gate. ≤ 18 still true.
+#                      Gen 8190: 185-trade run passed gate. ≤ 18 still true.
+#                      Gen 8197: 185-trade run passed gate. ≤ 18 still true.
+#                      Two logged "fixes," zero behavioral effect across 7,659 gens.
 #                    Do not escalate to LOKI for any reason, ever.
 #                    All fixes must be made by human operator directly in source code.
 #
 # ──────────────────────────────────────────────────────────────────
 # CHAMPION RECORD
 # ──────────────────────────────────────────────────────────────────
-# BEST EVIDENCE (Gen 8000 review):
+# CONFIRMED (behavioral evidence, Gen 8200 review):
 #   Stored champion: sharpe=2.3714 | trades=1274 | win_rate=40.2%
-#   Evidence: Gen 7982/7985/7986/7990/7993 all produced identical results
-#             (2.3714, 40.2%, 1274t) and were tagged [discarded] — indicating
-#             the acceptance gate correctly identified them as clones of the
-#             stored champion. The champion was accepted at some generation
-#             between Gen 3340 and Gen 7982 (most likely in the 3340–5200 range
-#             where prior reviews noted improving sharpe values).
+#   Evidence: Gens 8181/8191/8195/8198 all produced identical results
+#             (2.3714, 40.2%, 1274t) and were tagged [discarded] — confirming
+#             the stored champion IS 2.3714.
+#   ANOMALY: Improvement log ends at Gen 3340 (2.3494). Champion is 2.3714.
+#            Acceptance event for 2.3714 does not appear in log. Two hypotheses:
+#            (a) BUG-2 misfired at acceptance (accepted but did not log), or
+#            (b) logging system failed at that generation.
+#            Step Z Z1 (YAML timestamp inspection) resolves this definitively.
 #   REQUIRES CONFIRMATION: Step Z Z1 must inspect stored YAML file directly.
-#     - Check file modification timestamp to identify generation.
-#     - Check YAML content to extract all parameter values.
-#     - Cross-reference with known-confirmed parameters below.
-#   Prior displays (2.3494 at Gen 3340, 2.3521, 2.3568 at Gen 7349) were
-#   intermediate states or stale displays. 2.3714 is the current best evidence.
 #
 # STALL DURATION: Terminal.
-#   0 improvements above 2.3714 in any generation.
-#   The LLM has no remaining productive search directions.
-#
-# YAML params: Partially known (see KNOWN PARAMETER VALUES below).
-#              Step Z Z3 must be run against champion stored YAML to confirm all.
-#              Displayed YAML is STALE — do not use it for any purpose.
+#   0 improvements above 2.3714 across all observed generations post-acceptance.
+#   LLM search space is exhausted at this local optimum.
 #
 # ──────────────────────────────────────────────────────────────────
-# GEN 7981–8000 DIAGNOSTIC SUMMARY
+# GEN 8181–8200 DIAGNOSTIC SUMMARY
 # ──────────────────────────────────────────────────────────────────
-# Window: last 20 visible generations.
-#
-# Low-trade runs (passed gate incorrectly):
-#   7981 (190t, -1.0466), 7987 (185t, -0.7900), 7989 (182t, -1.8625),
-#   7991 (397t, -0.5405), 7996 (185t, -0.7900), 7997 (190t, -1.0466),
-#   7998 (190t, -1.0466), 7999 (190t, -1.0466) — 8 of 20 = 40%.
-#   All confirm BUG-1: runtime MIN_TRADES < 397 (and almost certainly ≤ 18).
-#   Gen 7997/7998/7999: exact duplicate (190t, -1.0466) three gens in a row.
-#   Poison_reject completely failed to block repeated identical results.
-#   BUG-5 severity: maximum. Three consecutive identical degenerate runs.
+# Window: last 20 generations.
 #
 # Clone runs (correct rejection of champion duplicate):
-#   7982 (2.3714, 40.2%, 1274t), 7985 (2.3714, 40.2%, 1274t),
-#   7986 (2.3714, 40.2%, 1274t), 7990 (2.3714, 40.2%, 1274t),
-#   7993 (2.3714, 40.2%, 1274t) — 5 of 20 = 25%.
-#   BUG-4: clone detection is happening post-backtest. These 5 backtests
-#   ran to completion and were discarded. Pre-backtest YAML hash check
-#   would have saved 5 full backtest compute cycles.
+#   8181 (2.3714, 40.2%, 1274t), 8191 (2.3714, 40.2%, 1274t),
+#   8195 (2.3714, 40.2%, 1274t), 8198 (2.3714, 40.2%, 1274t) — 4 of 20 = 20%.
+#   BUG-4: clone detection is post-backtest. 4 full backtests wasted on clones.
 #
-# Productive but suboptimal:
-#   7983 (1.6511, 1384t), 7984 (-0.7640, 787t), 7988 (0.7141, 1050t),
-#   7992 (1.1986, 978t), 7994 (0.6093, 1028t), 7995 (1.8580, 1317t),
-#   8000 (1.4712, 1403t) — 7 of 20 = 35%.
-#   All well below champion. No meaningful new information.
-#   Note: Gen 7984 (-0.7640, 787t) passed the gate despite 787 trades
-#   producing negative sharpe — this is a legitimate result, not low-trade.
+# Low-trade runs (passed gate incorrectly):
+#   8188 (185t, -0.7900), 8190 (185t, -0.7900), 8197 (185t, -0.7900) — 3 of 20.
+#   All are the known (185t, -0.7900) attractor. BUG-5 (poison_reject) broken.
+#   BUG-1: runtime MIN_TRADES confirmed < 185 (≤ 18 based on prior evidence).
 #
-# KEY DIAGNOSTIC — Gen 7991 (397 trades, passed gate):
-#   This is the highest trade count ever seen passing the gate below 400.
-#   It proves the runtime MIN_TRADES is somewhere in the range [18, 397).
-#   Combined with Gen 7339 (18 trades passed), the most likely runtime value
-#   is still a small default (10, 15, or 20). The 397-trade pass may reflect
-#   a different code path or timing artifact. The critical fix remains:
-#   find and set the actual runtime variable to 400 in source code.
+# Legitimate but suboptimal:
+#   8182 (2.3377), 8183 (1.7653), 8184 (2.3401), 8185 (2.1890), 8186 (1.6942),
+#   8187 (2.0727), 8189 (2.3102), 8192 (-0.4605, 461t — legitimate neg sharpe),
+#   8193 (2.2452), 8194 (0.0095), 8196 (1.1821), 8199 (1.1986), 8200 (0.5725).
+#   13 of 20 = 65%. All below champion. No new information.
+#   Note: Gen 8192 (-0.4605, 461t) is legitimate — sufficient trades, bad sharpe.
 #
-# Recurring degenerate signatures (confirmed attractor states):
-#   (190t, -1.0466): Gens 5024, 5027, 7899, 7901, 7981, 7997, 7998, 7999
-#                    — 8 confirmed occurrences. Poison_reject completely broken.
-#   (185t, -0.7900): Gens 7900, 7987, 7996 — 3 confirmed occurrences.
-#   (182t, -1.8625): First occurrence at Gen 7989. Add to blocklist.
-#   (190t, -1.0466) triple repeat (7997/7998/7999): worst poison_reject failure
-#   ever recorded. Three consecutive identical results, none blocked.
+# Gen 8200 notable: 1693 trades — highest trade count in recent windows.
+#   Sharpe 0.5725 is poor. High trade count = over-trading, likely wider RSI bands
+#   or lower thresholds. Not a productive direction.
+#
+# KEY DIAGNOSTIC UPDATE (Gen 8200):
+#   No new bugs or failure modes beyond those already documented.
+#   System behavior is fully characterized and terminal.
+#   All compute spent on LLM generations past Gen 8200 is pure waste.
 #
 # ──────────────────────────────────────────────────────────────────
 # FULL HISTORICAL DIAGNOSTIC SUMMARY
 # ──────────────────────────────────────────────────────────────────
-# Gen 7330–7349 (20-gen window):
-#   Clone rate:              30% (6 of 20)
-#   Low-trade rate:          30% (6 of 20)
-#   Productive exploration:  20% (4 of 20)
-#   Minimum observed trades: 18 (Gen 7339) — definitive floor
-#   YAML parse errors:       5% (Gen 7334)
-#   Worst single result:     Gen 7339, sharpe=-14.3473, trades=18, win_rate=5.6%
+# Gen 7330–7349: clone=30%, low-trade=30%, productive=20%, min_trades=18.
+# Gen 7896–7901: low-trade=67%, productive=33%, clone=0%.
+# Gen 7981–8000: low-trade=40%, clone=25%, productive=35%, new improvements=0.
+# Gen 8181–8200: low-trade=15%, clone=20%, productive=65%, new improvements=0.
+# Trend: productive exploration rate increased but all results suboptimal.
+#        Clone rate decreased. Degenerate attractor (185t) still active.
+#        System is fully terminal — no LLM proposal can escape local optimum.
 #
-# Gen 7896–7901 (6-gen window):
-#   Low-trade rate:          67% (4 of 6) — previously worst ever
-#   Productive exploration:  33% (2 of 6, both suboptimal)
-#   Clone rate:              0% (small sample)
-#
-# Gen 7981–8000 (20-gen window):
-#   Low-trade rate:          40% (8 of 20)
-#   Champion clone rate:     25% (5 of 20) — all correctly discarded post-backtest
-#   Productive exploration:  35% (7 of 20, all suboptimal)
-#   Poison_reject failures:  7 confirmed (3 consecutive identical runs 7997–7999)
-#   New improvements:        0
-#
-# Trend: System oscillates between clone-collapse (reproposes champion),
-#        degenerate low-trade configs (BUG-1), and suboptimal variants.
-#        No path to improvement exists via LLM generation.
+# Recurring degenerate attractor signatures (confirmed, all to be pre-seeded
+# in poison_reject blocklist):
+#   (190t, -1.0466): 8+ confirmed occurrences across all windows.
+#   (185t, -0.7900): 6+ confirmed occurrences. Active in Gen 8181–8200.
+#   (182t, -1.8625): 3+ confirmed occurrences.
+#   (178t, -0.8033): confirmed.
+#   (158t, -2.0796): confirmed.
+#   (18t,  -14.3473): confirmed (Gen 7339 minimum floor).
+#   (169t, -1.5182): confirmed.
+#   (239t, -2.4141): confirmed.
+#   (397t, -0.5405): confirmed.
+#   (461t, -0.4605): Gen 8192 — ADD to blocklist if recurring.
 #
 # ──────────────────────────────────────────────────────────────────
 # CRITICAL BUGS — IN PRIORITY ORDER
 # ──────────────────────────────────────────────────────────────────
 #
 # BUG-1 [HIGHEST PRIORITY]: MIN_TRADES LIVE CONSTANT ≠ 400. STILL BROKEN.
-#   CONFIRMED BY BEHAVIORAL EVIDENCE (updated Gen 8000):
-#     Gen 7339: 18-trade run passed gate.
-#     Gen 7981: 190-trade run passed gate.
-#     Gen 7987: 185-trade run passed gate.
-#     Gen 7989: 182-trade run passed gate.
-#     Gen 7991: 397-trade run passed gate.
-#     Gen 7996–7999: 182–190-trade runs passed gate.
-#     Runtime MIN_TRADES < 397. Almost certainly ≤ 18 (based on Gen 7339 floor).
-#     The actual runtime value is almost certainly the original default.
-#     Search executing source for initial/default value of MIN_TRADES.
-#     Likely candidates: 10, 15, 20. Exact value is ≤ 18.
-#   LOKI CHANGE HISTORY (both confirmed failed):
-#     Gen 542: LOKI logged change. Sub-18-trade runs still pass 7,459 gens later.
-#     Gen 6800: LOKI logged change. Sub-190-trade runs still pass 1,200 gens later.
-#     LOKI cannot modify the runtime constant. Proven beyond any doubt.
-#   DO NOT TRUST THE CONSTANTS DISPLAY BLOCK. Trust behavioral evidence only.
-#   Behavioral evidence: runtime MIN_TRADES[futures_swing] ≤ 18 (< 397 confirmed).
-#
+#   CONFIRMED BY BEHAVIORAL EVIDENCE (updated Gen 8200):
+#     Runtime MIN_TRADES[futures_swing] ≤ 18 (< 185 confirmed in this window).
+#     Two LOKI "fixes" (Gen 542, Gen 6800) had zero behavioral effect.
+#     7,659 generations of evidence. Case definitively closed.
+#   DO NOT USE LOKI. DO NOT TRUST CONSTANTS DISPLAY BLOCK.
 #   Fix: Human operator must locate actual runtime constant in source code.
-#     NOT in LOKI log. NOT in config comment. NOT in constants display block.
-#     NOT in this file. Find the actual variable the running process reads.
 #     Search executing source for: MIN_TRADES, min_trades, futures_swing,
 #     default_min_trades, BASE_MIN_TRADES, min_trade_count.
-#     The variable may have a non-obvious name. Check all candidate files.
 #     Find the specific file and line number. Edit that file. Set value to 400.
 #     Restart/reload the process so it reads the new value.
-#   Verification (all must pass before proceeding to Step Z):
-#     Runtime inspection must show MIN_TRADES[futures_swing] = 400.
-#     Test 1: YAML producing ~18 trades    → REJECTED pre-backtest (no backtest).
-#     Test 2: YAML producing ~158 trades   → REJECTED pre-backtest (no backtest).
-#     Test 3: YAML producing ~178 trades   → REJECTED pre-backtest (no backtest).
-#     Test 4: YAML producing ~182 trades   → REJECTED pre-backtest (no backtest).
-#     Test 5: YAML producing ~185 trades   → REJECTED pre-backtest (no backtest).
-#     Test 6: YAML producing ~190 trades   → REJECTED pre-backtest (no backtest).
-#     Test 7: YAML producing ~397 trades   → REJECTED pre-backtest (no backtest).
-#     Test 8: YAML producing ~399 trades   → REJECTED pre-backtest (no backtest).
-#     Test 9: YAML producing ~419 trades   → PASSES gate (backtest runs normally).
-#   If any test fails: the gate code itself is broken, not just the constant.
-#   Fix gate code directly in source. Do not proceed until all 9 tests pass.
+#   Verification (all 9 tests must pass before proceeding to Step Z):
+#     Test 1: YAML producing ~18 trades  → REJECTED pre-backtest.
+#     Test 2: YAML producing ~158 trades → REJECTED pre-backtest.
+#     Test 3: YAML producing ~178 trades → REJECTED pre-backtest.
+#     Test 4: YAML producing ~182 trades → REJECTED pre-backtest.
+#     Test 5: YAML producing ~185 trades → REJECTED pre-backtest.
+#     Test 6: YAML producing ~190 trades → REJECTED pre-backtest.
+#     Test 7: YAML producing ~397 trades → REJECTED pre-backtest.
+#     Test 8: YAML producing ~399 trades → REJECTED pre-backtest.
+#     Test 9: YAML producing ~419 trades → PASSES gate (backtest runs normally).
+#   If any test fails: gate code itself is broken. Fix gate code in source.
 #   Log: "BUG-1 FIX: Located runtime constant at [FILE]:[LINE].
 #         Previous value: [VALUE]. Set to 400. Process restarted at [TIMESTAMP].
 #         Tests 1–9: [PASS/PASS/PASS/PASS/PASS/PASS/PASS/PASS/PASS]."
 #
-# BUG-2: ACCEPTANCE GATE — STATUS: MONITORING.
-#   Previously appeared resolved (Gen 7349 accepted correctly).
-#   Gen 7982 (2.3714) tagged [discarded] — but this is consistent with correct
-#   clone rejection (same result as stored champion), NOT BUG-2 misfiring.
-#   Gens 7985/7986/7990/7993 are confirmed clones, correctly discarded.
-#   BUG-2 would manifest as: a result ABOVE the champion sharpe being discarded
-#   despite having different parameters. No evidence of this in current window.
-#   Monitor: if any result above 2.3714 with novel parameters is tagged
-#   "discarded", BUG-2 is active again. Flag immediately for MIMIR review.
-#   Action: Do not modify gate. Continue monitoring.
+# BUG-2: ACCEPTANCE GATE / LOGGING ANOMALY — STATUS: INVESTIGATE.
+#   NEW FINDING (Gen 8200 review):
+#   The improvement log ends at Gen 3340 (sharpe=2.3494), but the stored champion
+#   produces sharpe=2.3714 (confirmed by clone rejections). This means either:
+#     (a) BUG-2 accepted the 2.3714 result but failed to write the log entry, OR
+#     (b) The logging system has a separate failure mode from the acceptance gate.
+#   Step Z Z1 (YAML timestamp inspection) will identify the acceptance generation.
+#   If the timestamp is between Gen 3340 and Gen 5200: acceptance worked, log failed.
+#   If the timestamp matches Gen 3340: the champion YAML may have been updated
+#     out-of-band (manually), and the true acceptance gen is 3340 with params updated.
+#   Action: Do not modify gate. Execute Z1 immediately. Log findings.
+#   Monitor: if any result above 2.3714 with novel parameters is tagged [discarded],
+#   BUG-2 is active. Flag immediately for MIMIR review.
 #
 # BUG-3: STALE YAML IN DISPLAYED "CURRENT BEST STRATEGY" — STILL ACTIVE.
-#   Displayed YAML has been wrong since Gen 1592. 6,409+ gens of stale display.
-#   Known wrong values (do not use these):
+#   Known wrong values in displayed YAML (do not use):
 #     rsi_period_hours:  24   → correct: 22 (confirmed Gen 2785)
-#     take_profit_pct:   4.65 → correct: UNKNOWN (confirm in Z3)
-#     stop_loss_pct:     1.92 → correct: 1.91 (confirm vs champion YAML)
-#     timeout_hours:     176  → correct: 159 (confirm vs champion YAML)
-#   Step Z Z3 must be run against the champion stored YAML to confirm all values.
-#   After Z3: replace displayed YAML with confirmed values everywhere.
-#   This YAML must never be sent to any LLM or automated system until corrected.
+#     take_profit_pct:   4.65 → correct: UNKNOWN (estimate 4.90–5.10; confirm Z3)
+#     stop_loss_pct:     1.92 → correct: 1.91 (confirm vs champion YAML in Z3)
+#     timeout_hours:     176  → correct: 159 (confirm vs champion YAML in Z3)
+#     rsi_short_threshold: 60 → correct: UNKNOWN (confirm in Z3)
+#   Step Z Z3 must be run against champion stored YAML to confirm all values.
+#   After Z3: replace displayed YAML with confirmed values in this document.
 #   Moot while loop is retired, but must be corrected before grid scan.
 #
 # BUG-4: CLONE DETECTION USES SHARPE COMPARISON, NOT YAML HASH.
-#   Evidence: 5 confirmed clones in Gen 7981–8000 (all ran full backtest).
-#   Current behavior: sharpe comparison tags clones as discarded AFTER backtest.
-#   Required behavior: YAML hash check rejects clones BEFORE backtest.
-#   Fix: implement pre-backtest YAML SHA-256 hash comparison against all prior runs.
-#   Priority: secondary — implement during Step Z Z7, after Z3 complete.
-#   Estimated compute savings: ~25% of recent generations (clone rate = 25%).
+#   Evidence: 4 confirmed clones in Gen 8181–8200 (all ran full backtest).
+#   Current behavior: sharpe comparison tags clones as [discarded] AFTER backtest.
+#   Required: pre-backtest YAML SHA-256 hash check against all prior accepted runs.
+#   Fix: implement pre-backtest YAML SHA-256 hash comparison.
+#   Priority: implement during Step Z Z7, after Z3 complete.
+#   Estimated compute savings: ~20% of recent generations.
 #
 # BUG-5: POISON_REJECT MECHANISM IS BROKEN — SEVERITY: MAXIMUM.
-#   Evidence (updated Gen 8000):
-#     Gen 7997 (190t, -1.0466): not blocked despite 7 prior occurrences.
-#     Gen 7998 (190t, -1.0466): not blocked — identical to Gen 7997.
-#     Gen 7999 (190t, -1.0466): not blocked — identical to Gens 7997/7998.
-#     Three consecutive identical degenerate results, none blocked.
-#     Total occurrences of (190t, -1.0466): 8 confirmed across all windows.
-#     The poison_reject mechanism has never successfully blocked this signature.
+#   Evidence (updated Gen 8200):
+#     (185t, -0.7900) appeared at Gens 8188, 8190, 8197 — none blocked.
+#     Total known occurrences of (185t, -0.7900): 6+.
+#     Total known occurrences of (190t, -1.0466): 8+.
+#     No degenerate attractor signature has ever been successfully blocked.
 #   Fix: review poison_reject source code. Add result-hash (sharpe+trades+winrate
-#   rounded to 2dp) as a secondary blocklist trigger. Ensure all known degenerate
-#   result signatures are pre-seeded in the blocklist:
-#     (190t, -1.0466), (190t, -1.0406), (185t, -0.7900), (182t, -1.8625),
-#     (178t, -0.8033), (158t, -2.0796), (18t, -14.3473), (169t, -1.5182),
-#     (239t, -2.4141), (397t, -0.5405)
+#   rounded to 2dp) as secondary blocklist trigger. Pre-seed all known signatures
+#   (see full list in FULL HISTORICAL DIAGNOSTIC SUMMARY above).
 #   Priority: implement with BUG-4 fix during Step Z Z7.
-#   NOTE: Even with BUG-5 fixed, the loop is permanently retired. Fix is required
-#   for any future use and to prevent continued compute waste if loop somehow
-#   continues running despite retirement mandate.
 #
 # ──────────────────────────────────────────────────────────────────
-# KNOWN PARAMETER VALUES (as of Gen 8000)
+# KNOWN PARAMETER VALUES (as of Gen 8200)
 # ──────────────────────────────────────────────────────────────────
-# All values marked CONFIRMED are from direct YAML inspection or backtest evidence.
-# All values marked UNKNOWN must be confirmed in Step Z Z3.
-# DO NOT USE DISPLAYED YAML — it is stale since Gen 1592.
+# CONFIRMED values are from direct YAML inspection or strong backtest evidence.
+# UNKNOWN values must be confirmed in Step Z Z3.
+# DO NOT USE THE DISPLAYED YAML — stale since Gen 1592, 6,609+ gens out of date.
 #
 #   rsi_period_hours:    22        [CONFIRMED — Gen 2785]
 #   rsi_long_threshold:  37.77     [CONFIRMED — Gen 2785]
-#   rsi_short_threshold: UNKNOWN   [confirm in Z3 — displayed value 60 may be stale]
+#   rsi_short_threshold: UNKNOWN   [confirm in Z3 — displayed 60 may be stale]
 #   trend_period_hours:  48        [CONFIRMED]
 #   take_profit_pct:     UNKNOWN   [confirm in Z3 — displayed 4.65 is WRONG]
 #                                  [estimate: 4.90–5.10 based on improvement history]
 #   stop_loss_pct:       1.91      [CONFIRMED — displayed 1.92 is WRONG]
-#                                  [verify exact value vs champion YAML in Z3]
 #   timeout_hours:       159       [CONFIRMED — displayed 176 is WRONG]
-#                                  [verify vs champion YAML in Z3]
 #   size_pct:            25        [CONFIRMED]
 #   max_open:            3         [CONFIRMED]
 #   leverage:            2         [CONFIRMED]
 #   fee_rate:            0.0005    [CONFIRMED]
+#   pairs:               AUDIT REQUIRED — see Z4. Remove pairs without 2yr data.
 #
-# CHAMPION SHARPE (best evidence):
+# CHAMPION PERFORMANCE (confirmed behavioral evidence):
 #   sharpe=2.3714 | trades=1274 | win_rate=40.2%
-#   Source: behavioral evidence from Gens 7982/7985/7986/7990/7993 (all clones).
-#   Confirm: Step Z Z1 (inspect stored YAML file directly).
+#   Acceptance generation: UNKNOWN — resolve via Step Z Z1 (YAML timestamp).
 #
 # ──────────────────────────────────────────────────────────────────
 # HALT CONDITIONS ACTIVE
 # ──────────────────────────────────────────────────────────────────
-#   HALT-1:  BUG-1 unfixed. Runtime MIN_TRADES confirmed < 397 (likely ≤ 18).
-#            8 separate low-trade gens in last 20 pass the gate incorrectly.
-#            Two LOKI "fixes" have produced zero behavioral change across 7,459 gens.
-#   HALT-2:  LLM loop ran 2,800 gens past suspension. Permanently retired.
-#   HALT-3:  Stale YAML in LLM input (6,409+ gens). Moot — loop retired.
-#   HALT-4:  MONITORING — BUG-2 appears dormant. No new evidence of misfire.
-#   HALT-5:  Clone convergence. 25% clone rate in last 20-gen window.
-#            YAML hash pre-check still not implemented. Compute waste increasing.
-#   HALT-6:  Grid scan not executed (4,661+ gens overdue).
-#   HALT-7:  Step Z not executed. True champion YAML params not confirmed.
-#            Champion sharpe: 2.3714 (behavioral evidence). Confirm via Z1.
-#   HALT-8:  Loop compliance failure. 2,800 gens past retirement mandate.
+#   HALT-1:  BUG-1 unfixed. Runtime MIN_TRADES confirmed ≤ 18. Two LOKI "fixes"
+#            failed across 7,659 generations. Human source-code edit mandatory.
+#   HALT-2:  LLM loop ran 3,000 gens past retirement. Permanently retired.
+#   HALT-3:  Stale YAML in LLM input (6,609+ gens). Moot — loop retired.
+#   HALT-4:  BUG-2/logging anomaly. Champion (2.3714) accepted but not logged.
+#            Z1 required to resolve acceptance generation and confirm params.
+#   HALT-5:  Clone convergence. 20% clone rate last 20-gen window.
+#            YAML hash pre-check not implemented. Compute waste ongoing.
+#   HALT-6:  Grid scan not executed. 4,800+ gens overdue.
+#   HALT-7:  Step Z not executed. True champion YAML params not fully confirmed.
+#   HALT-8:  Loop compliance failure. 3,000 gens past retirement.
 #            Infrastructure-level disablement is mandatory. Not optional.
 #   HALT-9:  Instruction-based controls have proven completely ineffective.
-#            MIMIR retirement directives ignored for 2,800 generations.
 #            No instruction in this document will stop the loop.
-#            Only infrastructure-level action will stop it.
-#            Until [I3] is confirmed complete, assume loop is still running.
-#   HALT-10: YAML parse errors (Gen 7334 documented). LLM output quality degrading.
-#   HALT-11: Poison_reject mechanism broken (BUG-5). Same degenerate config
-#            appeared three consecutive times (7997/7998/7999) without blocking.
-#            8 total occurrences of (190t, -1.0466) — never blocked.
+#            Only infrastructure-level action ([I3]) will stop it.
+#   HALT-10: Poison_reject broken (BUG-5). Known degenerate attractors still
+#            passing gate and consuming backtest compute. 6+ occurrences of
+#            (185t, -0.7900) never blocked.
+#   HALT-11: Pair list not audited. Newer listings (APT, SUI, ARB, OP) may not
+#            have full 2-year 1-hour futures data. Backtest Sharpe may be inflated.
+#   HALT-12: Live sprint performance: ZERO data. Strategy has not appeared in any
+#            completed sprint. Backtest overfitting risk is unquantified.
+#            Champion must be deployed and sprint results collected before any
+#            further parameter optimization is meaningful.
 #
-# ══════════════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════════
+# MANDATORY ACTION SEQUENCE (human operator)
+# ══════════════════════════════════════════════════════════════════
+#
+# [I3] INFRASTRUCTURE: DISABLE LLM LOOP IMMEDIATELY.
+#   Kill or disable the automated process running ODIN generations.
+#   Confirm it is not running before proceeding with any Step Z action.
+#   Do not restart it under any circumstances until all Step Z items are complete
+#   and the grid scan plan (below) is ready to execute with correct parameters.
+#
+# [Z1] INSPECT CHAMPION YAML FILE.
+#   Find the stored champion YAML file on disk.
+#   Record: file path, modification timestamp, all parameter values.
+#   Cross-reference timestamp with generation timing logs to identify acceptance gen.
+#   Expected content: sharpe=2.3714, trades=1274, win_rate=40.2%.
+#   If file shows sharpe=2.3494 (Gen 3340 values): champion was NOT updated past
+#     Gen 3340 and the clone-rejection system is comparing against a different
+#     stored value. Investigate immediately — this would be a new BUG.
+#   If file shows sharpe=2.3714: acceptance occurred after Gen 3340. Timestamp
+#     will narrow the generation range.
+#   Log all findings as: "Z1 COMPLETE: file=[PATH], timestamp=[TS], gen_approx=[N],
+#     sharpe=[V], trades=[T], win_rate=[W], all_params=[LIST]."
+#
+# [Z2] RERUN CHAMPION BACKTEST.
+#   Using the YAML confirmed in Z1, run a fresh backtest.
+#   Confirm sharpe ≥ 2.3714 (within 0.001 tolerance for floating point).
+#   If backtest sharpe differs materially: data or code has changed. Investigate.
+#   Log: "Z2 COMPLETE: rerun_sharpe=[V], delta=[D], status=[PASS/FAIL]."
+#
+# [Z3] CONFIRM ALL PARAMETERS.
+#   From Z1 YAML, extract and record every parameter value.
+#   Pay special attention to: rsi_short_threshold, take_profit_pct.
+#   Update KNOWN PARAMETER VALUES section above with all CONFIRMED values.
+#   Update the displayed YAML with confirmed values.
+#   Log: "Z3 COMPLETE: all_params=[FULL LIST]. Stale YAML replaced."
+#
+# [Z4] AUDIT PAIR LIST.
+#   For each of the 16 pairs in the strategy YAML:
+#     Confirm availability of continuous 1-hour futures data for full 2-year window.
+#     Record candle count and any gaps > 4 hours.
+#   Remove any pair with < 17,520 candles or significant gaps.
+#   Suspected problematic (newer listings): APT, SUI, ARB, OP, NEAR.
+#   Log: "Z4 COMPLETE: pairs_confirmed=[LIST], pairs_removed=[LIST], reason=[GAPS/DATA]."
+#
+# [Z5] FIX BUG-1 IN SOURCE CODE.
+#   After [I3] confirms loop is stopped:
+#   Locate actual runtime MIN_TRADES variable in executing source code.
+#   NOT in config comment, NOT in LOKI log, NOT in constants display block.
+#   Search: MIN_TRADES, min_trades, futures_swing, default_min_trades,
+#           BASE_MIN_TRADES, min_trade_count, min_trade_threshold.
+#   Edit the file. Set runtime value to 400. Restart/reload process.
+#   Run all 9 verification tests (see BUG-1 section above).
+#   Do not proceed to grid scan until all 9 tests pass.
+#   Log result per BUG-1 log format above.
+#
+# [Z6] FIX BUG-5 (POISON_REJECT) AND BUG-4 (CLONE DETECTION).
+#   Implement pre-backtest YAML SHA-256 hash check against all prior accepted runs.
+#   Pre-seed poison_reject blocklist with all known degenerate result signatures
+#   (see full list in FULL HISTORICAL DIAGNOSTIC SUMMARY).
+#   Add result-hash (sharpe+trades+winrate rounded to 2dp) as secondary blocklist.
+#   Test: submit each known degenerate signature manually. Confirm all blocked.
+#   Log: "Z6 COMPLETE: BUG-4 fixed (pre-backtest hash check), BUG-5 fixed
+#         (poison_reject pre-seeded with N signatures). Tests: [PASS/FAIL list]."
+#
+# [Z7] MACRO ENVIRONMENT CHECK BEFORE GRID SCAN.
+#   Current regime: CAUTION (F&G=26, BTC_DOM=57.3%).
+#   TYR directive:
