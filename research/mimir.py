@@ -364,7 +364,7 @@ Output EXACTLY two sections, using these exact headers:
 If you identify a specific structural code change needed in odin_researcher_v2.py (a logic error, a missing guard, a counterproductive behavior — NOT a constant value), add an optional third section:
 
 ### STRUCTURAL_PATCH
-[{"old": "exact unique string to replace", "new": "replacement string"}]
+[{{"old": "exact unique string to replace", "new": "replacement string"}}]
 
 Rules: each "old" string must appear exactly once in the file; max 3 pairs; no new imports; no signature changes; Python must remain valid. Omit this section entirely if no structural change is needed."""
 
