@@ -57,6 +57,7 @@ ALERT_COOLDOWN_H  = 6
 
 
 def tg_send(msg):
+    msg = f"[SYN/watchdog] {msg}"  # SYN-prefix-applied
     try:
         payload = json.dumps({
             "chat_id": CHAT_ID, "text": msg, "parse_mode": "HTML",

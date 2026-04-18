@@ -32,6 +32,7 @@ def log(msg: str) -> None:
 
 
 def send_telegram(msg: str) -> None:
+    msg = f"[SYN/session] {msg}"  # SYN-prefix-applied
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     data = json.dumps({"chat_id": CHAT_ID, "text": msg}).encode()
     req = urllib.request.Request(

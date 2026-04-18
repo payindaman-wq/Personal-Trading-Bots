@@ -90,6 +90,7 @@ def save_json(path, data):
 
 
 def tg_send(msg):
+    msg = f"[SYN/regression] {msg}"  # SYN-prefix-applied
     import urllib.request
     try:
         payload = json.dumps({"chat_id": CHAT_ID, "text": msg, "parse_mode": "HTML"}).encode()

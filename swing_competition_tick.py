@@ -294,6 +294,7 @@ def find_active_comp():
 
 
 def tg_send(msg):
+    msg = f"[SYN/swing-tick] {msg}"  # SYN-prefix-applied
     """Send a Telegram message to the configured chat."""
     try:
         import urllib.request as ur

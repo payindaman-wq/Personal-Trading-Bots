@@ -56,6 +56,7 @@ def save_state(s):
 
 
 def tg_send(msg):
+    msg = f"[SYN/exchange] {msg}"  # SYN-prefix-applied
     try:
         payload = json.dumps({"chat_id": CHAT_ID, "text": msg, "parse_mode": "HTML"}).encode()
         req = urllib.request.Request(

@@ -128,6 +128,7 @@ def clear_alert(state, key):
 # ── Telegram ────────────────────────────────────────────────────────────────
 
 def tg_send(msg):
+    msg = f"[SYN/heartbeat] {msg}"  # SYN-prefix-applied
     try:
         payload = json.dumps({
             "chat_id":    CHAT_ID,

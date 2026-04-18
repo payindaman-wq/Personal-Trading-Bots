@@ -48,6 +48,7 @@ ALL_PAIRS = [
 
 
 def tg_send(msg):
+    msg = f"[SYN/odin] {msg}"  # SYN-prefix-applied
     try:
         payload = json.dumps({
             "chat_id": TG_CHAT_ID, "text": msg, "parse_mode": "HTML",

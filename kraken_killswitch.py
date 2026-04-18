@@ -54,6 +54,7 @@ def log(msg):
 
 
 def tg_actionable(msg):
+    msg = f"[SYN/killswitch] {msg}"  # SYN-prefix-applied
     """Telegram alert — reserved for calls-to-action only (per user rule)."""
     try:
         payload = json.dumps({"chat_id": CHAT_ID, "text": msg, "parse_mode": "HTML"}).encode()

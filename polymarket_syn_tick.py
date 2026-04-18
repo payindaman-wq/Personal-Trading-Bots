@@ -650,6 +650,7 @@ def update_equity(bot):
 # ── Cycle management ──────────────────────────────────────────────────────
 
 def tg_send(msg):
+    msg = f"[SYN/pm-tick] {msg}"  # SYN-prefix-applied
     """Send a Telegram message via the SYN bot."""
     try:
         data = json.dumps({"chat_id": CHAT_ID, "text": msg, "parse_mode": "Markdown"}).encode()

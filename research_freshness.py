@@ -126,6 +126,7 @@ def record_alert(state, key, detail=""):
 
 
 def telegram(msg):
+    msg = f"[SYN/freshness] {msg}"  # SYN-prefix-applied
     try:
         data = urllib.parse.urlencode({
             "chat_id": CHAT_ID,

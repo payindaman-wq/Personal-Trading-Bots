@@ -70,7 +70,15 @@ EXPECTED_CRON = [
     "heartbeat.log",         # weekly log trim block
 ]
 
-EXPECTED_SERVICES = ["freya.service", "kalshi_copy.service", "polymarket_syn.service"]
+EXPECTED_SERVICES = [
+    "freya.service",
+    "kalshi_copy.service",
+    "polymarket_syn.service",
+    "odin_day.service",
+    "odin_swing.service",
+    "odin_futures_day.service",
+    "odin_futures_swing.service",
+]
 
 # state file → max age in minutes before flagged stale
 STATE_FILES = {
@@ -104,6 +112,7 @@ def log(msg):
 
 
 def tg_actionable(msg):
+    msg = f"[SYN/audit] {msg}"  # SYN-prefix-applied
     try:
         payload = json.dumps({"chat_id": CHAT_ID, "text": msg, "parse_mode": "HTML"}).encode()
         req = urllib.request.Request(
