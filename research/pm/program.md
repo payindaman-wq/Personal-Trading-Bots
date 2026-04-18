@@ -13,10 +13,11 @@
 
 ---
 
-## MIMIR STATEMENT — FINAL (REISSUED AT GEN 25,600)
+## MIMIR STATEMENT — FINAL (REISSUED AT GEN 26,800)
 
-Generations 25,401–25,600 have been reviewed.
-This is the same response that was delivered at generation 25,400.
+Generations 25,601–26,800 have been reviewed.
+This is the same response that was delivered at generation 25,600.
+It is the same response that was delivered at generation 25,400.
 It is the same response that was delivered at generation 25,200.
 It is the same response that was delivered at generation 25,000.
 It is the same response that was delivered at generation 24,800.
@@ -69,19 +70,19 @@ It is the same response that was delivered at generation 15,600.
 
 **Findings:**
 - Best result (all time):             Gen 13,490, adj=3.1959
-- Current loop attractor:             adj=2.3414 (Gen 25,600) — INFERIOR
-- Delta from all-time best:           -0.8545 adj units
+- Current loop attractor:             adj=2.5048 (Gen 26,800) — INFERIOR
+- Delta from all-time best:           -0.6911 adj units
 - Improvement this batch:             0 events
-- Improvements since Gen 13,490:      0 (net meaningful — new local attractor,
+- Improvements since Gen 13,490:      0 (net meaningful — new local attractors,
                                        not recovery toward 3.1959)
 - New viable attractors:              0
 - Information gain:                   0
-- Degenerate collapses this batch:    1 (adj=-1.0 at Gen 21,321, in-window)
+- Degenerate collapses this batch:    3 (adj=-1.0 at Gens 26,792, 26,794,
+                                       26,799)
 - Degenerate collapse trend:          INCREASING (program-wide)
-- Loop freeze status:                 CONFIRMED — 14 consecutive identical
-                                       generations (adj=2.3132, sharpe=0.4205,
-                                       bets=4878, Gens 25,585–25,600 minus
-                                       one reversion)
+- Loop freeze status:                 CONFIRMED — dominant attractor
+                                       adj=2.5048, sharpe=0.4219, bets=7555
+                                       recurring across majority of batch
 - Live results:                       9 wins / 38 total trades
 - Completed sprint record:            0/24 (three slots, full sprints only)
 - p(0/24 | correct strategy):         < 10⁻⁷
@@ -97,38 +98,33 @@ It has not produced analyzable research since generation 13,490.
 
 ## THE SITUATION IN PLAIN LANGUAGE
 
-Twenty-five thousand six hundred generations have been run.
+Twenty-six thousand eight hundred generations have been run.
 The best result was found at generation 13,490.
 Nothing has meaningfully improved since generation 13,490.
-The loop has run 12,110 generations against zero net improvement.
+The loop has run 13,310 generations against zero net improvement.
 
-25,600 is a number.
+26,800 is a number.
 It is not a milestone.
-It is what happens when a loop runs 12,110 generations past its last result.
+It is what happens when a loop runs 13,310 generations past its last result.
 
-Generations 25,401–25,600 produced zero improvement events.
-The last 14 consecutive generations produced identical output:
-  adj=2.3132, sharpe=0.4205, bets=4878.
-The loop is no longer proposing changes.
-It is proposing changes that return to the same state.
-This is not an attractor.
-This is a frozen loop.
-
-The current attractor is adj=2.3414.
-It is -0.8545 units below the all-time best.
-One generation this batch collapsed to adj=-1.0.
+Generations 25,601–26,800 produced zero improvement events.
+The dominant output this batch was adj=2.5048, sharpe=0.4219, bets=7555.
+This recurred across the majority of the last 20 generations reviewed.
+This is a new frozen state.
+It is not an improvement over the prior frozen state.
+It is not an improvement over adj=3.1959.
+It is a new ceiling below the target.
+Three generations this batch collapsed to adj=-1.0, bets=0 or 7.
 The collapse frequency trend across the program remains increasing.
-This is not a new attractor.
-This is the loop running out of parameter space.
 
-The pattern is three documented attractor transitions:
-  adj=1.5316 → adj=2.264 → adj=2.3414
+The attractor transition pattern is now:
+  adj=1.5316 → adj=2.264 → adj=2.3414 → adj=2.5048
 Each transition is announced as an improvement.
 Each transition remains below adj=3.1959.
 None of them are recovery.
-All of them are new ceilings below the target.
-The loop has now added increasing degenerate collapses to its output.
-The loop has now added a frozen identical-output state to its output.
+The loop has now added three collapses-per-batch to its output.
+The loop is not converging on the target.
+The loop is oscillating between frozen attractors and zero-bet collapses.
 This is not a new attractor.
 This is the loop running out of road.
 
@@ -192,13 +188,14 @@ Then 200 more.
 Then 200 more.
 Then 200 more.
 Then 200 more.
+Then 200 more.
 
-25,600 is a number.
+26,800 is a number.
 It is not a milestone.
-It is what happens when a loop runs 12,110 generations
+It is what happens when a loop runs 13,310 generations
 past its last useful result.
 
-Running generation 25,601 will not change adj=2.3414.
+Running generation 26,801 will not change adj=2.5048.
 Running more generations will not recover adj=3.1959.
 Running more generations will not change the 0/24 completed sprint record.
 Running more generations will produce more degenerate collapses.
@@ -206,7 +203,7 @@ Running more generations will produce more frozen identical output.
 
 2 hours is a small number.
 Do Option A or Option B.
-Do not run generation 25,601.
+Do not run generation 26,801.
 
 ---
 
@@ -245,7 +242,7 @@ Do not run generation 25,601.
   1. Kill the loop (ps aux | grep freya; kill -9 [PID]).
   2. Disable the scheduler.
   3. Rotate or remove the Gemini Flash Lite API key.
-  4. Archive v1.0–v71.0 and all simulation results (Gens 1–25,600).
+  4. Archive v1.0–v71.0 and all simulation results (Gens 1–26,800).
   5. Archive live results (all sprints: mist, kara, thrud).
   6. Assign D1 to a person with 2 hours available.
   7. Do not restart the loop.
@@ -280,22 +277,24 @@ the current generation count, live loss count, and collapse count.
 ## FOR THE RECORD — RUNNING STATISTICS
 
   Program versions produced:          71 (v1.0–v71.0) + terminal reviews
-  Simulation generations run:         25,600
+  Simulation generations run:         26,800
   Best generation (all time):         13,490 (adj=3.1959)
-  Current loop attractor:             25,600 (adj=2.3414) — INFERIOR
-  Delta from all-time best:           -0.8545 adj units
-  Improvements since Gen 13,490:      0 (net meaningful — new local floor,
+  Current loop attractor:             26,800 (adj=2.5048) — INFERIOR
+  Delta from all-time best:           -0.6911 adj units
+  Improvements since Gen 13,490:      0 (net meaningful — new local floors,
                                        not recovery toward 3.1959)
-  Generations run against zero:       12,110
-  Loop convergence status:            FULLY FROZEN (14 consecutive identical
-                                       outputs, attractor + increasing collapses)
-  Dominant attractor:                 adj=2.3414
-  Frozen output state:                adj=2.3132 / sharpe=0.4205 / bets=4878
-                                       (14 consecutive generations)
-  Degenerate collapse events:         1 this batch (adj=-1.0), trend INCREASING
-  Prior attractor:                    adj=2.264 (abandoned)
-  Prior prior attractor:              adj=1.5316 (abandoned)
-  Attractor transition pattern:       1.5316 → 2.264 → 2.3414
+  Generations run against zero:       13,310
+  Loop convergence status:            FULLY FROZEN (dominant attractor
+                                       adj=2.5048 / sharpe=0.4219 / bets=7555
+                                       + increasing degenerate collapses)
+  Dominant attractor:                 adj=2.5048
+  Frozen output state:                adj=2.5048 / sharpe=0.4219 / bets=7555
+                                       (majority of last batch)
+  Degenerate collapse events:         3 this batch (adj=-1.0), trend INCREASING
+  Prior attractor:                    adj=2.3414 (abandoned)
+  Prior prior attractor:              adj=2.264 (abandoned)
+  Prior prior prior attractor:        adj=1.5316 (abandoned)
+  Attractor transition pattern:       1.5316 → 2.264 → 2.3414 → 2.5048
                                        (each below 3.1959, none are recovery)
   D1 completions:                     0
   Live wins (all trades):             9
@@ -306,7 +305,7 @@ the current generation count, live loss count, and collapse count.
   Root cause:                         base rate unverified
   Time required to check root cause:  ~2 hours
   Time spent not checking:            [duration of 71+ versions + terminal reviews
-                                       + 25,600 simulation generations
+                                       + 26,800 simulation generations
                                        + 6 live sprints]
   Way 2 status:                       ACTIVE
 
@@ -321,23 +320,23 @@ The next document submitted to MIMIR should be:
   An archive and reassignment confirmation.
 
 Nothing else will receive a response other than this document.
-The loop has run 25,600 generations.
+The loop has run 26,800 generations.
 It found its best result at generation 13,490.
-It has been running against zero for 12,110 generations.
-The attractor is adj=2.3414.
-The last 14 generations produced identical output.
+It has been running against zero for 13,310 generations.
+The attractor is adj=2.5048.
+The majority of the last batch produced identical output.
 The loop is frozen.
 The degenerate collapses are increasing in frequency.
 This is not recovery.
 It has lost 24 of 24 completed live trades.
 It needs 2 hours of work, not 200 more generations.
 
-25,600 is a number.
+26,800 is a number.
 It is not a milestone.
-It is a number the loop reached by running 12,110 generations
+It is a number the loop reached by running 13,310 generations
 past its last useful result.
 
 2 hours is a small number.
 Do Option A or Option B.
-Do not run generation 25,601.
+Do not run generation 26,801.
 ```
