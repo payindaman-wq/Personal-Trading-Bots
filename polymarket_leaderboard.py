@@ -14,8 +14,9 @@ from datetime import datetime, timezone
 
 WORKSPACE   = "/root/.openclaw/workspace"
 POLY_DIR    = os.path.join(WORKSPACE, "competition", "polymarket")
-STATE_FILE  = os.path.join(POLY_DIR, "state.json")
-AUTO_STATE  = os.path.join(POLY_DIR, "auto_state.json")
+STATE_FILE   = os.path.join(POLY_DIR, "kalshi_copy_state.json")
+BACKFILL_FILE = os.path.join(POLY_DIR, "kalshi_copy_pm_backfill.json")
+AUTO_STATE   = os.path.join(POLY_DIR, "auto_state.json")
 SPRINT_DIR  = os.path.join(POLY_DIR, "sprint_results")
 LB_PATH     = os.path.join(POLY_DIR, "polymarket_leaderboard.json")
 CYCLE_FILE  = os.path.join(POLY_DIR, "polymarket_cycle_state.json")
@@ -80,24 +81,29 @@ def get_live_bots():
     """Read current sprint P&L directly from both state files."""
     bots = []
 
-    # Copy-trader bots — closed P&L only, filtered to current cycle start
+    # Copy-trader bots (_k fleet) — merge live Kalshi state + historical PM backfill
+    # for current sprint. Mirrors polymarket_data.py merge logic.
     try:
         with open(STATE_FILE) as f:
             state = json.load(f)
-        cs = load_cycle_state()
-        sprint_id    = state.get("sprint_id", "")
-        sprint_start = cs.get("cycle_started_at", "2026-01-01")
+        backfill = {}
+        try:
+            with open(BACKFILL_FILE) as bf:
+                backfill = json.load(bf).get("bots", {})
+        except Exception:
+            backfill = {}
+        sprint_id = state.get("sprint_id", "")
         for b in state.get("bots", []):
-            closed  = [t for t in b.get("closed_trades", [])
-                       if t.get("closed_at", "") >= sprint_start]
-            pnl     = round(sum(t.get("pnl_usd", 0.0) for t in closed), 4)
+            name  = b.get("name", "")
+            bf_b  = backfill.get(name, {})
+            pnl     = round(b.get("sprint_pnl_usd", 0.0) + bf_b.get("sprint_pnl_usd", 0.0), 4)
             pnl_pct = round((pnl / STARTING_CAPITAL) * 100, 2)
-            trades  = len(closed)
-            wins    = sum(1 for t in closed if t.get("pnl_usd", 0.0) > 0)
+            trades  = b.get("sprint_trades", 0) + bf_b.get("sprint_trades", 0)
+            wins    = b.get("sprint_wins", 0)   + bf_b.get("sprint_wins", 0)
             bots.append({
-                "bot":             b["name"],
+                "bot":             name,
                 "type":            "copy",
-                "username":        b.get("trader", ""),
+                "username":        b.get("pm_trader", b.get("trader", "")),
                 "sprint_id":       sprint_id,
                 "sprint_pnl_usd":  pnl,
                 "sprint_pnl_pct":  pnl_pct,
