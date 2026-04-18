@@ -178,9 +178,45 @@ def start_new():
         return None
 
 
+def check_cycle_boundary_early():
+    """Guard against prior archive crash: if the last completed sprint closed a
+    cycle but status was never flipped to awaiting_review (e.g., archive_current
+    raised before advance_cycle_if_needed ran), flip it now and exit so LOKI can
+    process the cycle. Idempotent and safe when cycle is mid-flight.
+    Returns True if main() should exit early."""
+    cs = load_cycle_state()
+    if cs.get("status") == "awaiting_review":
+        print(f"  [cycle] Day Cycle {cs.get('cycle')} already awaiting LOKI review — skipping restart.")
+        return True
+    sprint_in_cycle   = cs.get("sprint_in_cycle", 0)
+    sprints_per_cycle = cs.get("sprints_per_cycle", 7)
+    if sprint_in_cycle >= sprints_per_cycle:
+        old_cycle = cs.get("cycle", 1)
+        cs["status"] = "awaiting_review"
+        save_cycle_state(cs)
+        print(f"  [cycle] Day Cycle {old_cycle} boundary recovered from stale state "
+              f"({sprint_in_cycle}/{sprints_per_cycle}) — awaiting LOKI review.")
+        try:
+            inbox = os.path.join(WORKSPACE, "syn_inbox.jsonl")
+            entry = json.dumps({
+                "ts": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
+                "source": "day_restart", "severity": "warning",
+                "msg": f"Day Cycle {old_cycle} boundary recovered from stale state — LOKI restructure pending",
+            })
+            with open(inbox, "a") as _f:
+                _f.write(entry + "\n")
+        except Exception:
+            pass
+        return True
+    return False
+
+
 def main():
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     print(f"[day_daily_restart] {now}")
+
+    if check_cycle_boundary_early():
+        return
 
     comp_dir, meta = find_active()
 
