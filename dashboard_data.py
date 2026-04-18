@@ -725,7 +725,7 @@ MIMIR_LOG = "/root/.openclaw/workspace/research/mimir_log.jsonl"
 
 def get_mimir_state():
     """Read Mimir analysis log and return dashboard state."""
-    state = {"analyses": [], "last_day": None, "last_swing": None, "last_pm": None, "total_analyses": 0}
+    state = {"analyses": [], "last_day": None, "last_swing": None, "last_pm": None, "last_futures_day": None, "last_futures_swing": None, "total_analyses": 0}
     if not os.path.exists(MIMIR_LOG):
         return state
     entries = []
@@ -764,6 +764,10 @@ def get_mimir_state():
             state["last_swing"] = {k: v for k, v in entry_full.items() if k != "analysis"}
         if lg == "pm" and state["last_pm"] is None:
             state["last_pm"] = {k: v for k, v in entry_full.items() if k != "analysis"}
+        if lg == "futures_day" and state["last_futures_day"] is None:
+            state["last_futures_day"] = {k: v for k, v in entry_full.items() if k != "analysis"}
+        if lg == "futures_swing" and state["last_futures_swing"] is None:
+            state["last_futures_swing"] = {k: v for k, v in entry_full.items() if k != "analysis"}
     state["analyses"]       = analyses
     state["total_analyses"] = len(entries)
     return state
