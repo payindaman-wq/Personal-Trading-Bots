@@ -93,6 +93,18 @@ def save_state(state):
         json.dump(state, f, indent=2)
 
 
+
+HC_PING_URL = "https://hc-ping.com/e3fb3f2d-2f5a-4128-af8c-4555b937f3a1"
+
+
+def hc_ping(suffix=""):
+    """Dead-man ping to healthchecks.io. Fire-and-forget; never raises."""
+    try:
+        url = HC_PING_URL + suffix
+        urllib.request.urlopen(url, timeout=10).read()
+    except Exception as e:
+        print(f"  [hc-ping] {e}")
+
 def should_alert(state, key, cooldown_min=None):
     """Return True if cooldown has passed for this problem key."""
     if cooldown_min is None:
@@ -622,6 +634,7 @@ def main():
                         except Exception: pass
                     write_syn_mimir_alert(state, lg, etype, msg, context=ctx)
 
+    hc_ping()
     save_state(state)
 
 
