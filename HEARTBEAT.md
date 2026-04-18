@@ -8,6 +8,28 @@
 
 ---
 
+## How to send a Telegram alert (REQUIRED — do not improvise the recipient)
+
+When you need to message Chris, use this exact pattern. Do NOT use `@heartbeat` or any `@`-handle — Telegram bots cannot resolve usernames to chat IDs and the message will silently bounce.
+
+```python
+import json, urllib.request
+BOT_TOKEN = '8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY'
+CHAT_ID = '8154505910'  # Chris — numeric chat_id, never an @-handle
+
+def tg_send(body):
+    msg = f'[SYN/heartbeat] {body}'  # SYN-prefix-applied — required convention
+    payload = json.dumps({'chat_id': CHAT_ID, 'text': msg}).encode()
+    req = urllib.request.Request(
+        f'https://api.telegram.org/bot{BOT_TOKEN}/sendMessage',
+        data=payload, headers={'Content-Type': 'application/json'})
+    urllib.request.urlopen(req, timeout=10).read()
+```
+
+Every alert body must be prefixed with `[SYN/heartbeat]` (the helper above does this). Never call the OpenClaw `message` tool with channel=Telegram — use the urllib pattern above.
+
+---
+
 ## Step 1 — Load alert state
 
 ```python
@@ -20,7 +42,8 @@ now = datetime.now(timezone.utc)
 if os.path.exists(STATE):
     state = json.load(open(STATE))
 else:
-    state = {"alerted": {}}
+    state = {"alerted": {}, "pending": {}}
+state.setdefault("pending", {})  # tracks first-seen time for must-persist checks
 
 def already_alerted(key):
     ts = state["alerted"].get(key)
@@ -30,6 +53,19 @@ def already_alerted(key):
 
 def mark_alerted(key):
     state["alerted"][key] = now.isoformat()
+    state["pending"].pop(key, None)
+
+def must_persist(key, min_minutes):
+    """Return True only if this key has been failing for >= min_minutes.
+    Suppresses single-cycle blips that auto-recover before next heartbeat."""
+    first_seen = state["pending"].get(key)
+    if not first_seen:
+        state["pending"][key] = now.isoformat()
+        return False
+    return now - datetime.fromisoformat(first_seen) >= timedelta(minutes=min_minutes)
+
+def clear_pending(key):
+    state["pending"].pop(key, None)
 
 def save_state():
     json.dump(state, open(STATE, "w"), indent=2)
@@ -45,18 +81,19 @@ ls /root/.openclaw/workspace/alerts/pending_*.txt 2>/dev/null
 ```
 - If any exist: read each, send contents to Telegram, delete the file. No cooldown needed — each file is unique.
 
-### Day Trading Tick Health
+### Day Trading Tick Health (must persist 60+ min)
 ```bash
 stat /root/.openclaw/workspace/competition/leaderboard.json
 ```
-- If modified >15 min ago AND a sprint is active: problem key = `day_tick_stale`
-- Check `tail -10 /root/.openclaw/workspace/competition/cron.log` for context
+- If modified >15 min ago AND a sprint is active: candidate problem key = `day_tick_stale`
+- **Only alert if `must_persist('day_tick_stale', 60)` returns True.** This silences single-cycle blips that recover by next heartbeat. If the file is fresh, call `clear_pending('day_tick_stale')`.
+- When alerting, include `tail -10 /root/.openclaw/workspace/competition/cron.log` for context.
 
-### Swing Trading Tick Health
+### Swing Trading Tick Health (must persist 90+ min — already long-window, no extra delay)
 ```bash
 stat /root/.openclaw/workspace/competition/swing/swing_leaderboard.json
 ```
-- If modified >90 min ago AND a sprint is active: problem key = `swing_tick_stale`
+- If modified >90 min ago AND a sprint is active: problem key = `swing_tick_stale` — alert immediately (90min already exceeds blip window).
 
 ### Active Day Sprint
 ```bash
@@ -93,7 +130,7 @@ if entries:
 For each problem found:
 ```python
 if not already_alerted("problem_key"):
-    # send Telegram message
+    tg_send("<problem body>")  # uses helper above with [SYN/heartbeat] prefix and numeric chat_id
     mark_alerted("problem_key")
 
 save_state()
