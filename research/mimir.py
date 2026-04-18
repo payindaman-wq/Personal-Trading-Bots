@@ -164,6 +164,32 @@ def load_research_results(league):
     return rows
 
 
+
+def load_champion_ground_truth(league):
+    """Read actual stored champion metrics from population/elite_0.yaml.
+
+    Prevents MIMIR from inferring/hallucinating champion values when results.tsv
+    is incomplete (gen gaps, rotation, etc.). Parses the _sharpe/_trades fields
+    without importing yaml so we do not add a new dependency to this module.
+    """
+    path = os.path.join(RESEARCH, league, "population", "elite_0.yaml")
+    if not os.path.exists(path):
+        return None
+    sharpe = trades = None
+    try:
+        for line in open(path):
+            line = line.strip()
+            if line.startswith("_sharpe:"):
+                sharpe = float(line.split(":", 1)[1].strip())
+            elif line.startswith("_trades:"):
+                trades = int(float(line.split(":", 1)[1].strip()))
+        if sharpe is None or trades is None:
+            return None
+        return {"sharpe": sharpe, "trades": trades}
+    except Exception:
+        return None
+
+
 def summarize_research(rows):
     if not rows:
         return "No research results yet."
@@ -293,16 +319,31 @@ def format_tyr_context(tyr):
 
 def build_prompt(league, program_md, best_strategy_yaml,
                  research_summary, sprint_summary, generation,
-                 self_audit="", tyr_context=""):
+                 self_audit="", tyr_context="", champion_ground_truth=None):
     if league == "day":              bot_name = "AutoBotDay";    timeframe = "5-minute (day trading)"
     elif league == "swing":          bot_name = "AutoBotSwing";  timeframe = "1-hour (swing trading)"
     elif league == "futures_day":    bot_name = "AutoBotDayFutures";   timeframe = "5-minute (futures day, 2x leverage)"
     elif league == "futures_swing":  bot_name = "AutoBotSwingFutures"; timeframe = "1-hour (futures swing, 2x leverage)"
     else:                            bot_name = "AutoBot";       timeframe = "unknown"
 
+    if champion_ground_truth:
+        _champion_gt_str = (
+            f"**Sharpe = {champion_ground_truth['sharpe']:.4f}** | "
+            f"**Trades = {champion_ground_truth['trades']}**"
+        )
+    else:
+        _champion_gt_str = "NOT AVAILABLE (elite_0.yaml missing or unreadable — flag this in your analysis)"
+
     return f"""You are MIMIR, a senior crypto trading strategy analyst. You are analyzing {generation} generations of automated research from ODIN, a strategy optimization loop.
 
 ODIN works by asking a small LLM (llama-3.1-8b-instant) to propose ONE change to the current best strategy, then backtesting it on 2 years of {timeframe} BTC/USD, ETH/USD, SOL/USD data. If Sharpe improves, the change is kept.
+
+---
+## Actual Stored Champion (GROUND TRUTH — read directly from population/elite_0.yaml)
+
+{_champion_gt_str}
+
+This is the CANONICAL source for the current champion's backtest metrics. Do NOT infer champion Sharpe or trade count from the improvement log, prior MIMIR analyses, or clone-rejection behavior — use the values above. If results.tsv appears incomplete or contradicts these values, trust these values and flag the TSV gap in your analysis.
 
 ---
 ## Current Research Program (instructions ODIN gives the LLM)
@@ -710,11 +751,13 @@ def main():
         self_audit       = format_self_audit(constants, loki_changes)
         tyr     = load_tyr_context()
         tyr_ctx = format_tyr_context(tyr)
+        champion_gt = load_champion_ground_truth(league)
         prompt = build_prompt(
             league, program_md, best_strategy,
             research_summary, sprint_summary, generation,
             self_audit=self_audit,
             tyr_context=tyr_ctx,
+            champion_ground_truth=champion_gt,
         )
 
     print(f"  Calling Claude ({ANTHROPIC_MODEL})...")

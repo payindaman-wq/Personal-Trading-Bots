@@ -296,16 +296,18 @@ class Population:
             self.elites.append(entry)
             self.elites.sort(key=lambda x: x[0], reverse=True)
             self.save()
-            if is_new_best:
-                self._save_fleet(strategy_yaml)
+            # Sync best_strategy.yaml to current top elite after EVERY insertion,
+            # not only on strict new_best. elites[0] can shift via adj_score
+            # ranking without strict sharpe improvement; prior logic let the
+            # deployed YAML drift out of sync with the live champion.
+            self._save_fleet(self.elites[0][2])
             return True, is_new_best
 
         if score > self.worst_adj():
             self.elites[-1] = entry
             self.elites.sort(key=lambda x: x[0], reverse=True)
             self.save()
-            if is_new_best:
-                self._save_fleet(strategy_yaml)
+            self._save_fleet(self.elites[0][2])
             return True, is_new_best
 
         return False, False

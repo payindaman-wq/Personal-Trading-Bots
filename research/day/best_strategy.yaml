@@ -47,7 +47,7 @@ entry:
     - indicator: price_change_pct
       period_minutes: 30
       operator: gt
-      value: 1.19
+      value: 1.16
     - indicator: macd_signal
       period_minutes: 30
       operator: eq
