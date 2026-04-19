@@ -623,8 +623,9 @@ def log_result(league, gen, result, status, description=""):
         win_rate = result.get("win_rate_pct", 0) if isinstance(result, dict) else 0
         pnl_pct = result.get("total_pnl_pct", 0) if isinstance(result, dict) else 0
         trades = result.get("total_trades", 0) if isinstance(result, dict) else 0
+        desc_clean = str(description).replace("\n", " ").replace("\r", " ").replace("\t", " ")[:200]
         f.write(f"{gen}\t{sharpe:.4f}\t{win_rate:.1f}\t{pnl_pct:.2f}\t"
-                f"{trades}\t{status}\t{description}\t{ts}\n")
+                f"{trades}\t{status}\t{desc_clean}\t{ts}\n")
 
 
 # ----------------------------------------------------------------
