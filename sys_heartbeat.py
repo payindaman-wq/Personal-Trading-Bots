@@ -601,9 +601,12 @@ def main():
             try:
                 entry = json.loads(line)
                 severity = entry.get("severity", "info")
-                if severity in ("error", "critical"):
-                    source = entry.get("source", "unknown").upper()
-                    msg = entry.get("msg", "")[:200]
+                source_raw = entry.get("source", "unknown")
+                msg = entry.get("msg", "")[:200]
+                # Self-heal silence: LOKI reverts are audit trail, not decisions.
+                is_self_heal = source_raw == "loki" and "REVERT" in msg
+                if severity in ("error", "critical") and not is_self_heal:
+                    source = source_raw.upper()
                     key = "inbox_" + hashlib.md5(f"{source}:{msg}".encode()).hexdigest()[:12]
                     if should_alert(state, key):
                         problems.append((key, f"[{source}] {msg}"))
