@@ -1,59 +1,85 @@
+```markdown
 # ODIN Day League Research Program
-# v11000-lean
+# v11100-champion-refine
 
 ═══════════════════════════════════════════════════════════════
-COPY THIS YAML EXACTLY. Change ONLY the three values in Step 2.
+CANONICAL CHAMPION — DO NOT MODIFY THIS BLOCK
+═══════════════════════════════════════════════════════════════
+
+Sharpe = 1.1227 | Trades = 309 | Gen 9325
+Beat it: Sharpe > 1.1227 AND trades ≥ 280
+
+═══════════════════════════════════════════════════════════════
+TEMPLATE — COPY EXACTLY, CHANGE ONLY STEP 2 VALUES
 ═══════════════════════════════════════════════════════════════
 
 ```yaml
 name: crossover
 style: momentum_optimized
 pairs:
-- BTC/USD
-- ETH/USD
-- SOL/USD
-- XRP/USD
-- DOGE/USD
-- AVAX/USD
-- LINK/USD
 - UNI/USD
 - AAVE/USD
+- XRP/USD
+- SOL/USD
+- DOGE/USD
 - NEAR/USD
-- APT/USD
-- SUI/USD
-- ARB/USD
-- OP/USD
-- ADA/USD
-- POL/USD
+- BTC/USD
+- ETH/USD
+- AVAX/USD
+- LINK/USD
 position:
   size_pct: 10
-  max_open: 4
+  max_open: 3
   fee_rate: 0.001
 entry:
   long:
     conditions:
+    - indicator: momentum_accelerating
+      period_minutes: 60
+      operator: eq
+      value: true
     - indicator: price_change_pct
-      period_minutes: 30
-      operator: lt        # <-- MUST be lt. If gt: DELETE, start over.
-      value: -0.43        # <-- MUST be negative. If positive or 0: DELETE, start over.
+      period_minutes: 5
+      operator: lt
+      value: LONG_PCT       # ← REPLACE with negative number from table
     - indicator: macd_signal
-      period_minutes: 45
+      period_minutes: MACD_PERIOD   # ← REPLACE with period from table
       operator: eq
       value: bullish
+    - indicator: price_vs_ema
+      period_minutes: 60
+      operator: eq
+      value: above
+    - indicator: trend
+      period_minutes: 240
+      operator: eq
+      value: up
   short:
     conditions:
+    - indicator: momentum_accelerating
+      period_minutes: 60
+      operator: eq
+      value: true
     - indicator: price_change_pct
       period_minutes: 30
-      operator: gt        # <-- MUST be gt. If lt: DELETE, start over.
-      value: 0.43
+      operator: gt
+      value: SHORT_PCT      # ← REPLACE with positive number from table
     - indicator: macd_signal
-      period_minutes: 45
+      period_minutes: MACD_PERIOD   # ← REPLACE with period from table
       operator: eq
       value: bearish
+    - indicator: price_vs_ema
+      period_minutes: 120
+      operator: eq
+      value: below
+    - indicator: trend
+      period_minutes: 240
+      operator: eq
+      value: down
 exit:
-  take_profit_pct: 2.5
-  stop_loss_pct: 1.2
-  timeout_minutes: 720
+  take_profit_pct: 3.51
+  stop_loss_pct: 0.37
+  timeout_minutes: 706
 risk:
   pause_if_down_pct: 4
   stop_if_down_pct: 10
@@ -61,70 +87,65 @@ risk:
 ```
 
 ═══════════════════════════════════════════════════════════════
-STEP 1 — VERIFY THREE THINGS BEFORE SUBMITTING
+STEP 1 — VERIFY BEFORE SUBMITTING (mandatory)
 ═══════════════════════════════════════════════════════════════
 
-  long.operator   = lt     (NOT gt)
-  long.value      = -0.43  (NEGATIVE, not positive, not 0)
-  short.operator  = gt     (NOT lt)
-
-If any are wrong → DELETE and restart. Do not patch.
+  long  price_change_pct operator  = lt    (NOT gt — if gt, DELETE and restart)
+  long  price_change_pct value     < 0     (NEGATIVE — if zero or positive, DELETE)
+  short price_change_pct operator  = gt    (NOT lt — if lt, DELETE and restart)
+  short price_change_pct value     > 0     (POSITIVE — if zero or negative, DELETE)
 
 ═══════════════════════════════════════════════════════════════
-STEP 2 — THREE VALUES THAT CHANGE BY TARGET
+STEP 2 — ONLY THESE THREE VALUES CHANGE
 ═══════════════════════════════════════════════════════════════
 
-Only long.value, short.value, macd period_minutes change. Nothing else, ever.
-
-| Target | long.value | short.value | macd period |
-|--------|------------|-------------|-------------|
-| A1     | -0.43      | 0.43        | 45          | ← CURRENT
-| A2     | -0.42      | 0.42        | 45          |
-| A3     | -0.41      | 0.41        | 45          |
-| A4     | -0.44      | 0.44        | 45          |
-| A5     | -0.40      | 0.40        | 45          |
-| B1     | -0.42      | 0.42        | 30          |
-| B2     | -0.41      | 0.41        | 30          |
-| B3     | -0.40      | 0.40        | 30          |
+| Target | LONG_PCT | SHORT_PCT | MACD_PERIOD |
+|--------|----------|-----------|-------------|
+| A1     | -1.21    | 1.16      | 30          | ← CURRENT CHAMPION
+| A2     | -1.10    | 1.10      | 30          |
+| A3     | -1.30    | 1.30      | 30          |
+| A4     | -1.00    | 1.00      | 30          |
+| A5     | -1.40    | 1.40      | 30          |
+| B1     | -1.21    | 1.16      | 45          |
+| B2     | -1.10    | 1.10      | 45          |
+| B3     | -1.30    | 1.30      | 45          |
+| C1     | -1.21    | 1.16      | 60          |
+| C2     | -1.00    | 1.00      | 60          |
 
 Run 8 reps per target before advancing. A rep = any result with trades ≤ 450.
 
 ═══════════════════════════════════════════════════════════════
-STEP 3 — ACCEPTANCE
+STEP 3 — ACCEPTANCE RULES
 ═══════════════════════════════════════════════════════════════
 
-Formal best: Sharpe = 1.1227, trades = 309 (gen 9325).
-Beat it = Sharpe > 1.1227 AND trades ≥ 280.
+MIN_TRADES = 280. FINAL. DO NOT CHANGE.
 
-| Result                     | Tag                   | Counts as rep? |
-|----------------------------|-----------------------|----------------|
-| trades > 450               | [structural_failure]  | NO             |
-| trades < 280               | [low_trades]          | YES            |
-| 280 ≤ trades ≤ 450, S<1.12 | [discarded]           | YES            |
-| 280 ≤ trades ≤ 450, S>1.12 | [new_best] — deploy   | YES            |
-
-MIN_TRADES = 280. Final. Do not change.
+| Result                              | Tag                  | Rep? |
+|-------------------------------------|----------------------|------|
+| trades > 450                        | [structural_failure] | NO   |
+| trades < 280                        | [low_trades]         | YES  |
+| 280 ≤ trades ≤ 450, Sharpe < 1.1227 | [discarded]          | YES  |
+| 280 ≤ trades ≤ 450, Sharpe > 1.1227 | [new_best] → deploy  | YES  |
 
 ═══════════════════════════════════════════════════════════════
 NEVER CHANGE THESE FIELDS
 ═══════════════════════════════════════════════════════════════
 
-name, style, pairs (all 16), max_open=4, size_pct=10, fee_rate=0.001,
-take_profit_pct=2.5, stop_loss_pct=1.2, timeout_minutes=720,
-price_change_pct period_minutes=30, total conditions=4 (2 long, 2 short).
+name, style, pairs (exactly 10 listed), max_open=3, size_pct=10,
+fee_rate=0.001, take_profit_pct=3.51, stop_loss_pct=0.37,
+timeout_minutes=706, momentum_accelerating period=60,
+price_vs_ema long period=60, price_vs_ema short period=120,
+trend period=240, total conditions=5 long + 5 short = 10 total.
 
 ═══════════════════════════════════════════════════════════════
-FAILURE FINGERPRINTS — DIAGNOSE FAST
+FAILURE FINGERPRINTS
 ═══════════════════════════════════════════════════════════════
 
-  trades=818, sharpe=-4.78  → long.operator is gt (should be lt)
-  trades≥1000               → structural failure; recheck all operators
-  trades<140, sharpe<0      → long.value is 0 or positive
-  trades=0                  → YAML malformed
+  trades=1011, sharpe=-0.2625 → long operator is gt (should be lt). DELETE.
+  trades > 450                → operator error or extra conditions. DELETE.
+  trades < 140, sharpe < 0   → long value is 0 or positive. DELETE.
+  trades = 0                  → YAML malformed.
+  Sharpe > 1.17, trades < 280 → promising but low_trades; tighten nothing further.
+```
 
-═══════════════════════════════════════════════════════════════
-NOTE
-═══════════════════════════════════════════════════════════════
-
-Escalation to MIMIR is now handled by the researcher loop in code.
-You do NOT need to self-check escalation triggers. Just submit YAMLs.
+---
