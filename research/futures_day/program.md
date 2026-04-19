@@ -1,13 +1,7 @@
 ```markdown
-# ODIN — FUTURES DAY v36.0
-# PIVOT: TP=5.0 tested and failed (Gen 3770: Sharpe=0.0213 < champion 0.4066)
-# NEW TASK: Change rsi_long from 29.33 to 32.0. Nothing else.
+# ODIN — FUTURES DAY v37.0
 
-## OUTPUT THESE TWO LINES FIRST:
-CHANGE: rsi_long 29.33 → 32.0
-USING: size_pct=8, rsi_long=32.0, rsi_short=68.63, stop_loss=2.59, tp=4.6
-
-## OUTPUT THIS YAML EXACTLY (only rsi long value changes):
+## YOUR ONLY JOB: Output the YAML below with ONE value changed.
 
 ```yaml
 name: crossover
@@ -41,13 +35,13 @@ entry:
     - indicator: rsi
       period_minutes: 60
       operator: lt
-      value: 32.0
+      value: 29.33
   short:
     conditions:
     - indicator: rsi
       period_minutes: 60
       operator: gt
-      value: 68.63
+      value: 66.0
 exit:
   take_profit_pct: 4.6
   stop_loss_pct: 2.59
@@ -58,36 +52,35 @@ risk:
   stop_if_down_pct: 18
 ```
 
-## VERIFY BEFORE SUBMITTING — all must be true:
-- rsi long value = 32.0   (changed from 29.33)
-- rsi short value = 68.63 (unchanged)
-- take_profit_pct = 4.6   (unchanged)
-- stop_loss_pct = 2.59    (unchanged)
-- size_pct = 8            (unchanged)
-- timeout_minutes = 720   (unchanged)
-- pairs list = 16 pairs   (unchanged)
+## CHANGE MADE
+CHANGE: rsi_short 68.63 → 66.0
+USING: size_pct=8, rsi_long=29.33, rsi_short=66.0, stop_loss=2.59, tp=4.6
 
-## FORBIDDEN VALUES — if you wrote any of these, STOP and use the YAML above:
-- rsi long = 29.33   → INVALID (must be 32.0)
-- rsi long = 35.97   → INVALID
-- rsi short = 72     → INVALID
-- size_pct = 16.91   → INVALID
-- stop_loss = 2.39   → INVALID
-- take_profit = 5.0  → INVALID (TP=5.0 already failed, use 4.6)
+## WHAT CHANGED (exactly one value)
+- entry.short.conditions[0].value: 68.63 → 66.0
+- Everything else is IDENTICAL to the champion
 
-## CHAMPION CONTEXT:
-- Current champion: Gen 3233, Sharpe=0.4066, 1756 trades, WR=50.1%
+## TESTED AND FAILED — DO NOT USE THESE VALUES
+- rsi_short=68.63 (champion value — do not submit unchanged)
+- rsi_long=32.0 (tested Gen 3903/3916: Sharpe=0.296 < 0.4066 — FAILED)
+- tp=5.0 (tested Gen 3770: Sharpe=0.0213 — FAILED)
+- rsi_long=35.97 → BANNED
+- size_pct=16.91 → BANNED
+- stop_loss=2.39 → BANNED
+
+## CHAMPION CONTEXT
+- Champion: Gen 3233, Sharpe=0.4066, 1756 trades, WR=50.1%
 - Goal: Sharpe > 0.4066
-- TP=5.0 was tested (Gen 3770): Sharpe=0.0213 — FAILED, do not retry
+- MIN_TRADES[futures_day] = 50 — FROZEN
 
-## ROADMAP:
-- Step 1 (NOW): rsi_long 29.33 → 32.0
-- Step 2: If Step 1 succeeds → rsi_long 32.0 → 34.0
-- Step 3: If Step 1 fails → rsi_short 68.63 → 66.0
-- Step 4: If both RSI steps fail → stop_loss 2.59 → 2.3
+## ROADMAP
+- Step 3 (NOW): rsi_short 68.63 → 66.0  ← YOU ARE HERE
+- Step 4: If Step 3 fails → rsi_short 66.0 → 64.0
+- Step 5: If Step 4 fails → stop_loss 2.59 → 2.3
+- Step 6: If Step 5 fails → size_pct 8 → 10
 
-## SYSTEM CONSTANT (never change):
-- MIN_TRADES[futures_day] = 50 — FROZEN. Do not raise.
+## OUTPUT FORMAT
+Output CHANGE line, USING line, then the YAML. Nothing else.
 ```
 
 ---
