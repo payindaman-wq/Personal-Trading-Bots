@@ -160,29 +160,6 @@ def attempt_auto_restart(unit):
         return False
 
 
-def git_commit_push(message):
-    """Commit any dirty workspace files and push to remote. No-op if nothing changed."""
-    try:
-        subprocess.run(["git", "-C", WORKSPACE, "add", "-A"], timeout=30, check=False)
-        dirty = subprocess.run(
-            ["git", "-C", WORKSPACE, "diff", "--cached", "--quiet"], timeout=10
-        )
-        if dirty.returncode == 0:
-            print(f"  [git] nothing to commit for: {message}")
-            return
-        subprocess.run(
-            ["git", "-C", WORKSPACE, "commit", "-m", f"SYN auto-fix: {message}"],
-            timeout=30, check=False
-        )
-        subprocess.run(["git", "-C", WORKSPACE, "push", "origin", "master"],
-                       timeout=60, check=False)
-        print(f"  [git] pushed: {message}")
-    except Exception as e:
-        print(f"  [git] push failed: {e}")
-
-
-
-
 def write_syn_mimir_alert(state, league, error_type, message, context=None):
     """Write a structured alert to the SYN-Mimir queue and launch Mimir analysis."""
     cooldown_key = f"mimir_{league}_{error_type}"
@@ -504,7 +481,6 @@ def main():
             print(f"  [{svc['name']}] {problem} — attempting auto-restart...")
             restarted = attempt_auto_restart(svc["unit"])
             if restarted:
-                git_commit_push(f"heartbeat auto-restarted {svc['unit']}")
                 clear_alert(state, key)
                 print(f"  [{svc['name']}] auto-restarted successfully")
             else:
