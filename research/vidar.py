@@ -57,16 +57,23 @@ TG_BOT_TOKEN = "8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
 TG_CHAT_ID   = "8154505910"
 
 
-def tg_send(text):
+INBOX = os.path.join(WORKSPACE, "syn_inbox.jsonl")
+
+
+def tg_send(text, severity="error"):
+    """Write to SYN inbox. sys_heartbeat is the sole Telegram gateway.
+    Only remaining call site is VIDAR API-call failure — genuine infra."""
     try:
-        data = json.dumps({"chat_id": TG_CHAT_ID, "text": text[:4000]}).encode()
-        req = urllib.request.Request(
-            f"https://api.telegram.org/bot{TG_BOT_TOKEN}/sendMessage",
-            data=data, headers={"Content-Type": "application/json"},
-        )
-        urllib.request.urlopen(req, timeout=10).read()
+        rec = {
+            "ts":       datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
+            "source":   "vidar",
+            "severity": severity,
+            "msg":      (text if isinstance(text, str) else str(text))[:2000],
+        }
+        with open(INBOX, "a") as f:
+            f.write(json.dumps(rec) + "\n")
     except Exception as e:
-        print(f"  [vidar/tg] {e}")
+        print(f"  [vidar/inbox] {e}")
 
 
 def load_anthropic_key():

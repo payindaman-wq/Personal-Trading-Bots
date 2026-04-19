@@ -31,17 +31,22 @@ def log(msg: str) -> None:
         f.write(line + "\n")
 
 
-def send_telegram(msg: str) -> None:
-    msg = f"[SYN/session] {msg}"  # SYN-prefix-applied
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    data = json.dumps({"chat_id": CHAT_ID, "text": msg}).encode()
-    req = urllib.request.Request(
-        url, data=data, headers={"Content-Type": "application/json"}
-    )
+INBOX = "/root/.openclaw/workspace/syn_inbox.jsonl"
+
+
+def send_telegram(msg: str, severity: str = "warning") -> None:
+    """Write to SYN inbox. sys_heartbeat is the sole Telegram gateway."""
     try:
-        urllib.request.urlopen(req, timeout=10)
+        rec = {
+            "ts":       datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
+            "source":   "session_watchdog",
+            "severity": severity,
+            "msg":      msg[:2000],
+        }
+        with open(INBOX, "a") as f:
+            f.write(json.dumps(rec) + "\n")
     except Exception as e:
-        log(f"Telegram alert failed: {e}")
+        log(f"syn_inbox write failed: {e}")
 
 
 def main() -> None:

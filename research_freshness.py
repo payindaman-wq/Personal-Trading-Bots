@@ -125,22 +125,25 @@ def record_alert(state, key, detail=""):
     state[key] = {"last_alerted": now_ts(), "detail": detail}
 
 
-def telegram(msg):
-    msg = f"[SYN/freshness] {msg}"  # SYN-prefix-applied
+INBOX = f"{WORKSPACE}/syn_inbox.jsonl"
+
+
+def telegram(msg, severity="warning"):
+    """Write to SYN inbox. sys_heartbeat is the sole Telegram gateway.
+    Research-freshness signals are dashboard-only; only true stalls (MIMIR
+    silent, LOKI unreachable) surface to Chris via the heartbeat allowlist."""
     try:
-        data = urllib.parse.urlencode({
-            "chat_id": CHAT_ID,
-            "text": msg,
-            "disable_web_page_preview": "true",
-        }).encode()
-        req = urllib.request.Request(
-            f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
-            data=data, method="POST",
-        )
-        urllib.request.urlopen(req, timeout=10)
+        rec = {
+            "ts":       datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
+            "source":   "research_freshness",
+            "severity": severity,
+            "msg":      (msg if isinstance(msg, str) else str(msg))[:2000],
+        }
+        with open(INBOX, "a") as f:
+            f.write(json.dumps(rec) + "\n")
         return True
     except Exception as e:
-        print(f"[research_freshness] telegram send failed: {e}")
+        print(f"[research_freshness] inbox write failed: {e}")
         return False
 
 

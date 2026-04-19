@@ -21,7 +21,7 @@ import subprocess
 import time
 import urllib.parse
 import urllib.request
-from datetime import datetime
+from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
 PST = ZoneInfo("America/Los_Angeles")
@@ -53,19 +53,22 @@ def log(msg):
         pass
 
 
-def tg_actionable(msg):
-    msg = f"[SYN/killswitch] {msg}"  # SYN-prefix-applied
-    """Telegram alert — reserved for calls-to-action only (per user rule)."""
+INBOX = f"{WORKSPACE}/syn_inbox.jsonl"
+
+
+def tg_actionable(msg, severity="critical"):
+    """Write to SYN inbox. sys_heartbeat is the sole Telegram gateway."""
     try:
-        payload = json.dumps({"chat_id": CHAT_ID, "text": msg, "parse_mode": "HTML"}).encode()
-        req = urllib.request.Request(
-            f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
-            data=payload,
-            headers={"Content-Type": "application/json"},
-        )
-        urllib.request.urlopen(req, timeout=10).read()
+        rec = {
+            "ts":       datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
+            "source":   "kraken_killswitch",
+            "severity": severity,
+            "msg":      (msg if isinstance(msg, str) else str(msg))[:2000],
+        }
+        with open(INBOX, "a") as f:
+            f.write(json.dumps(rec) + "\n")
     except Exception as e:
-        log(f"[tg] {e}")
+        log(f"[killswitch/inbox] {e}")
 
 
 def load_state():

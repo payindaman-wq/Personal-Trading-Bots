@@ -56,19 +56,22 @@ HEALTH_STATE_FILE = os.path.join(WORKSPACE, "competition", "watchdog_health_stat
 ALERT_COOLDOWN_H  = 6
 
 
-def tg_send(msg):
-    msg = f"[SYN/watchdog] {msg}"  # SYN-prefix-applied
+INBOX = os.path.join(WORKSPACE, "syn_inbox.jsonl")
+
+
+def tg_send(msg, severity="error"):
+    """Write to SYN inbox. sys_heartbeat is the sole Telegram gateway."""
     try:
-        payload = json.dumps({
-            "chat_id": CHAT_ID, "text": msg, "parse_mode": "HTML",
-        }).encode()
-        req = urllib.request.Request(
-            f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
-            data=payload, headers={"Content-Type": "application/json"},
-        )
-        urllib.request.urlopen(req, timeout=10)
+        rec = {
+            "ts":       datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
+            "source":   "league_watchdog",
+            "severity": severity,
+            "msg":      (msg if isinstance(msg, str) else str(msg))[:2000],
+        }
+        with open(INBOX, "a") as f:
+            f.write(json.dumps(rec) + "\n")
     except Exception as e:
-        print(f"  [tg_send] failed: {e}")
+        print(f"  [league_watchdog/inbox] failed: {e}")
 
 
 def load_health_state():

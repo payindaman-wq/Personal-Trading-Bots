@@ -293,17 +293,24 @@ def find_active_comp():
     return comp_dir, meta
 
 
-def tg_send(msg):
-    msg = f"[SYN/swing-tick] {msg}"  # SYN-prefix-applied
-    """Send a Telegram message to the configured chat."""
+INBOX = "/root/.openclaw/workspace/syn_inbox.jsonl"
+
+
+def tg_send(msg, severity="info"):
+    """Write to SYN inbox. sys_heartbeat is the sole Telegram gateway.
+    Default severity=info: swing cycle-complete is handled by LOKI and
+    surfaced on the dashboard; Chris is not paged."""
     try:
-        import urllib.request as ur
-        data = json.dumps({"chat_id": CHAT_ID, "text": msg, "parse_mode": "Markdown"}).encode()
-        req  = ur.Request(f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
-                          data=data, headers={"Content-Type": "application/json"})
-        ur.urlopen(req, timeout=5)
+        rec = {
+            "ts":       datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
+            "source":   "swing_competition_tick",
+            "severity": severity,
+            "msg":      (msg if isinstance(msg, str) else str(msg))[:2000],
+        }
+        with open(INBOX, "a") as f:
+            f.write(json.dumps(rec) + "\n")
     except Exception as e:
-        print(f"  Telegram notify failed: {e}")
+        print(f"  [swing_tick/inbox] failed: {e}")
 
 
 def update_swing_cycle_state(comp_id):

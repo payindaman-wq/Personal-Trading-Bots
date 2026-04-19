@@ -9,7 +9,7 @@ restarts them and fires a SYN alert. Kraken failure alerts but does not
 auto-pause (no live Kraken trading yet — Phase 1 funding pending).
 """
 import json, os, subprocess, urllib.request, urllib.error, ssl
-from datetime import datetime
+from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
 PST = ZoneInfo("America/Los_Angeles")
@@ -55,18 +55,22 @@ def save_state(s):
         json.dump(s, f, indent=2)
 
 
-def tg_send(msg):
-    msg = f"[SYN/exchange] {msg}"  # SYN-prefix-applied
+INBOX = "/root/.openclaw/workspace/syn_inbox.jsonl"
+
+
+def tg_send(msg, severity="error"):
+    """Write to SYN inbox. sys_heartbeat is the sole Telegram gateway."""
     try:
-        payload = json.dumps({"chat_id": CHAT_ID, "text": msg, "parse_mode": "HTML"}).encode()
-        req = urllib.request.Request(
-            f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
-            data=payload,
-            headers={"Content-Type": "application/json"},
-        )
-        urllib.request.urlopen(req, timeout=10).read()
+        rec = {
+            "ts":       datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
+            "source":   "exchange_health",
+            "severity": severity,
+            "msg":      (msg if isinstance(msg, str) else str(msg))[:2000],
+        }
+        with open(INBOX, "a") as f:
+            f.write(json.dumps(rec) + "\n")
     except Exception as e:
-        print(f"[tg] {e}")
+        print(f"[exchange_health/inbox] {e}")
 
 
 def ping(name, cfg):
@@ -134,9 +138,9 @@ def main():
                 )
                 if failed:
                     msg += f"\nRestart failed: {', '.join(failed)}"
-                tg_send(msg)
+                tg_send(msg, severity="info")  # recovery is good news, not actionable
             elif prev_fails >= FAIL_THRESHOLD:
-                tg_send(f"<b>SYN: {name.upper()} API recovered</b>\nTime: {pst_now()}")
+                tg_send(f"<b>SYN: {name.upper()} API recovered</b>\nTime: {pst_now()}", severity="info")
             state["fail_count"][name] = 0
         else:
             new_count = prev_fails + 1

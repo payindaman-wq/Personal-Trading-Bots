@@ -70,18 +70,22 @@ def mark_alerted(state, key):
     state["last_alerted"][key] = datetime.now(timezone.utc).isoformat()
 
 
-def tg_send(msg):
-    msg = f"[SYN/anthropic] {msg}"  # SYN-prefix-applied
+INBOX = "/root/.openclaw/workspace/syn_inbox.jsonl"
+
+
+def tg_send(msg, severity="error"):
+    """Write to SYN inbox. sys_heartbeat is the sole Telegram gateway."""
     try:
-        payload = json.dumps({"chat_id": CHAT_ID, "text": msg, "parse_mode": "HTML"}).encode()
-        req = urllib.request.Request(
-            f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
-            data=payload,
-            headers={"Content-Type": "application/json"},
-        )
-        urllib.request.urlopen(req, timeout=10).read()
+        rec = {
+            "ts":       datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
+            "source":   "anthropic_health",
+            "severity": severity,
+            "msg":      (msg if isinstance(msg, str) else str(msg))[:2000],
+        }
+        with open(INBOX, "a") as f:
+            f.write(json.dumps(rec) + "\n")
     except Exception as e:
-        print(f"[tg] {e}")
+        print(f"[anthropic_health/inbox] {e}")
 
 
 def load_api_key():
@@ -220,7 +224,8 @@ def main():
             lines = [f"{n}: {r}/{l} ({p:.1f}%)" for (n, p, r, l) in low_buckets]
             tg_send(
                 f"<b>SYN: Claude rate limit low</b>\n"
-                f"Time: {pst_now()}\n" + "\n".join(lines)
+                f"Time: {pst_now()}\n" + "\n".join(lines),
+                severity="warning",  # dashboard only; not urgent
             )
             mark_alerted(state, key)
 

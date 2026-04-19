@@ -112,18 +112,22 @@ def log(msg):
         pass
 
 
-def tg_actionable(msg):
-    msg = f"[SYN/audit] {msg}"  # SYN-prefix-applied
+INBOX = "/root/.openclaw/workspace/syn_inbox.jsonl"
+
+
+def tg_actionable(msg, severity="warning"):
+    """Write to SYN inbox. Audit findings are dashboard-only drift reports."""
     try:
-        payload = json.dumps({"chat_id": CHAT_ID, "text": msg, "parse_mode": "HTML"}).encode()
-        req = urllib.request.Request(
-            f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
-            data=payload,
-            headers={"Content-Type": "application/json"},
-        )
-        urllib.request.urlopen(req, timeout=10).read()
+        rec = {
+            "ts":       datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
+            "source":   "syn_audit",
+            "severity": severity,
+            "msg":      (msg if isinstance(msg, str) else str(msg))[:2000],
+        }
+        with open(INBOX, "a") as f:
+            f.write(json.dumps(rec) + "\n")
     except Exception as e:
-        log(f"[tg] {e}")
+        log(f"[syn_audit/inbox] {e}")
 
 
 def check_cron(findings):

@@ -561,7 +561,34 @@ def main():
             problems.append((key, f"[GEMINI] {problem}"))
     # intentionally not clearing on resolve — quota flickers; let cooldown expire naturally
 
-    # ── SYN inbox — escalations from LOKI/other officers (critical/error only) ──
+    # ── SYN inbox — gateway policy ──────────────────────────────────────────
+    #
+    # All alert-capable modules write to syn_inbox.jsonl. sys_heartbeat is the
+    # ONLY path from workspace code to Telegram. Policy:
+    #
+    #   1. Allowlist — only these sources may Telegram, and only at
+    #      severity=error/critical. Everything else is dashboard-only.
+    #   2. Per-source silence substrings — even if the source is allowlisted,
+    #      messages matching these tokens stay silent (handled by self-heal).
+    #
+    # Dashboard-only sources (vidar, loki-except-infra, regression_watch,
+    # sprint_integrity, odin_researcher, research_freshness, self_heal_readiness,
+    # syn_audit, polymarket_syn_tick, swing_competition_tick) never page Chris.
+    TG_ALLOWED_SOURCES = {
+        "anthropic_health",     # Claude API dead / over-budget / auth broken
+        "exchange_health",      # Kraken / Kalshi outage (errors only; recoveries are info)
+        "kraken_killswitch",    # 15% drawdown auto-pause trip (critical)
+        "league_watchdog",      # Dead execution / stale tick / no MTM
+        "session_watchdog",     # Session rotation events requiring attention
+        "sys_heartbeat",        # Self-generated checks (service dead, etc.) — defensive
+        "loki",                 # LOKI systemd/cycle failures (REVERT/restructure silenced below)
+        "vidar",                # VIDAR API-call failure only (decision completions silent)
+    }
+    TG_SILENT_SUBSTRINGS = {
+        "loki":  ("REVERT", "restructure:", "cycle advance OK"),
+        "vidar": ("completed", "NEEDS YOU"),   # belt-and-suspenders against old code paths
+    }
+
     inbox_path = f"{WORKSPACE}/syn_inbox.jsonl"
     inbox_offset_key = "syn_inbox_offset"
     inbox_offset = state.get(inbox_offset_key, 0)
@@ -578,20 +605,17 @@ def main():
                 entry = json.loads(line)
                 severity = entry.get("severity", "info")
                 source_raw = entry.get("source", "unknown")
-                msg = entry.get("msg", "")[:200]
-                # Self-heal silence: LOKI reverts, sprint_integrity phantoms,
-                # and VIDAR completions are all auto-handled downstream and
-                # surface on the dashboard — they are not Chris-facing pages.
-                is_self_heal = (
-                    (source_raw == "loki" and "REVERT" in msg)
-                    or source_raw == "sprint_integrity"
-                    or source_raw == "vidar"
-                )
-                if severity in ("error", "critical") and not is_self_heal:
-                    source = source_raw.upper()
-                    key = "inbox_" + hashlib.md5(f"{source}:{msg}".encode()).hexdigest()[:12]
-                    if should_alert(state, key):
-                        problems.append((key, f"[{source}] {msg}"))
+                msg = entry.get("msg", "")[:400]
+                if severity not in ("error", "critical"):
+                    continue
+                if source_raw not in TG_ALLOWED_SOURCES:
+                    continue
+                if any(tok in msg for tok in TG_SILENT_SUBSTRINGS.get(source_raw, ())):
+                    continue
+                source = source_raw.upper()
+                key = "inbox_" + hashlib.md5(f"{source}:{msg}".encode()).hexdigest()[:12]
+                if should_alert(state, key):
+                    problems.append((key, f"[{source}] {msg[:200]}"))
             except Exception:
                 pass
 

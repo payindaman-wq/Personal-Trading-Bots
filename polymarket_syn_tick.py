@@ -649,17 +649,24 @@ def update_equity(bot):
 
 # ── Cycle management ──────────────────────────────────────────────────────
 
-def tg_send(msg):
-    msg = f"[SYN/pm-tick] {msg}"  # SYN-prefix-applied
-    """Send a Telegram message via the SYN bot."""
+INBOX = "/root/.openclaw/workspace/syn_inbox.jsonl"
+
+
+def tg_send(msg, severity="info"):
+    """Write to SYN inbox. sys_heartbeat is the sole Telegram gateway.
+    Default severity=info: cycle-complete events are handled autonomously
+    by LOKI and surfaced on the dashboard; Chris is not paged."""
     try:
-        data = json.dumps({"chat_id": CHAT_ID, "text": msg, "parse_mode": "Markdown"}).encode()
-        req  = urllib.request.Request(
-            f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
-            data=data, headers={"Content-Type": "application/json"})
-        urllib.request.urlopen(req, timeout=5)
+        rec = {
+            "ts":       datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
+            "source":   "polymarket_syn_tick",
+            "severity": severity,
+            "msg":      (msg if isinstance(msg, str) else str(msg))[:2000],
+        }
+        with open(INBOX, "a") as f:
+            f.write(json.dumps(rec) + "\n")
     except Exception as e:
-        log.warning(f"Telegram notify failed: {e}")
+        log.warning(f"syn_inbox write failed: {e}")
 
 
 def load_cycle_state():

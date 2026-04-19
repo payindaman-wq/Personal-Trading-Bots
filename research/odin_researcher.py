@@ -47,19 +47,24 @@ ALL_PAIRS = [
 ]
 
 
-def tg_send(msg):
-    msg = f"[SYN/odin] {msg}"  # SYN-prefix-applied
+INBOX = os.path.join(WORKSPACE, "syn_inbox.jsonl")
+
+
+def tg_send(msg, severity="warning"):
+    """Write to SYN inbox. sys_heartbeat is the sole Telegram gateway.
+    ODIN stalls/resets are research-side progress signals — dashboard only,
+    never Telegram'd."""
     try:
-        payload = json.dumps({
-            "chat_id": TG_CHAT_ID, "text": msg, "parse_mode": "HTML",
-        }).encode()
-        req = urllib.request.Request(
-            f"https://api.telegram.org/bot{TG_BOT_TOKEN}/sendMessage",
-            data=payload, headers={"Content-Type": "application/json"},
-        )
-        urllib.request.urlopen(req, timeout=10)
+        rec = {
+            "ts":       datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
+            "source":   "odin_researcher",
+            "severity": severity,
+            "msg":      (msg if isinstance(msg, str) else str(msg))[:2000],
+        }
+        with open(INBOX, "a") as f:
+            f.write(json.dumps(rec) + "\n")
     except Exception as e:
-        print(f"  [tg] alert failed: {e}")
+        print(f"  [odin/inbox] failed: {e}")
 
 
 def load_gemini_key(league):
