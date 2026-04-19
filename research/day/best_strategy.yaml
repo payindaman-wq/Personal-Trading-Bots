@@ -62,7 +62,7 @@ entry:
       value: down
 exit:
   take_profit_pct: 3.51
-  stop_loss_pct: 0.4
+  stop_loss_pct: 0.37
   timeout_minutes: 706
 risk:
   pause_if_down_pct: 4
