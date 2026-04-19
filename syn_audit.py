@@ -23,7 +23,7 @@ import re
 import subprocess
 import time
 import urllib.request
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 PST = ZoneInfo("America/Los_Angeles")
@@ -64,6 +64,7 @@ EXPECTED_CRON = [
     "research_freshness.py",
     "kraken_killswitch.py",
     "syn_audit.py",
+    "self_heal_readiness.py",
     "dashboard/index.html",  # the -nt sync entry
     "openclaw@latest",
     "loki_log.jsonl",        # log trimmer
@@ -240,6 +241,27 @@ def check_killswitch(findings):
     # When dormant (no kraken.json), skip state-file freshness. When active, fold into STATE_FILES check.
 
 
+def report_dedup_stats():
+    """Per-league dedup_reject rollup — informational log line, no SYN alert."""
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M")
+    for league in ("day", "futures_day", "swing", "futures_swing"):
+        tsv = f"{WORKSPACE}/research/{league}/results.tsv"
+        if not os.path.isfile(tsv):
+            continue
+        total = last_7d = 0
+        try:
+            with open(tsv) as f:
+                for ln in f:
+                    cols = ln.rstrip("\n").split("\t")
+                    if len(cols) >= 8 and cols[5] == "dedup_reject":
+                        total += 1
+                        if cols[7] >= cutoff:
+                            last_7d += 1
+            log(f"dedup {league}: total={total} last_7d={last_7d}")
+        except Exception as e:
+            log(f"dedup {league}: read failed ({e})")
+
+
 def main():
     log("=== SYN audit starting ===")
     findings = []
@@ -250,6 +272,8 @@ def main():
             check(findings)
         except Exception as e:
             findings.append(f"{check.__name__} errored: {e}")
+
+    report_dedup_stats()
 
     if not findings:
         log("audit clean: no drift detected")
