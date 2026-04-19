@@ -1,27 +1,18 @@
 ```markdown
 # ODIN Research Program — Swing Trading Strategy Optimizer
-# Effective from Gen 23933 | Incumbent (STORED): Sharpe=1.6344, trades=54
-# MIMIR-reviewed 2026-04-18 (v47)
-#
+# Effective from Gen 20133 | Incumbent (STORED): Sharpe=1.4796, trades=55
+# MIMIR-reviewed 2026-04-19 (v48)
+
 # ══════════════════════════════════════════════════════════════════════
-# SITUATION SUMMARY (READ THIS FIRST — 30 SECONDS)
+# YOUR ONLY JOB: OUTPUT THE YAML BELOW WITH EXACTLY ONE CHANGE (Step 2).
 # ══════════════════════════════════════════════════════════════════════
-#
-# STORED CHAMPION: Sharpe=1.6344, trades=54, WR=44.4% (elite_0.yaml — GROUND TRUTH)
-# RESEARCH GOAL:   Beat Sharpe=1.6344 by tuning entry conditions only
-#
-# THE CHAMPION IS REAL AND STORED. DO NOT TRY TO RESTORE ANYTHING.
-# JUST MAKE ONE SMALL CHANGE TO THE CHAMPION YAML BELOW AND SUBMIT.
-#
-# ══════════════════════════════════════════════════════════════════════
+
 # ████████████████████████████████████████████████████████████████████
-# █  STEP 1 — OUTPUT THIS YAML WITH EXACTLY ONE CHANGE (SEE STEP 2). █
+# STEP 1 — COPY THIS YAML EXACTLY, THEN APPLY THE ONE CHANGE IN STEP 2
 # ████████████████████████████████████████████████████████████████████
-#
-# CHAMPION BASE YAML (Sharpe=1.6344, trades=54):
-#
+
 # ```yaml
-# name: gen23933_d8a
+# name: gen20133_e1a
 # style: randomly generated
 # pairs:
 # - BTC/USD
@@ -49,7 +40,7 @@
 #     - indicator: price_change_pct
 #       period_hours: 24
 #       operator: lt
-#       value: -1.0
+#       value: -0.5
 #     - indicator: rsi
 #       period_hours: 14
 #       operator: lt
@@ -81,67 +72,64 @@
 #   stop_if_down_pct: 18
 #   pause_hours: 48
 # ```
-#
+
 # ████████████████████████████████████████████████████████████████████
-# █  STEP 2 — THE ONE CHANGE IN THIS YAML (vs. champion)             █
+# STEP 2 — THE ONE CHANGE (apply to Step 1 YAML, nothing else)
 # ████████████████████████████████████████████████████████████████████
 #
-# ACTIVE TEST: D8a
-#   long price_change_pct value: -0.5 → -1.0
-#   (Requires a larger dip before entering long — higher quality entries)
-#   This is the ONLY change. Everything else is identical to the champion.
+# ACTIVE TEST: E1a
+#   Change: long price_change_pct value: -0.5 → -1.0
+#   (Requires a larger dip before entering long)
+#   This is the ONLY change. All other values are identical to Step 1.
 #
-# WHY: The champion enters on -0.5% dips. Testing -1.0% requires a deeper
-# pullback, which may improve entry quality and win rate.
-# If trades drop below 40: too restrictive → D8b will use -0.75
-# If trades stay 45-65 and Sharpe improves: confirmed improvement
-# If Sharpe drops: D8b will use -0.75
-#
+# AFTER YOUR CHANGE, the long price_change_pct block must read:
+#     - indicator: price_change_pct
+#       period_hours: 24
+#       operator: lt
+#       value: -1.0
+
 # ══════════════════════════════════════════════════════════════════════
-# POISON CHECK — FAIL ANY ONE → DISCARD AND RESUBMIT STEP 1 YAML
+# POISON CHECK — verify your output before submitting
 # ══════════════════════════════════════════════════════════════════════
 #
-# ✗ Rule 1: pairs must be [BTC/USD, ETH/USD, SOL/USD]  (3 pairs, not 1)
-# ✗ Rule 2: size_pct must be 25.0  (not 22.67 or 30)
-# ✗ Rule 3: max_open must be 2
-# ✗ Rule 4: take_profit_pct must be 9.5  (not 6.63)
-# ✗ Rule 5: timeout_hours must be 156  (not 129, 132, or 133)
-# ✗ Rule 6: rsi value must be 35.0  (not 32.5 or 32.96)
-# ✗ Rule 7: long price_change_pct must be -1.0  (not -0.5)
+# ✗ pairs must be [BTC/USD, ETH/USD, SOL/USD]     (3 pairs)
+# ✗ size_pct = 25.0
+# ✗ max_open = 2
+# ✗ take_profit_pct = 9.5
+# ✗ stop_loss_pct = 1.5
+# ✗ timeout_hours = 156
+# ✗ rsi value = 35.0
+# ✗ long price_change_pct value = -1.0             ← THE ONE CHANGE
+# ✗ short price_change_pct value = 0.54
 #
-# POISON RESULT SIGNATURES — if you get any of these, your YAML is wrong:
-#   trades=54, Sharpe≈1.6344  →  CLONE — you made no change. Check Rule 7.
-#   trades=58, Sharpe≈1.34    →  wrong base (BTC/USD only, size=22.67)
-#   trades=0,  Sharpe=0.00    →  malformed YAML or too many conditions
-#   trades=60, Sharpe≈1.34    →  old corrupted base, wrong pairs/size
+# POISON SIGNATURES (your YAML is wrong if you see these):
+#   trades=55, Sharpe≈1.4796  →  CLONE. price_change_pct is still -0.5.
+#   trades=0,  Sharpe=0.00    →  You added/removed a condition. Revert.
+#   trades=58, Sharpe≈1.34    →  Wrong base. pairs must include ETH and SOL.
 #
-# VALID RESULT: trades between 35 and 65, Sharpe computed (any value)
-#
+# VALID: trades 35–65, Sharpe computed (any value)
+
 # ══════════════════════════════════════════════════════════════════════
 # RESULT CLASSIFICATION
 # ══════════════════════════════════════════════════════════════════════
 #
-# trades=0,  Sharpe=0.00      [POISON/MALFORMED] → Discard. Resubmit Step 1.
-# trades=54, Sharpe≈1.6344    [CLONE — NO CHANGE] → Check price_change_pct.
-# trades=58, Sharpe≈1.34      [WRONG BASE]        → Check pairs and size_pct.
-# trades<35                   [TOO RESTRICTIVE]   → D8a dead. Move to D8b (-0.75).
-# trades 35-65, Sharpe>1.6344 [NEW BEST]          → Report success. Advance to D8b.
-# trades 35-65, Sharpe≤1.6344 [VALID DISCARD]     → D8a tested. Move to D8b (-0.75).
-# Sharpe<0                    [CATASTROPHIC]      → Multiple params changed. Check YAML.
-#
+# trades=55, Sharpe≈1.4796     [CLONE]         → price_change_pct still -0.5
+# trades=0,  Sharpe=0.00       [MALFORMED]     → revert to Step 1 + one change only
+# trades<35                    [TOO TIGHT]     → E1a dead; move to E1b (-0.75)
+# trades 35–65, Sharpe>1.4796  [NEW BEST]      → success; advance to E1b
+# trades 35–65, Sharpe≤1.4796  [VALID DISCARD] → E1a tested; move to E1b (-0.75)
+
 # ══════════════════════════════════════════════════════════════════════
-# CHAMPION YAML — EXACT VALUES (FOR REFERENCE)
+# STORED CHAMPION VALUES (do not change these)
 # ══════════════════════════════════════════════════════════════════════
 #
-# Sharpe=1.6344, trades=54, WR=44.4% (Gen 23932 — CURRENT STORED CHAMPION)
-# The Step 1 YAML above differs by EXACTLY ONE value: price_change_pct = -1.0
+# Sharpe=1.4796, trades=55, WR=43.6% (Gen 20132 — elite_0.yaml GROUND TRUTH)
 #
-# Champion values for verification:
 #   pairs:               BTC/USD, ETH/USD, SOL/USD
 #   size_pct:            25.0
 #   max_open:            2
 #   long rsi:            35.0, lt, period=14
-#   long price_change:   -0.5, lt, period=24   ← D8a changes this to -1.0
+#   long price_change:   -0.5, lt, period=24   ← E1a changes this to -1.0
 #   long bollinger:      below_lower, period=48
 #   long macd:           bullish, period=48
 #   long momentum:       false, period=48
@@ -155,120 +143,59 @@
 #   pause_if_down_pct:   8
 #   stop_if_down_pct:    18
 #   pause_hours:         48
-#
+
 # ══════════════════════════════════════════════════════════════════════
-# D-SERIES TEST QUEUE
+# TEST QUEUE
 # ══════════════════════════════════════════════════════════════════════
-#
-# PRIORITY: Entry conditions only. Exit/risk changes do not improve Sharpe.
-# All tests mutate from the CURRENT CHAMPION (Sharpe=1.6344), not Gen 20502.
-#
-# COMPLETED:
-#   D7b: rsi → 35.0           ✓ COMPLETE — contributed to champion 1.6344
 #
 # ACTIVE:
-#   D8a: long price_change_pct → -1.0   ← ACTIVE (Step 1 YAML above)
+#   E1a: long price_change_pct → -1.0   ← CURRENT
 #
-# QUEUED:
-#   D8b: long price_change_pct → -0.75  (if D8a dead or too restrictive)
-#   D8c: long price_change_pct → -0.3   (if D8b dead; loosens entry)
+# QUEUED (entry conditions only — exit/risk changes do not improve Sharpe):
+#   E1b: long price_change_pct → -0.75  (if E1a dead or too restrictive)
+#   E1c: long price_change_pct → -0.3   (if E1b dead; loosens entry)
+#   E2a: long bollinger period_hours → 36
+#   E2b: long bollinger period_hours → 60
+#   E3a: short price_change_pct → 1.0
+#   E3b: short bollinger period_hours → 72
+#   E4a: rsi → 33.5
+#   E4b: rsi → 36.5
 #
-#   D6a: long bollinger period_hours → 36   (after D8 resolves)
-#   D6b: long bollinger period_hours → 60   (if D6a dead)
-#
-#   D9a: short price_change_pct → 1.0       (after D6 resolves)
-#   D9b: short bollinger period_hours → 72  (if D9a dead)
-#
-#   D7c: rsi → 33.5           (if D8 series all dead, revisit RSI direction)
-#   D7d: rsi → 36.5           (further RSI relaxation)
-#
-# SUSPENDED (exit/risk — no Sharpe gains observed from these ever):
-#   D2:  stop_if_down_pct variations
-#   D3:  pause_hours variations
-#   D4:  timeout_hours variations (129,133,135,138,144,156,168,192,216 tested)
-#   D5:  take_profit_pct variations (6.63,7.14,7.36,7.38,10.0-11.5 all dead)
-#
-# PERMANENTLY DEAD:
-#   D1:  pause_if_down_pct → 10  (800+ gens, confirmed dead)
+# SUSPENDED (confirmed no Sharpe gains ever):
+#   Exit/risk parameters: take_profit, stop_loss, timeout, pause, stop_if_down
 #
 # ══════════════════════════════════════════════════════════════════════
-# INCUMBENT TRAJECTORY (confirmed improvements only)
+# CONFIRMED IMPROVEMENT TRAJECTORY
 # ══════════════════════════════════════════════════════════════════════
 #
 #   Gen 19808: Sharpe=1.3483, trades=58, WR=41.4%
 #   Gen 20475: Sharpe=1.4877, trades=55, WR=43.6%  (+0.139) entry change
 #   Gen 20492: Sharpe=1.4898, trades=52, WR=50.0%  (+0.002) entry change
 #   Gen 20502: Sharpe=1.6060, trades=54, WR=44.4%  (+0.116) multi-pair + RSI
-#   [Gen 22157-23010: corrupted/poison results — disregard]
-#   Gen 23612: Sharpe=1.5983, trades=54, WR=46.3%  restored from base
-#   Gen 23638: Sharpe=1.6069, trades=54, WR=46.3%  (+0.007) entry tweak
-#   Gen 23765: Sharpe=1.6343, trades=54, WR=44.4%  (+0.027) entry tweak
-#   Gen 23932: Sharpe=1.6344, trades=54, WR=44.4%  (+0.000) CURRENT CHAMPION
+#   Gen 20132: Sharpe=1.4796, trades=55, WR=43.6%  CURRENT STORED CHAMPION
+#
+# NOTE: Gen 22157–23932 entries in earlier program were phantom/corrupted.
+# The stored file (elite_0.yaml) is the ground truth: Sharpe=1.4796.
 #
 # KEY INSIGHTS:
-#   • Every Sharpe gain came from entry condition changes
-#   • Trade count stabilized at 54 — this is the signal count in 2yr backtest
-#   • Win rate is 44.4% — strategy profits from large TP (9.5%) vs small SL (1.5%)
-#   • 6.3:1 reward/risk ratio compensates for sub-50% win rate
+#   • Every gain came from entry condition changes
+#   • Trade count ~54–55 is the natural signal count for this filter set
+#   • WR ~43–50% with 9.5/1.5 TP/SL = 6.3:1 reward/risk is the edge
 #   • Fewer, better-filtered trades = better Sharpe
-#   • Exit/risk parameters are at their optimal values — do not change them
-#
+#   • Do NOT change exit or risk parameters
+
 # ══════════════════════════════════════════════════════════════════════
-# FAILURE PATTERNS — WHAT THE LLM KEEPS DOING WRONG
-# ══════════════════════════════════════════════════════════════════════
-#
-# 1. CLONE OUTPUT (most common): LLM outputs champion YAML unchanged.
-#    Signature: trades=54, Sharpe≈1.6343-1.6344. DISCARDED.
-#    Fix: Verify price_change_pct = -1.0 (not -0.5) before submitting.
-#
-# 2. ZERO TRADES (common): LLM adds extra conditions or tightens thresholds.
-#    Signature: trades=0, Sharpe=0.00, max_trades_reject.
-#    Fix: Make ONLY the ONE change in Step 2. Do NOT add conditions.
-#    Do NOT change momentum, bollinger, macd, or rsi simultaneously.
-#
-# 3. WRONG BASE (less common): LLM uses old BTC-only strategy.
-#    Signature: trades=58, Sharpe≈1.34. pairs=[BTC/USD] only.
-#    Fix: pairs must list ALL THREE: BTC/USD, ETH/USD, SOL/USD.
-#
-# 4. EXIT PARAMETER DRIFT: LLM changes take_profit or timeout.
-#    Fix: take_profit_pct=9.5 ALWAYS. timeout_hours=156 ALWAYS.
-#
-# ══════════════════════════════════════════════════════════════════════
-# MACRO CONTEXT (TYR Risk Officer — 2026-04-18)
+# COMMON LLM MISTAKES — READ BEFORE SUBMITTING
 # ══════════════════════════════════════════════════════════════════════
 #
-# F&G = 26 (Fear). BTC Dominance = 57.43%. Regime: CAUTION.
-# TYR Directive: Reduce live position sizes to 50% of normal.
-# Fear regime is FAVORABLE for this strategy's long entry logic.
-# RSI<35 + below Bollinger lower + MACD bullish = fear capitulation setup.
-# Backtest Sharpe=1.6344 was earned in fear/capitulation regimes.
-# Live sizing: 50% reduction per TYR directive regardless of backtest.
-# NOTE: size_pct in YAML is the BACKTEST size. Live sizing is managed by TYR.
+# 1. CLONE: No change made. price_change_pct is still -0.5.
+#    Fix: value must be -1.0 in your output.
 #
-# ══════════════════════════════════════════════════════════════════════
-# FINAL YAML CHECKLIST — VERIFY BEFORE SUBMITTING
-# ══════════════════════════════════════════════════════════════════════
+# 2. ZERO TRADES: You added a condition or changed multiple values.
+#    Fix: ONE change only. Do not touch momentum, bollinger, macd, rsi, or exit.
 #
-# ✓ name               = gen23933_d8a
-# ✓ pairs              = BTC/USD, ETH/USD, SOL/USD  (3 pairs — NOT just BTC)
-# ✓ size_pct           = 25.0  (NOT 22.67)
-# ✓ max_open           = 2
-# ✓ fee_rate           = 0.001
-# ✓ long momentum_accelerating   period=48, eq, false
-# ✓ long bollinger_position       period=48, eq, below_lower
-# ✓ long macd_signal              period=48, eq, bullish
-# ✓ long price_change_pct         period=24, lt, -1.0   ← THE ONE CHANGE
-# ✓ long rsi                      period=14, lt, 35.0
-# ✓ short momentum_accelerating  period=48, eq, false
-# ✓ short bollinger_position      period=168, eq, above_upper
-# ✓ short macd_signal             period=24, eq, bearish
-# ✓ short price_change_pct        period=24, gt, 0.54
-# ✓ take_profit_pct    = 9.5   (NOT 6.63)
-# ✓ stop_loss_pct      = 1.5
-# ✓ timeout_hours      = 156   (NOT 129 or 132)
-# ✓ pause_if_down_pct  = 8
-# ✓ stop_if_down_pct   = 18
-# ✓ pause_hours        = 48
-#
-# DOUBLE-CHECK: Is price_change_pct = -1.0?  If it says -0.5, you have a clone.
+# 3. WRONG BASE: pairs=[BTC/USD] only, or size_pct=30, or take_profit=6.63.
+#    Fix: Use the Step 1 YAML exactly. 3 pairs. size_pct=25.0. take_profit=9.5.
 ```
+
+---
