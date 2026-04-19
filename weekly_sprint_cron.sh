@@ -141,6 +141,10 @@ ${SWING_MSG}
 
 ${POLY_MSG}"
 
-tg_send "$FULL_MSG"
-log "Combined weekly Telegram message sent."
+# Telegram silenced — this script's python snippets are all syntactically
+# broken (every open() and dict access was stripped of its arguments/quotes)
+# so the message body is mostly empty placeholders. The actual weekly league
+# restart happens in weekly_league_restart.py; no user-facing summary needed.
+# tg_send "$FULL_MSG"
+log "Combined weekly Telegram message: silenced (script body broken; replaced by weekly_league_restart.py)."
 log "=== Weekly sprint cron done ==="

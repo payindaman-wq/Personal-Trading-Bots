@@ -28,8 +28,21 @@ WORKSPACE         = "/root/.openclaw/workspace"
 RESEARCH          = os.path.join(WORKSPACE, "research")
 ANTHROPIC_SECRET  = "/root/.openclaw/secrets/anthropic.json"
 ANTHROPIC_URL     = "https://api.anthropic.com/v1/messages"
-VIDAR_MODEL       = "claude-opus-4-7"
+VIDAR_MODEL       = "claude-opus-4-7"       # high-stakes strategic modes
+VIDAR_MODEL_FAST  = "claude-sonnet-4-6"     # pattern-match / routine modes
 VIDAR_MAX_TOKENS  = 6000
+
+# Opus reserved for genuinely strategic arbitration (novel reasoning, program
+# rewrites, manual deep-dives). Sonnet handles pattern-match modes where the
+# judgment is mostly structured diff-review.
+MODEL_BY_MODE = {
+    "revert_review":    VIDAR_MODEL_FAST,
+    "patch_repair":     VIDAR_MODEL_FAST,
+    "cycle_review":     VIDAR_MODEL_FAST,
+    "oscillation_diag": VIDAR_MODEL,
+    "restructure":      VIDAR_MODEL,
+    "deep_dive":        VIDAR_MODEL,
+}
 VIDAR_LOG         = os.path.join(RESEARCH, "vidar_log.jsonl")
 VIDAR_DECISIONS   = os.path.join(RESEARCH, "vidar_decisions.jsonl")
 MAINTENANCE_LOG   = os.path.join(WORKSPACE, "maintenance_log.jsonl")
@@ -61,9 +74,9 @@ def load_anthropic_key():
         return json.load(f)["anthropic_api_key"]
 
 
-def call_opus(prompt, api_key):
+def call_claude(prompt, api_key, model):
     payload = json.dumps({
-        "model":      VIDAR_MODEL,
+        "model":      model,
         "max_tokens": VIDAR_MAX_TOKENS,
         "messages":   [{"role": "user", "content": prompt}],
     }).encode()
@@ -83,7 +96,7 @@ def call_opus(prompt, api_key):
         rec = {
             "ts":            datetime.now(timezone.utc).isoformat(),
             "caller":        "vidar",
-            "model":         VIDAR_MODEL,
+            "model":         model,
             "input_tokens":  usage.get("input_tokens", 0),
             "output_tokens": usage.get("output_tokens", 0),
             "cache_creation_input_tokens": usage.get("cache_creation_input_tokens", 0),
@@ -200,12 +213,15 @@ Answer three questions precisely:
 
 1. **Was the revert mechanically correct?** (Did the post-change metrics actually degrade, or was the audit threshold too tight?)
 2. **Was the revert strategically correct?** (Sometimes short-term metric dips precede long-term gains — is this one of those?)
-3. **What should happen next?** Options: "accept_revert" (done, continue), "reapply_change" (the original change was good, revert was wrong), "escalate_chris" (pattern suggests deeper issue), "clear_pause" (if oscillation pause was triggered but you judge it premature).
+3. **What should happen next?** This is a fully-automated system — you must pick a concrete autonomous action. Options:
+   - "accept_revert" (revert was correct — keep it, continue)
+   - "clear_pause" (oscillation pause was premature — release it)
+   Your rationale stays in the audit log for later human review, but you do NOT get to punt this to a human. If you are uncertain, pick "accept_revert" (the safer default — LOKI's revert stands).
 
 Output EXACTLY this JSON block at the end of your response:
 
 ```json
-{{"verdict": "revert_correct|revert_wrong|inconclusive", "recommended_action": "accept_revert|reapply_change|escalate_chris|clear_pause", "confidence": "high|medium|low", "rationale": "<2-3 sentences>"}}
+{{"verdict": "revert_correct|revert_wrong|inconclusive", "recommended_action": "accept_revert|clear_pause", "confidence": "high|medium|low", "rationale": "<2-3 sentences, including any concerns you would have escalated>"}}
 ```
 
 Before the JSON, write 3-5 paragraphs of your reasoning."""
@@ -229,12 +245,12 @@ Pause state: {json.dumps(pauses.get(league), default=str)}
 ## YOUR TASK
 1. What failure mode is MIMIR stuck in? (Same mistake repeated? Over-correction cycle? External data shift?)
 2. Is the pause sufficient, or does something deeper need attention?
-3. Recommended action: "keep_pause" | "clear_pause" | "manual_program_rewrite" (VIDAR takes over) | "escalate_chris"
+3. Recommended action: this is a fully-automated system — you must pick one of "keep_pause" | "clear_pause" | "manual_program_rewrite" (VIDAR takes over the program.md rewrite). No human-escalation option. If you are uncertain, pick "keep_pause" (safest — system stays paused pending the next MIMIR cycle).
 
 End with:
 
 ```json
-{{"diagnosis": "<short label>", "recommended_action": "keep_pause|clear_pause|manual_program_rewrite|escalate_chris", "rationale": "<2-3 sentences>"}}
+{{"diagnosis": "<short label>", "recommended_action": "keep_pause|clear_pause|manual_program_rewrite", "rationale": "<2-3 sentences, including concerns you would have escalated>"}}
 ```"""
 
 
@@ -324,10 +340,10 @@ Write 2-3 paragraphs of reasoning (what MIMIR was trying to achieve, what's actu
 Then output EXACTLY this JSON block at the end:
 
 ```json
-{{"verdict": "patch_repaired|not_actionable|escalate_chris", "rationale": "<2-3 sentences>", "patch": [{{"old": "<exact unique string>", "new": "<replacement>"}}], "description": "<short description for LOKI>"}}
+{{"verdict": "patch_repaired|not_actionable", "rationale": "<2-3 sentences, including any concerns you would have escalated>", "patch": [{{"old": "<exact unique string>", "new": "<replacement>"}}], "description": "<short description for LOKI>"}}
 ```
 
-If verdict is "not_actionable" or "escalate_chris", pass `"patch": []`."""
+This is a fully-automated system — there is no human-escalation path. If you cannot produce a clean patch, pass "not_actionable" with `"patch": []`; MIMIR will re-diagnose on its next cycle."""
 
 
 def build_deep_dive_prompt(league, topic):
@@ -380,9 +396,10 @@ def run_mode(args, api_key):
         print(f"unknown mode: {args.mode}")
         sys.exit(1)
 
-    print(f"[vidar] firing Opus ({args.mode}, {args.league}) — prompt {len(prompt)} chars")
+    model = MODEL_BY_MODE.get(args.mode, VIDAR_MODEL)
+    print(f"[vidar] firing {model} ({args.mode}, {args.league}) — prompt {len(prompt)} chars")
     try:
-        response = call_opus(prompt, api_key)
+        response = call_claude(prompt, api_key, model)
     except Exception as e:
         tg_send(f"[SYN/VIDAR] API call failed ({args.mode}/{args.league}): {e}")
         raise
@@ -440,19 +457,38 @@ def run_mode(args, api_key):
         action = decision.get("recommended_action", "?")
         rationale = decision.get("rationale", "")
         verdict = decision.get("verdict") or decision.get("diagnosis") or ""
+
+        # Autonomous fallback: project is fully automated, VIDAR must pick a
+        # concrete action and own it. When the model hedges with
+        # "escalate_chris" or "reapply_change" (the two human-in-the-loop
+        # options from the old playbook), coerce to the safest autonomous
+        # equivalent per mode. Rationale stays on the Maintenance tab so Chris
+        # can audit later.
+        original_action = action
+        coerced = False
+        if action in ("escalate_chris", "reapply_change"):
+            fallback = {
+                "revert_review":    "accept_revert",         # LOKI already reverted — keep it
+                "oscillation_diag": "keep_pause",            # safest: stay paused
+                "patch_repair":     "not_actionable",        # let MIMIR re-diagnose
+                "cycle_review":     "accept_revert",
+            }.get(args.mode, "accept_revert")
+            action = fallback
+            coerced = True
+            decision["recommended_action"] = action
+            decision["coerced_from"] = original_action
+
         detail_str = f"{args.topic or args.revert_ts or ''}".strip() or f"{args.mode} review"
+        coerce_tag = f" [coerced from {original_action}]" if coerced else ""
         write_maintenance(
             args.league, args.mode,
             detail=detail_str,
-            result=f"{verdict} -> {action}".strip(" ->"),
+            result=f"{verdict} -> {action}{coerce_tag}".strip(" ->"),
             fix_hint=rationale,
         )
-        # Telegram ONLY when the decision routes back to Chris. Autonomous
-        # actions (patch_repaired, accept_revert, declined-as-not-actionable,
-        # keep_pause) are logged to the Maintenance tab and SYN stays silent.
-        action_requires_chris = action in ("escalate_chris", "reapply_change")
-        if action_requires_chris:
-            tg_send(f"[SYN/VIDAR] {args.mode} ({args.league}) NEEDS YOU: {action} — {rationale[:240]}")
+        # SYN stays silent on all VIDAR decisions — they are recorded in
+        # vidar_decisions.jsonl + maintenance_log, visible on the dashboard.
+        # The project is fully automated; Chris does not page on each call.
     else:
         write_maintenance(
             args.league, args.mode,

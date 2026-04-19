@@ -579,8 +579,14 @@ def main():
                 severity = entry.get("severity", "info")
                 source_raw = entry.get("source", "unknown")
                 msg = entry.get("msg", "")[:200]
-                # Self-heal silence: LOKI reverts are audit trail, not decisions.
-                is_self_heal = source_raw == "loki" and "REVERT" in msg
+                # Self-heal silence: LOKI reverts, sprint_integrity phantoms,
+                # and VIDAR completions are all auto-handled downstream and
+                # surface on the dashboard — they are not Chris-facing pages.
+                is_self_heal = (
+                    (source_raw == "loki" and "REVERT" in msg)
+                    or source_raw == "sprint_integrity"
+                    or source_raw == "vidar"
+                )
                 if severity in ("error", "critical") and not is_self_heal:
                     source = source_raw.upper()
                     key = "inbox_" + hashlib.md5(f"{source}:{msg}".encode()).hexdigest()[:12]

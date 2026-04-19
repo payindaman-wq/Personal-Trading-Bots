@@ -337,13 +337,13 @@ def check_loki(state, alerts):
             info(alerts, f"bad timestamp in loki log for {league} ({ts!r}): {e}")
 
 
-# ── Check 5: LOKI escalations awaiting human review — ACTIONABLE ────────────
+# ── Check 5: LOKI escalations awaiting human review — INFO ONLY ────────────
 
 def check_loki_escalations(state, alerts):
     """LOKI logs structural-code recommendations from MIMIR into the escalation
-    log but won't auto-apply them. They sit unread until Chris reviews. This is
-    the definitive call-to-action: Chris needs to decide whether to apply each
-    recommended patch."""
+    log. Per feedback_loki_escalation_autonomy: LOKI escalations are work
+    orders, not decision requests — they are surfaced on the dashboard for
+    audit only, never paged to Telegram. VIDAR handles the judgment calls."""
     if not os.path.exists(LOKI_ESCALATION_LOG):
         return
     try:
@@ -366,10 +366,8 @@ def check_loki_escalations(state, alerts):
         summary_lines.append(f"[{lg} gen {gen}] {desc}")
     body = "\n  ".join(summary_lines)
     extra = f" (+{len(new_entries) - 5} older)" if len(new_entries) > 5 else ""
-    action(alerts,
-        f"LOKI has {len(new_entries)} unreviewed escalation(s){extra} — MIMIR-recommended "
-        f"structural code changes requiring your decision:\n  {body}\n"
-        f"Review: /root/.openclaw/workspace/research/loki_escalation_log.jsonl"
+    info(alerts,
+        f"LOKI has {len(new_entries)} unreviewed escalation(s){extra} — work orders on dashboard:\n  {body}"
     )
     latest_ts = max(e.get("ts", "") for e in new_entries)
     state["loki_escalations_last_seen"] = {"ts": latest_ts, "recorded_at": now_ts()}

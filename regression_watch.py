@@ -240,19 +240,41 @@ def run_default(dry_run=False):
         if dry_run:
             print("--- dry-run alert ---"); print(msg); print()
         else:
-            tg_send(msg)
+            # Route to SYN inbox for downstream self-heal (LOKI/VIDAR), not
+            # directly to Telegram. Chris is not paged on routine regressions;
+            # the maintenance dashboard + officer pipeline handles the judgment.
+            try:
+                inbox_rec = {
+                    "ts":       datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
+                    "source":   "regression_watch",
+                    "severity": "warning",
+                    "msg":      f"[regression] {r['league']}/{r['bot']} under={r['under_pct']:.2f}% z={r['z_score']:.2f} n={r['n']}",
+                    "detail":   {"league": r["league"], "bot": r["bot"],
+                                 "under_pct": r["under_pct"], "z": r["z_score"], "n": r["n"]},
+                }
+                with open(f"{WORKSPACE}/syn_inbox.jsonl", "a") as f:
+                    f.write(json.dumps(inbox_rec) + "\n")
+            except Exception as e:
+                log(f"syn_inbox write failed: {e}")
             mark_alerted(state, key)
 
     if stale_warnings and not dry_run:
         key = "stale_baselines"
         if should_alert(state, key):
-            tg_send(
-                "<b>SYN: Regression baselines stale</b>\n"
-                f"Stale (>{BASELINE_STALE_DAYS}d): {len(stale_warnings)} entries\n"
-                f"Sample: {', '.join(stale_warnings[:6])}\n"
-                f"Run: regression_watch.py --refresh-baseline --league &lt;name&gt;\n"
-                f"Time: {pst_now()}"
-            )
+            # Log to inbox; not a Chris-facing page. A weekly review on the
+            # dashboard surfaces stale baselines.
+            try:
+                inbox_rec = {
+                    "ts":       datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
+                    "source":   "regression_watch",
+                    "severity": "info",
+                    "msg":      f"[regression] {len(stale_warnings)} stale baseline(s) (>{BASELINE_STALE_DAYS}d)",
+                    "detail":   {"stale": stale_warnings[:12]},
+                }
+                with open(f"{WORKSPACE}/syn_inbox.jsonl", "a") as f:
+                    f.write(json.dumps(inbox_rec) + "\n")
+            except Exception as e:
+                log(f"syn_inbox write failed: {e}")
             mark_alerted(state, key)
 
     save_json(STATE_FILE, state)
