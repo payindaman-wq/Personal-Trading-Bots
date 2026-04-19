@@ -400,7 +400,7 @@ Output EXACTLY two sections, using these exact headers:
 (3-5 paragraphs of findings)
 
 ### UPDATED PROGRAM
-(The complete rewritten program.md — same structure, improved guidance)
+(The complete rewritten program.md — improved guidance. You MAY restructure (reorder sections, shorten, remove dead weight) when structure itself is a failure mode. If the program exceeds ~1,500 words or the small 8b LLM is measurably failing to apply in-program checks, restructure aggressively: put the YAML template first, put critical checks adjacent to the template, strip narrative explanation. When in doubt, shorter and earlier > longer and explained.)
 
 If you identify a specific structural code change needed in odin_researcher_v2.py (a logic error, a missing guard, a counterproductive behavior — NOT a constant value), add an optional third section:
 
@@ -567,7 +567,7 @@ Output EXACTLY two sections:
 (3-5 paragraphs)
 
 ### UPDATED PROGRAM
-(Complete rewritten program.md — same structure, improved guidance)"""
+(Complete rewritten program.md — improved guidance; restructure when structure itself is the failure mode. See day-league rules above.)"""
 
 
 def parse_response(response):

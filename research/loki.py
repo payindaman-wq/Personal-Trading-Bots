@@ -19,7 +19,7 @@ import yaml
 import subprocess
 import sys
 import urllib.request
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 WORKSPACE        = "/root/.openclaw/workspace"
 RESEARCH         = os.path.join(WORKSPACE, "research")
@@ -37,6 +37,19 @@ LOKI_PENDING_ACTIONS    = os.path.join(RESEARCH, "loki_pending_actions.jsonl")
 STRUCTURAL_RATE_FILE    = os.path.join(RESEARCH, "loki_structural_rate.json")
 STRUCTURAL_MONITOR_FILE = os.path.join(RESEARCH, "loki_structural_monitor.json")
 STRUCTURAL_RATE_MIN     = 360   # 6h between structural code changes per league
+
+# Self-heal audit layer
+LOKI_REVERT_HISTORY_FILE   = os.path.join(RESEARCH, "loki_revert_history.json")
+LOKI_STRUCTURAL_PAUSES     = os.path.join(RESEARCH, "loki_structural_pauses.json")
+VIDAR_SCRIPT               = os.path.join(RESEARCH, "vidar.py")
+MAINTENANCE_LOG_GLOBAL     = os.path.join(WORKSPACE, "maintenance_log.jsonl")
+AUDIT_MIN_GENS_FIRST             = 20
+AUDIT_MIN_GENS_FINAL             = 120
+AUDIT_MAX_MINUTES                = 360
+AUDIT_STRUCTURAL_FAILURE_RISE_PP = 15
+AUDIT_MEAN_SHARPE_DROP           = 0.3
+AUDIT_REVERT_OSCILLATION_LIMIT   = 2
+AUDIT_PAUSE_HOURS                = 12
 PM_PERSONAS = {
     "sports":       "You are a sports analytics expert specializing in predicting sporting event outcomes.",
     "politics":     "You are a political analyst specializing in predicting electoral and policy outcomes.",
@@ -116,6 +129,187 @@ def call_gemini(prompt, max_tokens=500, temperature=0.1):
 
 
 
+def _read_results_tsv(league, last_n=50):
+    path = os.path.join(RESEARCH, league, "results.tsv")
+    if not os.path.exists(path):
+        return []
+    try:
+        with open(path) as f:
+            lines = f.readlines()[1:]
+    except Exception:
+        return []
+    rows = []
+    for line in lines[-last_n:]:
+        parts = line.rstrip("\n").split("\t")
+        if len(parts) < 6:
+            continue
+        try:
+            rows.append({
+                "gen":    int(parts[0]),
+                "sharpe": float(parts[1]),
+                "trades": int(parts[4]),
+                "status": parts[5],
+            })
+        except ValueError:
+            continue
+    return rows
+
+
+def compute_league_metrics(league, last_n=50):
+    rows = _read_results_tsv(league, last_n)
+    if not rows:
+        return None
+    total = len(rows)
+    structural = sum(1 for r in rows if r["trades"] > 450)
+    # League-agnostic 'valid' filter: exclude structural failures and errors.
+    # structural (trades>450) is captured in its own metric; backtest_error/zero-trade
+    # rows skew the mean. Everything else counts.
+    valid = [r for r in rows if r["trades"] > 0 and r["trades"] <= 450 and r["status"] != 'backtest_error']
+    new_bests = sum(1 for r in rows if r["status"] == "new_best")
+    return {
+        "gens_in_window":          total,
+        "structural_failure_rate": round(structural / total, 4) if total else 0,
+        "mean_sharpe_valid":       round(sum(r["sharpe"] for r in valid) / len(valid), 4) if valid else None,
+        "new_best_count":          new_bests,
+        "latest_gen":              rows[-1]["gen"],
+    }
+
+
+def load_revert_history():
+    if os.path.exists(LOKI_REVERT_HISTORY_FILE):
+        try:
+            return json.load(open(LOKI_REVERT_HISTORY_FILE))
+        except Exception:
+            pass
+    return {}
+
+
+def save_revert_history(h):
+    with open(LOKI_REVERT_HISTORY_FILE, "w") as f:
+        json.dump(h, f, indent=2)
+
+
+def load_structural_pauses():
+    if os.path.exists(LOKI_STRUCTURAL_PAUSES):
+        try:
+            return json.load(open(LOKI_STRUCTURAL_PAUSES))
+        except Exception:
+            pass
+    return {}
+
+
+def save_structural_pauses(p):
+    with open(LOKI_STRUCTURAL_PAUSES, "w") as f:
+        json.dump(p, f, indent=2)
+
+
+def is_structural_paused(league):
+    pauses = load_structural_pauses()
+    until = pauses.get(league)
+    if not until:
+        return False, None
+    try:
+        until_dt = datetime.fromisoformat(until).replace(tzinfo=timezone.utc)
+        if datetime.now(timezone.utc) < until_dt:
+            return True, until
+        del pauses[league]
+        save_structural_pauses(pauses)
+    except Exception:
+        pass
+    return False, None
+
+
+def _record_revert(league, reason, detail=""):
+    history = load_revert_history()
+    revert_ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
+    history.setdefault(league, []).append({
+        "ts":     revert_ts,
+        "reason": reason,
+        "detail": detail[:200],
+    })
+    cutoff = datetime.now(timezone.utc).timestamp() - 30 * 86400
+    kept = []
+    for r in history[league]:
+        try:
+            r_ts = datetime.fromisoformat(r["ts"]).replace(tzinfo=timezone.utc).timestamp()
+            if r_ts > cutoff:
+                kept.append(r)
+        except Exception:
+            continue
+    history[league] = kept
+    save_revert_history(history)
+
+    # Maintenance tab surface — every revert shows up here with source=LOKI.
+    try:
+        mrec = {
+            "ts":       revert_ts,
+            "phase":    "reverted",
+            "source":   "LOKI",
+            "league":   league,
+            "kind":     f"audit_revert_{reason}",
+            "detail":   detail[:200],
+            "result":   "backup_restored",
+            "fix_hint": "VIDAR arbitration queued",
+        }
+        with open(MAINTENANCE_LOG_GLOBAL, "a") as _mf:
+            _mf.write(json.dumps(mrec) + "\n")
+    except Exception as _e:
+        print(f"  [loki/revert/maintenance] failed: {_e}")
+
+    # Fire VIDAR revert_review in background (Opus arbitration — non-blocking).
+    try:
+        subprocess.Popen(
+            ["python3", VIDAR_SCRIPT,
+             "--mode", "revert_review",
+             "--league", league,
+             "--revert-ts", revert_ts],
+            stdout=open(os.path.join(RESEARCH, "vidar.log"), "a"),
+            stderr=subprocess.STDOUT,
+        )
+    except Exception as _e:
+        print(f"  [loki/revert/vidar] launch failed: {_e}")
+
+    # Oscillation guard
+    now_ts = datetime.now(timezone.utc).timestamp()
+    recent = [r for r in kept
+              if (now_ts - datetime.fromisoformat(r["ts"]).replace(tzinfo=timezone.utc).timestamp()) < 86400]
+    if len(recent) >= AUDIT_REVERT_OSCILLATION_LIMIT:
+        pauses = load_structural_pauses()
+        until = datetime.now(timezone.utc) + timedelta(hours=AUDIT_PAUSE_HOURS)
+        pauses[league] = until.strftime("%Y-%m-%dT%H:%M")
+        save_structural_pauses(pauses)
+        print(f"  [loki-oscillation] {league} paused {AUDIT_PAUSE_HOURS}h after {len(recent)} reverts in 24h -- VIDAR oscillation_diag will review")
+        # Fire VIDAR oscillation_diag in background
+        try:
+            subprocess.Popen(
+                ["python3", VIDAR_SCRIPT,
+                 "--mode", "oscillation_diag",
+                 "--league", league],
+                stdout=open(os.path.join(RESEARCH, "vidar.log"), "a"),
+                stderr=subprocess.STDOUT,
+            )
+        except Exception as _e:
+            print(f"  [loki/oscillation/vidar] launch failed: {_e}")
+
+
+def _audit_verdict(baseline, current):
+    if not baseline or not current:
+        return "insufficient_data", "missing_metrics"
+    b_sfr = baseline.get("structural_failure_rate")
+    c_sfr = current.get("structural_failure_rate")
+    if b_sfr is not None and c_sfr is not None:
+        rise = c_sfr - b_sfr
+        if rise * 100 >= AUDIT_STRUCTURAL_FAILURE_RISE_PP:
+            return "degraded", f"structural_failure_rate rose {rise*100:.1f}pp ({b_sfr:.2f} -> {c_sfr:.2f})"
+    b_s = baseline.get("mean_sharpe_valid")
+    c_s = current.get("mean_sharpe_valid")
+    if b_s is not None and c_s is not None:
+        drop = b_s - c_s
+        if drop >= AUDIT_MEAN_SHARPE_DROP:
+            return "degraded", f"mean_sharpe_valid dropped {drop:.3f} ({b_s:.3f} -> {c_s:.3f})"
+    return "healthy", ""
+
+
 def load_structural_rate():
     if os.path.exists(STRUCTURAL_RATE_FILE):
         try:
@@ -151,38 +345,67 @@ def check_structural_monitors():
     if not monitor:
         return
     changed = False
-    for league, m in list(monitor.items()):
+    for monitor_key, m in list(monitor.items()):
+        league = m.get("league", monitor_key.split("__")[0])
         try:
             ts = datetime.fromisoformat(m["ts"]).replace(tzinfo=timezone.utc)
         except Exception:
-            del monitor[league]
-            changed = True
+            del monitor[monitor_key]; changed = True
             continue
         age_min = (datetime.now(timezone.utc) - ts).total_seconds() / 60
-        if age_min < 12:
+        unit     = m.get("unit")
+        backup   = m.get("backup")
+        target   = m.get("target")
+        baseline = m.get("baseline", {})
+        kind     = m.get("kind", "code")
+
+        if unit and age_min >= 5:
+            try:
+                result = subprocess.run(
+                    ["systemctl", "is-active", unit],
+                    capture_output=True, text=True, timeout=5,
+                )
+                if result.stdout.strip() != "active":
+                    print(f"  [loki-audit] CRASH REVERT: {unit} inactive after {kind} change ({league})")
+                    if backup and target and os.path.exists(backup):
+                        shutil.copy2(backup, target)
+                        subprocess.run(["systemctl", "restart", unit], timeout=15, check=False)
+                    _record_revert(league, "service_crash", f"{unit} inactive after {kind} change")
+                    print(f"  [loki-audit] {unit} crashed after {kind} change -- backup restored, VIDAR revert_review fired")
+                    del monitor[monitor_key]; changed = True
+                    continue
+            except Exception as e:
+                print(f"  [loki-audit] is-active check failed: {e}")
+
+        current = compute_league_metrics(league, last_n=50)
+        baseline_gen = baseline.get("latest_gen")
+        current_gen  = (current or {}).get("latest_gen")
+        gens_elapsed = (current_gen - baseline_gen) if (baseline_gen and current_gen) else 0
+
+        if age_min >= AUDIT_MAX_MINUTES:
+            print(f"  [loki-audit] {league} {kind} change cleared (timeout {age_min:.0f}m, gens_elapsed={gens_elapsed})")
+            del monitor[monitor_key]; changed = True
             continue
-        unit   = m.get("unit")
-        backup = m.get("backup")
-        target = m.get("target")
-        if age_min > 120:
-            del monitor[league]
-            changed = True
+
+        if gens_elapsed < AUDIT_MIN_GENS_FIRST:
             continue
-        result = subprocess.run(
-            ["systemctl", "is-active", unit], capture_output=True, text=True, timeout=5
-        )
-        if result.stdout.strip() != "active":
-            print(f"  [loki-structural] ROLLBACK: {unit} died after patch")
+
+        verdict, reason = _audit_verdict(baseline, current)
+        if verdict == "degraded":
+            print(f"  [loki-audit] METRIC REVERT ({league}/{kind}): {reason}")
             if backup and target and os.path.exists(backup):
                 shutil.copy2(backup, target)
-                subprocess.run(["systemctl", "restart", unit], timeout=15, check=False)
-            tg_send(f"LOKI rollback: {unit} died after structural patch", "error")
-            del monitor[league]
-            changed = True
-        else:
-            print(f"  [loki-structural] {unit} healthy at {age_min:.0f}m post-patch")
-            del monitor[league]
-            changed = True
+                if unit:
+                    subprocess.run(["systemctl", "restart", unit], timeout=15, check=False)
+            _record_revert(league, "metric_degradation", reason)
+            print(f"  [loki-audit] metric revert {league}/{kind}: {reason} -- VIDAR revert_review fired")
+            del monitor[monitor_key]; changed = True
+            continue
+
+        if gens_elapsed >= AUDIT_MIN_GENS_FINAL:
+            print(f"  [loki-audit] {league} {kind} change healthy at +{gens_elapsed} gens -- clearing monitor")
+            del monitor[monitor_key]; changed = True
+
     if changed:
         save_structural_monitor(monitor)
 
@@ -239,6 +462,10 @@ def apply_structural_change(league, description, patches):
     if not patches:
         return False, "no patch provided (Mimir did not generate a structural patch)"
 
+    paused, until = is_structural_paused(league)
+    if paused:
+        return False, f"structural changes paused for {league} until {until} (oscillation guard)"
+
     rate    = load_structural_rate()
     last_ts = rate.get(league or "global")
     if last_ts:
@@ -289,13 +516,17 @@ def apply_structural_change(league, description, patches):
     if unit:
         subprocess.run(["systemctl", "restart", unit], timeout=15, check=False)
 
+    baseline = compute_league_metrics(league, last_n=50) or {}
     monitor = load_structural_monitor()
     monitor[league] = {
-        "ts":     datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
-        "unit":   unit,
-        "backup": backup,
-        "target": target,
-        "desc":   description[:80],
+        "ts":       datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
+        "league":   league,
+        "unit":     unit,
+        "backup":   backup,
+        "target":   target,
+        "desc":     description[:80],
+        "kind":     "code",
+        "baseline": baseline,
     }
     save_structural_monitor(monitor)
     rate[league or "global"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
@@ -1391,7 +1622,7 @@ def process_entry(entry):
     print(f"\n[loki] MIMIR/{league_up} Gen {gen} ({ts})")
     actions = []
 
-    # Step 1: Commit program.md if Mimir updated it
+    # Step 1: Commit program.md if Mimir updated it + register audit monitor
     program_path = os.path.join(RESEARCH, league, "program.md")
     if program_updated and os.path.exists(program_path):
         rel_path = os.path.relpath(program_path, WORKSPACE)
@@ -1400,8 +1631,42 @@ def process_entry(entry):
             f"[loki] MIMIR/{league_up} Gen {gen}: apply program.md update",
         )
         actions.append("program.md committed" if committed else "program.md already committed")
+        # Snapshot baseline + register monitor so a bad rewrite gets auto-reverted.
+        # MIMIR already wrote the new program.md; we preserve the prior version as
+        # a pre-change backup for revert.
+        try:
+            ts_str = datetime.now().strftime("%Y%m%d_%H%M")
+            prog_backup = program_path + f".pre_mimir_gen{gen}_{ts_str}.bak"
+            # Use the most recent git blob for program.md as the pre-change state
+            prior = subprocess.run(
+                ["git", "-C", WORKSPACE, "show", f"HEAD~1:{rel_path}"],
+                capture_output=True, text=True, timeout=10,
+            )
+            if prior.returncode == 0 and prior.stdout:
+                with open(prog_backup, "w") as f:
+                    f.write(prior.stdout)
+                baseline = compute_league_metrics(league, last_n=50) or {}
+                monitor = load_structural_monitor()
+                # Preserve an existing code-patch monitor (same league) — both can coexist
+                # by keying on kind via a composite league key.
+                monitor[f"{league}__program"] = {
+                    "ts":       datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
+                    "league":   league,
+                    "unit":     SERVICE_MAP.get(league),
+                    "backup":   prog_backup,
+                    "target":   program_path,
+                    "desc":     f"program.md rewrite gen {gen}",
+                    "kind":     "program",
+                    "baseline": baseline,
+                }
+                save_structural_monitor(monitor)
+                actions.append("program.md audit registered")
+            else:
+                print(f"  [loki-audit] skipped monitor: no prior program.md blob in git (returncode={prior.returncode})")
+        except Exception as e:
+            print(f"  [loki-audit] failed to register program.md monitor: {e}")
     else:
-        print(f"  [loki] program_updated={program_updated} — no program.md commit")
+        print(f"  [loki] program_updated={program_updated} -- no program.md commit")
 
     # Step 2: Check analysis for code changes to odin_researcher_v2.py
     if detect_code_change_keywords(analysis):
@@ -1437,9 +1702,24 @@ def process_entry(entry):
                 actions.append(f"structural: {patch_desc}")
                 print(f"  [loki] Structural change applied: {patch_desc}")
             else:
+                # MIMIR's patch did not apply (usually stale anchor). Fire VIDAR
+                # patch_repair before escalating to Chris — VIDAR will produce a
+                # corrected patch, decline as "not actionable", or escalate.
+                try:
+                    subprocess.Popen(
+                        ["python3", VIDAR_SCRIPT,
+                         "--mode", "patch_repair",
+                         "--league", league,
+                         "--mimir-ts", ts],
+                        stdout=open(os.path.join(RESEARCH, "vidar.log"), "a"),
+                        stderr=subprocess.STDOUT,
+                    )
+                    actions.append(f"vidar_patch_repair_fired: {patch_desc[:50]}")
+                except Exception as _e:
+                    print(f"  [loki/vidar] patch_repair launch failed: {_e}")
                 write_escalation_log(ts, league, gen, desc)
                 actions.append(f"escalated(Phase2): {patch_desc[:60]}")
-                print(f"  [loki] Structural escalated: {patch_desc}")
+                print(f"  [loki] Structural escalated (VIDAR repair fired): {patch_desc}")
     else:
         print(f"  [loki] No code change keywords — program.md only")
 

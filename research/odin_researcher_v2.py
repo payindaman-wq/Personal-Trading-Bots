@@ -915,8 +915,16 @@ def main():
 
         # Mimir milestone: deep analysis every 200 gens (baseline cadence)
         # or immediately after a breakthrough (min 100 gens since last Mimir).
+        # Structural-failure storm: 3+ of last 10 had trades>450 — fire early
+        # (requires 50+ gens since last MIMIR to avoid spam on a single cluster).
         # Wall-clock cooldown (MIMIR_MIN_GAP_HRS) caps per-league Claude spend.
-        trigger_mimir = (gen % 200 == 0) or (is_new_best and (gen - last_mimir_gen) >= 100)
+        last_10_trades = [int(r.get('trades', '0')) for r in results_history[-10:] if str(r.get('trades', '0')).isdigit()]
+        structural_storm = sum(1 for t in last_10_trades if t > 450) >= 3
+        trigger_mimir = (
+            (gen % 200 == 0)
+            or (is_new_best and (gen - last_mimir_gen) >= 100)
+            or (structural_storm and (gen - last_mimir_gen) >= 50)
+        )
         if trigger_mimir:
             now_utc = datetime.now(timezone.utc)
             gap_ok  = True
