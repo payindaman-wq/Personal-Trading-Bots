@@ -20,6 +20,11 @@ competition/backtest_results.json
 competition/swing/active/
 competition/futures_day/active/
 competition/futures_swing/active/
+competition/heartbeat_state.json
+competition/heartbeat_syn_state.json
+competition/futures_day/cycle_state.json
+competition/futures_swing/cycle_state.json
+competition/swing/swing_cycle_state.json
 competition/swing/price_history/
 competition/swing/tick.log
 competition/swing/leaderboard.log
