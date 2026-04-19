@@ -285,8 +285,11 @@ def fetch_candles(coin, days):
 
 def load_strategy(bot_name):
     import yaml
-    path = os.path.join(FLEET_DIR, bot_name, "strategy.yaml")
-    if not os.path.exists(path):
+    candidates = [os.path.join(FLEET_DIR, bot_name, "strategy.yaml")]
+    for sub in ("day", "swing", "futures_day", "futures_swing"):
+        candidates.append(os.path.join(FLEET_DIR, sub, bot_name, "strategy.yaml"))
+    path = next((c for c in candidates if os.path.exists(c)), None)
+    if path is None:
         return None
     with open(path) as f:
         return yaml.safe_load(f)
