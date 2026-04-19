@@ -803,6 +803,7 @@ def main():
 
         if candidate is None:
             print("| no candidate")
+            log_result(league, gen, {}, "no_candidate", f"mutation_type={mutation_type}")
             gen += 1
             time.sleep(args.sleep)
             continue

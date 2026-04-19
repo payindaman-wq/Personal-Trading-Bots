@@ -744,6 +744,21 @@ def main():
         best_strategy = open(best_path).read()     if os.path.exists(best_path)    else ""
         research_rows    = load_research_results(league)
         research_summary = summarize_research(research_rows)
+        try:
+            _latest_tsv_gen = max(int(r["gen"]) for r in research_rows) if research_rows else 0
+            _gen_gap = int(generation) - _latest_tsv_gen
+            if _gen_gap > 100:
+                research_summary = (
+                    f"**INSUFFICIENT RECENT DATA — DO NOT FABRICATE**\n"
+                    f"Current generation: {generation}. Latest row in results.tsv: gen {_latest_tsv_gen} "
+                    f"(gap: {_gen_gap} gens). The research loop has been running but results are not "
+                    f"being persisted to results.tsv for this league. Do NOT invent per-generation "
+                    f"metrics for any gen > {_latest_tsv_gen}. Base your analysis only on the rows "
+                    f"shown below and flag the TSV write gap as the primary finding.\n\n"
+                    + research_summary
+                )
+        except Exception:
+            pass
         sprint_results   = load_sprint_results(league, bot_name)
         sprint_summary   = summarize_sprints(sprint_results, bot_name)
         constants        = load_researcher_constants()
