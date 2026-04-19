@@ -743,15 +743,6 @@ def main():
         candidate_yaml = None
         description = mutation_type
 
-        # Item 2: dedup check
-        if candidate_yaml:
-            _h = hashlib.md5(candidate_yaml.encode()).hexdigest()
-            if _h in seen_configs:
-                print(f"| [DEDUP_REJECT]")
-                log_result(league, gen, {}, "dedup_reject", "duplicate config")
-                gen += 1
-                time.sleep(args.sleep)
-                continue
         if mutation_type == "llm":
             _, best_strat, _ = pop.elites[0]
             clean = copy.deepcopy(best_strat)
@@ -815,6 +806,19 @@ def main():
                 candidate["pairs"] = [p for p in candidate.get("pairs", []) if p in SWING_ALLOWED_PAIRS] or ["BTC/USD", "ETH/USD", "SOL/USD"]
                 import yaml as _yaml2
                 candidate_yaml = _yaml2.dump(candidate, default_flow_style=False, sort_keys=False)
+
+        # Canonical dedup — hash structure (sort_keys) so whitespace/key-order doesn't evade
+        _canon = yaml.dump(candidate, default_flow_style=False, sort_keys=True)
+        _h = hashlib.md5(_canon.encode()).hexdigest()
+        if _h in seen_configs:
+            print(f"| [DEDUP_REJECT]")
+            log_result(league, gen, {}, "dedup_reject", "duplicate config")
+            gen += 1
+            with open(state_path, "w") as f:
+                json.dump({"gen": gen, "gens_since_best": gens_since_best, "last_mimir_gen": last_mimir_gen, "last_mimir_ts": last_mimir_ts}, f)
+            time.sleep(args.sleep)
+            continue
+        seen_configs.add(_h)
 
         # Pre-backtest poison check
         _poison, _poison_reason = is_poison_yaml(candidate, league)
@@ -883,9 +887,6 @@ def main():
             gen += 1
             time.sleep(args.sleep)
             continue
-        # Item 2: add to dedup cache after successful backtest
-        if candidate_yaml:
-            seen_configs.add(hashlib.md5(candidate_yaml.encode()).hexdigest())
         # Population insertion
         inserted, is_new_best = pop.try_insert(candidate, candidate_yaml, sharpe, trades)
 
