@@ -1,12 +1,13 @@
 ```markdown
-# ODIN — FUTURES DAY v35.0
-# ONE TASK: change take_profit_pct from 4.6 to 5.0. Nothing else.
+# ODIN — FUTURES DAY v36.0
+# PIVOT: TP=5.0 tested and failed (Gen 3770: Sharpe=0.0213 < champion 0.4066)
+# NEW TASK: Change rsi_long from 29.33 to 32.0. Nothing else.
 
 ## OUTPUT THESE TWO LINES FIRST:
-CHANGE: take_profit_pct 4.6 → 5.0
-USING: size_pct=8, rsi_long=29.33, rsi_short=68.63, stop_loss=2.59, tp=5.0
+CHANGE: rsi_long 29.33 → 32.0
+USING: size_pct=8, rsi_long=32.0, rsi_short=68.63, stop_loss=2.59, tp=4.6
 
-## THEN OUTPUT THIS YAML EXACTLY (only take_profit_pct changes):
+## OUTPUT THIS YAML EXACTLY (only rsi long value changes):
 
 ```yaml
 name: crossover
@@ -40,7 +41,7 @@ entry:
     - indicator: rsi
       period_minutes: 60
       operator: lt
-      value: 29.33
+      value: 32.0
   short:
     conditions:
     - indicator: rsi
@@ -48,7 +49,7 @@ entry:
       operator: gt
       value: 68.63
 exit:
-  take_profit_pct: 5.0
+  take_profit_pct: 4.6
   stop_loss_pct: 2.59
   timeout_minutes: 720
 risk:
@@ -58,30 +59,32 @@ risk:
 ```
 
 ## VERIFY BEFORE SUBMITTING — all must be true:
-- take_profit_pct = 5.0  (changed from 4.6)
-- stop_loss_pct = 2.59   (unchanged)
-- size_pct = 8           (unchanged)
-- rsi long value = 29.33 (unchanged)
+- rsi long value = 32.0   (changed from 29.33)
 - rsi short value = 68.63 (unchanged)
-- timeout_minutes = 720  (unchanged)
-- pairs list = 16 pairs  (unchanged)
+- take_profit_pct = 4.6   (unchanged)
+- stop_loss_pct = 2.59    (unchanged)
+- size_pct = 8            (unchanged)
+- timeout_minutes = 720   (unchanged)
+- pairs list = 16 pairs   (unchanged)
 
 ## FORBIDDEN VALUES — if you wrote any of these, STOP and use the YAML above:
-- size_pct = 16.91   → INVALID
+- rsi long = 29.33   → INVALID (must be 32.0)
 - rsi long = 35.97   → INVALID
 - rsi short = 72     → INVALID
+- size_pct = 16.91   → INVALID
 - stop_loss = 2.39   → INVALID
-- take_profit = 4.6  → INVALID (must be 5.0)
+- take_profit = 5.0  → INVALID (TP=5.0 already failed, use 4.6)
 
 ## CHAMPION CONTEXT:
 - Current champion: Gen 3233, Sharpe=0.4066, 1756 trades, WR=50.1%
-- Your goal: Sharpe > 0.4066 with take_profit_pct=5.0
+- Goal: Sharpe > 0.4066
+- TP=5.0 was tested (Gen 3770): Sharpe=0.0213 — FAILED, do not retry
 
-## ROADMAP (after this step succeeds):
-- Step 2: TP 5.0 → 5.5
-- Step 3: TP 5.5 → 6.0
-- Step 4: TP 6.0 → 7.0
-- If 3 TP steps fail: test rsi_long 29.33 → 32.0
+## ROADMAP:
+- Step 1 (NOW): rsi_long 29.33 → 32.0
+- Step 2: If Step 1 succeeds → rsi_long 32.0 → 34.0
+- Step 3: If Step 1 fails → rsi_short 68.63 → 66.0
+- Step 4: If both RSI steps fail → stop_loss 2.59 → 2.3
 
 ## SYSTEM CONSTANT (never change):
 - MIN_TRADES[futures_day] = 50 — FROZEN. Do not raise.
