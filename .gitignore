@@ -18,6 +18,8 @@ competition/leaderboard.log
 competition/cron.log
 competition/backtest_results.json
 competition/swing/active/
+competition/futures_day/active/
+competition/futures_swing/active/
 competition/swing/price_history/
 competition/swing/tick.log
 competition/swing/leaderboard.log
