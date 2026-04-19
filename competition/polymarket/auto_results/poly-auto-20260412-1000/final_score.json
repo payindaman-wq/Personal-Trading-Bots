@@ -1,0 +1,126 @@
+{
+  "sprint_id": "poly-auto-20260412-1000",
+  "scored_at": "2026-04-19T09:00:07.069619+00:00",
+  "bots": [
+    {
+      "bot": "njal",
+      "type": "crypto",
+      "username": "",
+      "sprint_pnl_usd": 519.66,
+      "sprint_pnl_pct": 51.97,
+      "sprint_trades": 16,
+      "sprint_wins": 8,
+      "win_rate": 50.0
+    },
+    {
+      "bot": "kara",
+      "type": "world_events",
+      "username": "",
+      "sprint_pnl_usd": 0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "tora",
+      "type": "sports",
+      "username": "",
+      "sprint_pnl_usd": 48.95,
+      "sprint_pnl_pct": 4.9,
+      "sprint_trades": 4,
+      "sprint_wins": 2,
+      "win_rate": 50.0
+    },
+    {
+      "bot": "mist",
+      "type": "world_events",
+      "username": "",
+      "sprint_pnl_usd": 0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "thrud",
+      "type": "world_events",
+      "username": "",
+      "sprint_pnl_usd": 0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "eir",
+      "type": "science",
+      "username": "",
+      "sprint_pnl_usd": 0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "gerd",
+      "type": "crypto",
+      "username": "",
+      "sprint_pnl_usd": 0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "muninn",
+      "type": "arb",
+      "username": "",
+      "sprint_pnl_usd": 0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "hlin",
+      "type": "sports",
+      "username": "",
+      "sprint_pnl_usd": 0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "var",
+      "type": "politics",
+      "username": "",
+      "sprint_pnl_usd": -100.0,
+      "sprint_pnl_pct": -10.0,
+      "sprint_trades": 1,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "hermod",
+      "type": "world_economics",
+      "username": "",
+      "sprint_pnl_usd": -194.57,
+      "sprint_pnl_pct": -19.46,
+      "sprint_trades": 6,
+      "sprint_wins": 1,
+      "win_rate": 16.7
+    },
+    {
+      "bot": "skadi",
+      "type": "crypto",
+      "username": "",
+      "sprint_pnl_usd": -218.55,
+      "sprint_pnl_pct": -21.86,
+      "sprint_trades": 8,
+      "sprint_wins": 2,
+      "win_rate": 25.0
+    }
+  ]
+}

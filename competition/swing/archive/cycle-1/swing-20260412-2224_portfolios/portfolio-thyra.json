@@ -1,0 +1,72 @@
+{
+  "bot": "thyra",
+  "competition_id": "swing-20260412-2224",
+  "league": "swing",
+  "duration_hours": 168,
+  "started_at": "2026-04-12T22:24:51.040976+00:00",
+  "pairs": [
+    "BTC/USD",
+    "ETH/USD",
+    "SOL/USD",
+    "XRP/USD",
+    "DOGE/USD",
+    "AVAX/USD",
+    "LINK/USD",
+    "UNI/USD",
+    "AAVE/USD",
+    "NEAR/USD",
+    "APT/USD",
+    "SUI/USD",
+    "ARB/USD",
+    "OP/USD",
+    "ADA/USD",
+    "POL/USD"
+  ],
+  "starting_capital": 1000.0,
+  "fee_rate": 0.001,
+  "equity": 987.87,
+  "peak_equity": 1000.0,
+  "positions": [],
+  "stats": {
+    "total_trades": 3,
+    "wins": 1,
+    "losses": 1,
+    "win_rate": 50.0,
+    "total_pnl_usd": -11.53,
+    "total_pnl_pct": -5.1233,
+    "total_fees": 0.9934,
+    "max_drawdown_pct": 1.125,
+    "current_equity": 988.75,
+    "live_equity_mtm": 987.97,
+    "live_pnl_usd": -12.03,
+    "live_pnl_pct": -1.2032,
+    "sum_losses_usd": -10.71,
+    "sum_wins_usd": 0.06
+  },
+  "closed_trades": [
+    {
+      "pair": "SOL/USD",
+      "direction": "short",
+      "entry_price": 81.453,
+      "exit_price": 85.734,
+      "size_usd": 200.0,
+      "pnl_pct": -5.26,
+      "net_pnl": -10.71,
+      "reason": "SL",
+      "opened_at": "2026-04-12T23:43:20.813365+00:00",
+      "closed_at": "2026-04-13T22:30:16.514708+00:00"
+    },
+    {
+      "pair": "SUI/USD",
+      "direction": "long",
+      "entry_price": 0.94368,
+      "exit_price": 0.94493,
+      "size_usd": 197.82,
+      "pnl_pct": 0.13,
+      "net_pnl": 0.06,
+      "reason": "TIMEOUT",
+      "opened_at": "2026-04-14T08:00:12.010555+00:00",
+      "closed_at": "2026-04-19T08:00:17.115083+00:00"
+    }
+  ]
+}

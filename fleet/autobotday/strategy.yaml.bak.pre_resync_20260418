@@ -1,0 +1,54 @@
+name: autobotday
+style: momentum_dip_buyer
+pairs:
+  - BTC/USD
+  - ETH/USD
+  - SOL/USD
+  - XRP/USD
+  - DOGE/USD
+  - AVAX/USD
+  - LINK/USD
+  - UNI/USD
+  - AAVE/USD
+  - NEAR/USD
+position:
+  size_pct: 15
+  max_open: 3
+  fee_rate: 0.001
+entry:
+  long:
+    conditions:
+    - indicator: momentum_accelerating
+      period_minutes: 60
+      operator: eq
+      value: true
+    - indicator: price_change_pct
+      period_minutes: 15
+      operator: lt
+      value: -0.3
+    - indicator: trend
+      period_minutes: 240
+      operator: in
+      value: [up, flat]
+  short:
+    conditions:
+    - indicator: momentum_accelerating
+      period_minutes: 60
+      operator: eq
+      value: true
+    - indicator: price_change_pct
+      period_minutes: 15
+      operator: gt
+      value: 0.3
+    - indicator: trend
+      period_minutes: 240
+      operator: in
+      value: [down, flat]
+exit:
+  take_profit_pct: 0.5
+  stop_loss_pct: 0.25
+  timeout_minutes: 60
+risk:
+  pause_if_down_pct: 4
+  stop_if_down_pct: 10
+  pause_minutes: 60

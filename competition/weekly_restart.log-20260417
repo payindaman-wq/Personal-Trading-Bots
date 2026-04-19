@@ -1,0 +1,61 @@
+weekly_league_restart @ 2026-03-29 09:00 UTC
+  [SWING] Sprint only 0.3h old — skipping.
+  [ARB] Sprint only 0.3h old — skipping.
+  [SPREAD] Sprint only 0.3h old — skipping.
+  [POLYMARKET] Sprint only 0.3h old — skipping.
+Done.
+weekly_league_restart @ 2026-04-05 09:00 UTC
+  Target start timestamp: 2026-04-05T09:00:00+00:00
+  [SWING] Sprint 168.0h old — expiring and archiving...
+    Another tick instance is running. Exiting.
+  [odin-swing] Injected best swing strategy -> /root/.openclaw/workspace/fleet/swing/autobotswing/strategy.yaml
+  [SWING] Started: swing-20260405-0900
+  [SWING] Patched started_at -> 2026-04-05T09:00:00+00:00
+  [SWING] Cycle 1, Sprint 5/4 registered in cycle state.
+  [ARB] Sprint 319.8h old — expiring and archiving...
+    Arb tick: arb-20260323-0110  2026-04-05T09:00
+      Competition expired — archiving...
+      Archived: arb-20260323-0110  winner: fafnir
+      Arb cycle state: Cycle 1, Sprint 3/4
+  [ARB] Started: arb-20260405-0900
+  [ARB] Patched started_at -> 2026-04-05T09:00:00+00:00
+  [ARB] Cycle 1, Sprint 4/4 registered in cycle state.
+  [SPREAD] Sprint 168.0h old — expiring and archiving...
+    Another tick instance is running. Exiting.
+  [SPREAD] Started: spread-20260405-0900
+  [SPREAD] Patched started_at -> 2026-04-05T09:00:00+00:00
+  [SPREAD] Cycle 1, Sprint 4/4 registered in cycle state.
+  [freya] Injected strategy -> mist (cat=world_events, edge=0.033)
+  [freya] Injected strategy -> kara (cat=world_events, edge=0.063)
+  [freya] Injected strategy -> thrud (cat=world_events, edge=0.03)
+  [POLYMARKET] Expired after 155.0h. Service restarted.
+Done.
+weekly_league_restart @ 2026-04-12 09:00 UTC
+  Target start timestamp: 2026-04-12T09:00:00+00:00
+  [SWING] Sprint 168.0h old — expiring and archiving...
+    Another tick instance is running. Exiting.
+  [odin-swing] Injected best swing strategy -> /root/.openclaw/workspace/fleet/swing/autobotswing/strategy.yaml
+  [SWING] Started: swing-20260412-0900
+  [SWING] Patched started_at -> 2026-04-12T09:00:00+00:00
+  [SWING] Cycle 1, Sprint 5/4 registered in cycle state.
+  [ARB] No active sprint — will start fresh.
+  [ARB] Started: arb-20260412-0900
+  [ARB] Patched started_at -> 2026-04-12T09:00:00+00:00
+  [ARB] Cycle 1, Sprint 5/4 registered in cycle state.
+  [SPREAD] No active sprint — will start fresh.
+  [SPREAD] Started: spread-20260412-0900
+  [SPREAD] Patched started_at -> 2026-04-12T09:00:00+00:00
+  [SPREAD] Cycle 1, Sprint 5/4 registered in cycle state.
+  [freya] Injected strategy -> mist (cat=world_events, edge=0.07)
+  [freya] Injected strategy -> kara (cat=world_events, edge=0.1)
+  [freya] Injected strategy -> thrud (cat=world_events, edge=0.05)
+  [POLYMARKET] Expired after 121.9h. Service restarted.
+[weekly] Restarting futures swing league...
+[futures_swing_restart] 2026-04-12 09:00 UTC
+  Archiving current: fut-swing-20260407-0027
+  Archived: fut-swing-20260407-0027
+  [odin] Injected futures_swing best strategy -> autobotswingfutures
+  Started: fut-swing-20260412-0900 (Cycle 1, Sprint 2)
+  Patched started_at -> 2026-04-12T09:00:00+00:00
+
+Done.

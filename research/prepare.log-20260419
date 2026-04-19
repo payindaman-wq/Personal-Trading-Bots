@@ -1,0 +1,133 @@
+
+[DAY] interval=5m  years=2
+  BTC/USD...
+    Refreshing from 2026-04-17 06:00
+    page 1: 288 candles -> 2026-04-18 06:00
+    Appended 288 new rows -> /root/.openclaw/workspace/research/data/BTC_USD_5m.csv
+  ETH/USD...
+    Refreshing from 2026-04-17 06:00
+    page 1: 288 candles -> 2026-04-18 06:00
+    Appended 288 new rows -> /root/.openclaw/workspace/research/data/ETH_USD_5m.csv
+  SOL/USD...
+    Refreshing from 2026-04-17 06:00
+    page 1: 288 candles -> 2026-04-18 06:00
+    Appended 288 new rows -> /root/.openclaw/workspace/research/data/SOL_USD_5m.csv
+  XRP/USD...
+    Refreshing from 2026-04-17 06:00
+    page 1: 288 candles -> 2026-04-18 06:00
+    Appended 288 new rows -> /root/.openclaw/workspace/research/data/XRP_USD_5m.csv
+  DOGE/USD...
+    Refreshing from 2026-04-17 06:00
+    page 1: 288 candles -> 2026-04-18 06:00
+    Appended 288 new rows -> /root/.openclaw/workspace/research/data/DOGE_USD_5m.csv
+  AVAX/USD...
+    Refreshing from 2026-04-17 06:00
+    page 1: 288 candles -> 2026-04-18 06:00
+    Appended 288 new rows -> /root/.openclaw/workspace/research/data/AVAX_USD_5m.csv
+  LINK/USD...
+    Refreshing from 2026-04-17 06:00
+    page 1: 288 candles -> 2026-04-18 06:00
+    Appended 288 new rows -> /root/.openclaw/workspace/research/data/LINK_USD_5m.csv
+  UNI/USD...
+    Refreshing from 2026-04-17 06:00
+    page 1: 288 candles -> 2026-04-18 06:00
+    Appended 288 new rows -> /root/.openclaw/workspace/research/data/UNI_USD_5m.csv
+  AAVE/USD...
+    Refreshing from 2026-04-17 06:00
+    page 1: 288 candles -> 2026-04-18 06:00
+    Appended 288 new rows -> /root/.openclaw/workspace/research/data/AAVE_USD_5m.csv
+  NEAR/USD...
+    Refreshing from 2026-04-17 06:00
+    page 1: 288 candles -> 2026-04-18 06:00
+    Appended 288 new rows -> /root/.openclaw/workspace/research/data/NEAR_USD_5m.csv
+  APT/USD...
+    Refreshing from 2026-04-17 06:00
+    page 1: 288 candles -> 2026-04-18 06:00
+    Appended 288 new rows -> /root/.openclaw/workspace/research/data/APT_USD_5m.csv
+  SUI/USD...
+    Refreshing from 2026-04-17 06:00
+    page 1: 288 candles -> 2026-04-18 06:00
+    Appended 288 new rows -> /root/.openclaw/workspace/research/data/SUI_USD_5m.csv
+  ARB/USD...
+    Refreshing from 2026-04-17 06:00
+    page 1: 288 candles -> 2026-04-18 06:00
+    Appended 288 new rows -> /root/.openclaw/workspace/research/data/ARB_USD_5m.csv
+  OP/USD...
+    Refreshing from 2026-04-17 06:00
+    page 1: 288 candles -> 2026-04-18 06:00
+    Appended 288 new rows -> /root/.openclaw/workspace/research/data/OP_USD_5m.csv
+  ADA/USD...
+    Refreshing from 2026-04-17 06:00
+    page 1: 288 candles -> 2026-04-18 06:00
+    Appended 288 new rows -> /root/.openclaw/workspace/research/data/ADA_USD_5m.csv
+  POL/USD...
+    Refreshing from 2024-09-10 02:55
+    No new candles.
+
+[SWING] interval=1h  years=2
+  BTC/USD...
+    Refreshing from 2026-04-17 06:00
+    page 1: 24 candles -> 2026-04-18 06:00
+    Appended 24 new rows -> /root/.openclaw/workspace/research/data/BTC_USD_1h.csv
+  ETH/USD...
+    Refreshing from 2026-04-17 06:00
+    page 1: 24 candles -> 2026-04-18 06:00
+    Appended 24 new rows -> /root/.openclaw/workspace/research/data/ETH_USD_1h.csv
+  SOL/USD...
+    Refreshing from 2026-04-17 06:00
+    page 1: 24 candles -> 2026-04-18 06:00
+    Appended 24 new rows -> /root/.openclaw/workspace/research/data/SOL_USD_1h.csv
+  XRP/USD...
+    Refreshing from 2026-04-17 06:00
+    page 1: 24 candles -> 2026-04-18 06:00
+    Appended 24 new rows -> /root/.openclaw/workspace/research/data/XRP_USD_1h.csv
+  DOGE/USD...
+    Refreshing from 2026-04-17 06:00
+    page 1: 24 candles -> 2026-04-18 06:00
+    Appended 24 new rows -> /root/.openclaw/workspace/research/data/DOGE_USD_1h.csv
+  AVAX/USD...
+    Refreshing from 2026-04-17 06:00
+    page 1: 24 candles -> 2026-04-18 06:00
+    Appended 24 new rows -> /root/.openclaw/workspace/research/data/AVAX_USD_1h.csv
+  LINK/USD...
+    Refreshing from 2026-04-17 06:00
+    page 1: 24 candles -> 2026-04-18 06:00
+    Appended 24 new rows -> /root/.openclaw/workspace/research/data/LINK_USD_1h.csv
+  UNI/USD...
+    Refreshing from 2026-04-17 06:00
+    page 1: 24 candles -> 2026-04-18 06:00
+    Appended 24 new rows -> /root/.openclaw/workspace/research/data/UNI_USD_1h.csv
+  AAVE/USD...
+    Refreshing from 2026-04-17 06:00
+    page 1: 24 candles -> 2026-04-18 06:00
+    Appended 24 new rows -> /root/.openclaw/workspace/research/data/AAVE_USD_1h.csv
+  NEAR/USD...
+    Refreshing from 2026-04-17 06:00
+    page 1: 24 candles -> 2026-04-18 06:00
+    Appended 24 new rows -> /root/.openclaw/workspace/research/data/NEAR_USD_1h.csv
+  APT/USD...
+    Refreshing from 2026-04-17 06:00
+    page 1: 24 candles -> 2026-04-18 06:00
+    Appended 24 new rows -> /root/.openclaw/workspace/research/data/APT_USD_1h.csv
+  SUI/USD...
+    Refreshing from 2026-04-17 06:00
+    page 1: 24 candles -> 2026-04-18 06:00
+    Appended 24 new rows -> /root/.openclaw/workspace/research/data/SUI_USD_1h.csv
+  ARB/USD...
+    Refreshing from 2026-04-17 06:00
+    page 1: 24 candles -> 2026-04-18 06:00
+    Appended 24 new rows -> /root/.openclaw/workspace/research/data/ARB_USD_1h.csv
+  OP/USD...
+    Refreshing from 2026-04-17 06:00
+    page 1: 24 candles -> 2026-04-18 06:00
+    Appended 24 new rows -> /root/.openclaw/workspace/research/data/OP_USD_1h.csv
+  ADA/USD...
+    Refreshing from 2026-04-17 06:00
+    page 1: 24 candles -> 2026-04-18 06:00
+    Appended 24 new rows -> /root/.openclaw/workspace/research/data/ADA_USD_1h.csv
+  POL/USD...
+    Refreshing from 2024-09-10 02:00
+    No new candles.
+
+Done.
+Weekly refresh cron: 0 6 * * 1 python3 /root/.openclaw/workspace/research/prepare.py --refresh

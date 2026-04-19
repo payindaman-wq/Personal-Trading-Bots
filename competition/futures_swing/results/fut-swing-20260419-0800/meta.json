@@ -1,0 +1,41 @@
+{
+  "comp_id": "fut-swing-20260419-0800",
+  "duration_hours": 168,
+  "started_at": "2026-04-19T09:00:00+00:00",
+  "pairs": [
+    "BTC/USD",
+    "ETH/USD",
+    "SOL/USD",
+    "XRP/USD",
+    "DOGE/USD",
+    "AVAX/USD",
+    "LINK/USD",
+    "UNI/USD",
+    "AAVE/USD",
+    "NEAR/USD",
+    "APT/USD",
+    "SUI/USD",
+    "ARB/USD",
+    "OP/USD",
+    "ADA/USD",
+    "POL/USD"
+  ],
+  "bots": [
+    "sigmund",
+    "sinfjotli",
+    "hogni",
+    "atli",
+    "regin",
+    "andvari",
+    "grimolf",
+    "audun",
+    "thorolf",
+    "autobotswingfutures"
+  ],
+  "starting_capital": 1000.0,
+  "fee_rate": 0.0005,
+  "status": "completed",
+  "league": "futures_swing",
+  "leverage_default": 2.0,
+  "ended_at": "2026-04-19T09:00:06.976970+00:00"
+}

@@ -1,0 +1,26 @@
+{
+  "brandr": {
+    "stopped": true,
+    "paused_until": null
+  },
+  "ketil": {
+    "stopped": false,
+    "paused_until": "2026-04-16T06:10:02.041507+00:00"
+  },
+  "orvar": {
+    "stopped": false,
+    "paused_until": "2026-04-16T06:30:01.403379+00:00"
+  },
+  "vemund": {
+    "stopped": false,
+    "paused_until": "2026-04-16T06:30:01.452385+00:00"
+  },
+  "hakon": {
+    "stopped": true,
+    "paused_until": null
+  },
+  "haki": {
+    "stopped": false,
+    "paused_until": "2026-04-16T06:00:02.213160+00:00"
+  }
+}

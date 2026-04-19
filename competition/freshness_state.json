@@ -1,0 +1,42 @@
+{
+  "odin_stall:futures_day": {
+    "last_alerted": "2026-04-18T07:04:08.941825+00:00",
+    "detail": "gsb=915"
+  },
+  "freya_stall": {
+    "last_alerted": "2026-04-19T07:23:01.425717+00:00",
+    "detail": "gsb=1884"
+  },
+  "mimir_repeat:futures_swing:BUG-1": {
+    "last_alerted": "2026-04-18T07:04:08.958549+00:00",
+    "detail": "count=5"
+  },
+  "loki_never_reviewed:day": {
+    "last_alerted": "2026-04-19T07:23:01.445121+00:00",
+    "detail": ""
+  },
+  "loki_stale:futures_day": {
+    "last_alerted": "2026-04-19T07:23:01.445205+00:00",
+    "detail": "age_days=4.9"
+  },
+  "loki_escalations_last_seen": {
+    "ts": "2026-04-19T06:15",
+    "recorded_at": "2026-04-19T06:23:01.565438+00:00"
+  },
+  "mimir_repeat:futures_swing:BUG-4": {
+    "last_alerted": "2026-04-18T12:23:01.778286+00:00",
+    "detail": "count=3"
+  },
+  "mimir_repeat:futures_swing:BUG-2": {
+    "last_alerted": "2026-04-18T12:23:01.778306+00:00",
+    "detail": "count=3"
+  },
+  "odin_stall:day": {
+    "last_alerted": "2026-04-19T07:23:01.425437+00:00",
+    "detail": "gsb=1306"
+  },
+  "odin_stall:futures_swing": {
+    "last_alerted": "2026-04-19T08:23:01.610719+00:00",
+    "detail": "gsb=613"
+  }
+}

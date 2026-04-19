@@ -1,0 +1,69 @@
+{
+  "bot": "starkad",
+  "competition_id": "fut-day-20260417-0900",
+  "duration_hours": 24,
+  "started_at": "2026-04-17T09:00:01.339992+00:00",
+  "pairs": [
+    "BTC/USD",
+    "ETH/USD",
+    "SOL/USD",
+    "XRP/USD",
+    "DOGE/USD",
+    "AVAX/USD",
+    "LINK/USD",
+    "UNI/USD",
+    "AAVE/USD",
+    "NEAR/USD",
+    "APT/USD",
+    "SUI/USD",
+    "ARB/USD",
+    "OP/USD",
+    "ADA/USD",
+    "POL/USD"
+  ],
+  "starting_capital": 1000.0,
+  "fee_rate": 0.0005,
+  "cash": 917.3379003572321,
+  "positions": [
+    {
+      "pair": "ETH/USD",
+      "direction": "short",
+      "entry_price": 2359.62,
+      "quantity": 0.06780753,
+      "cost_basis": 80.0,
+      "leverage": 2.0,
+      "opened_at": "2026-04-17T10:05:01.422068+00:00"
+    }
+  ],
+  "closed_trades": [
+    {
+      "pair": "ADA/USD",
+      "direction": "long",
+      "reason": "stop",
+      "entry_price": 0.258082,
+      "exit_price": 0.255935,
+      "pnl_usd": -2.6621,
+      "pnl_pct": -3.3276,
+      "funding_cost": 0.0,
+      "leverage": 2.0,
+      "won": false,
+      "opened_at": "2026-04-17T09:50:01.350058+00:00",
+      "closed_at": "2026-04-17T10:30:01.804695+00:00"
+    }
+  ],
+  "stats": {
+    "total_trades": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "total_pnl_usd": -2.6621,
+    "total_pnl_pct": -8.2662,
+    "total_fees": 0.0,
+    "max_drawdown_pct": 0.0,
+    "current_equity": 917.34,
+    "peak_equity": 1000.0,
+    "live_equity_mtm": 919.6,
+    "live_pnl_usd": -80.4,
+    "live_pnl_pct": -8.0401
+  }
+}

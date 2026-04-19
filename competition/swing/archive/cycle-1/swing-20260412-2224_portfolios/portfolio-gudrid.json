@@ -1,0 +1,71 @@
+{
+  "bot": "gudrid",
+  "competition_id": "swing-20260412-2224",
+  "league": "swing",
+  "duration_hours": 168,
+  "started_at": "2026-04-12T22:24:51.040976+00:00",
+  "pairs": [
+    "BTC/USD",
+    "ETH/USD",
+    "SOL/USD",
+    "XRP/USD",
+    "DOGE/USD",
+    "AVAX/USD",
+    "LINK/USD",
+    "UNI/USD",
+    "AAVE/USD",
+    "NEAR/USD",
+    "APT/USD",
+    "SUI/USD",
+    "ARB/USD",
+    "OP/USD",
+    "ADA/USD",
+    "POL/USD"
+  ],
+  "starting_capital": 1000.0,
+  "fee_rate": 0.001,
+  "equity": 1024.98,
+  "peak_equity": 1027.54,
+  "positions": [],
+  "stats": {
+    "total_trades": 3,
+    "wins": 2,
+    "losses": 0,
+    "win_rate": 100.0,
+    "total_pnl_usd": 25.52,
+    "total_pnl_pct": 15.8015,
+    "total_fees": 0.9041,
+    "max_drawdown_pct": 0.0,
+    "current_equity": 1027.54,
+    "live_equity_mtm": 1024.91,
+    "live_pnl_usd": 24.91,
+    "live_pnl_pct": 2.4913,
+    "sum_wins_usd": 28.08
+  },
+  "closed_trades": [
+    {
+      "pair": "AAVE/USD",
+      "direction": "long",
+      "entry_price": 94.91,
+      "exit_price": 107.09,
+      "size_usd": 179.97,
+      "pnl_pct": 12.83,
+      "net_pnl": 22.92,
+      "reason": "TP",
+      "opened_at": "2026-04-13T14:00:12.602551+00:00",
+      "closed_at": "2026-04-15T15:30:07.453234+00:00"
+    },
+    {
+      "pair": "NEAR/USD",
+      "direction": "long",
+      "entry_price": 1.3779,
+      "exit_price": 1.4188,
+      "size_usd": 180.0,
+      "pnl_pct": 2.97,
+      "net_pnl": 5.16,
+      "reason": "TIMEOUT",
+      "opened_at": "2026-04-13T07:30:11.910959+00:00",
+      "closed_at": "2026-04-18T08:00:08.449953+00:00"
+    }
+  ]
+}

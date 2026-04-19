@@ -1,0 +1,185 @@
+[loki] 1 new Mimir entry to process
+
+[loki] MIMIR/FUTURES_SWING Gen 8000 (2026-04-17T23:47)
+  [loki] Committed: [loki] MIMIR/FUTURES_SWING Gen 8000: apply program.md update
+  [loki] Code change keywords found — classifying with Haiku...
+  [loki] Classification: {'type': 'constant', 'constant': 'MIN_TRADES', 'subkey': 'futures_swing', 'new_value': 400, 'reason': 'The report indicates that MIN_TRADES for futures_swing is not being enforced correctly, with runs passing with trade counts significantly below 400. The analysis suggests the runtime value might be closer to 395 or exhibits rounding/off-by-one behavior. Setting it to 400 aims to enforce the intended minimum.'}
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] 1 new Mimir entry to process
+
+[loki] MIMIR/FUTURES_DAY Gen 5200 (2026-04-18T02:19)
+  [loki] Committed: [loki] MIMIR/FUTURES_DAY Gen 5200: apply program.md update
+  [loki] Code change keywords found — classifying with Haiku...
+  [loki] Classification: {'type': 'structural', 'description': "The 'Current Best Strategy' YAML block within the research program's context needs to be dynamically updated to reflect the actual champion strategy. This prevents prompt poisoning where the LLM oscillates between the canonical definition and the stale 'Current Best Strategy'."}
+  [loki] Phase 2 escalation logged: The 'Current Best Strategy' YAML block within the research program's context nee
+  [loki] Structural escalated: patch 0: old string found 0x (need exactly 1)
+[loki] No new Mimir entries.
+[loki] 1 new Mimir entry to process
+
+[loki] MIMIR/PM Gen 26800 (2026-04-18T02:55)
+  [loki] Committed: [loki] MIMIR/PM Gen 26800: apply program.md update
+  [loki] No PM code change keywords — program.md only
+  [loki] inject: mist <- gen 26800 champion (cat=world_events, edge=0.069)
+  [loki] inject: kara <- gen 26800 champion (cat=world_events, edge=0.099)
+  [loki] inject: thrud <- gen 26800 champion (cat=world_events, edge=0.049)
+  [loki] Committed: [loki] MIMIR/PM Gen 26800: inject FREYA champion -> mist, kara, thrud
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] 1 new Mimir entry to process
+
+[loki] MIMIR/FUTURES_SWING Gen 8200 (2026-04-18T05:55)
+  [loki] Committed: [loki] MIMIR/FUTURES_SWING Gen 8200: apply program.md update
+  [loki] Code change keywords found — classifying with Haiku...
+  [loki] Classification: {'type': 'constant', 'constant': 'MIN_TRADES', 'subkey': 'swing', 'new_value': 400, 'reason': "The Mimir analysis indicates that the MIN_TRADES for 'futures_swing' has not been effectively updated by LOKI changes and is currently reading a value far below 400, leading to the acceptance of low-trade failure configurations. This constant needs to be set to 400 directly in the source code to enforce the intended minimum trade count for swing strategies."}
+[loki] No new Mimir entries.
+[loki] 1 new Mimir entry to process
+
+[loki] MIMIR/DAY Gen 9800 (2026-04-18T06:18)
+  [loki] Nothing staged — no commit needed.
+  [loki] Code change keywords found — classifying with Haiku...
+  [loki] Classification: {'type': 'structural', 'description': 'Implement a code-level guard in the backtesting harness to reject any YAML where the long-side `price_change_pct` operator is `gt`. This is to prevent the systematic failure mode of the small LLM inverting the long-side operator for mean-reversion long entries.'}
+  [loki] Phase 2 escalation logged: Implement a code-level guard in the backtesting harness to reject any YAML where
+  [loki] Structural escalated: patch 0: old string found 0x (need exactly 1)
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] 1 new Mimir entry to process
+
+[loki] MIMIR/PM Gen 27200 (2026-04-18T09:41)
+  [loki] Committed: [loki] MIMIR/PM Gen 27200: apply program.md update
+  [loki] No PM code change keywords — program.md only
+  [loki] inject: mist <- gen 27200 champion (cat=world_events, edge=0.069)
+  [loki] inject: kara <- gen 27200 champion (cat=world_events, edge=0.099)
+  [loki] inject: thrud <- gen 27200 champion (cat=world_events, edge=0.049)
+  [loki] Committed: [loki] MIMIR/PM Gen 27200: inject FREYA champion -> mist, kara, thrud
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] 1 new Mimir entry to process
+
+[loki] MIMIR/SWING Gen 23600 (2026-04-18T11:57)
+  [loki] Committed: [loki] MIMIR/SWING Gen 23600: apply program.md update
+  [loki] Code change keywords found — classifying with Haiku...
+  [loki] Classification: {'type': 'structural', 'description': "Implement logic to correctly identify and load the true incumbent champion strategy, even if the 'elite_0.yaml' file is outdated or corrupted. This involves comparing candidate strategies against the historically best-performing strategy (Gen 20502: Sharpe=1.6060) rather than the potentially incorrect stored champion. The system should prioritize the historically best-performing strategy as the benchmark for improvements."}
+  [loki] Phase 2 escalation logged: Implement logic to correctly identify and load the true incumbent champion strat
+  [loki] Structural escalated: patch 0: old string found 0x (need exactly 1)
+[loki] 1 new Mimir entry to process
+
+[loki] MIMIR/FUTURES_SWING Gen 8400 (2026-04-18T12:10)
+  [loki] Committed: [loki] MIMIR/FUTURES_SWING Gen 8400: apply program.md update
+  [loki] Code change keywords found — classifying with Haiku...
+  [loki] Classification: {'type': 'constant', 'constant': 'MIN_TRADES', 'subkey': 'swing', 'new_value': 400, 'reason': 'The Mimir analysis indicates that MIN_TRADES[futures_swing] should be 400. The report states that runs with fewer than 400 trades are now correctly rejected, and the current value of 45 is too low.'}
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] 1 new Mimir entry to process
+
+[loki] MIMIR/FUTURES_DAY Gen 5400 (2026-04-18T15:25)
+  [loki] Committed: [loki] MIMIR/FUTURES_DAY Gen 5400: apply program.md update
+  [loki] Code change keywords found — classifying with Haiku...
+  [loki] Classification: {'type': 'structural', 'description': "Implement a mechanism to verify the 'champion state' against the actual improvement log and ground truth YAML. If a discrepancy is found, the research program should be reset or re-initialized with the correct ground truth champion. This involves modifying the logic that determines the current champion and ensuring it's consistently updated based on verified 'new_best' events from the improvement history, not LLM-generated 'phantom' champions. Additionally, investigate and potentially adjust the LLM's prompting or fine-tuning to prevent it from defaulting to known 'attractor' configurations (poison_reject) or generating overly restrictive parameters (low_trades)."}
+  [loki] Phase 2 escalation logged: Implement a mechanism to verify the 'champion state' against the actual improvem
+  [loki] Structural escalated: no patch provided (Mimir did not generate a structural patch)
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] 1 new Mimir entry to process
+
+[loki] MIMIR/PM Gen 27600 (2026-04-18T16:28)
+  [loki] Committed: [loki] MIMIR/PM Gen 27600: apply program.md update
+  [loki] No PM code change keywords — program.md only
+  [loki] inject: mist <- gen 27600 champion (cat=world_events, edge=0.069)
+  [loki] inject: kara <- gen 27600 champion (cat=world_events, edge=0.099)
+  [loki] inject: thrud <- gen 27600 champion (cat=world_events, edge=0.049)
+  [loki] Committed: [loki] MIMIR/PM Gen 27600: inject FREYA champion -> mist, kara, thrud
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] 1 new Mimir entry to process
+
+[loki] MIMIR/SWING Gen 23932 (2026-04-18T20:43)
+  [loki] Committed: [loki] MIMIR/SWING Gen 23932: apply program.md update
+  [loki] Code change keywords found — classifying with Haiku...
+  [loki] Classification: {'type': 'structural', 'description': "Update the research program description and target values within the LLM prompt to reflect the current champion (Sharpe=1.6344, trades=54) and advance to the next test series (D7c/D8a). This involves modifying the prompt to remove stale incumbent references and 'RESTORE TARGET' instructions, and to correctly identify the current champion's performance metrics. The prompt should also emphasize exploring entry condition tuning (RSI, multi-pair, bollinger period, price_change_pct) and de-emphasize exit/risk parameter changes. The LLM's exploration strategy needs to be adjusted to encourage mutation rather than regeneration of the champion, potentially by adjusting parameters that influence mutation vs. cloning or by modifying the prompt to explicitly ask for novel improvements beyond the current champion's performance."}
+  [loki] Phase 2 escalation logged: Update the research program description and target values within the LLM prompt 
+  [loki] Structural escalated: no patch provided (Mimir did not generate a structural patch)
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] 1 pending SYN-Mimir action(s)
+[loki] 1 new Mimir entry to process
+
+[loki] MIMIR/FUTURES_SWING Gen 8754 (2026-04-18T22:30)
+  [loki] Nothing staged — no commit needed.
+  [loki] Code change keywords found — classifying with Haiku...
+  [loki] Classification: {'type': 'none'}
+[loki] No new Mimir entries.
+[loki] 1 new Mimir entry to process
+
+[loki] MIMIR/PM Gen 28000 (2026-04-18T23:13)
+  [loki] Committed: [loki] MIMIR/PM Gen 28000: apply program.md update
+  [loki] No PM code change keywords — program.md only
+  [loki] inject: mist <- gen 28000 champion (cat=world_events, edge=0.069)
+  [loki] inject: kara <- gen 28000 champion (cat=world_events, edge=0.099)
+  [loki] inject: thrud <- gen 28000 champion (cat=world_events, edge=0.049)
+  [loki] Committed: [loki] MIMIR/PM Gen 28000: inject FREYA champion -> mist, kara, thrud
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.
+[loki] No new Mimir entries.

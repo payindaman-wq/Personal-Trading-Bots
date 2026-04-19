@@ -3272,9 +3272,6 @@ gen	sharpe	win_rate	pnl_pct	trades	status	description	ts
 4722	0.6621	35.6	47.72	1042	discarded	llm	2026-04-13T20:45
 4723	2.3513	40.1	613.47	1265	discarded	crossover(A_entry+B_exit)	2026-04-13T20:47
 4724	0.0000	0.0	0.00	0	llm_yaml_parse: mapping values are not allowed here
-  in "<unicode string>", line 2, column 19:
-          period_hours: 24
-                      ^		2026-04-13T20:48
 4725	2.1373	39.9	362.03	883	discarded	perturb mo: 3->2	2026-04-13T20:50
 4726	1.6032	38.1	235.35	1177	discarded	perturb cond_long_1: 37.77->35.54	2026-04-13T20:52
 4727	-0.6843	28.3	-18.41	530	discarded	random(2conds,8pairs)	2026-04-13T20:54
@@ -3578,3 +3575,6 @@ gen	sharpe	win_rate	pnl_pct	trades	status	description	ts
 5025	2.2062	39.8	520.02	1268	discarded	perturb to: 166->139	2026-04-14T05:55
 5026	2.3513	40.1	613.47	1265	discarded	crossover(A_entry+B_exit)	2026-04-14T05:57
 5027	-1.0406	31.1	-18.28	190	low_trades	trades=190	2026-04-14T05:59
+5030	1.6954	38.2	275.61	1208	discarded	llm	2026-04-19T09:24
+5031	2.3127	39.9	599.95	1274	discarded	perturb mo: 3->3	2026-04-19T09:26
+5032	0.0000	0.0	0.00	0	dedup_reject	duplicate config	2026-04-19T09:28

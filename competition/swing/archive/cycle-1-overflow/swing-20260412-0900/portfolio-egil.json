@@ -1,0 +1,59 @@
+{
+  "bot": "egil",
+  "competition_id": "swing-20260412-0900",
+  "league": "swing",
+  "duration_hours": 168.0,
+  "started_at": "2026-04-12T09:00:01.924272+00:00",
+  "pairs": [
+    "BTC/USD",
+    "ETH/USD",
+    "SOL/USD",
+    "XRP/USD",
+    "DOGE/USD",
+    "AVAX/USD",
+    "LINK/USD",
+    "UNI/USD",
+    "AAVE/USD",
+    "NEAR/USD",
+    "APT/USD",
+    "SUI/USD",
+    "ARB/USD",
+    "OP/USD",
+    "ADA/USD",
+    "POL/USD"
+  ],
+  "starting_capital": 1000.0,
+  "fee_rate": 0.001,
+  "equity": 999.5,
+  "peak_equity": 1000.0,
+  "positions": [
+    {
+      "pair": "AAVE/USD",
+      "direction": "short",
+      "entry_price": 89.336,
+      "size_usd": 250.0,
+      "opened_at": "2026-04-12T17:00:09.967403+00:00"
+    },
+    {
+      "pair": "UNI/USD",
+      "direction": "short",
+      "entry_price": 3.0462,
+      "size_usd": 249.94,
+      "opened_at": "2026-04-12T19:00:20.318182+00:00"
+    }
+  ],
+  "stats": {
+    "total_trades": 0,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "total_pnl_usd": 0.0,
+    "total_pnl_pct": 0.0,
+    "total_fees": 0.4999,
+    "max_drawdown_pct": 0.0,
+    "current_equity": 999.5,
+    "live_equity_mtm": 995.41,
+    "live_pnl_usd": -4.59,
+    "live_pnl_pct": -0.4594
+  }
+}

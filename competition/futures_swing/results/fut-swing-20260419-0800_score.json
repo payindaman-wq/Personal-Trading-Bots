@@ -1,0 +1,80 @@
+{
+  "comp_id": "fut-swing-20260419-0800",
+  "league": "futures_swing",
+  "started_at": "2026-04-19T09:00:00+00:00",
+  "ended_at": "2026-04-19T09:00:06.976970+00:00",
+  "duration_hours": 168,
+  "scores": [
+    {
+      "bot": "andvari",
+      "final_equity": 1000.0,
+      "total_pnl_pct": 0.0,
+      "total_trades": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "atli",
+      "final_equity": 1000.0,
+      "total_pnl_pct": 0.0,
+      "total_trades": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "audun",
+      "final_equity": 1000.0,
+      "total_pnl_pct": 0.0,
+      "total_trades": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "autobotswingfutures",
+      "final_equity": 1000.0,
+      "total_pnl_pct": 0.0,
+      "total_trades": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "grimolf",
+      "final_equity": 1000.0,
+      "total_pnl_pct": 0.0,
+      "total_trades": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "hogni",
+      "final_equity": 1000.0,
+      "total_pnl_pct": 0.0,
+      "total_trades": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "regin",
+      "final_equity": 1000.0,
+      "total_pnl_pct": 0.0,
+      "total_trades": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "sigmund",
+      "final_equity": 1000.0,
+      "total_pnl_pct": 0.0,
+      "total_trades": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "sinfjotli",
+      "final_equity": 1000.0,
+      "total_pnl_pct": 0.0,
+      "total_trades": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "thorolf",
+      "final_equity": 1000.0,
+      "total_pnl_pct": 0.0,
+      "total_trades": 0,
+      "win_rate": 0.0
+    }
+  ],
+  "winner": "andvari"
+}

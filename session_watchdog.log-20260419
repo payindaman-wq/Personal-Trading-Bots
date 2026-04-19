@@ -1,0 +1,104 @@
+2026-04-18T01:00:01Z All sessions within 100KB limit — no action needed
+2026-04-18T01:00:01Z All sessions within 100KB limit — no action needed
+2026-04-18T02:00:01Z Archived agent:main:main: 119.3KB -> archive/9e8a5c51-e527-4d6b-a7fa-ddeed311f6c1.jsonl.20260418T020001.archived
+2026-04-18T02:00:01Z Updated sessions.json
+2026-04-18T02:00:01Z Restarted openclaw-gateway.service
+2026-04-18T02:00:01Z Session watchdog rotated bloated sessions:
+  agent:main:main: 119KB
+2026-04-18T02:00:01Z Archived agent:main:main: 119.3KB -> archive/9e8a5c51-e527-4d6b-a7fa-ddeed311f6c1.jsonl.20260418T020001.archived
+2026-04-18T02:00:01Z Updated sessions.json
+2026-04-18T02:00:01Z Restarted openclaw-gateway.service
+2026-04-18T02:00:01Z Session watchdog rotated bloated sessions:
+  agent:main:main: 119KB
+2026-04-18T03:00:01Z All sessions within 100KB limit — no action needed
+2026-04-18T03:00:01Z All sessions within 100KB limit — no action needed
+2026-04-18T04:00:01Z All sessions within 100KB limit — no action needed
+2026-04-18T04:00:01Z All sessions within 100KB limit — no action needed
+2026-04-18T05:00:01Z All sessions within 100KB limit — no action needed
+2026-04-18T05:00:01Z All sessions within 100KB limit — no action needed
+2026-04-18T06:00:01Z All sessions within 100KB limit — no action needed
+2026-04-18T06:00:01Z All sessions within 100KB limit — no action needed
+2026-04-18T07:00:02Z All sessions within 100KB limit — no action needed
+2026-04-18T07:00:02Z All sessions within 100KB limit — no action needed
+2026-04-18T08:00:01Z Archived agent:main:main: 113.6KB -> archive/ee93f379-4f46-4b54-9841-9a84a9d0ad28.jsonl.20260418T080001.archived
+2026-04-18T08:00:01Z Updated sessions.json
+2026-04-18T08:00:01Z Restarted openclaw-gateway.service
+2026-04-18T08:00:01Z Session watchdog rotated bloated sessions:
+  agent:main:main: 114KB
+2026-04-18T08:00:01Z Archived agent:main:main: 113.6KB -> archive/ee93f379-4f46-4b54-9841-9a84a9d0ad28.jsonl.20260418T080001.archived
+2026-04-18T08:00:01Z Updated sessions.json
+2026-04-18T08:00:01Z Restarted openclaw-gateway.service
+2026-04-18T08:00:01Z Session watchdog rotated bloated sessions:
+  agent:main:main: 114KB
+2026-04-18T09:00:01Z All sessions within 100KB limit — no action needed
+2026-04-18T09:00:01Z All sessions within 100KB limit — no action needed
+2026-04-18T10:00:02Z All sessions within 100KB limit — no action needed
+2026-04-18T10:00:02Z All sessions within 100KB limit — no action needed
+2026-04-18T11:00:01Z All sessions within 100KB limit — no action needed
+2026-04-18T11:00:01Z All sessions within 100KB limit — no action needed
+2026-04-18T12:00:01Z Archived agent:main:main: 121.6KB -> archive/5efdb0ee-9d7d-4f0b-8478-1df4335396d6.jsonl.20260418T120001.archived
+2026-04-18T12:00:01Z Updated sessions.json
+2026-04-18T12:00:02Z Restarted openclaw-gateway.service
+2026-04-18T12:00:02Z Session watchdog rotated bloated sessions:
+  agent:main:main: 122KB
+2026-04-18T12:00:01Z Archived agent:main:main: 121.6KB -> archive/5efdb0ee-9d7d-4f0b-8478-1df4335396d6.jsonl.20260418T120001.archived
+2026-04-18T12:00:01Z Updated sessions.json
+2026-04-18T12:00:02Z Restarted openclaw-gateway.service
+2026-04-18T12:00:02Z Session watchdog rotated bloated sessions:
+  agent:main:main: 122KB
+2026-04-18T13:00:01Z All sessions within 100KB limit — no action needed
+2026-04-18T13:00:01Z All sessions within 100KB limit — no action needed
+2026-04-18T14:00:02Z All sessions within 100KB limit — no action needed
+2026-04-18T14:00:02Z All sessions within 100KB limit — no action needed
+2026-04-18T15:00:01Z All sessions within 100KB limit — no action needed
+2026-04-18T15:00:01Z All sessions within 100KB limit — no action needed
+2026-04-18T16:00:01Z All sessions within 100KB limit — no action needed
+2026-04-18T16:00:01Z All sessions within 100KB limit — no action needed
+2026-04-18T17:00:01Z All sessions within 100KB limit — no action needed
+2026-04-18T17:00:01Z All sessions within 100KB limit — no action needed
+2026-04-18T18:00:01Z All sessions within 100KB limit — no action needed
+2026-04-18T18:00:01Z All sessions within 100KB limit — no action needed
+2026-04-18T19:00:01Z Archived agent:main:main: 118.4KB -> archive/62726978-3a95-4df7-b380-f9f0b07ceae0.jsonl.20260418T190001.archived
+2026-04-18T19:00:01Z Updated sessions.json
+2026-04-18T19:00:01Z Restarted openclaw-gateway.service
+2026-04-18T19:00:01Z Session watchdog rotated bloated sessions:
+  agent:main:main: 118KB
+2026-04-18T19:00:01Z Archived agent:main:main: 118.4KB -> archive/62726978-3a95-4df7-b380-f9f0b07ceae0.jsonl.20260418T190001.archived
+2026-04-18T19:00:01Z Updated sessions.json
+2026-04-18T19:00:01Z Restarted openclaw-gateway.service
+2026-04-18T19:00:01Z Session watchdog rotated bloated sessions:
+  agent:main:main: 118KB
+2026-04-18T20:00:01Z Archived agent:main:main: 160.9KB -> archive/8a6fdb2b-cbcb-4744-acc7-259ba1092fa4.jsonl.20260418T200001.archived
+2026-04-18T20:00:01Z Updated sessions.json
+2026-04-18T20:00:01Z Restarted openclaw-gateway.service
+2026-04-18T20:00:01Z Session watchdog rotated bloated sessions:
+  agent:main:main: 161KB
+2026-04-18T20:00:01Z Archived agent:main:main: 160.9KB -> archive/8a6fdb2b-cbcb-4744-acc7-259ba1092fa4.jsonl.20260418T200001.archived
+2026-04-18T20:00:01Z Updated sessions.json
+2026-04-18T20:00:01Z Restarted openclaw-gateway.service
+2026-04-18T20:00:01Z Session watchdog rotated bloated sessions:
+  agent:main:main: 161KB
+2026-04-18T21:00:02Z Archived agent:main:main: 130.1KB -> archive/f2d6914b-56ba-462e-8671-a2c27ad5bcb5.jsonl.20260418T210002.archived
+2026-04-18T21:00:02Z Updated sessions.json
+2026-04-18T21:00:02Z Restarted openclaw-gateway.service
+2026-04-18T21:00:02Z Session watchdog rotated bloated sessions:
+  agent:main:main: 130KB
+2026-04-18T21:00:02Z Archived agent:main:main: 130.1KB -> archive/f2d6914b-56ba-462e-8671-a2c27ad5bcb5.jsonl.20260418T210002.archived
+2026-04-18T21:00:02Z Updated sessions.json
+2026-04-18T21:00:02Z Restarted openclaw-gateway.service
+2026-04-18T21:00:02Z Session watchdog rotated bloated sessions:
+  agent:main:main: 130KB
+2026-04-18T22:00:01Z All sessions within 100KB limit — no action needed
+2026-04-18T22:00:01Z All sessions within 100KB limit — no action needed
+2026-04-18T23:00:02Z Archived agent:main:main: 154.0KB -> archive/37eb158c-eaaf-4ec2-9776-c744a1257886.jsonl.20260418T230002.archived
+2026-04-18T23:00:02Z Updated sessions.json
+2026-04-18T23:00:02Z Restarted openclaw-gateway.service
+2026-04-18T23:00:02Z Session watchdog rotated bloated sessions:
+  agent:main:main: 154KB
+2026-04-18T23:00:02Z Archived agent:main:main: 154.0KB -> archive/37eb158c-eaaf-4ec2-9776-c744a1257886.jsonl.20260418T230002.archived
+2026-04-18T23:00:02Z Updated sessions.json
+2026-04-18T23:00:02Z Restarted openclaw-gateway.service
+2026-04-18T23:00:02Z Session watchdog rotated bloated sessions:
+  agent:main:main: 154KB
+2026-04-19T00:00:02Z All sessions within 100KB limit — no action needed
+2026-04-19T00:00:02Z All sessions within 100KB limit — no action needed

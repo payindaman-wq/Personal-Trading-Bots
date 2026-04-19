@@ -1,0 +1,69 @@
+{
+  "bot": "helgi",
+  "competition_id": "fut-day-20260416-0910",
+  "duration_hours": 24,
+  "started_at": "2026-04-16T09:10:01.933456+00:00",
+  "pairs": [
+    "BTC/USD",
+    "ETH/USD",
+    "SOL/USD",
+    "XRP/USD",
+    "DOGE/USD",
+    "AVAX/USD",
+    "LINK/USD",
+    "UNI/USD",
+    "AAVE/USD",
+    "NEAR/USD",
+    "APT/USD",
+    "SUI/USD",
+    "ARB/USD",
+    "OP/USD",
+    "ADA/USD",
+    "POL/USD"
+  ],
+  "starting_capital": 1000.0,
+  "fee_rate": 0.0005,
+  "cash": 948.23898729436,
+  "positions": [
+    {
+      "pair": "ETH/USD",
+      "direction": "long",
+      "entry_price": 2334.97,
+      "quantity": 0.04274787,
+      "cost_basis": 49.9075,
+      "leverage": 2.0,
+      "opened_at": "2026-04-17T08:05:01.942686+00:00"
+    }
+  ],
+  "closed_trades": [
+    {
+      "pair": "UNI/USD",
+      "direction": "short",
+      "reason": "stop",
+      "entry_price": 3.345,
+      "exit_price": 3.376,
+      "pnl_usd": -1.8535,
+      "pnl_pct": -3.707,
+      "funding_cost": 0.0,
+      "leverage": 2.0,
+      "won": false,
+      "opened_at": "2026-04-17T06:15:02.270180+00:00",
+      "closed_at": "2026-04-17T06:55:02.036819+00:00"
+    }
+  ],
+  "stats": {
+    "total_trades": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "total_pnl_usd": -1.8535,
+    "total_pnl_pct": -0.1854,
+    "total_fees": 0.0,
+    "max_drawdown_pct": 0.0,
+    "current_equity": 998.15,
+    "peak_equity": 1000.0,
+    "live_equity_mtm": 950.05,
+    "live_pnl_usd": -49.95,
+    "live_pnl_pct": -4.9945
+  }
+}

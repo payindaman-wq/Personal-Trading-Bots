@@ -1,0 +1,54 @@
+{
+  "bot": "atli",
+  "competition_id": "fut-swing-20260419-0800",
+  "duration_hours": 168,
+  "started_at": "2026-04-19T08:00:01.933294+00:00",
+  "pairs": [
+    "BTC/USD",
+    "ETH/USD",
+    "SOL/USD",
+    "XRP/USD",
+    "DOGE/USD",
+    "AVAX/USD",
+    "LINK/USD",
+    "UNI/USD",
+    "AAVE/USD",
+    "NEAR/USD",
+    "APT/USD",
+    "SUI/USD",
+    "ARB/USD",
+    "OP/USD",
+    "ADA/USD",
+    "POL/USD"
+  ],
+  "starting_capital": 1000.0,
+  "fee_rate": 0.0005,
+  "cash": 850.0,
+  "positions": [
+    {
+      "pair": "AAVE/USD",
+      "direction": "long",
+      "entry_price": 92.218,
+      "quantity": 3.25316099,
+      "cost_basis": 150.0,
+      "leverage": 2.0,
+      "opened_at": "2026-04-19T08:30:09.929833+00:00"
+    }
+  ],
+  "closed_trades": [],
+  "stats": {
+    "total_trades": 0,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "total_pnl_usd": 0.0,
+    "total_pnl_pct": 0.0,
+    "total_fees": 0.0,
+    "max_drawdown_pct": 0.0,
+    "current_equity": 1000.0,
+    "peak_equity": 1000.0,
+    "live_equity_mtm": 1000.0,
+    "live_pnl_usd": 0.0,
+    "live_pnl_pct": 0.0
+  }
+}

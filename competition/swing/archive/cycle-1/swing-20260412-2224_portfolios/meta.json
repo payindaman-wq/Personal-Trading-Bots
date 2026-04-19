@@ -1,0 +1,41 @@
+{
+  "comp_id": "swing-20260412-2224",
+  "league": "swing",
+  "duration_hours": 154.5762,
+  "started_at": "2026-04-12T22:24:51.040976+00:00",
+  "pairs": [
+    "BTC/USD",
+    "ETH/USD",
+    "SOL/USD",
+    "XRP/USD",
+    "DOGE/USD",
+    "AVAX/USD",
+    "LINK/USD",
+    "UNI/USD",
+    "AAVE/USD",
+    "NEAR/USD",
+    "APT/USD",
+    "SUI/USD",
+    "ARB/USD",
+    "OP/USD",
+    "ADA/USD",
+    "POL/USD"
+  ],
+  "bots": [
+    "autobotswing",
+    "egil",
+    "gudrid",
+    "halfdan",
+    "ivar",
+    "orm",
+    "runa",
+    "solveig",
+    "thyra",
+    "valdis"
+  ],
+  "starting_capital": 1000.0,
+  "fee_rate": 0.001,
+  "status": "active",
+  "cycle": 2,
+  "sprint_in_cycle": 1
+}

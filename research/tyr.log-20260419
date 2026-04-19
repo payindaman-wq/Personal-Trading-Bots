@@ -1,0 +1,528 @@
+[tyr] 2026-04-18T00:00:01.267514+00:00 — fetching signals...
+[tyr]   F&G: {'value': 21, 'label': 'Extreme Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.33, 'stable_dom': 9.81, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.227, 'change_1d_pct': 0.007, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': 0.00453, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 106820.8, 'change_pct': 0.018, 'ok': True}
+[tyr]   L/S: {'ratio': 0.6033, 'long_pct': 37.6, 'short_pct': 62.4, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 17.1, 'label': 'Bullish', 'bullish_count': 26, 'bearish_count': 14, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['Bitcoin rises past $76,000, aiming at major breakout as oil plunges on Iran cooldown', 'Russia-linked Grinex exchange halts operations after $13 million ‘state-backed’ hack', "Every bitcoin bear market bottom since 2015 was called by a simple indicator. It still hasn't flashed"]}
+[tyr] Regime=CAUTION | F&G 21 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T00:30:01.224278+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.32, 'stable_dom': 9.84, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.227, 'change_1d_pct': 0.007, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': 0.00425, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 106691.31, 'change_pct': -0.121, 'ok': True}
+[tyr]   L/S: {'ratio': 0.601, 'long_pct': 37.5, 'short_pct': 62.5, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 17.1, 'label': 'Bullish', 'bullish_count': 26, 'bearish_count': 14, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['Bitcoin rises past $76,000, aiming at major breakout as oil plunges on Iran cooldown', 'Russia-linked Grinex exchange halts operations after $13 million ‘state-backed’ hack', "Every bitcoin bear market bottom since 2015 was called by a simple indicator. It still hasn't flashed"]}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T01:00:01.287365+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.3, 'stable_dom': 9.84, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.227, 'change_1d_pct': 0.007, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': 0.00429, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 106639.51, 'change_pct': -0.049, 'ok': True}
+[tyr]   L/S: {'ratio': 0.601, 'long_pct': 37.5, 'short_pct': 62.5, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 17.1, 'label': 'Bullish', 'bullish_count': 26, 'bearish_count': 14, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['Bitcoin rises past $76,000, aiming at major breakout as oil plunges on Iran cooldown', 'Russia-linked Grinex exchange halts operations after $13 million ‘state-backed’ hack', "Every bitcoin bear market bottom since 2015 was called by a simple indicator. It still hasn't flashed"]}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T01:30:01.896594+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.3, 'stable_dom': 9.82, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.227, 'change_1d_pct': 0.007, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': 0.00442, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 106618.14, 'change_pct': -0.02, 'ok': True}
+[tyr]   L/S: {'ratio': 0.6095, 'long_pct': 37.9, 'short_pct': 62.1, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 18.6, 'label': 'Bullish', 'bullish_count': 27, 'bearish_count': 14, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['Bitcoin rises past $76,000, aiming at major breakout as oil plunges on Iran cooldown', 'Russia-linked Grinex exchange halts operations after $13 million ‘state-backed’ hack', "Every bitcoin bear market bottom since 2015 was called by a simple indicator. It still hasn't flashed"]}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T02:00:01.571727+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.31, 'stable_dom': 9.83, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.227, 'change_1d_pct': 0.007, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': 0.00392, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 106669.17, 'change_pct': 0.048, 'ok': True}
+[tyr]   L/S: {'ratio': 0.6095, 'long_pct': 37.9, 'short_pct': 62.1, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 18.6, 'label': 'Bullish', 'bullish_count': 27, 'bearish_count': 14, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['Bitcoin rises past $76,000, aiming at major breakout as oil plunges on Iran cooldown', 'Russia-linked Grinex exchange halts operations after $13 million ‘state-backed’ hack', "Every bitcoin bear market bottom since 2015 was called by a simple indicator. It still hasn't flashed"]}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T02:30:01.797087+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.33, 'stable_dom': 9.81, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.227, 'change_1d_pct': 0.007, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': 0.0035, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 106678.36, 'change_pct': 0.009, 'ok': True}
+[tyr]   L/S: {'ratio': 0.6166, 'long_pct': 38.1, 'short_pct': 61.9, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 18.6, 'label': 'Bullish', 'bullish_count': 27, 'bearish_count': 14, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['Bitcoin rises past $76,000, aiming at major breakout as oil plunges on Iran cooldown', 'Russia-linked Grinex exchange halts operations after $13 million ‘state-backed’ hack', "Every bitcoin bear market bottom since 2015 was called by a simple indicator. It still hasn't flashed"]}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T03:00:01.726092+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.32, 'stable_dom': 9.82, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.227, 'change_1d_pct': 0.007, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': 0.00325, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 106715.26, 'change_pct': 0.035, 'ok': True}
+[tyr]   L/S: {'ratio': 0.6166, 'long_pct': 38.1, 'short_pct': 61.9, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 17.1, 'label': 'Bullish', 'bullish_count': 26, 'bearish_count': 14, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['Bitcoin rises past $76,000, aiming at major breakout as oil plunges on Iran cooldown', 'Russia-linked Grinex exchange halts operations after $13 million ‘state-backed’ hack', "Every bitcoin bear market bottom since 2015 was called by a simple indicator. It still hasn't flashed"]}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T03:30:01.529386+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.32, 'stable_dom': 9.83, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.227, 'change_1d_pct': 0.007, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': 0.00281, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 106661.68, 'change_pct': -0.05, 'ok': True}
+[tyr]   L/S: {'ratio': 0.6205, 'long_pct': 38.3, 'short_pct': 61.7, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 18.6, 'label': 'Bullish', 'bullish_count': 27, 'bearish_count': 14, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['Bitcoin rises past $76,000, aiming at major breakout as oil plunges on Iran cooldown', 'Russia-linked Grinex exchange halts operations after $13 million ‘state-backed’ hack', "Every bitcoin bear market bottom since 2015 was called by a simple indicator. It still hasn't flashed"]}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T04:00:01.815117+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.3, 'stable_dom': 9.85, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': 0.00294, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 106436.21, 'change_pct': -0.211, 'ok': True}
+[tyr]   L/S: {'ratio': 0.6205, 'long_pct': 38.3, 'short_pct': 61.7, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 18.6, 'label': 'Bullish', 'bullish_count': 26, 'bearish_count': 13, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['Bitcoin rises past $76,000, aiming at major breakout as oil plunges on Iran cooldown', 'Russia-linked Grinex exchange halts operations after $13 million ‘state-backed’ hack', 'US Senator asks for Binance monitor update amid scrutiny of Iran sanctions']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T04:30:02.069198+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.29, 'stable_dom': 9.85, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': 0.00326, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 106309.3, 'change_pct': -0.119, 'ok': True}
+[tyr]   L/S: {'ratio': 0.6184, 'long_pct': 38.2, 'short_pct': 61.8, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 17.1, 'label': 'Bullish', 'bullish_count': 25, 'bearish_count': 13, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['Bitcoin rises past $76,000, aiming at major breakout as oil plunges on Iran cooldown', 'Russia-linked Grinex exchange halts operations after $13 million ‘state-backed’ hack', 'US Senator asks for Binance monitor update amid scrutiny of Iran sanctions']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T05:00:01.481211+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.31, 'stable_dom': 9.84, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': 0.00339, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 106213.08, 'change_pct': -0.091, 'ok': True}
+[tyr]   L/S: {'ratio': 0.6184, 'long_pct': 38.2, 'short_pct': 61.8, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 18.6, 'label': 'Bullish', 'bullish_count': 26, 'bearish_count': 13, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['Bitcoin rises past $76,000, aiming at major breakout as oil plunges on Iran cooldown', 'Russia-linked Grinex exchange halts operations after $13 million ‘state-backed’ hack', 'US Senator asks for Binance monitor update amid scrutiny of Iran sanctions']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T05:30:02.081933+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.3, 'stable_dom': 9.83, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': 0.00309, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 106176.17, 'change_pct': -0.035, 'ok': True}
+[tyr]   L/S: {'ratio': 0.6223, 'long_pct': 38.4, 'short_pct': 61.6, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 21.4, 'label': 'Very Bullish', 'bullish_count': 26, 'bearish_count': 11, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['Bitcoin rises past $76,000, aiming at major breakout as oil plunges on Iran cooldown', 'Russia-linked Grinex exchange halts operations after $13 million ‘state-backed’ hack', 'US Senator asks for Binance monitor update amid scrutiny of Iran sanctions']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T06:00:01.552271+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.3, 'stable_dom': 9.84, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': 0.00281, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 106182.42, 'change_pct': 0.006, 'ok': True}
+[tyr]   L/S: {'ratio': 0.6223, 'long_pct': 38.4, 'short_pct': 61.6, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 21.4, 'label': 'Very Bullish', 'bullish_count': 26, 'bearish_count': 11, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['Bitcoin rises past $76,000, aiming at major breakout as oil plunges on Iran cooldown', 'Russia-linked Grinex exchange halts operations after $13 million ‘state-backed’ hack', 'US Senator asks for Binance monitor update amid scrutiny of Iran sanctions']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T06:30:01.966003+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.3, 'stable_dom': 9.84, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': 0.00231, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 106345.61, 'change_pct': 0.154, 'ok': True}
+[tyr]   L/S: {'ratio': 0.6247, 'long_pct': 38.5, 'short_pct': 61.6, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 21.4, 'label': 'Very Bullish', 'bullish_count': 26, 'bearish_count': 11, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['Bitcoin rises past $76,000, aiming at major breakout as oil plunges on Iran cooldown', 'Russia-linked Grinex exchange halts operations after $13 million ‘state-backed’ hack', 'US Senator asks for Binance monitor update amid scrutiny of Iran sanctions']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T07:00:01.959315+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.28, 'stable_dom': 9.84, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': 0.00261, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 106358.91, 'change_pct': 0.013, 'ok': True}
+[tyr]   L/S: {'ratio': 0.6247, 'long_pct': 38.5, 'short_pct': 61.6, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 21.4, 'label': 'Very Bullish', 'bullish_count': 26, 'bearish_count': 11, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['Bitcoin rises past $76,000, aiming at major breakout as oil plunges on Iran cooldown', 'Russia-linked Grinex exchange halts operations after $13 million ‘state-backed’ hack', 'US Senator asks for Binance monitor update amid scrutiny of Iran sanctions']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T07:30:01.876086+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.28, 'stable_dom': 9.84, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': 0.00245, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 106360.95, 'change_pct': 0.002, 'ok': True}
+[tyr]   L/S: {'ratio': 0.6289, 'long_pct': 38.6, 'short_pct': 61.4, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 21.4, 'label': 'Very Bullish', 'bullish_count': 26, 'bearish_count': 11, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['Bitcoin rises past $76,000, aiming at major breakout as oil plunges on Iran cooldown', 'Russia-linked Grinex exchange halts operations after $13 million ‘state-backed’ hack', 'US Senator asks for Binance monitor update amid scrutiny of Iran sanctions']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T08:00:01.398810+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.25, 'stable_dom': 9.86, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': 0.00215, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 105913.78, 'change_pct': -0.42, 'ok': True}
+[tyr]   L/S: {'ratio': 0.6289, 'long_pct': 38.6, 'short_pct': 61.4, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 20.0, 'label': 'Bullish', 'bullish_count': 26, 'bearish_count': 12, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['Bitcoin rises past $76,000, aiming at major breakout as oil plunges on Iran cooldown', 'Russia-linked Grinex exchange halts operations after $13 million ‘state-backed’ hack', 'SEC charges Donald Basile in $16M crypto fraud tied to ‘insured’ token']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T08:30:01.651644+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.28, 'stable_dom': 9.88, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': 0.00137, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 105588.7, 'change_pct': -0.307, 'ok': True}
+[tyr]   L/S: {'ratio': 0.6308, 'long_pct': 38.7, 'short_pct': 61.3, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 17.1, 'label': 'Bullish', 'bullish_count': 25, 'bearish_count': 13, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['Bitcoin rises past $76,000, aiming at major breakout as oil plunges on Iran cooldown', 'Russia-linked Grinex exchange halts operations after $13 million ‘state-backed’ hack', 'SEC charges Donald Basile in $16M crypto fraud tied to ‘insured’ token']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T09:00:01.402954+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.34, 'stable_dom': 9.9, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': 0.00114, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 105314.7, 'change_pct': -0.259, 'ok': True}
+[tyr]   L/S: {'ratio': 0.6308, 'long_pct': 38.7, 'short_pct': 61.3, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 18.6, 'label': 'Bullish', 'bullish_count': 26, 'bearish_count': 13, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['Bitcoin rises past $76,000, aiming at major breakout as oil plunges on Iran cooldown', 'Russia-linked Grinex exchange halts operations after $13 million ‘state-backed’ hack', 'SEC charges Donald Basile in $16M crypto fraud tied to ‘insured’ token']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T09:30:01.905306+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.33, 'stable_dom': 9.92, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': 0.00093, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 104509.25, 'change_pct': -0.765, 'ok': True}
+[tyr]   L/S: {'ratio': 0.6372, 'long_pct': 38.9, 'short_pct': 61.1, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 18.6, 'label': 'Bullish', 'bullish_count': 26, 'bearish_count': 13, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['Bitcoin rises past $76,000, aiming at major breakout as oil plunges on Iran cooldown', 'Russia-linked Grinex exchange halts operations after $13 million ‘state-backed’ hack', 'SEC charges Donald Basile in $16M crypto fraud tied to ‘insured’ token']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T10:00:01.977378+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.36, 'stable_dom': 9.91, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': 0.00065, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 104330.22, 'change_pct': -0.171, 'ok': True}
+[tyr]   L/S: {'ratio': 0.6372, 'long_pct': 38.9, 'short_pct': 61.1, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 18.6, 'label': 'Bullish', 'bullish_count': 26, 'bearish_count': 13, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['Bitcoin rises past $76,000, aiming at major breakout as oil plunges on Iran cooldown', 'Russia-linked Grinex exchange halts operations after $13 million ‘state-backed’ hack', 'SEC charges Donald Basile in $16M crypto fraud tied to ‘insured’ token']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T10:30:02.118556+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.35, 'stable_dom': 9.95, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': 0.00022, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 103823.65, 'change_pct': -0.486, 'ok': True}
+[tyr]   L/S: {'ratio': 0.6562, 'long_pct': 39.6, 'short_pct': 60.4, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 18.6, 'label': 'Bullish', 'bullish_count': 26, 'bearish_count': 13, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['Bitcoin rises past $76,000, aiming at major breakout as oil plunges on Iran cooldown', 'Russia-linked Grinex exchange halts operations after $13 million ‘state-backed’ hack', 'SEC charges Donald Basile in $16M crypto fraud tied to ‘insured’ token']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T11:00:01.545685+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.32, 'stable_dom': 9.96, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': 4e-05, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 103786.56, 'change_pct': -0.036, 'ok': True}
+[tyr]   L/S: {'ratio': 0.6562, 'long_pct': 39.6, 'short_pct': 60.4, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 18.6, 'label': 'Bullish', 'bullish_count': 26, 'bearish_count': 13, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['Bitcoin rises past $76,000, aiming at major breakout as oil plunges on Iran cooldown', 'Russia-linked Grinex exchange halts operations after $13 million ‘state-backed’ hack', 'SEC charges Donald Basile in $16M crypto fraud tied to ‘insured’ token']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T11:30:02.079546+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.32, 'stable_dom': 9.98, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': 0.00041, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 103794.22, 'change_pct': 0.007, 'ok': True}
+[tyr]   L/S: {'ratio': 0.6628, 'long_pct': 39.9, 'short_pct': 60.1, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 18.6, 'label': 'Bullish', 'bullish_count': 26, 'bearish_count': 13, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['Bitcoin rises past $76,000, aiming at major breakout as oil plunges on Iran cooldown', 'Russia-linked Grinex exchange halts operations after $13 million ‘state-backed’ hack', 'SEC charges Donald Basile in $16M crypto fraud tied to ‘insured’ token']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T12:00:01.807408+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.33, 'stable_dom': 10.0, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': 0.00036, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 102669.14, 'change_pct': -1.084, 'ok': True}
+[tyr]   L/S: {'ratio': 0.6628, 'long_pct': 39.9, 'short_pct': 60.1, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 21.4, 'label': 'Very Bullish', 'bullish_count': 27, 'bearish_count': 12, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['Bitcoin rises past $76,000, aiming at major breakout as oil plunges on Iran cooldown', 'SEC charges Donald Basile in $16M crypto fraud tied to ‘insured’ token', 'US Senator asks for Binance monitor update amid scrutiny of Iran sanctions']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T12:30:02.181435+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.4, 'stable_dom': 9.98, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': -0.0004, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 102185.64, 'change_pct': -0.471, 'ok': True}
+[tyr]   L/S: {'ratio': 0.6883, 'long_pct': 40.8, 'short_pct': 59.2, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 24.3, 'label': 'Very Bullish', 'bullish_count': 29, 'bearish_count': 12, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['Bitcoin rises past $76,000, aiming at major breakout as oil plunges on Iran cooldown', 'SEC charges Donald Basile in $16M crypto fraud tied to ‘insured’ token', 'US Senator asks for Binance monitor update amid scrutiny of Iran sanctions']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T13:00:01.434812+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.43, 'stable_dom': 9.97, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': -0.00046, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 102142.65, 'change_pct': -0.042, 'ok': True}
+[tyr]   L/S: {'ratio': 0.6883, 'long_pct': 40.8, 'short_pct': 59.2, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 27.1, 'label': 'Very Bullish', 'bullish_count': 30, 'bearish_count': 11, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['Bitcoin rises past $76,000, aiming at major breakout as oil plunges on Iran cooldown', 'SEC charges Donald Basile in $16M crypto fraud tied to ‘insured’ token', 'US Senator asks for Binance monitor update amid scrutiny of Iran sanctions']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T13:30:01.884018+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.4, 'stable_dom': 9.98, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': -0.00072, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 102146.19, 'change_pct': 0.003, 'ok': True}
+[tyr]   L/S: {'ratio': 0.7212, 'long_pct': 41.9, 'short_pct': 58.1, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 22.9, 'label': 'Very Bullish', 'bullish_count': 29, 'bearish_count': 13, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['Bitcoin rises past $76,000, aiming at major breakout as oil plunges on Iran cooldown', 'SEC charges Donald Basile in $16M crypto fraud tied to ‘insured’ token', 'US Senator asks for Binance monitor update amid scrutiny of Iran sanctions']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T14:00:02.023557+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.4, 'stable_dom': 9.98, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': -5e-05, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 101827.75, 'change_pct': -0.312, 'ok': True}
+[tyr]   L/S: {'ratio': 0.7212, 'long_pct': 41.9, 'short_pct': 58.1, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 21.4, 'label': 'Very Bullish', 'bullish_count': 28, 'bearish_count': 13, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['Bitcoin rises past $76,000, aiming at major breakout as oil plunges on Iran cooldown', 'SEC charges Donald Basile in $16M crypto fraud tied to ‘insured’ token', 'US Senator asks for Binance monitor update amid scrutiny of Iran sanctions']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T14:30:02.002175+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.42, 'stable_dom': 9.99, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': 6e-05, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 101702.63, 'change_pct': -0.123, 'ok': True}
+[tyr]   L/S: {'ratio': 0.7346, 'long_pct': 42.4, 'short_pct': 57.6, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 21.4, 'label': 'Very Bullish', 'bullish_count': 28, 'bearish_count': 13, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['Bitcoin rises past $76,000, aiming at major breakout as oil plunges on Iran cooldown', 'SEC charges Donald Basile in $16M crypto fraud tied to ‘insured’ token', 'US Senator asks for Binance monitor update amid scrutiny of Iran sanctions']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T15:00:01.237746+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.43, 'stable_dom': 9.98, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': 0.00024, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 101819.22, 'change_pct': 0.115, 'ok': True}
+[tyr]   L/S: {'ratio': 0.7346, 'long_pct': 42.4, 'short_pct': 57.6, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 21.4, 'label': 'Very Bullish', 'bullish_count': 27, 'bearish_count': 12, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['Bitcoin rises past $76,000, aiming at major breakout as oil plunges on Iran cooldown', 'SEC charges Donald Basile in $16M crypto fraud tied to ‘insured’ token', 'US Senator asks for Binance monitor update amid scrutiny of Iran sanctions']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T15:30:02.151915+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.42, 'stable_dom': 9.98, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': -8e-05, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 101472.78, 'change_pct': -0.34, 'ok': True}
+[tyr]   L/S: {'ratio': 0.7578, 'long_pct': 43.1, 'short_pct': 56.9, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 21.4, 'label': 'Very Bullish', 'bullish_count': 27, 'bearish_count': 12, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['Bitcoin rises past $76,000, aiming at major breakout as oil plunges on Iran cooldown', 'SEC charges Donald Basile in $16M crypto fraud tied to ‘insured’ token', 'US Senator asks for Binance monitor update amid scrutiny of Iran sanctions']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T16:00:01.263674+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.4, 'stable_dom': 9.99, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': -0.00062, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 101308.97, 'change_pct': -0.161, 'ok': True}
+[tyr]   L/S: {'ratio': 0.7578, 'long_pct': 43.1, 'short_pct': 56.9, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 21.4, 'label': 'Very Bullish', 'bullish_count': 27, 'bearish_count': 12, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['Bitcoin rises past $76,000, aiming at major breakout as oil plunges on Iran cooldown', 'SEC charges Donald Basile in $16M crypto fraud tied to ‘insured’ token', 'US Senator asks for Binance monitor update amid scrutiny of Iran sanctions']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T16:30:01.708613+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.37, 'stable_dom': 9.99, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': -0.00066, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 100352.54, 'change_pct': -0.944, 'ok': True}
+[tyr]   L/S: {'ratio': 0.7649, 'long_pct': 43.3, 'short_pct': 56.7, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 21.4, 'label': 'Very Bullish', 'bullish_count': 27, 'bearish_count': 12, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['Bitcoin rises past $76,000, aiming at major breakout as oil plunges on Iran cooldown', 'SEC charges Donald Basile in $16M crypto fraud tied to ‘insured’ token', 'US Senator asks for Binance monitor update amid scrutiny of Iran sanctions']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T17:00:01.746334+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.38, 'stable_dom': 10.01, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': -0.00134, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 100168.04, 'change_pct': -0.184, 'ok': True}
+[tyr]   L/S: {'ratio': 0.7649, 'long_pct': 43.3, 'short_pct': 56.7, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 20.0, 'label': 'Bullish', 'bullish_count': 24, 'bearish_count': 10, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['SEC charges Donald Basile in $16M crypto fraud tied to ‘insured’ token', 'US Senator asks for Binance monitor update amid scrutiny of Iran sanctions', 'Crypto market liquidations hit $820M as Bitcoin price taps $78K']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T17:30:01.223644+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.37, 'stable_dom': 10.02, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': -0.00121, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 99910.9, 'change_pct': -0.257, 'ok': True}
+[tyr]   L/S: {'ratio': 0.7587, 'long_pct': 43.1, 'short_pct': 56.9, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 18.6, 'label': 'Bullish', 'bullish_count': 23, 'bearish_count': 10, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['SEC charges Donald Basile in $16M crypto fraud tied to ‘insured’ token', 'US Senator asks for Binance monitor update amid scrutiny of Iran sanctions', 'Crypto market liquidations hit $820M as Bitcoin price taps $78K']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T18:00:01.189546+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.36, 'stable_dom': 10.01, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': -0.00137, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 99673.07, 'change_pct': -0.238, 'ok': True}
+[tyr]   L/S: {'ratio': 0.7587, 'long_pct': 43.1, 'short_pct': 56.9, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 18.6, 'label': 'Bullish', 'bullish_count': 23, 'bearish_count': 10, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['SEC charges Donald Basile in $16M crypto fraud tied to ‘insured’ token', 'US Senator asks for Binance monitor update amid scrutiny of Iran sanctions', 'Crypto market liquidations hit $820M as Bitcoin price taps $78K']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T18:30:02.051753+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.35, 'stable_dom': 10.04, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': -0.00159, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 99212.34, 'change_pct': -0.462, 'ok': True}
+[tyr]   L/S: {'ratio': 0.7674, 'long_pct': 43.4, 'short_pct': 56.6, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 18.6, 'label': 'Bullish', 'bullish_count': 23, 'bearish_count': 10, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['SEC charges Donald Basile in $16M crypto fraud tied to ‘insured’ token', 'US Senator asks for Binance monitor update amid scrutiny of Iran sanctions', 'Crypto market liquidations hit $820M as Bitcoin price taps $78K']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T19:00:01.173885+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.41, 'stable_dom': 10.05, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': -0.00242, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 99064.39, 'change_pct': -0.149, 'ok': True}
+[tyr]   L/S: {'ratio': 0.7674, 'long_pct': 43.4, 'short_pct': 56.6, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 20.0, 'label': 'Bullish', 'bullish_count': 23, 'bearish_count': 9, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['SEC charges Donald Basile in $16M crypto fraud tied to ‘insured’ token', 'US Senator asks for Binance monitor update amid scrutiny of Iran sanctions', 'Crypto market liquidations hit $820M as Bitcoin price taps $78K']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T19:30:01.440141+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.41, 'stable_dom': 10.05, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': -0.00207, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 98890.7, 'change_pct': -0.175, 'ok': True}
+[tyr]   L/S: {'ratio': 0.7627, 'long_pct': 43.3, 'short_pct': 56.7, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 20.0, 'label': 'Bullish', 'bullish_count': 23, 'bearish_count': 9, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['SEC charges Donald Basile in $16M crypto fraud tied to ‘insured’ token', 'US Senator asks for Binance monitor update amid scrutiny of Iran sanctions', 'Crypto market liquidations hit $820M as Bitcoin price taps $78K']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T20:00:01.493623+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.41, 'stable_dom': 10.05, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': -0.00192, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 98888.1, 'change_pct': -0.003, 'ok': True}
+[tyr]   L/S: {'ratio': 0.7627, 'long_pct': 43.3, 'short_pct': 56.7, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 20.0, 'label': 'Bullish', 'bullish_count': 23, 'bearish_count': 9, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['SEC charges Donald Basile in $16M crypto fraud tied to ‘insured’ token', 'US Senator asks for Binance monitor update amid scrutiny of Iran sanctions', 'Crypto market liquidations hit $820M as Bitcoin price taps $78K']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T20:30:01.606603+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.43, 'stable_dom': 10.05, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': -0.00136, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 98805.72, 'change_pct': -0.083, 'ok': True}
+[tyr]   L/S: {'ratio': 0.7705, 'long_pct': 43.5, 'short_pct': 56.5, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 15.7, 'label': 'Bullish', 'bullish_count': 20, 'bearish_count': 9, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ['SEC charges Donald Basile in $16M crypto fraud tied to ‘insured’ token', 'US Senator asks for Binance monitor update amid scrutiny of Iran sanctions', 'Crypto market liquidations hit $820M as Bitcoin price taps $78K']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T21:00:02.094485+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.43, 'stable_dom': 10.03, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': -0.00031, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 98741.72, 'change_pct': -0.065, 'ok': True}
+[tyr]   L/S: {'ratio': 0.7705, 'long_pct': 43.5, 'short_pct': 56.5, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 20.0, 'label': 'Bullish', 'bullish_count': 22, 'bearish_count': 8, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ["2026's biggest crypto exploit: Kelp DAO hit for $292 million with wrapped ether stranded across 20 chains", 'SEC charges Donald Basile in $16M crypto fraud tied to ‘insured’ token', 'US Senator asks for Binance monitor update amid scrutiny of Iran sanctions']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T21:30:01.780264+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.4, 'stable_dom': 10.05, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': 0.00034, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 98675.68, 'change_pct': -0.067, 'ok': True}
+[tyr]   L/S: {'ratio': 0.7813, 'long_pct': 43.9, 'short_pct': 56.1, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 18.6, 'label': 'Bullish', 'bullish_count': 21, 'bearish_count': 8, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ["2026's biggest crypto exploit: $292 million gets drained from Kelp DAO with wrapped ether stranded across 20 chains", 'SEC charges Donald Basile in $16M crypto fraud tied to ‘insured’ token', 'US Senator asks for Binance monitor update amid scrutiny of Iran sanctions']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T22:00:01.405380+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.41, 'stable_dom': 10.03, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': 0.00113, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 98680.73, 'change_pct': 0.005, 'ok': True}
+[tyr]   L/S: {'ratio': 0.7813, 'long_pct': 43.9, 'short_pct': 56.1, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 18.6, 'label': 'Bullish', 'bullish_count': 21, 'bearish_count': 8, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ["2026's biggest crypto exploit: $292 million gets drained from Kelp DAO with wrapped ether stranded across 20 chains", 'SEC charges Donald Basile in $16M crypto fraud tied to ‘insured’ token', 'US Senator asks for Binance monitor update amid scrutiny of Iran sanctions']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T22:30:02.029791+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.41, 'stable_dom': 10.04, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': 0.00143, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 98710.13, 'change_pct': 0.03, 'ok': True}
+[tyr]   L/S: {'ratio': 0.7864, 'long_pct': 44.0, 'short_pct': 56.0, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 17.1, 'label': 'Bullish', 'bullish_count': 21, 'bearish_count': 9, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ["2026's biggest crypto exploit: $292 million gets drained from Kelp DAO with wrapped ether stranded across 20 chains", 'SEC charges Donald Basile in $16M crypto fraud tied to ‘insured’ token', 'US Senator asks for Binance monitor update amid scrutiny of Iran sanctions']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T23:00:02.174028+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.42, 'stable_dom': 10.03, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': 0.00137, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 98499.3, 'change_pct': -0.214, 'ok': True}
+[tyr]   L/S: {'ratio': 0.7864, 'long_pct': 44.0, 'short_pct': 56.0, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 14.3, 'label': 'Bullish', 'bullish_count': 20, 'bearish_count': 10, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ["2026's biggest crypto exploit: $292 million gets drained from Kelp DAO with wrapped ether stranded across 20 chains", 'Kelp restaking platform exploited, $293M drained in attack', 'SEC charges Donald Basile in $16M crypto fraud tied to ‘insured’ token']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
+[tyr] 2026-04-18T23:30:01.678127+00:00 — fetching signals...
+[tyr]   F&G: {'value': 26, 'label': 'Fear', 'ok': True}
+[tyr]   CG_GLOBAL: {'btc_dom': 57.43, 'stable_dom': 10.03, 'ok': True}
+[tyr]   VIX: {'value': 17.48, 'label': 'Normal', 'ok': True}
+[tyr]   DXY: {'value': 98.1, 'change_1d_pct': -0.122, 'label': 'Stable', 'ok': True}
+[tyr]   FUNDING: {'avg_pct': 0.0012, 'label': 'Neutral', 'pair_count': 16, 'ok': True}
+[tyr]   OI: {'value': 98340.18, 'change_pct': -0.162, 'ok': True}
+[tyr]   L/S: {'ratio': 0.7924, 'long_pct': 44.2, 'short_pct': 55.8, 'label': 'Balanced', 'ok': True}
+[tyr]   NEWS: {'ok': True, 'net_score': 14.3, 'label': 'Bullish', 'bullish_count': 20, 'bearish_count': 10, 'total_headlines': 70, 'sources': ['CoinDesk', 'Cointelegraph', 'Decrypt', 'Finnhub'], 'bearish_headlines': ["2026's biggest crypto exploit: $292 million gets drained from Kelp DAO with wrapped ether stranded across 20 chains", 'Kelp restaking platform exploited, $293M drained in attack', 'SEC charges Donald Basile in $16M crypto fraud tied to ‘insured’ token']}
+[tyr] Regime=CAUTION | F&G 26 (Fear) Reduce position sizes to 50%.
+[tyr] Saved → /root/.openclaw/workspace/research/tyr_state.json
