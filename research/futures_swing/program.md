@@ -1,27 +1,12 @@
 ```markdown
 # ODIN Research Program — FUTURES SWING
-# Version: Post-Gen-5257 | Revised by MIMIR (Gen 5257 review)
+# Version: Post-Gen-5515 | Revised by MIMIR (Gen 5515 review)
 #
 # ══════════════════════════════════════════════════════════════════
-# STOP — READ THIS FIRST
+# CHAMPION YAML — COPY THIS, CHANGE EXACTLY ONE VALUE, SUBMIT
 # ══════════════════════════════════════════════════════════════════
 #
-# LOOP STATUS: RUNNING (Gen 5257 context — loop is active)
-# CHAMPION:    sharpe=2.3513 | trades=1265 | win_rate=~40%
-#              Source: elite_0.yaml (canonical). Do NOT use log estimates.
-# BUG-2:       YAML persistence may be broken. In-memory champion may be
-#              higher than 2.3513. Inspect elite_0.yaml before trusting
-#              [new_best] / [discarded] labels.
-# PAIR AUDIT:  APT, SUI, ARB, OP may lack full 2yr data → Sharpe may be
-#              inflated. Do not deploy live until Z4 is complete.
-# LIVE DATA:   Zero live sprint results. Backtest overfitting risk unknown.
-#
-# ══════════════════════════════════════════════════════════════════
-# PROPOSE EXACTLY ONE YAML CHANGE PER GENERATION — TEMPLATE BELOW
-# ══════════════════════════════════════════════════════════════════
-#
-# Copy this YAML, change EXACTLY ONE parameter, submit.
-# Do NOT change two parameters. Do NOT reproduce this unchanged.
+# Sharpe=2.3513 | Trades=1265 | Win=40.1% | Source: elite_0.yaml
 
 name: crossover
 style: swing_momentum
@@ -56,7 +41,7 @@ entry:
       operator: eq
       value: up
     - indicator: rsi
-      period_hours: 22        # CONFIRMED champion value — do NOT change to 24
+      period_hours: 24        # CANONICAL value from elite_0.yaml — do NOT change to 22
       operator: lt
       value: 37.77
   short:
@@ -66,7 +51,7 @@ entry:
       operator: eq
       value: down
     - indicator: rsi
-      period_hours: 22        # CONFIRMED champion value — do NOT change to 24
+      period_hours: 24        # CANONICAL value from elite_0.yaml — do NOT change to 22
       operator: gt
       value: 60
 exit:
@@ -79,93 +64,107 @@ risk:
   stop_if_down_pct: 18
 
 # ══════════════════════════════════════════════════════════════════
-# RULES — CHECK ALL BEFORE SUBMITTING
+# RULES — VERIFY BEFORE SUBMITTING
 # ══════════════════════════════════════════════════════════════════
 #
 # RULE 1: Change EXACTLY ONE parameter. One. Not two. Not zero.
-# RULE 2: Result must produce 400–3000 trades. If your change is likely
-#         to drop below 400 trades, pick a different parameter.
-# RULE 3: Do NOT reproduce the champion YAML unchanged → [discarded].
-# RULE 4: Do NOT propose a configuration you have proposed before → [dedup_reject].
-# RULE 5: Do NOT propose any of these known-bad signatures (trades, sharpe):
+# RULE 2: Your result MUST produce 400–3000 trades. If uncertain, pick
+#         a different parameter. Small RSI or stop_loss changes are risky.
+# RULE 3: Do NOT submit the champion YAML unchanged → [discarded].
+# RULE 4: Do NOT repeat a previously proposed configuration → [dedup_reject].
+# RULE 5: Do NOT recreate these known-bad signatures (trades, sharpe):
 #           (190t, -1.0517), (185t, -0.7900), (28t, -9.018),
 #           (174t, -1.9619), (224t, -1.7297), (178t, -0.8033),
 #           (182t, -1.8625), (158t, -2.0796), (239t, -2.4141),
 #           (397t, -0.5405), (461t, -0.4605), (18t, -14.3473),
-#           (190t, -1.0406).
-#         If your change would recreate one of these, pick a different parameter.
-# RULE 6: Prioritize the HIGH-VALUE parameters listed below.
+#           (190t, -1.0406), (190t, -1.6316).
+#         If your change would produce ~190 trades, do NOT submit it.
+# RULE 6: Use the HIGH-VALUE parameter grid below. Try untested values.
 #
 # ══════════════════════════════════════════════════════════════════
-# HIGH-VALUE PARAMETERS — CHANGE THESE FIRST
+# HIGH-VALUE PARAMETERS — PRIORITY ORDER
 # ══════════════════════════════════════════════════════════════════
 #
-# These parameters have the strongest improvement history.
-# Try them in grid order. Do not skip ranges.
+# PRIORITY 1 — try these first (strongest improvement history):
 #
-# take_profit_pct:    try 4.50, 4.60, 4.70, 4.80, 4.90, 5.00,
-#                         5.10, 5.20, 5.30, 5.40, 5.50
-#                     (current: 4.65 — try adjacent values first)
+# take_profit_pct:   [4.50, 4.55, 4.60, 4.70, 4.75, 4.80, 4.85,
+#                     4.90, 4.95, 5.00, 5.10, 5.20, 5.30, 5.40, 5.50]
+#                    (current=4.65; try 4.70, 4.60, 4.80, 4.55 first)
 #
-# stop_loss_pct:      try 1.70, 1.75, 1.80, 1.85, 1.90, 1.95,
-#                         2.00, 2.05, 2.10, 2.15, 2.20
-#                     (current: 1.92 — try adjacent values first)
+# stop_loss_pct:     [1.70, 1.75, 1.80, 1.85, 1.90, 1.95, 2.00,
+#                     2.05, 2.10, 2.15, 2.20, 2.25, 2.30]
+#                    (current=1.92; try 1.95, 1.90, 2.00, 1.85 first)
+#                    WARNING: values < 1.70 → ~190 trades → [low_trades]
 #
-# timeout_hours:      try 120, 128, 136, 144, 152, 160, 168,
-#                         176, 184, 192, 200
-#                     (current: 166 — try 160, 168, 152, 176 first)
+# timeout_hours:     [120, 128, 136, 144, 152, 156, 160, 164, 168,
+#                     172, 176, 180, 184, 192, 200]
+#                    (current=166; try 160, 168, 172, 164 first)
 #
-# rsi_long_threshold: try 34.0, 34.5, 35.0, 35.5, 36.0, 36.5,
-#                         37.0, 37.5, 38.0, 38.5, 39.0, 39.5,
-#                         40.0, 40.5, 41.0, 41.5, 42.0
-#                     (current: 37.77 — try 37.0, 38.0, 36.5 first)
+# rsi_long_threshold (value under "lt"): 
+#                    [34.0, 34.5, 35.0, 35.5, 36.0, 36.5, 37.0,
+#                     37.5, 38.0, 38.5, 39.0, 39.5, 40.0, 40.5,
+#                     41.0, 41.5, 42.0]
+#                    (current=37.77; try 38.0, 37.5, 38.5, 37.0 first)
+#                    WARNING: values > 45 or < 30 → degenerate attractor
 #
-# rsi_period_hours:   try 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28
-#                     (current: 22 — confirmed champion value)
+# PRIORITY 2 — try after Priority 1 exhausted:
 #
-# LOW-PRIORITY (change only if all high-value ranges exhausted):
-#   trend_period_hours: 36, 42, 48, 54, 60
-#   rsi_short_threshold: 58, 59, 60, 61, 62, 63, 64
-#   size_pct: 20, 22, 25, 28, 30
-#   max_open: 2, 3, 4
+# rsi_period_hours:  [18, 19, 20, 21, 22, 23, 25, 26, 27, 28]
+#                    (current=24; do NOT try 24 — that is the champion)
+#                    WARNING: values < 18 or > 30 → low trades
+#
+# rsi_short_threshold (value under "gt"):
+#                    [57, 58, 59, 61, 62, 63, 64, 65]
+#                    (current=60; try 59, 61, 58, 62 first)
+#
+# PRIORITY 3 — low priority, try last:
+#
+# trend_period_hours: [36, 42, 54, 60, 72]  (current=48)
+# size_pct:          [20, 22, 28, 30]        (current=25)
+# max_open:          [2, 4]                  (current=3)
+# pause_if_down_pct: [6, 7, 9, 10]          (current=8)
+# stop_if_down_pct:  [15, 16, 17, 20, 22]   (current=18)
 #
 # ══════════════════════════════════════════════════════════════════
-# KNOWN FAILURES — DO NOT REPEAT
+# KNOWN FAILURES — DO NOT PROPOSE
 # ══════════════════════════════════════════════════════════════════
 #
-# These consistently produce bad results. Do not propose them:
-#   - Very large timeout_hours (>210) → low trades, rejected
-#   - Very small stop_loss_pct (<1.50) → low trades or degenerate Sharpe
-#   - rsi_long_threshold > 45 or < 30 → degenerate attractor zone
-#   - rsi_period_hours < 18 or > 30 → low trades or attractor
-#   - Removing pairs → changes trade count unpredictably, avoid
-#   - Adding new pairs → may lack 2yr data, invalid backtest
+# - stop_loss_pct < 1.70 → ~190 trades → automatic reject
+# - rsi_long_threshold > 45 or < 30 → degenerate Sharpe
+# - rsi_period_hours < 18 or > 30 → low trades
+# - timeout_hours > 210 → low trades
+# - Adding or removing pairs → invalid (data gaps / unpredictable trade count)
+# - rsi_period_hours = 22 → was a previous tested value, avoid
 #
 # ══════════════════════════════════════════════════════════════════
 # INFRASTRUCTURE STATUS (human operator — action required)
 # ══════════════════════════════════════════════════════════════════
 #
-# [BUG-2] YAML persistence broken. In-memory champion may be ~2.3680
-#   (Gen 9000 evidence from prior run context). elite_0.yaml shows 2.3513.
+# [CRITICAL] rsi_period_hours corrected to 24 (was erroneously listed as 22
+#   in previous program versions). The elite_0.yaml canonical value is 24.
+#   Prior program misdirected the LLM. All generation output from programs
+#   specifying 22 may have been mutating from wrong base.
+#
+# [BUG-2] YAML persistence broken. elite_0.yaml may lag in-memory champion.
 #   Fix: ensure persistence call writes elite_0.yaml on every acceptance.
-#   Test: submit above-champion YAML, confirm file timestamp updates.
 #
 # [BUG-4] Clone detection is post-backtest (35% dedup_reject rate).
 #   Fix: pre-backtest SHA-256 hash of proposed YAML vs all prior accepted.
 #
-# [BUG-5] Poison_reject blocklist incomplete — (190t, -1.0406) still appearing.
-#   Fix: add all RULE 5 signatures to blocklist with hash-based matching.
+# [BUG-5] Poison attractor (~190 trades, negative Sharpe) still appearing.
+#   Fix: pre-backtest trade-count estimation gate; block known-bad signatures.
 #
-# [Z4] Pair audit overdue. Confirm APT/SUI/ARB/OP have ≥17,520 candles.
-#   Remove any pair with incomplete data before live deployment.
+# [Z4] REQUIRED before live: confirm APT/SUI/ARB/OP have ≥17,520 candles.
+#   Remove pairs with incomplete data before any live deployment.
 #
-# [Z8] Grid scan overdue (~5,000 gens without systematic sweep).
-#   Run 1D sweep of all HIGH-VALUE ranges above (~61 backtests).
-#   Sort by Sharpe. If any result > 2.3513, run 2D grid around that point.
+# [Z8] REQUIRED: systematic grid scan overdue (>2,000 gens since last improvement).
+#   Run full 1D sweep of all PRIORITY 1 ranges (~50 backtests).
+#   Sort results by Sharpe. If any > 2.3513, run 2D grid around that point.
+#   This is more efficient than random LLM sampling at this plateau depth.
 #
-# [Z9] Live deployment: zero sprint data. Deploy after Z4+Z8 complete.
-#   Minimum 3 completed sprints before further parameter optimization.
-#   Note: Current macro = CAUTION (F&G=27, Fear). Apply 50% position sizing.
+# [Z9] Live deployment: zero sprint data. Do NOT deploy until Z4+Z8 complete.
+#   Macro = CAUTION (F&G=27, Fear). Apply 50% position sizing in live only
+#   (do NOT change size_pct in backtest YAML — keep at 25 for comparability).
 #
 # ══════════════════════════════════════════════════════════════════
 # END OF RESEARCH PROGRAM
