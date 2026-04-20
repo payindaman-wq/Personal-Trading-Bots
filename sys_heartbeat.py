@@ -583,6 +583,14 @@ def main():
         "sys_heartbeat",        # Self-generated checks (service dead, etc.) — defensive
         "loki",                 # LOKI systemd/cycle failures (REVERT/restructure silenced below)
         "vidar",                # VIDAR API-call failure only (decision completions silent)
+        # NOTE (2026-04-19): the following sources are intentionally NOT allowlisted.
+        # They route to syn_inbox only; VIDAR/LOKI consume and decide. Per
+        # feedback_syn_telegram_chris_action_only.md: detection is not a Chris-action.
+        #   gemini_health, odin_memory, cron_health, tyr_freshness,
+        #   crashloop, self_heal, research_freshness, regression_watch,
+        #   sprint_integrity
+        # Only re-allowlist if the signal genuinely requires Chris to act and
+        # VIDAR/LOKI cannot.
     }
     TG_SILENT_SUBSTRINGS = {
         "loki":  ("REVERT", "restructure:", "cycle advance OK"),

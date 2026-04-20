@@ -72,6 +72,10 @@ def get_funding_rate():
 def get_tyr_regime(started_at_iso, ended_at_iso=None):
     if not os.path.exists(TYR_STATE_PATH):
         return None
+    # SYN/tyr staleness gate: if tyr_state.json > 45 min old, regime is untrusted.
+    import time
+    if (time.time() - os.path.getmtime(TYR_STATE_PATH)) / 60 > 45:
+        return None
     try:
         state = json.load(open(TYR_STATE_PATH))
         entries = state.get('log', [])

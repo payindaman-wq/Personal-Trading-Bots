@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
 """
-kraken_killswitch.py — Live 15% drawdown kill-switch for Kraken.
+kraken_killswitch.py — Live drawdown kill-switch + graduated alerts for Kraken.
 
 Dormant until Phase 1 Kraken funding lands (/root/.openclaw/secrets/kraken.json).
 Once active, runs every 5 min via cron:
   - Fetches current Kraken account equity (ZUSD + USD value of open positions).
   - Tracks peak_equity in killswitch_state.json.
-  - If current <= 0.85 * peak:
-      * Writes KILLSWITCH_TRIGGERED flag file (bots refuse to trade).
-      * Stops live trading services.
-      * Fires ACTIONABLE Telegram alert (call to action — user must review).
-  - Flag is NOT auto-cleared on recovery — manual reset required after review.
+  - Graduated thresholds (P1.1, 2026-04-19):
+      *  5% drawdown: info-level inbox entry (dashboard only, no Telegram).
+      * 10% drawdown: warning-level inbox entry (Telegram — early warning).
+      * 15% drawdown: CRITICAL. Writes KILLSWITCH_TRIGGERED flag, stops live
+        services, actionable Telegram alert.
+  - Auto-recovery (P1.2, 2026-04-19): when triggered, if drawdown recovers to
+    <=5% AND flag has been present for >=48h, auto-clears flag, restarts live
+    services, and logs recovery event. Gives set-and-forget operation while
+    keeping a genuine loss window for Chris to review.
 """
 import base64
 import hashlib
@@ -33,7 +37,18 @@ LOG_FILE      = f"{WORKSPACE}/competition/killswitch.log"
 BOT_TOKEN     = "8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
 CHAT_ID       = "8154505910"
 
-DRAWDOWN_THRESHOLD = 0.15  # 15%
+DRAWDOWN_THRESHOLD = 0.15  # 15% = hard kill
+DRAWDOWN_WARNING   = 0.10  # 10% = Telegram warning
+DRAWDOWN_INFO      = 0.05  # 5%  = dashboard-only info
+
+# Auto-recovery: if flag has been up this long AND drawdown is back under this
+# much, auto-clear flag + restart services. Both conditions required.
+RECOVERY_HOLD_HOURS     = 48
+RECOVERY_DRAWDOWN_MAX   = 0.05
+
+# Cooldowns to avoid spamming graduated warnings on every 5-min tick
+SOFT_ALERT_COOLDOWN_HOURS = 6
+
 LIVE_SERVICES      = ["kalshi_copy.service", "polymarket_syn.service"]
 
 KRAKEN_API = "https://api.kraken.com"
@@ -150,6 +165,80 @@ def trigger_killswitch(peak, current, drawdown_pct):
     )
 
 
+def soft_alert(state, equity, peak, drawdown, severity, key):
+    """Fire a graduated pre-kill alert with per-threshold cooldown."""
+    from datetime import timedelta
+    last = state.get(f"soft_alert_{key}")
+    if last:
+        try:
+            last_dt = datetime.fromisoformat(last)
+            if datetime.now(timezone.utc) - last_dt < timedelta(hours=SOFT_ALERT_COOLDOWN_HOURS):
+                return
+        except Exception:
+            pass
+    # severity: "info" stays on dashboard; "warning" doesn't Telegram under
+    # current allowlist either. To reach Telegram, upgrade to "error".
+    send_severity = "error" if severity == "warning" else severity
+    try:
+        rec = {
+            "ts":       datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
+            "source":   "kraken_killswitch",
+            "severity": send_severity,
+            "msg":      (
+                f"<b>SYN: drawdown {drawdown*100:.1f}% ({key})</b>\n"
+                f"Peak:    ${peak:,.2f}\n"
+                f"Current: ${equity:,.2f}\n"
+                f"Kill threshold: {DRAWDOWN_THRESHOLD*100:.0f}% — still trading."
+            ),
+        }
+        with open(INBOX, "a") as f:
+            f.write(json.dumps(rec) + chr(10))
+    except Exception as e:
+        log(f"[soft_alert] inbox write failed: {e}")
+    state[f"soft_alert_{key}"] = datetime.now(timezone.utc).isoformat()
+    log(f"[soft_alert] {key} @ drawdown {drawdown*100:.2f}%")
+
+
+def auto_recover(state, peak, equity, drawdown, hold_hours):
+    """Clear flag + restart services when drawdown has recovered."""
+    try:
+        os.remove(FLAG_FILE)
+    except FileNotFoundError:
+        pass
+    except Exception as e:
+        log(f"[recover] flag removal failed: {e}")
+    restarted = []
+    for svc in LIVE_SERVICES:
+        try:
+            subprocess.run(["systemctl", "start", svc], check=False, timeout=15)
+            restarted.append(svc)
+        except Exception as e:
+            log(f"[recover] {svc} start failed: {e}")
+    state["triggered"]      = False
+    state["triggered_at"]   = None
+    state["recovered_at"]   = datetime.now(timezone.utc).isoformat()
+    save_state(state)
+    log(f"[RECOVER] cleared flag, restarted {restarted}, drawdown={drawdown*100:.2f}% hold={hold_hours:.1f}h")
+    try:
+        rec = {
+            "ts":       datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
+            "source":   "kraken_killswitch",
+            "severity": "error",  # surfaces to Telegram — Chris should know recovery happened
+            "msg":      (
+                f"<b>SYN: kill-switch AUTO-RECOVERED</b>\n"
+                f"Peak:    ${peak:,.2f}\n"
+                f"Current: ${equity:,.2f}\n"
+                f"Drawdown: {drawdown*100:.2f}% (recovery threshold {RECOVERY_DRAWDOWN_MAX*100:.0f}%)\n"
+                f"Held paused: {hold_hours:.1f}h (min {RECOVERY_HOLD_HOURS}h)\n"
+                f"Restarted: {', '.join(restarted) or 'none'}"
+            ),
+        }
+        with open(INBOX, "a") as f:
+            f.write(json.dumps(rec) + chr(10))
+    except Exception as e:
+        log(f"[recover] inbox write failed: {e}")
+
+
 def main():
     # Dormant check — no Kraken funding yet
     if not os.path.isfile(SECRETS_FILE):
@@ -170,9 +259,31 @@ def main():
 
     state = load_state()
 
-    # Already-triggered short-circuit — don't re-alert, just log
+    # Already-triggered: evaluate auto-recovery window + threshold.
     if state.get("triggered") and os.path.isfile(FLAG_FILE):
-        log(f"already-triggered: flag present, peak=${state.get('peak_equity', 0):.2f}")
+        peak_now = state.get("peak_equity", 0.0)
+        try:
+            equity_now = fetch_equity(key, secret)
+        except Exception as e:
+            log(f"already-triggered: equity fetch failed: {e}")
+            return
+        dd_now = (peak_now - equity_now) / peak_now if peak_now > 0 else 0.0
+        triggered_at_iso = state.get("triggered_at")
+        hold_hours = 0.0
+        if triggered_at_iso:
+            try:
+                t0 = datetime.fromisoformat(triggered_at_iso)
+                hold_hours = (datetime.now(timezone.utc) - t0).total_seconds() / 3600
+            except Exception:
+                hold_hours = 0.0
+        state["last_equity"] = equity_now
+        state["last_check"]  = datetime.now(PST).isoformat()
+        log(f"already-triggered: equity=${equity_now:.2f} peak=${peak_now:.2f} "
+            f"dd={dd_now*100:.2f}% hold={hold_hours:.1f}h")
+        if dd_now <= RECOVERY_DRAWDOWN_MAX and hold_hours >= RECOVERY_HOLD_HOURS:
+            auto_recover(state, peak_now, equity_now, dd_now, hold_hours)
+        else:
+            save_state(state)
         return
 
     try:
@@ -193,10 +304,20 @@ def main():
     })
 
     if drawdown >= DRAWDOWN_THRESHOLD:
-        state["triggered"] = True
+        state["triggered"]    = True
+        state["triggered_at"] = datetime.now(timezone.utc).isoformat()
         save_state(state)
         trigger_killswitch(peak, equity, drawdown)
+    elif drawdown >= DRAWDOWN_WARNING:
+        soft_alert(state, equity, peak, drawdown, "warning", "DRAWDOWN_WARNING")
+        save_state(state)
+    elif drawdown >= DRAWDOWN_INFO:
+        soft_alert(state, equity, peak, drawdown, "info", "DRAWDOWN_INFO")
+        save_state(state)
     else:
+        # Clear graduated-alert cooldowns when drawdown recovers under 5%
+        state.pop("soft_alert_DRAWDOWN_WARNING", None)
+        state.pop("soft_alert_DRAWDOWN_INFO", None)
         save_state(state)
 
 

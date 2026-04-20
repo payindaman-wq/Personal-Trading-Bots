@@ -378,20 +378,43 @@ def check_loki_escalations(state, alerts):
 
 # ── Check 6: TYR / HEIMDALL freshness — INFO ONLY ───────────────────────────
 
+def _inbox_error(msg):
+    """Write severity=error to SYN inbox with source=tyr_freshness for Telegram routing."""
+    try:
+        rec = {
+            "ts":       datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
+            "source":   "tyr_freshness",
+            "severity": "error",
+            "msg":      msg[:2000],
+        }
+        with open(INBOX, "a") as f:
+            f.write(json.dumps(rec) + chr(10))
+    except Exception as e:
+        print(f"[research_freshness/tyr_inbox] {e}")
+
+
 def check_tyr_heimdall(state, alerts):
+    # Upgraded 2026-04-19: stale TYR/HEIMDALL = consumers (tick scripts, mimir)
+    # fall back to regime=None, so bots lose their risk multiplier.
+    # Routes through source=tyr_freshness (allowlisted) + severity=error so it
+    # reaches Chris via Telegram, while LOKI-escalation alerts stay dashboard-only.
     for officer in ["tyr", "heimdall"]:
         log = f"{WORKSPACE}/research/{officer}.log"
         age = mtime_age_min(log)
         if age is None:
             key = f"{officer}_missing"
             if should_alert(state, key):
-                info(alerts, f"{officer.upper()} log missing: {log}")
+                msg = f"{officer.upper()} log missing: {log} — officer not running?"
+                info(alerts, msg)
+                _inbox_error(f"[SYN/tyr_freshness] {msg}")
                 record_alert(state, key)
         elif age > LOG_STALE_MIN[officer]:
             key = f"{officer}_stale"
             if should_alert(state, key):
-                info(alerts, f"{officer.upper()} log stale: {age:.0f} min "
-                             f"(threshold {LOG_STALE_MIN[officer]}).")
+                msg = (f"{officer.upper()} log stale: {age:.0f} min "
+                       f"(threshold {LOG_STALE_MIN[officer]}) — consumers degrading to fallback.")
+                info(alerts, msg)
+                _inbox_error(f"[SYN/tyr_freshness] {msg}")
                 record_alert(state, key, f"age_min={age:.0f}")
 
 

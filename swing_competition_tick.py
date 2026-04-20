@@ -59,8 +59,11 @@ def get_tyr_regime_for_sprint(started_at_iso, ended_at_iso=None):
     Falls back to current regime if no log entries match the window.
     Returns None if TYR state file is missing.
     """
-    import json, os
+    import json, os, time
     if not os.path.exists(TYR_STATE_PATH):
+        return None
+    # SYN/tyr staleness gate: if tyr_state.json > 45 min old, regime is untrusted.
+    if (time.time() - os.path.getmtime(TYR_STATE_PATH)) / 60 > 45:
         return None
     try:
         state = json.load(open(TYR_STATE_PATH))

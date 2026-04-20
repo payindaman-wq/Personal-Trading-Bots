@@ -284,6 +284,11 @@ def load_tyr_context():
     tyr_path = os.path.join(RESEARCH, "tyr_state.json")
     if not os.path.exists(tyr_path):
         return None
+    # SYN/tyr staleness gate: if tyr_state.json > 45 min old, do not feed it
+    # into the LLM prompt — format_tyr_context will render "unavailable".
+    import time
+    if (time.time() - os.path.getmtime(tyr_path)) / 60 > 45:
+        return None
     try:
         return json.load(open(tyr_path))
     except Exception:
