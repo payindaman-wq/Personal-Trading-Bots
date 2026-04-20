@@ -24,6 +24,7 @@ import sys
 import subprocess
 import time
 import urllib.request
+from collections import deque
 from datetime import datetime, timezone
 
 import yaml
@@ -36,6 +37,21 @@ GEMINI_BASE   = "https://generativelanguage.googleapis.com/v1beta/models"
 
 SUSPICIOUS_SHARPE   = 3.5
 POPULATION_SIZE     = 10
+
+# LLM cost control: if recent LLM attempts rarely yield a population hit,
+# down-weight LLM calls and redirect to free local perturbation. Saves Gemini
+# spend during narrow-plateau phases where LLM proposals aren't beating local
+# perturbations anyway. Window re-fills as soon as an LLM call wins again.
+LLM_WINDOW              = 20
+LLM_PLATEAU_THRESHOLD   = 0.10   # <10% recent hits → cut llm weight to 0.20
+LLM_PLATEAU_WEIGHT      = 0.20
+_llm_history = deque(maxlen=LLM_WINDOW)
+
+def _llm_plateau():
+    if len(_llm_history) < LLM_WINDOW:
+        return False
+    return (sum(_llm_history) / LLM_WINDOW) < LLM_PLATEAU_THRESHOLD
+
 MIN_TRADES = {"day": 50, "futures_day": 50, "futures_swing": 50}
 SWING_MIN_TRADES    = 30   # IMMUTABLE - DO NOT MODIFY via LOKI (Item 4)
 MIMIR_MIN_GAP_HRS   = 6    # min wall-clock hours between Mimir calls per league
@@ -727,6 +743,13 @@ def main():
         else:
             weights = {"llm": 0.40, "perturb": 0.45, "crossover": 0.05, "random": 0.10}
 
+        # Plateau override: if last N LLM attempts yielded <10% pop-hits,
+        # cut llm weight and redirect the delta to local perturb (free).
+        if _llm_plateau():
+            llm_cut = weights["llm"] - LLM_PLATEAU_WEIGHT
+            weights["llm"] = LLM_PLATEAU_WEIGHT
+            weights["perturb"] = weights.get("perturb", 0) + llm_cut
+
         # Select mutation
         r = random.random()
         cum = 0
@@ -905,6 +928,9 @@ def main():
             status = "discarded"
             gens_since_best += 1
             print(f"| sharpe={sharpe:.4f} win={win_rate}% trades={trades} [disc]")
+
+        if mutation_type == "llm":
+            _llm_history.append(inserted)
 
 
         log_result(league, gen, result, status, description[:80])
