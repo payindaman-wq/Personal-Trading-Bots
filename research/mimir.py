@@ -280,7 +280,15 @@ def summarize_sprints(sprint_results, bot_name):
 
 
 def load_tyr_context():
-    """Load TYR macro regime for MIMIR context."""
+    """Load TYR macro regime for MIMIR context.
+
+    Phase 1 gate: TYR is a Phase 2 (Live Trading) guardrail. During Phase 1
+    paper trading we intentionally do NOT feed macro regime into autoresearch,
+    so research output is not shaped by TYR before live capital is at risk.
+    Flip on by exporting PHASE_2_LIVE_TRADING=1 in the MIMIR environment.
+    """
+    if os.environ.get("PHASE_2_LIVE_TRADING", "").strip() not in ("1", "true", "TRUE", "yes"):
+        return None
     tyr_path = os.path.join(RESEARCH, "tyr_state.json")
     if not os.path.exists(tyr_path):
         return None
@@ -339,9 +347,14 @@ def build_prompt(league, program_md, best_strategy_yaml,
     else:
         _champion_gt_str = "NOT AVAILABLE (elite_0.yaml missing or unreadable — flag this in your analysis)"
 
+    if tyr_context and tyr_context.strip() and tyr_context.strip() != "TYR macro data unavailable.":
+        _tyr_section = "---\n## Macro Environment (TYR Risk Officer)\n\n" + tyr_context + "\n\n"
+    else:
+        _tyr_section = ""
+
     return f"""You are MIMIR, a senior crypto trading strategy analyst. You are analyzing {generation} generations of automated research from ODIN, a strategy optimization loop.
 
-ODIN works by asking a small LLM (llama-3.1-8b-instant) to propose ONE change to the current best strategy, then backtesting it on 2 years of {timeframe} BTC/USD, ETH/USD, SOL/USD data. If Sharpe improves, the change is kept.
+ODIN works by asking a small LLM (gemini-2.5-flash-lite) to propose ONE change to the current best strategy, then backtesting it on 2 years of {timeframe} BTC/USD, ETH/USD, SOL/USD data. If Sharpe improves, the change is kept.
 
 ---
 ## Actual Stored Champion (GROUND TRUTH — read directly from population/elite_0.yaml)
@@ -372,12 +385,7 @@ This is the CANONICAL source for the current champion's backtest metrics. Do NOT
 
 {sprint_summary}
 
----
-## Macro Environment (TYR Risk Officer)
-
-{tyr_context}
-
----
+{_tyr_section}---
 ## Self-Audit: Constants & Your Past Decisions
 
 {self_audit}
