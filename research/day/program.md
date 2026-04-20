@@ -1,9 +1,9 @@
 ```markdown
 # ODIN Day League Research Program
-# v11100-champion-tune
+# v11200-table-expand
 
 ═══════════════════════════════════════════════════════════════
-COPY THIS YAML EXACTLY. Change ONLY the values listed in Step 2.
+TEMPLATE — COPY EXACTLY, THEN CHANGE ONLY STEP 2 VALUES
 ═══════════════════════════════════════════════════════════════
 
 ```yaml
@@ -34,7 +34,7 @@ entry:
     - indicator: price_change_pct
       period_minutes: 5
       operator: lt
-      value: -1.21        # ← LONG THRESHOLD (negative, see table)
+      value: -1.21        # ← LONG THRESHOLD
     - indicator: macd_signal
       period_minutes: 30
       operator: eq
@@ -56,7 +56,7 @@ entry:
     - indicator: price_change_pct
       period_minutes: 30
       operator: gt
-      value: 1.16         # ← SHORT THRESHOLD (positive, see table)
+      value: 1.16         # ← SHORT THRESHOLD
     - indicator: macd_signal
       period_minutes: 30
       operator: eq
@@ -70,9 +70,9 @@ entry:
       operator: eq
       value: down
 exit:
-  take_profit_pct: 3.51   # ← TP (see table)
-  stop_loss_pct: 0.37     # ← SL (see table)
-  timeout_minutes: 706    # ← TIMEOUT (see table)
+  take_profit_pct: 3.51   # ← TP
+  stop_loss_pct: 0.37     # ← SL
+  timeout_minutes: 706    # ← TIMEOUT
 risk:
   pause_if_down_pct: 4
   stop_if_down_pct: 10
@@ -80,27 +80,28 @@ risk:
 ```
 
 ═══════════════════════════════════════════════════════════════
-STEP 1 — VERIFY BEFORE SUBMITTING
+CRITICAL CHECKS — VERIFY BEFORE SUBMITTING
 ═══════════════════════════════════════════════════════════════
 
   long price_change_pct operator  = lt     (NOT gt)
-  long price_change_pct value     = negative number
+  long price_change_pct value     = NEGATIVE number (e.g. -1.21)
   short price_change_pct operator = gt     (NOT lt)
-  short price_change_pct value    = positive number
-  pairs count = 10 (do NOT add or remove pairs)
-  conditions count = 5 long, 5 short (do NOT add or remove)
+  short price_change_pct value    = POSITIVE number (e.g. 1.16)
+  pairs count = 10 (unchanged)
+  conditions = 5 long, 5 short (unchanged)
+  Values MUST come from the table below — no invented values
 
-If ANY are wrong → DELETE and restart from the YAML above.
+If ANY check fails → DELETE and restart from template above.
 
 ═══════════════════════════════════════════════════════════════
-STEP 2 — FIVE VALUES THAT CHANGE BY TARGET
+STEP 2 — USE EXACTLY ONE ROW FROM THIS TABLE
 ═══════════════════════════════════════════════════════════════
 
-Only these five values change. Nothing else, ever.
+Champion: Sharpe=1.1739, trades=310 (A1) — beat with Sharpe > 1.1739 AND trades ≥ 280
 
 | Target | long.value | short.value | take_profit | stop_loss | timeout |
 |--------|------------|-------------|-------------|-----------|---------|
-| A1     | -1.21      | 1.16        | 3.51        | 0.37      | 706     | ← CURRENT CHAMPION
+| A1     | -1.21      | 1.16        | 3.51        | 0.37      | 706     | ← CHAMPION
 | A2     | -1.18      | 1.16        | 3.51        | 0.37      | 706     |
 | A3     | -1.24      | 1.16        | 3.51        | 0.37      | 706     |
 | A4     | -1.21      | 1.13        | 3.51        | 0.37      | 706     |
@@ -109,47 +110,57 @@ Only these five values change. Nothing else, ever.
 | B2     | -1.21      | 1.16        | 3.25        | 0.37      | 706     |
 | B3     | -1.21      | 1.16        | 3.51        | 0.40      | 706     |
 | B4     | -1.21      | 1.16        | 3.51        | 0.34      | 706     |
+| B5     | -1.21      | 1.16        | 3.51        | 0.31      | 706     |
+| B6     | -1.21      | 1.16        | 4.00        | 0.37      | 706     |
+| B7     | -1.21      | 1.16        | 3.51        | 0.43      | 706     |
 | C1     | -1.21      | 1.16        | 3.51        | 0.37      | 660     |
 | C2     | -1.21      | 1.16        | 3.51        | 0.37      | 750     |
 | C3     | -1.18      | 1.13        | 3.75        | 0.37      | 706     |
 | C4     | -1.24      | 1.19        | 3.25        | 0.40      | 706     |
+| C5     | -1.21      | 1.16        | 3.51        | 0.37      | 800     |
+| C6     | -1.21      | 1.16        | 3.51        | 0.37      | 600     |
+| D1     | -1.18      | 1.16        | 3.75        | 0.37      | 706     |
+| D2     | -1.24      | 1.16        | 3.25        | 0.37      | 706     |
+| D3     | -1.21      | 1.13        | 3.51        | 0.34      | 706     |
+| D4     | -1.21      | 1.19        | 3.51        | 0.40      | 706     |
+| D5     | -1.18      | 1.16        | 3.51        | 0.34      | 750     |
+| D6     | -1.24      | 1.16        | 3.51        | 0.40      | 660     |
+| D7     | -1.21      | 1.13        | 3.75        | 0.37      | 750     |
+| D8     | -1.21      | 1.19        | 3.25        | 0.37      | 660     |
 
 Run 8 reps per target before advancing. A rep = any result with trades ≤ 450.
 
 ═══════════════════════════════════════════════════════════════
-STEP 3 — ACCEPTANCE
+STEP 3 — ACCEPTANCE RULES
 ═══════════════════════════════════════════════════════════════
 
-Champion: Sharpe = 1.1739, trades = 310 (gen 10391).
-Beat it: Sharpe > 1.1739 AND trades ≥ 280.
-
-| Result                      | Tag                   | Counts as rep? |
-|-----------------------------|-----------------------|----------------|
-| trades > 450                | [structural_failure]  | NO             |
-| trades < 280                | [low_trades]          | YES            |
-| 280 ≤ trades ≤ 450, S<1.17 | [discarded]           | YES            |
-| 280 ≤ trades ≤ 450, S>1.17 | [new_best] — deploy   | YES            |
+| Result                        | Tag                  | Counts as rep? |
+|-------------------------------|----------------------|----------------|
+| trades > 450                  | [structural_failure] | NO             |
+| trades < 280                  | [low_trades]         | YES            |
+| 280 ≤ trades ≤ 450, S ≤ 1.1739 | [discarded]        | YES            |
+| 280 ≤ trades ≤ 450, S > 1.1739 | [new_best] → deploy | YES           |
 
 MIN_TRADES = 280. Final. Do not change.
 
 ═══════════════════════════════════════════════════════════════
-NEVER CHANGE THESE FIELDS
+FAILURE FINGERPRINTS — IF YOU SEE THESE, DELETE AND RESTART
 ═══════════════════════════════════════════════════════════════
 
-name, style, pairs (all 10 above), max_open=3, size_pct=10, fee_rate=0.001,
-all operators (lt/gt/eq), all indicator types, all period_minutes values,
+  trades > 450        → threshold outside table range; DELETE, restart
+  trades = 0          → YAML malformed; DELETE, restart
+  sharpe < -10        → entry conditions broken; DELETE, restart
+  long.value > 0      → sign error; DELETE, restart
+  dedup_reject        → pick a different row from the table (never invent values)
+
+═══════════════════════════════════════════════════════════════
+NEVER CHANGE THESE (LOCKED)
+═══════════════════════════════════════════════════════════════
+
+name, style, all 10 pairs, max_open=3, size_pct=10, fee_rate=0.001,
+all operators (lt/gt/eq), all indicator types, all period_minutes,
 all eq values (true/bullish/bearish/above/below/up/down),
-total conditions = 5 long + 5 short.
-
-═══════════════════════════════════════════════════════════════
-FAILURE FINGERPRINTS — DIAGNOSE FAST
-═══════════════════════════════════════════════════════════════
-
-  trades > 450            → operator inverted or threshold loosened; DELETE, restart
-  trades < 140, sharpe<0  → long.value is 0 or positive; DELETE, restart
-  trades = 0              → YAML malformed; DELETE, restart
-  sharpe < -10            → entry conditions destroyed; DELETE, restart
-  dedup_reject            → choose a different target row from the table above
+condition count = 5 long + 5 short.
 ```
 
 ---
