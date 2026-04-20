@@ -187,12 +187,17 @@ def load_gemini_key(league):
     return data.get(f"gemini_{league}_key") or data["gemini_api_key"]
 
 
-def call_gemini(prompt, api_key):
+def call_gemini(prompt, api_key, system_instruction=None, cached_content=None):
     url = f"{GEMINI_BASE}/{GEMINI_MODEL}:generateContent?key={api_key}"
-    payload = json.dumps({
+    body = {
         "contents": [{"parts": [{"text": prompt}]}],
         "generationConfig": {"temperature": 0.9, "maxOutputTokens": 2000},
-    }).encode()
+    }
+    if cached_content:
+        body["cachedContent"] = cached_content
+    elif system_instruction:
+        body["systemInstruction"] = {"parts": [{"text": system_instruction}]}
+    payload = json.dumps(body).encode()
     req = urllib.request.Request(
         url, data=payload, headers={"Content-Type": "application/json"}
     )
@@ -526,6 +531,13 @@ def load_program_md(league):
 
 
 def build_llm_prompt(league, best_yaml, population):
+    """Returns (system_instruction, user_message).
+
+    The system_instruction is stable across gens for a given league + current
+    MIMIR guidance and is cached via gemini_cache to reduce input-token cost.
+    The user_message carries per-gen dynamic data (best_yaml, population,
+    n_conds reminder).
+    """
     pop_summary = population.summary()
     import yaml as _yaml
     try:
@@ -553,14 +565,10 @@ def build_llm_prompt(league, best_yaml, population):
             "trend periods: 24,48,72,168h\n"
             "macd_signal periods: 12,24,26,48h"
         )
-    parts = [
+
+    system_parts = [
         f"You are a crypto {league} trading strategy optimizer."
           " Iterate on what works - do not explore random alternatives.\n\n",
-        "## Current Best Strategy (ANCHOR - always start from this)\n",
-        f"```yaml\n{best_yaml}```\n",
-        f"This strategy has {n_conds} entry conditions: {cond_list}\n\n",
-        "## Elite Population (context only - avoid duplicating)\n",
-        f"{pop_summary}\n\n",
         "## Constraints\n",
         f"{ranges_desc}\n",
         "Trade count HARD LIMITS: min 30, max 60 -- strategies outside this range are REJECTED.\n",
@@ -570,8 +578,10 @@ def build_llm_prompt(league, best_yaml, population):
         *(['## MIMIR Research Guidance\n',
           load_program_md(league) + '\n\n']
          if load_program_md(league) else []),
-        "## Your Task\n",
-        "Make ONE small targeted modification to the current best strategy. Output a complete modified copy.\n\n",
+        "## Task\n",
+        "You will be given a Current Best Strategy and an Elite Population.\n",
+        "Make ONE small targeted modification to the current best strategy."
+          " Output a complete modified copy.\n\n",
         "Allowed changes (pick exactly one):\n",
         "- Loosen a threshold to increase trade frequency"
           "  (e.g. RSI long from 30 to 40, or remove momentum_accelerating)\n",
@@ -580,19 +590,44 @@ def build_llm_prompt(league, best_yaml, population):
         "- Change a condition lookback period\n",
         "- Add or remove one pair\n\n",
         "Rules:\n",
-        "- Do NOT restructure or replace the core framework - modify this strategy only\n",
-        f"- Do NOT exceed {n_conds + 1} total conditions\n",
+        "- Do NOT restructure or replace the core framework - modify the given strategy only\n",
         "- If strategy has more than 5 conditions, prefer removing one over adding\n",
         "- momentum_accelerating is often overfitting - consider removing it if present\n",
         "- The current strategy likely generates TOO MANY trades. Tighten thresholds to REDUCE to <=60\n\n",
         "Output ONLY the complete modified strategy YAML between ```yaml and ``` markers.",
     ]
-    return "".join(parts)
+    system_instruction = "".join(system_parts)
+
+    user_parts = [
+        "## Current Best Strategy (ANCHOR - always start from this)\n",
+        f"```yaml\n{best_yaml}```\n",
+        f"This strategy has {n_conds} entry conditions: {cond_list}\n\n",
+        "## Elite Population (context only - avoid duplicating)\n",
+        f"{pop_summary}\n\n",
+        f"Reminder: Do NOT exceed {n_conds + 1} total conditions.\n",
+        "Output ONLY the complete modified strategy YAML between ```yaml and ``` markers.",
+    ]
+    user_message = "".join(user_parts)
+    return system_instruction, user_message
 
 
 def llm_mutate(best_yaml, league, population, api_key):
-    prompt = build_llm_prompt(league, best_yaml, population)
-    response = call_gemini(prompt, api_key)
+    system_instruction, user_message = build_llm_prompt(league, best_yaml, population)
+    cache_name = None
+    try:
+        import gemini_cache
+        cache_name = gemini_cache.get_cache_name(
+            scope=f"odin_{league}",
+            system_instruction=system_instruction,
+            api_key=api_key,
+        )
+    except Exception:
+        cache_name = None
+    response = call_gemini(
+        user_message, api_key,
+        system_instruction=None if cache_name else system_instruction,
+        cached_content=cache_name,
+    )
     yaml_str = extract_yaml(response)
     if not yaml_str:
         return None, None, "yaml_not_found"
