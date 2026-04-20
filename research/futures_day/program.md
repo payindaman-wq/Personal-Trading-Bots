@@ -1,10 +1,12 @@
 ```markdown
-# ODIN — FUTURES DAY v38.0
+# ODIN — FUTURES DAY v39.0
 
 ## YOUR ONLY JOB
-Output EXACTLY: a CHANGE line, a USING line, then the YAML below with ONE value changed from the champion. Nothing else. No explanation.
+Output EXACTLY: a CHANGE line, a USING line, then the YAML below with ONE value changed. Nothing else.
 
-## CHAMPION YAML (copy this exactly, change ONE value only)
+---
+
+## CHAMPION YAML — copy exactly, change ONE value only
 
 ```yaml
 name: crossover
@@ -55,47 +57,79 @@ risk:
   stop_if_down_pct: 18
 ```
 
-## BANNED VALUES — DO NOT USE THESE (instant reject)
-- entry.short.conditions[0].value: 68.63 (champion — must change it)
-- entry.long.conditions[0].value: 32.0, 35.97
-- position.size_pct: 16.91
-- exit.stop_loss_pct: 2.39
-- exit.take_profit_pct: 5.0
+---
 
-## NEXT STEP TO TRY (pick the first untested one)
-1. entry.short.conditions[0].value → 66.0  ← TRY THIS FIRST
-2. entry.short.conditions[0].value → 64.0  (if 66.0 already tested)
-3. entry.short.conditions[0].value → 62.0  (if 64.0 already tested)
-4. exit.stop_loss_pct → 2.3               (if short ladder exhausted)
-5. position.size_pct → 10                 (if stop_loss tested)
-6. exit.take_profit_pct → 4.2             (if size_pct tested)
-7. entry.long.conditions[0].value → 27.0  (if tp tested)
+## THIS GENERATION: MAKE THIS EXACT CHANGE
 
-## PREFLIGHT CHECKLIST (verify before outputting)
-- [ ] Exactly ONE value differs from champion YAML above
-- [ ] Changed value is NOT in the BANNED VALUES list
-- [ ] Changed value has NOT been tested before (check TESTED list)
-- [ ] YAML structure is identical to champion (same keys, same order)
-- [ ] fee_rate is 0.0005 (do not change)
-- [ ] leverage is 2 (do not change)
-- [ ] All 16 pairs present (do not add or remove)
+**Change `entry.short.conditions[0].value` from `68.63` to `66.0`**
 
-## TESTED AND FAILED (do not resubmit these)
-- rsi_short=68.63 (champion)
-- rsi_short=66.0 (Gen ~Step3 — if this appears in results, skip to 64.0)
-- rsi_long=32.0 (Gen 3903/3916: Sharpe=0.296)
-- rsi_long=35.97 (BANNED)
-- size_pct=16.91 (BANNED)
-- stop_loss=2.39 (BANNED)
-- tp=5.0 (Gen 3770: Sharpe=0.0213)
+If `66.0` is in the BANNED list below, use `64.0` instead.
+If `64.0` is also banned, use `62.0`.
+If all three are banned, change `exit.stop_loss_pct` from `2.59` to `2.3`.
 
-## CHAMPION CONTEXT
-- Champion: Gen 3233, Sharpe=0.4066, 1756 trades, WR=50.1%
-- Goal: Sharpe > 0.4066
-- MIN_TRADES[futures_day] = 50 — FROZEN
+---
+
+## BANNED — DO NOT USE (instant reject if you use any of these)
+
+| Field | Banned values |
+|-------|--------------|
+| entry.short.conditions[0].value | 68.63 |
+| entry.long.conditions[0].value | 29.33, 32.0, 35.97 |
+| position.size_pct | 8, 16.91 |
+| exit.stop_loss_pct | 2.59, 2.39 |
+| exit.take_profit_pct | 4.6, 5.0 |
+| timeout_minutes | 720 |
+| leverage | 2 |
+| fee_rate | 0.0005 |
+
+**Note:** `position.size_pct=8` and most other champion values are banned as the "change target" — they must stay at their champion values unless you are specifically changing them per the instruction above.
+
+---
+
+## TESTED AND FAILED (do not resubmit)
+
+- rsi_short=68.63 — champion, do not resubmit
+- rsi_long=32.0 — Sharpe=0.296 (worse)
+- rsi_long=35.97 — failed
+- size_pct=16.91 — failed
+- stop_loss_pct=2.39 — failed
+- take_profit_pct=5.0 — Sharpe=0.021 (much worse)
+
+---
+
+## PREFLIGHT — verify before output
+
+- [ ] Exactly ONE value differs from champion YAML
+- [ ] Changed value is NOT in BANNED list
+- [ ] Changed value is NOT in TESTED AND FAILED list
+- [ ] All 16 pairs present, same order
+- [ ] fee_rate=0.0005, leverage=2 (unchanged)
+- [ ] YAML structure identical to champion
+
+---
 
 ## OUTPUT FORMAT (exactly this, nothing else)
+
 CHANGE: [field] [old_value] → [new_value]
 USING: size_pct=8, rsi_long=29.33, rsi_short=[value], stop_loss=2.59, tp=4.6
 [YAML]
+
+---
+
+## CONTEXT
+
+Champion: Gen 3233 | Sharpe=0.4066 | 1756 trades | WR=50.1%
+Goal: Sharpe > 0.4066
+League: futures_day | MIN_TRADES=50
+
+Priority ladder (first untested wins):
+1. rsi_short → 66.0
+2. rsi_short → 64.0
+3. rsi_short → 62.0
+4. stop_loss_pct → 2.3
+5. size_pct → 10
+6. take_profit_pct → 4.2
+7. rsi_long → 27.0
 ```
+
+---
