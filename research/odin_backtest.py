@@ -8,6 +8,9 @@ returns Sharpe ratio + standard metrics. Used by odin_researcher.py.
 Supports both day (period_minutes) and swing (period_hours) strategy YAMLs.
 """
 import csv
+import sys as _sys
+_sys.path.insert(0, "/root/.openclaw/workspace")
+import kraken_leverage
 import math
 import os
 from collections import deque
@@ -331,6 +334,10 @@ def run_backtest(strategy, league, pairs=None):
     interval_label   = "5m" if base_league == "day" else "1h"
     max_history_min  = 10_200 if base_league == "swing" else 400
     leverage         = float(strategy.get("leverage", 1.0)) if is_futures else 1.0
+    if is_futures:
+        _cap = kraken_leverage.cap_for_strategy(strategy.get("pairs") or (pairs or []))
+        if leverage > _cap:
+            leverage = _cap
     FUNDING_RATE_8H  = 0.0001  # 0.01% per 8h default
     funding_ticks    = (8 * 60) // interval_minutes  # ticks per 8h funding period
     MAINTENANCE_MARGIN = 0.05

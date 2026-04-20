@@ -15,6 +15,10 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)),
 from price_store import append_prices
 from indicators import evaluate_entry
 
+import sys as _kl_sys
+_kl_sys.path.insert(0, "/root/.openclaw/workspace")
+import kraken_leverage
+
 WORKSPACE      = os.environ.get('WORKSPACE', '/root/.openclaw/workspace')
 FLEET_DIR      = os.path.join(WORKSPACE, 'fleet', 'futures_day')
 ACTIVE_DIR     = os.path.join(WORKSPACE, 'competition', 'futures_day', 'active')
@@ -365,6 +369,9 @@ def main():
         if portfolio is None:
             continue
         leverage = float(strategy.get('leverage', default_leverage))
+        _cap = kraken_leverage.cap_for_strategy(strategy.get('pairs', []))
+        if leverage > _cap:
+            leverage = _cap
 
         status = check_risk(portfolio, strategy, risk_state, now_iso)
         if status in ('paused', 'stopped'):

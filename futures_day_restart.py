@@ -6,6 +6,10 @@ Same logic as day_daily_restart.py but targets futures_day fleet and competition
 import os, json, subprocess, sys, shutil
 from datetime import datetime, timezone
 
+import sys as _kl_sys
+_kl_sys.path.insert(0, "/root/.openclaw/workspace")
+import kraken_leverage
+
 WORKSPACE        = os.environ.get('WORKSPACE', '/root/.openclaw/workspace')
 ACTIVE_DIR       = os.path.join(WORKSPACE, 'competition', 'futures_day', 'active')
 RESULTS_DIR      = os.path.join(WORKSPACE, 'competition', 'futures_day', 'results')
@@ -20,13 +24,9 @@ ALL_BOTS = [
     'helgi', 'kveldulf', 'ulfhedinn', 'haki', 'hakon', 'vemund',
     'autobotdayfutures',
 ]
-ALL_PAIRS = [
-    'BTC/USD', 'ETH/USD', 'SOL/USD', 'XRP/USD', 'DOGE/USD', 'AVAX/USD',
-    'LINK/USD', 'UNI/USD', 'AAVE/USD', 'NEAR/USD', 'APT/USD', 'SUI/USD',
-    'ARB/USD', 'OP/USD', 'ADA/USD', 'POL/USD',
-]
+ALL_PAIRS = ['BTC/USD', 'ETH/USD', 'SOL/USD']  # Kraken Derivatives US
 STARTING_CAPITAL = 1000.0
-LEVERAGE_DEFAULT = 2.0
+LEVERAGE_DEFAULT = min(2.0, kraken_leverage.cap_for_strategy(['BTC/USD','ETH/USD','SOL/USD']))
 
 
 def load_cycle_state():

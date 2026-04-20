@@ -19,6 +19,9 @@ import json
 import math
 import os
 import random
+import sys as _sys
+_sys.path.insert(0, "/root/.openclaw/workspace")
+import kraken_leverage
 import re
 import sys
 import subprocess
@@ -57,6 +60,7 @@ SWING_MIN_TRADES    = 30   # IMMUTABLE - DO NOT MODIFY via LOKI (Item 4)
 MIMIR_MIN_GAP_HRS   = 6    # min wall-clock hours between Mimir calls per league
 SWING_MAX_TRADES    = 60   # swing hard upper bound (Item 3)
 SWING_ALLOWED_PAIRS = frozenset({"BTC/USD", "ETH/USD", "SOL/USD"})  # Item 7
+FUTURES_ALLOWED_PAIRS = frozenset({"BTC/USD", "ETH/USD", "SOL/USD"})  # Kraken Derivatives US universe
 
 # Known-bad result fingerprints — sharpe values that always indicate a poison attractor.
 POISON_RESULT_FINGERPRINTS = {
@@ -865,6 +869,17 @@ def main():
                 candidate["pairs"] = [p for p in candidate.get("pairs", []) if p in SWING_ALLOWED_PAIRS] or ["BTC/USD", "ETH/USD", "SOL/USD"]
                 import yaml as _yaml2
                 candidate_yaml = _yaml2.dump(candidate, default_flow_style=False, sort_keys=False)
+
+        # Kraken Derivatives US constraints: pairs whitelist + per-strategy leverage cap
+        if league in ("futures_day", "futures_swing"):
+            _bad_pairs = set(candidate.get("pairs", [])) - FUTURES_ALLOWED_PAIRS
+            if _bad_pairs:
+                candidate["pairs"] = [p for p in candidate.get("pairs", []) if p in FUTURES_ALLOWED_PAIRS] or ["BTC/USD", "ETH/USD", "SOL/USD"]
+            _cap = kraken_leverage.cap_for_strategy(candidate.get("pairs", []))
+            if float(candidate.get("leverage", 1.0)) > _cap:
+                candidate["leverage"] = _cap
+            import yaml as _yaml2
+            candidate_yaml = _yaml2.dump(candidate, default_flow_style=False, sort_keys=False)
 
         # Canonical dedup — hash structure (sort_keys) so whitespace/key-order doesn't evade
         _canon = yaml.dump(candidate, default_flow_style=False, sort_keys=True)

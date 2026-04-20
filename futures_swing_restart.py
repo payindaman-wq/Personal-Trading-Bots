@@ -6,6 +6,10 @@ Called by weekly_league_restart.py and by the swing tick on expiry.
 import os, json, shutil, sys
 from datetime import datetime, timezone
 
+import sys as _kl_sys
+_kl_sys.path.insert(0, "/root/.openclaw/workspace")
+import kraken_leverage
+
 WORKSPACE        = os.environ.get('WORKSPACE', '/root/.openclaw/workspace')
 ACTIVE_DIR       = os.path.join(WORKSPACE, 'competition', 'futures_swing', 'active')
 RESULTS_DIR      = os.path.join(WORKSPACE, 'competition', 'futures_swing', 'results')
@@ -19,13 +23,9 @@ ALL_BOTS = [
     'sigmund', 'sinfjotli', 'hogni', 'atli', 'regin',
     'andvari', 'grimolf', 'audun', 'thorolf', 'autobotswingfutures',
 ]
-ALL_PAIRS = [
-    'BTC/USD', 'ETH/USD', 'SOL/USD', 'XRP/USD', 'DOGE/USD', 'AVAX/USD',
-    'LINK/USD', 'UNI/USD', 'AAVE/USD', 'NEAR/USD', 'APT/USD', 'SUI/USD',
-    'ARB/USD', 'OP/USD', 'ADA/USD', 'POL/USD',
-]
+ALL_PAIRS = ['BTC/USD', 'ETH/USD', 'SOL/USD']  # Kraken Derivatives US
 STARTING_CAPITAL = 1000.0
-LEVERAGE_DEFAULT = 2.0
+LEVERAGE_DEFAULT = min(2.0, kraken_leverage.cap_for_strategy(['BTC/USD','ETH/USD','SOL/USD']))
 
 
 def load_cycle_state():

@@ -17,14 +17,14 @@ sys.path.insert(0, WORKSPACE)
 from swing_price_store import get_current_price, update_pair
 from swing_indicators import evaluate_entry
 
+import sys as _kl_sys
+_kl_sys.path.insert(0, "/root/.openclaw/workspace")
+import kraken_leverage
+
 MAINTENANCE_MARGIN = 0.05
 DEFAULT_FUNDING_8H = 0.0001
 
-ALL_PAIRS = [
-    'BTC/USD', 'ETH/USD', 'SOL/USD', 'XRP/USD', 'DOGE/USD', 'AVAX/USD',
-    'LINK/USD', 'UNI/USD', 'AAVE/USD', 'NEAR/USD', 'APT/USD', 'SUI/USD',
-    'ARB/USD', 'OP/USD', 'ADA/USD', 'POL/USD',
-]
+ALL_PAIRS = ['BTC/USD', 'ETH/USD', 'SOL/USD']  # Kraken Derivatives US
 
 lock_fh = open(LOCK_FILE, 'w')
 try:
@@ -313,6 +313,9 @@ def main():
         if not strategy:
             continue
         bot_leverage = float(strategy.get('leverage', leverage))
+        _cap = kraken_leverage.cap_for_strategy(strategy.get('pairs', []))
+        if bot_leverage > _cap:
+            bot_leverage = _cap
 
         check_exits(portfolio, strategy, prices, bot_leverage)
         save_portfolio(comp_dir, bot, portfolio)
