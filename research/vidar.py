@@ -22,6 +22,7 @@ import json
 import os
 import sys
 import urllib.request
+import fcntl
 from datetime import datetime, timezone
 
 WORKSPACE         = "/root/.openclaw/workspace"
@@ -110,10 +111,9 @@ def call_claude(prompt, api_key, model):
             "cache_read_input_tokens":     usage.get("cache_read_input_tokens", 0),
             "rl_requests_remaining":       resp_headers.get("anthropic-ratelimit-requests-remaining"),
         }
-        with open(ANTHROPIC_USAGE, "a") as f:
-            f.write(json.dumps(rec) + "\n")
-    except Exception:
-        pass
+        _append_locked(ANTHROPIC_USAGE, json.dumps(rec) + "\n")
+    except Exception as e:
+        sys.stderr.write(f"[vidar/usage-log] write failed: {e}\n")
     return data["content"][0]["text"].strip()
 
 
@@ -163,14 +163,26 @@ def load_program(league):
         return f.read()
 
 
+def _append_locked(path, line):
+    """Atomic append under exclusive lock — parallel VIDAR subprocesses
+    race on these files; record size (~4KB+) exceeds PIPE_BUF so O_APPEND
+    alone does not keep writes atomic. Audit 2026-04-20 found ~13 of 24
+    fires were silently dropped without this lock."""
+    with open(path, "a") as f:
+        fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+        try:
+            f.write(line)
+            f.flush()
+        finally:
+            fcntl.flock(f.fileno(), fcntl.LOCK_UN)
+
+
 def write_decision(record):
-    with open(VIDAR_DECISIONS, "a") as f:
-        f.write(json.dumps(record) + "\n")
+    _append_locked(VIDAR_DECISIONS, json.dumps(record) + "\n")
 
 
 def write_log(record):
-    with open(VIDAR_LOG, "a") as f:
-        f.write(json.dumps(record) + "\n")
+    _append_locked(VIDAR_LOG, json.dumps(record) + "\n")
 
 
 def write_maintenance(league, mode, detail, result="", fix_hint="", phase="arbitrated"):
@@ -185,8 +197,7 @@ def write_maintenance(league, mode, detail, result="", fix_hint="", phase="arbit
             "result":   result[:180],
             "fix_hint": fix_hint[:180],
         }
-        with open(MAINTENANCE_LOG, "a") as f:
-            f.write(json.dumps(rec) + "\n")
+        _append_locked(MAINTENANCE_LOG, json.dumps(rec) + "\n")
     except Exception as e:
         print(f"  [vidar/maintenance] failed: {e}")
 
