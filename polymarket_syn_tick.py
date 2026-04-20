@@ -431,15 +431,19 @@ def filter_for_bot(markets, strategy, existing_cids):
         if m["liquidity"] < min_liq:
             continue
 
-        # End date — must resolve before both max_days cutoff AND sprint end
-        if m["end_date"]:
-            try:
-                end_dt = datetime.fromisoformat(m["end_date"].replace("Z", "+00:00"))
-                effective_cutoff = min(cutoff, sprint_end_dt) if sprint_end_dt else cutoff
-                if end_dt > effective_cutoff or end_dt < datetime.now(timezone.utc):
-                    continue
-            except Exception:
-                pass
+        # End date — must resolve before both max_days cutoff AND sprint end.
+        # Markets with missing/unparseable end_date are REJECTED (not skipped):
+        # otherwise long-horizon markets like Nov-2026 elections slip through and
+        # hold positions that never resolve within the 7-day sprint window.
+        if not m.get("end_date"):
+            continue
+        try:
+            end_dt = datetime.fromisoformat(m["end_date"].replace("Z", "+00:00"))
+        except Exception:
+            continue
+        effective_cutoff = min(cutoff, sprint_end_dt) if sprint_end_dt else cutoff
+        if end_dt > effective_cutoff or end_dt < datetime.now(timezone.utc):
+            continue
 
         # Price range — check the cheaper outcome
         prices = sorted(o["price"] for o in m["outcomes"])
@@ -561,6 +565,7 @@ def open_position(bot, market, outcome, price, reasoning, strategy):
         "current_value":  size_usd,
         "unrealized_pnl": 0.0,
         "opened_at":      datetime.now(timezone.utc).isoformat(),
+        "market_end_date": market.get("end_date"),
         "reasoning":      reasoning[:200] if reasoning else "",
     }
     bot["total_trades"] += 1
