@@ -94,7 +94,7 @@
       "win_rate": 0.0
     },
     {
-      "bot": "mist",
+      "bot": "autobotpred1",
       "type": "research",
       "username": "",
       "sprint_pnl_usd": -17.17,
@@ -104,7 +104,7 @@
       "win_rate": 0.0
     },
     {
-      "bot": "thrud",
+      "bot": "autobotpred3",
       "type": "research",
       "username": "",
       "sprint_pnl_usd": -17.17,
@@ -114,7 +114,7 @@
       "win_rate": 0.0
     },
     {
-      "bot": "kara",
+      "bot": "autobotpred2",
       "type": "research",
       "username": "",
       "sprint_pnl_usd": -21.38,

@@ -17,7 +17,7 @@ AUTOBOTSWING_STRAT = os.path.join(WORKSPACE, "fleet", "swing", "autobotswing", "
 
 FREYA_BEST         = os.path.join(WORKSPACE, "research", "pm", "best_strategy.yaml")
 PM_FLEET_DIR       = os.path.join(WORKSPACE, "fleet", "polymarket")
-FREYA_SLOTS        = ["mist", "kara", "thrud"]
+FREYA_SLOTS        = ["autobotpred1", "autobotpred2", "autobotpred3"]
 
 PM_PERSONAS = {
     "sports":       "You are a sports analytics expert specializing in predicting sporting event outcomes. You analyze team form, head-to-head records, player availability, and situational factors to estimate probabilities.",
@@ -72,7 +72,7 @@ def inject_odin_swing_strategy(dry_run=False):
 
 
 def inject_freya_strategy(dry_run=False):
-    """Apply FREYA best_strategy.yaml to the three FREYA research slots (mist/kara/thrud)."""
+    """Apply FREYA best_strategy.yaml to the three FREYA research slots (autobotpred1/autobotpred2/autobotpred3)."""
     if not os.path.exists(FREYA_BEST):
         print("  [freya] No best_strategy.yaml yet — FREYA slots stay disabled.")
         return
@@ -119,11 +119,11 @@ def inject_freya_strategy(dry_run=False):
                 "starting_capital": 1000.0,
             },
         }
-        # Slight variation per slot: kara gets tighter edge, thrud gets wider
-        if i == 1:   # kara — conservative variant
+        # Slight variation per slot: autobotpred2 gets tighter edge, autobotpred3 gets wider
+        if i == 1:   # autobotpred2 — conservative variant
             strategy["edge"]["min_edge_pts"] = round(
                 min(0.25, best.get("min_edge_pts", 0.08) + 0.03), 3)
-        elif i == 2:  # thrud — aggressive variant
+        elif i == 2:  # autobotpred3 — aggressive variant
             strategy["edge"]["min_edge_pts"] = round(
                 max(0.03, best.get("min_edge_pts", 0.08) - 0.02), 3)
 

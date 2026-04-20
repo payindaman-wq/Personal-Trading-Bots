@@ -487,7 +487,7 @@ def summarize_pm_research(rows):
 
 def load_pm_sprint_results(n=5):
     """Load last N completed PM sprint results for FREYA research bots."""
-    freya_bots = {"mist", "kara", "thrud"}
+    freya_bots = {"autobotpred1", "autobotpred2", "autobotpred3"}
     if not os.path.isdir(PM_RESULTS_DIR):
         return {}
     results = {b: [] for b in freya_bots}
@@ -561,7 +561,7 @@ SIMULATION MODEL:
 {research_summary}
 
 ---
-## Live Competition (FREYA research slots: mist, kara, thrud)
+## Live Competition (FREYA research slots: autobotpred1, autobotpred2, autobotpred3)
 
 {sprint_summary}
 

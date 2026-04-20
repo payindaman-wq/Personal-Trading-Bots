@@ -27,9 +27,9 @@ BOT_ROSTER = [
     # Arb (1)
     {"name": "muninn", "category": "arb",             "type": "arb"},
     # FREYA research slots — disabled until FREYA assigns strategies
-    {"name": "mist",   "category": "research",        "type": "disabled"},
-    {"name": "kara",   "category": "research",        "type": "disabled"},
-    {"name": "thrud",  "category": "research",        "type": "disabled"},
+    {"name": "autobotpred1",   "category": "research",        "type": "disabled"},
+    {"name": "autobotpred2",   "category": "research",        "type": "disabled"},
+    {"name": "autobotpred3",  "category": "research",        "type": "disabled"},
 ]
 
 def make_bot(meta):

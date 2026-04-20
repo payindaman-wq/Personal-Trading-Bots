@@ -31,7 +31,7 @@ FREYA_RESEARCHER = os.path.join(RESEARCH, "freya_researcher.py")
 PM_RESEARCH_DIR  = os.path.join(RESEARCH, "pm")
 PM_FLEET_DIR     = os.path.join(WORKSPACE, "fleet", "polymarket")
 
-FREYA_SLOTS = ["mist", "kara", "thrud"]
+FREYA_SLOTS = ["autobotpred1", "autobotpred2", "autobotpred3"]
 
 LOKI_PENDING_ACTIONS    = os.path.join(RESEARCH, "loki_pending_actions.jsonl")
 STRUCTURAL_RATE_FILE    = os.path.join(RESEARCH, "loki_structural_rate.json")
@@ -1112,7 +1112,7 @@ def apply_freya_constant(constant, new_value):
 
 
 def loki_inject_freya_strategy(gen):
-    """Inject current FREYA best_strategy into mist/kara/thrud at every Mimir milestone."""
+    """Inject current FREYA best_strategy into autobotpred1/autobotpred2/autobotpred3 at every Mimir milestone."""
     best_path = os.path.join(PM_RESEARCH_DIR, "best_strategy.yaml")
     if not os.path.exists(best_path):
         print("  [loki] inject: no best_strategy.yaml yet — skipping")
@@ -1133,11 +1133,11 @@ def loki_inject_freya_strategy(gen):
 
         edge_base = best.get("min_edge_pts", 0.08)
         if i == 1:
-            edge = round(min(0.25, edge_base + 0.03), 3)   # kara: conservative
+            edge = round(min(0.25, edge_base + 0.03), 3)   # autobotpred2: conservative
         elif i == 2:
-            edge = round(max(0.03, edge_base - 0.02), 3)   # thrud: aggressive
+            edge = round(max(0.03, edge_base - 0.02), 3)   # autobotpred3: aggressive
         else:
-            edge = edge_base                                # mist: exact champion
+            edge = edge_base                                # autobotpred1: exact champion
 
         strategy = {
             "name":           bot_name,
@@ -1240,7 +1240,7 @@ def process_pm_entry(entry):
     else:
         print(f"  [loki] No PM code change keywords — program.md only")
 
-    # Step 3: Inject current best strategy into mist/kara/thrud
+    # Step 3: Inject current best strategy into autobotpred1/autobotpred2/autobotpred3
     injected = loki_inject_freya_strategy(gen)
     if injected:
         actions.append("freya_inject: " + ", ".join(injected))
@@ -1300,7 +1300,7 @@ CYCLE_LEAGUE_CONFIGS = {
         "strategy_fmt": "pm",
         "advance_cmd":  ["python3", os.path.join(WORKSPACE, "polymarket_cycle_advance.py")],
         "start_cmd":    None,   # advance includes sprint start
-        "autobots":     {"mist", "kara", "thrud"},
+        "autobots":     {"autobotpred1", "autobotpred2", "autobotpred3"},
     },
 }
 

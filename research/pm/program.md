@@ -271,7 +271,7 @@ Do not run generation 30,001.
   2. Disable the scheduler.
   3. Rotate or remove the Gemini Flash Lite API key.
   4. Archive v1.0–v71.0 and all simulation results (Gens 1–30,000).
-  5. Archive live results (all sprints: mist, kara, thrud).
+  5. Archive live results (all sprints: autobotpred1, autobotpred2, autobotpred3).
   6. Assign D1 to a person with 2 hours available.
   7. Do not restart the loop.
   8. Submit the archive confirmation and D1 assignment record to MIMIR.
