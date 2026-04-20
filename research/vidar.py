@@ -29,21 +29,15 @@ WORKSPACE         = "/root/.openclaw/workspace"
 RESEARCH          = os.path.join(WORKSPACE, "research")
 ANTHROPIC_SECRET  = "/root/.openclaw/secrets/anthropic.json"
 ANTHROPIC_URL     = "https://api.anthropic.com/v1/messages"
-VIDAR_MODEL       = "claude-opus-4-7"       # high-stakes strategic modes
-VIDAR_MODEL_FAST  = "claude-sonnet-4-6"     # pattern-match / routine modes
+# VIDAR runs all modes on Opus 4.7. Single-model-per-officer keeps the
+# role/model mapping clean: MIMIR = Sonnet (first-pass analyst), VIDAR =
+# Opus (last-line arbiter). A cheaper model for arbitration would be
+# backwards — the arbiter should always be at least as strong as the work
+# it's reviewing. Was mixed pre-2026-04-20 for cost; dedup ship made the
+# split's savings negligible (~$6/month).
+VIDAR_MODEL       = "claude-opus-4-7"
 VIDAR_MAX_TOKENS  = 6000
 
-# Opus reserved for genuinely strategic arbitration (novel reasoning, program
-# rewrites, manual deep-dives). Sonnet handles pattern-match modes where the
-# judgment is mostly structured diff-review.
-MODEL_BY_MODE = {
-    "revert_review":    VIDAR_MODEL_FAST,
-    "patch_repair":     VIDAR_MODEL_FAST,
-    "cycle_review":     VIDAR_MODEL_FAST,
-    "oscillation_diag": VIDAR_MODEL,
-    "restructure":      VIDAR_MODEL,
-    "deep_dive":        VIDAR_MODEL,
-}
 VIDAR_LOG         = os.path.join(RESEARCH, "vidar_log.jsonl")
 VIDAR_DECISIONS   = os.path.join(RESEARCH, "vidar_decisions.jsonl")
 MAINTENANCE_LOG   = os.path.join(WORKSPACE, "maintenance_log.jsonl")
@@ -414,7 +408,7 @@ def run_mode(args, api_key):
         print(f"unknown mode: {args.mode}")
         sys.exit(1)
 
-    model = MODEL_BY_MODE.get(args.mode, VIDAR_MODEL)
+    model = VIDAR_MODEL
     print(f"[vidar] firing {model} ({args.mode}, {args.league}) — prompt {len(prompt)} chars")
     try:
         response = call_claude(prompt, api_key, model)
