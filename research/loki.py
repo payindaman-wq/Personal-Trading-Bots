@@ -50,6 +50,28 @@ AUDIT_STRUCTURAL_FAILURE_RISE_PP = 15
 AUDIT_MEAN_SHARPE_DROP           = 0.3
 AUDIT_REVERT_OSCILLATION_LIMIT   = 2
 AUDIT_PAUSE_HOURS                = 12
+
+# VIDAR fire dedup (prevents duplicate Opus/Sonnet fires on rapid LOKI retries
+# or while a league is already paused — see audit 2026-04-20).
+VIDAR_FIRE_STATE_FILE            = os.path.join(RESEARCH, "vidar_fire_state.json")
+VIDAR_REVERT_REVIEW_COOLDOWN_SEC = 600   # 10 min per (league, mode)
+
+def _vidar_fire_allowed(league, mode, cooldown_sec):
+    try:
+        state = json.load(open(VIDAR_FIRE_STATE_FILE)) if os.path.exists(VIDAR_FIRE_STATE_FILE) else {}
+    except Exception:
+        state = {}
+    key = f"{league}:{mode}"
+    now = datetime.now(timezone.utc).timestamp()
+    last = state.get(key, 0)
+    if now - last < cooldown_sec:
+        return False
+    state[key] = now
+    try:
+        json.dump(state, open(VIDAR_FIRE_STATE_FILE, "w"))
+    except Exception:
+        pass
+    return True
 PM_PERSONAS = {
     "sports":       "You are a sports analytics expert specializing in predicting sporting event outcomes.",
     "politics":     "You are a political analyst specializing in predicting electoral and policy outcomes.",
@@ -256,18 +278,23 @@ def _record_revert(league, reason, detail=""):
     except Exception as _e:
         print(f"  [loki/revert/maintenance] failed: {_e}")
 
-    # Fire VIDAR revert_review in background (Opus arbitration — non-blocking).
-    try:
-        subprocess.Popen(
-            ["python3", VIDAR_SCRIPT,
-             "--mode", "revert_review",
-             "--league", league,
-             "--revert-ts", revert_ts],
-            stdout=open(os.path.join(RESEARCH, "vidar.log"), "a"),
-            stderr=subprocess.STDOUT,
-        )
-    except Exception as _e:
-        print(f"  [loki/revert/vidar] launch failed: {_e}")
+    # Fire VIDAR revert_review in background (arbitration — non-blocking).
+    # Deduped per (league, mode) with a cooldown window to avoid duplicate
+    # fires when LOKI retries the same revert in quick succession.
+    if _vidar_fire_allowed(league, "revert_review", VIDAR_REVERT_REVIEW_COOLDOWN_SEC):
+        try:
+            subprocess.Popen(
+                ["python3", VIDAR_SCRIPT,
+                 "--mode", "revert_review",
+                 "--league", league,
+                 "--revert-ts", revert_ts],
+                stdout=open(os.path.join(RESEARCH, "vidar.log"), "a"),
+                stderr=subprocess.STDOUT,
+            )
+        except Exception as _e:
+            print(f"  [loki/revert/vidar] launch failed: {_e}")
+    else:
+        print(f"  [loki/revert/vidar] skipped — revert_review for {league} within cooldown")
 
     # Oscillation guard
     now_ts = datetime.now(timezone.utc).timestamp()
@@ -275,21 +302,34 @@ def _record_revert(league, reason, detail=""):
               if (now_ts - datetime.fromisoformat(r["ts"]).replace(tzinfo=timezone.utc).timestamp()) < 86400]
     if len(recent) >= AUDIT_REVERT_OSCILLATION_LIMIT:
         pauses = load_structural_pauses()
+        # Detect whether we're already in an active pause window — if so,
+        # extend but skip the VIDAR re-fire (it already diagnosed this cycle).
+        already_paused = False
+        prev_until = pauses.get(league)
+        if prev_until:
+            try:
+                prev_dt = datetime.fromisoformat(prev_until).replace(tzinfo=timezone.utc)
+                if prev_dt > datetime.now(timezone.utc):
+                    already_paused = True
+            except Exception:
+                pass
         until = datetime.now(timezone.utc) + timedelta(hours=AUDIT_PAUSE_HOURS)
         pauses[league] = until.strftime("%Y-%m-%dT%H:%M")
         save_structural_pauses(pauses)
-        print(f"  [loki-oscillation] {league} paused {AUDIT_PAUSE_HOURS}h after {len(recent)} reverts in 24h -- VIDAR oscillation_diag will review")
-        # Fire VIDAR oscillation_diag in background
-        try:
-            subprocess.Popen(
-                ["python3", VIDAR_SCRIPT,
-                 "--mode", "oscillation_diag",
-                 "--league", league],
-                stdout=open(os.path.join(RESEARCH, "vidar.log"), "a"),
-                stderr=subprocess.STDOUT,
-            )
-        except Exception as _e:
-            print(f"  [loki/oscillation/vidar] launch failed: {_e}")
+        if already_paused:
+            print(f"  [loki-oscillation] {league} pause extended (already paused until {prev_until}); skipping VIDAR re-fire")
+        else:
+            print(f"  [loki-oscillation] {league} paused {AUDIT_PAUSE_HOURS}h after {len(recent)} reverts in 24h -- VIDAR oscillation_diag will review")
+            try:
+                subprocess.Popen(
+                    ["python3", VIDAR_SCRIPT,
+                     "--mode", "oscillation_diag",
+                     "--league", league],
+                    stdout=open(os.path.join(RESEARCH, "vidar.log"), "a"),
+                    stderr=subprocess.STDOUT,
+                )
+            except Exception as _e:
+                print(f"  [loki/oscillation/vidar] launch failed: {_e}")
 
 
 def _audit_verdict(baseline, current):
