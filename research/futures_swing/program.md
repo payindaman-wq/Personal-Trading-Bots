@@ -1,11 +1,10 @@
 ```markdown
 # ODIN Research Program — FUTURES SWING
-# Version: Post-Gen-6284 | Revised by MIMIR (Gen 6284 review)
-# ══════════════════════════════════════════════════════════════════
-# SHARPE=2.3513 | TRADES=1265 | WIN=40.1% | Source: elite_0.yaml
-# ══════════════════════════════════════════════════════════════════
+# Champion: Sharpe=2.3513 | Trades=1265 | Win=40.1%
 
-# ── STEP 1: COPY THIS YAML EXACTLY, THEN CHANGE EXACTLY ONE VALUE ─
+# ══════════════════════════════════════════════════════════════════
+# STEP 1 — COPY THIS YAML EXACTLY, THEN CHANGE EXACTLY ONE VALUE
+# ══════════════════════════════════════════════════════════════════
 
 name: crossover
 style: swing_momentum
@@ -63,89 +62,99 @@ risk:
   stop_if_down_pct: 18
 
 # ══════════════════════════════════════════════════════════════════
-# STEP 2 — PICK EXACTLY ONE CHANGE FROM THE TABLE BELOW
+# STEP 2 — HARD REJECT (check ALL before submitting)
 # ══════════════════════════════════════════════════════════════════
-# RULES (violation = instant reject, do not submit):
-#   stop_loss_pct MUST be ≥ 1.70
-#   rsi long (lt) MUST be 30–45
-#   rsi_period_hours MUST be 18–30
-#   timeout_hours MUST be ≤ 210
-#   Do NOT add/remove pairs. Do NOT change fee_rate.
-#   Do NOT submit the champion unchanged.
-#   Output must produce 400–3000 trades.
-#
-# ── PRIORITY 1 — try these first, in order shown ─────────────────
-#
-# PARAMETER         CURRENT   CANDIDATES (try left-to-right, skip if tried)
-# take_profit_pct   4.65      4.70, 4.75, 4.80, 4.85, 4.90, 4.95,
-#                             5.00, 5.10, 5.20, 5.30, 5.40, 5.50,
-#                             4.60, 4.55, 4.50
-#
-# stop_loss_pct     1.92      1.95, 2.00, 2.05, 2.10, 2.15, 2.20,
-#                             2.25, 2.30, 1.90, 1.85, 1.80, 1.75
-#                             ← FLOOR IS 1.70; DO NOT GO BELOW 1.70
-#
-# timeout_hours     166       160, 168, 172, 164, 156, 176, 180,
-#                             152, 184, 144, 192, 136, 200
-#
-# rsi long (lt)     37.77     38.0, 37.5, 38.5, 37.0, 39.0, 36.5,
-#                             39.5, 36.0, 40.0, 40.5, 35.5, 35.0
-#                             ← FLOOR IS 35.0; CEILING IS 45.0
-#
-# ── PRIORITY 2 — only if ALL Priority 1 values are exhausted ─────
-#
-# rsi_period_hours  24        22, 23, 25, 26, 20, 21, 18, 19, 27, 28
-#                             (do NOT use 24 — that is the champion value)
-#
-# rsi short (gt)    60        59, 61, 58, 62, 57, 63
-#
-# ── PRIORITY 3 — last resort only ────────────────────────────────
-#
-# trend_period_hrs  48        36, 42, 54, 60, 72
-# pause_if_down_pct 8         6, 7, 9, 10
-# stop_if_down_pct  18        15, 16, 17, 20, 22
-#
-# DO NOT CHANGE: size_pct, max_open, pairs, fee_rate, leverage
-#
+# REJECT if ANY of these are true:
+#   stop_loss_pct < 1.70
+#   rsi long (lt) value > 45 or < 30
+#   rsi_period_hours < 18 or > 30
+#   timeout_hours > 210
+#   trades outside 400–3000
+#   fee_rate changed
+#   pairs added or removed
+#   more than ONE value changed
+#   identical to champion above
+
 # ══════════════════════════════════════════════════════════════════
-# STEP 3 — VERIFY BEFORE SUBMITTING (check every box)
+# STEP 3 — PICK ONE VALUE FROM THIS LIST (priority order)
 # ══════════════════════════════════════════════════════════════════
-# □ Copied YAML exactly — only ONE value changed
-# □ New value is NOT the current champion value
-# □ stop_loss_pct ≥ 1.70
-# □ rsi long (lt) is between 30 and 45
-# □ timeout_hours ≤ 210
-# □ Estimated trade count: 400–3000
-# □ This exact config has NOT been submitted before
+
+# TIER 1 — LEAST EXPLORED (try these first)
 #
-# KNOWN-BAD — do not reproduce any of these:
-# (trades≈190, sharpe<0), (trades≈185, sharpe<0), (trades≈174, sharpe<0)
-# (trades≈224, sharpe<0), (trades≈178, sharpe<0), (trades≈158, sharpe<0)
-# (trades≈239, sharpe<0), (trades≈397, sharpe<0.6), (trades≈461, sharpe<0.6)
-# stop_loss_pct < 1.70 → always bad, always reject
-# rsi long (lt) > 45   → bad Sharpe, reject
-# rsi long (lt) < 30   → bad Sharpe, reject
-# timeout_hours > 210  → reject
+# rsi_period_hours (currently 24):
+#   → TRY: 22, 23, 25, 26, 21, 27, 20, 28, 19, 18
 #
+# rsi short gt (currently 60):
+#   → TRY: 59, 61, 58, 62, 57, 63
+#
+# trend_period_hours (currently 48):
+#   → TRY: 42, 54, 60, 36, 72
+
+# TIER 2 — MODERATELY EXPLORED
+#
+# take_profit_pct (currently 4.65):
+#   → TRY: 4.80, 4.85, 4.90, 4.95, 5.00, 5.10, 5.20, 5.30, 5.40, 5.50
+#   → TRY: 4.55, 4.50, 4.45, 4.40
+#   → FINE: 4.62, 4.63, 4.64, 4.66, 4.67, 4.68, 4.69, 4.71, 4.72, 4.73
+#
+# stop_loss_pct (currently 1.92):
+#   → TRY: 2.10, 2.15, 2.20, 2.25, 2.30, 2.35, 2.40
+#   → TRY: 1.85, 1.80, 1.75, 1.70  ← 1.70 is hard floor
+#   → FINE: 1.88, 1.89, 1.90, 1.91, 1.93, 1.94, 1.96, 1.97, 1.98, 1.99
+#
+# timeout_hours (currently 166):
+#   → TRY: 158, 162, 163, 164, 165, 167, 168, 169, 170, 172, 174, 176, 178, 180
+
+# TIER 3 — LAST RESORT
+#
+# rsi long lt (currently 37.77):
+#   → TRY: 38.0, 38.2, 38.4, 38.6, 38.8, 39.0, 37.5, 37.3, 37.0, 36.5
+#   (most adjacent values already tested — prefer larger steps)
+#
+# pause_if_down_pct (currently 8):  → TRY: 7, 9, 6, 10
+# stop_if_down_pct (currently 18):  → TRY: 16, 17, 20, 22
+
 # ══════════════════════════════════════════════════════════════════
-# OPERATOR NOTES (do not send to LLM)
+# STEP 4 — VERIFY BEFORE SUBMITTING
 # ══════════════════════════════════════════════════════════════════
-# [STATUS] Stalled since gen 3340. Dedup rate ~65% in last 20 gens.
-#          Random single-param walk is structurally exhausted.
-# [Z8]  ACTION REQUIRED: Run full 2D grid sweep of take_profit_pct
-#       × stop_loss_pct (~150 backtests). This is now critical path.
-#       Random LLM sampling cannot find improvement without this.
-# [Z4]  Confirm APT/SUI/ARB/OP have ≥17,520 candles before live deploy.
+# □ Copied YAML exactly from champion above
+# □ Changed EXACTLY ONE parameter
+# □ Value is NOT the current champion value
+# □ All HARD REJECT rules pass
+# □ This exact config not submitted before
+
+# ══════════════════════════════════════════════════════════════════
+# DO NOT CHANGE (fixed):
+# size_pct=25 | max_open=3 | fee_rate=0.0005 | leverage=2
+#
+# KNOWN CATASTROPHIC — do not reproduce:
+# stop_loss_pct < 1.70 → catastrophic loss
+# max_open=2 → kills trade count
+# trend_period=24 → kills trade count
+# ~190 trades → poison attractor (sharpe ~ -1.6)
+# ~500 trades → weak attractor (sharpe ~ 0.84–0.94), already tested many times
+#
+# KNOWN-BAD SIGNATURES (do not reproduce):
+# (503t, 0.81), (521t, 0.94), (506t, 0.94), (447t, 1.10), (345t, 0.89)
+# (188t, −1.65), (190t, −1.05), (190t, −1.63), (185t, −0.79)
+# (502t, +0.87), (501t, +1.00), (505t, +0.84), (457t, +1.04)
+# ══════════════════════════════════════════════════════════════════
+
+# INFRASTRUCTURE NOTES (human operator — do not send to LLM):
+# [BUG-4] CRITICAL: Pre-backtest SHA-256 dedup gate still missing.
+#         ~60% of recent gens are dedup rejects = wasted compute.
+#         Implement immediately.
+# [Z4]  Confirm APT/SUI/ARB/OP/POL have ≥17,520 candles before live deploy.
+# [Z8]  Run systematic 2D grid: take_profit (4.40–5.50, step 0.10)
+#       × stop_loss (1.70–2.50, step 0.08) = ~150 backtests.
+#       LLM random search is exhausted. Grid is required.
 # [Z9]  Live deployment blocked until Z4+Z8 complete.
-#       Macro = CAUTION. Live sizing = 50% of normal only.
-#       Do NOT change size_pct in YAML (keep 25 for comparability).
-# [Z10] Gen gap 5031→5944 (913 gens missing). Investigate log writes.
-# [BUG-2] elite_0.yaml may lag in-memory champion. Fix: write on every accept.
-# [BUG-4] Clone detection is post-backtest. Fix: pre-backtest SHA-256 gate.
-# [BUG-5] Poison attractor (~190t) still appearing sporadically.
-#         MIN_TRADES=400 is correct; verify gate is applied pre-backtest.
-# [NOTE] Last improvement: gen 3340 (2946 gens ago). Z8 grid sweep
-#        must be actioned by human operator — prompt changes alone
-#        cannot overcome combinatorial exhaustion at this stage.
-# ══════════════════════════════════════════════════════════════════
+#       Macro = CAUTION. Live sizing = 50% only.
+# [Z10] Gen gap 5031→5944 (913 gens missing). Champion 2.3513 may reflect
+#       unlogged improvement. TSV audit required.
+# [Z11] Dedup rate ~60% — BUG-4 is now top infrastructure priority.
+# [Z12] Non-monotonic gen numbers (gen 5257 after gen 9000) = log corruption.
+#       Audit log integrity before trusting improvement counts.
 ```
+
+---
