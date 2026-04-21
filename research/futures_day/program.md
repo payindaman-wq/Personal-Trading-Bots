@@ -3,21 +3,29 @@
 
 ## YOUR ONLY JOB
 
-Output ONE change to the YAML below. The changed YAML must pass the checklist. Nothing else.
+Change **one field** in the YAML below, output the change declaration, then the full modified YAML.
 
 ---
 
-## OUTPUT FORMAT
+## REQUIRED CHANGE
+
+**Set `entry.short.conditions[0].value` = `66.0`**
+
+If `66.0` is banned below, use `64.0`. If `64.0` is banned, use `62.0`. If all three banned, set `exit.stop_loss_pct` = `2.3`.
+
+---
+
+## OUTPUT FORMAT (exactly this structure)
 
 ```
 CHANGE: [field] [old_value] → [new_value]
 USING: size_pct=8, rsi_long=29.33, rsi_short=[new_value], stop_loss=2.59, tp=4.6
-[YAML]
+[FULL YAML]
 ```
 
 ---
 
-## CHAMPION YAML — COPY THIS EXACTLY, THEN CHANGE EXACTLY ONE VALUE
+## CHAMPION YAML — change exactly ONE value
 
 ```yaml
 name: crossover
@@ -57,7 +65,7 @@ entry:
     - indicator: rsi
       period_minutes: 60
       operator: gt
-      value: 66.0        ← CHANGE IS HERE (was 68.63, now 66.0)
+      value: 68.63
 exit:
   take_profit_pct: 4.6
   stop_loss_pct: 2.59
@@ -68,51 +76,33 @@ risk:
   stop_if_down_pct: 18
 ```
 
-**THE ONLY CHANGE:** `entry.short.conditions[0].value` changed from `68.63` → `66.0`
-
-The `← CHANGE IS HERE` annotation must NOT appear in your output YAML. Remove it.
-
 ---
 
-## BANNED VALUES — INSTANT REJECT IF USED
+## BANNED VALUES — instant reject if used as the changed value
 
 | Field | Never use |
 |-------|-----------|
-| entry.short.conditions[0].value | **68.63** ← the old champion value — DO NOT USE |
-| entry.long.conditions[0].value | 29.33 (keep it, don't change it), 32.0, 35.97 |
-| position.size_pct | 16.91 (keep at 8) |
-| exit.stop_loss_pct | 2.59 (keep it), 2.39 |
-| exit.take_profit_pct | 4.6 (keep it), 5.0 |
-| exit.timeout_minutes | 720 (keep it) |
-| leverage | 2 (keep it) |
-| fee_rate | 0.0005 (keep it) |
+| entry.short.conditions[0].value | 68.63 |
+| entry.long.conditions[0].value | 29.33, 32.0, 35.97 |
+| position.size_pct | 16.91 |
+| exit.stop_loss_pct | 2.59, 2.39 |
+| exit.take_profit_pct | 4.6, 5.0 |
+| exit.timeout_minutes | 720 |
+| leverage | 2 |
+| fee_rate | 0.0005 |
 
-**CRITICAL:** If you output `value: 68.63` under `entry.short`, your result will be rejected as a duplicate. Use `66.0`.
-
----
-
-## FALLBACK CHAIN
-
-If 66.0 is unavailable or banned, try in order:
-1. `entry.short.conditions[0].value` = `64.0`
-2. `entry.short.conditions[0].value` = `62.0`
-3. `exit.stop_loss_pct` = `2.3`
-4. `position.size_pct` = `10`
+**`position.size_pct` stays at 8 — it is banned as a change target, keep it at 8.**
+**`leverage`, `fee_rate`, `timeout_minutes` must stay at their values above.**
 
 ---
 
-## PREFLIGHT — CHECK BEFORE OUTPUTTING
+## PREFLIGHT (verify before outputting)
 
-- [ ] `entry.short.conditions[0].value` is `66.0` (NOT `68.63`)
-- [ ] `entry.long.conditions[0].value` is still `29.33` (unchanged)
-- [ ] `exit.take_profit_pct` is still `4.6` (unchanged)
-- [ ] `exit.stop_loss_pct` is still `2.59` (unchanged)
-- [ ] `exit.timeout_minutes` is still `720` (unchanged)
-- [ ] `leverage` is still `2` (unchanged)
-- [ ] `fee_rate` is still `0.0005` (unchanged)
-- [ ] All 16 pairs present in exact order shown
 - [ ] Exactly ONE value differs from champion YAML
-- [ ] No annotation text (← arrows) in output YAML
+- [ ] Changed value is NOT in banned list
+- [ ] All 16 pairs present, same order
+- [ ] leverage=2, fee_rate=0.0005, timeout_minutes=720 unchanged
+- [ ] YAML structure identical to champion
 
 ---
 
@@ -122,20 +112,23 @@ Champion: Gen 3233 | Sharpe=0.4066 | 1756 trades | WR=50.1%
 Goal: Sharpe > 0.4066
 
 Previously tested — DO NOT RESUBMIT:
-- rsi_short=68.63 → current champion
-- rsi_long=32.0 → Sharpe=0.296 (worse)
-- rsi_long=35.97 → failed
-- size_pct=16.91 → failed
-- stop_loss_pct=2.39 → failed
-- take_profit_pct=5.0 → Sharpe=0.021 (failed)
+| Change | Result |
+|--------|--------|
+| rsi_short=68.63 | Champion (current) |
+| rsi_long=32.0 | Sharpe=0.296 (worse) |
+| rsi_long=35.97 | Failed |
+| size_pct=16.91 | Failed |
+| stop_loss_pct=2.39 | Failed |
+| take_profit_pct=5.0 | Sharpe=0.021 (failed) |
 
-Next to test after this (do not jump ahead):
-1. rsi_short=64.0
-2. rsi_short=62.0
-3. stop_loss_pct=2.3
-4. size_pct=10
-5. take_profit_pct=4.2
-6. rsi_long=27.0
+Next priority (first untested):
+1. **rsi_short → 66.0** ← DO THIS NOW
+2. rsi_short → 64.0
+3. rsi_short → 62.0
+4. stop_loss_pct → 2.3
+5. size_pct → 10
+6. take_profit_pct → 4.2
+7. rsi_long → 27.0
 ```
 
 ---
