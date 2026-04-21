@@ -1,13 +1,10 @@
 ```markdown
 # ODIN Research Program — FUTURES SWING
-# Version: Post-Gen-6615 | Revised by MIMIR (Gen 6615 review)
-# ══════════════════════════════════════════════════════════════════
-# SHARPE=2.3513 | TRADES=1265 | WIN=40.1% | Source: elite_0.yaml
-# STALLED since gen 3340 (3275+ gens). Z8 grid sweep is CRITICAL.
+# Sharpe=2.3513 | Trades=1265 | Win=40.1% | Gen 3340 (stalled 3444+ gens)
 # ══════════════════════════════════════════════════════════════════
 
 ## YOUR ONLY JOB
-Copy the YAML below. Change EXACTLY ONE value. Output the modified YAML.
+Copy the YAML below. Change EXACTLY ONE numeric value. Output ONLY the modified YAML.
 
 ```yaml
 name: crossover
@@ -68,102 +65,100 @@ risk:
 
 ---
 
-## HARD CONSTRAINTS — CHECK BEFORE SUBMITTING
+## HARD RULES (check these BEFORE submitting)
 
-| Constraint | Rule |
+| Parameter | Rule |
 |---|---|
-| stop_loss_pct | MUST be ≥ 1.70 |
-| rsi long (lt) | MUST be 30–45 |
-| rsi_period_hours | MUST be 18–30 |
-| timeout_hours | MUST be ≤ 210 |
-| Pairs | DO NOT add or remove |
-| fee_rate | DO NOT change |
-| size_pct / max_open / leverage | DO NOT change |
-| Trade count target | Your change MUST keep trades near 1200–1300 |
+| stop_loss_pct | ≥ 1.70 always |
+| rsi long (lt) | 30–45 only |
+| rsi_period_hours | 18–30 only |
+| timeout_hours | ≤ 210 only |
+| pairs / fee_rate / size_pct / max_open / leverage | DO NOT CHANGE |
+| Expected trades | Must stay 1000–1500. If your change would drop trades below 1000, pick a different value. |
 
-**CRITICAL:** The champion produces ~1265 trades. If your change would cut trades below 800, REJECT IT and choose a different parameter. Changes that drop trades to 400–600 have Sharpe < 1.0 and are useless.
+**REJECT your proposal if it produces fewer than 1000 trades. The champion has 1265 trades. Low-trade configs (under 800) always have Sharpe below 1.0 and are useless.**
 
 ---
 
-## WHAT TO CHANGE — PRIORITY ORDER
+## WHAT TO CHANGE — FOLLOW THIS ORDER
 
-### PRIORITY 1 — take_profit_pct and stop_loss_pct (2D combinations)
-The search is stalled. Try COMBINATIONS of these two parameters by changing one:
+### #1 PRIORITY: take_profit_pct (current: 4.65)
+Try ONE value from this list (pick one not recently tried):
+4.70 | 4.75 | 4.80 | 4.85 | 4.90 | 4.95 | 5.00 | 5.10 | 5.20 | 5.30 | 5.40 | 5.50 | 4.60 | 4.55 | 4.50
 
-**take_profit_pct** (current: 4.65):
-→ Try: 4.70, 4.75, 4.80, 4.85, 4.90, 4.95, 5.00, 5.10, 5.20, 5.30, 5.40, 5.50, 4.60, 4.55, 4.50
+### #2 PRIORITY: stop_loss_pct (current: 1.92)
+Try ONE value from this list:
+1.95 | 2.00 | 2.05 | 2.10 | 2.15 | 2.20 | 2.25 | 2.30 | 1.90 | 1.85 | 1.80 | 1.75
+**FLOOR = 1.70. Never go below 1.70.**
 
-**stop_loss_pct** (current: 1.92):
-→ Try: 1.95, 2.00, 2.05, 2.10, 2.15, 2.20, 2.25, 2.30, 1.90, 1.85, 1.80, 1.75
-→ FLOOR = 1.70. Never go below 1.70.
+### #3 PRIORITY: timeout_hours (current: 166)
+Try: 160 | 168 | 172 | 164 | 156 | 176 | 180 | 152 | 184 | 144 | 192
 
-Preferred: If take_profit_pct has been tried near 4.65, pick a stop_loss_pct value instead. Alternate between these two to explore the 2D surface.
+### #4 PRIORITY: RSI thresholds
+- rsi long (lt), current 37.77 → try: 38.0 | 37.5 | 38.5 | 37.0 | 39.0 | 36.5 | 39.5 | 36.0 | 40.0 | 35.5
+- rsi short (gt), current 60 → try: 59 | 61 | 58 | 62 | 57
+- rsi period_hours, current 24 → try: 22 | 23 | 25 | 26 | 20 | 21
 
-### PRIORITY 2 — timeout_hours (current: 166)
-→ Try: 160, 168, 172, 164, 156, 176, 180, 152, 184, 144, 192
+### #5 LAST RESORT ONLY
+- trend period_hours (48) → 36 | 42 | 54 | 60 | 72
+- pause_if_down_pct (8) → 6 | 7 | 9 | 10
+- stop_if_down_pct (18) → 15 | 16 | 17 | 20 | 22
 
-### PRIORITY 3 — RSI entry threshold (current: 37.77)
-**rsi long (lt)** — MUST stay 30–45:
-→ Try: 38.0, 37.5, 38.5, 37.0, 39.0, 36.5, 39.5, 36.0, 40.0, 35.5, 35.0
-
-**rsi_period_hours** (current: 24) — MUST stay 18–30:
-→ Try: 22, 23, 25, 26, 20, 21, 18, 19, 27, 28
-
-**rsi short (gt)** (current: 60):
-→ Try: 59, 61, 58, 62, 57, 63
-
-### PRIORITY 4 — Last resort only
-**trend_period_hrs** (current: 48): → 36, 42, 54, 60, 72
-**pause_if_down_pct** (current: 8): → 6, 7, 9, 10
-**stop_if_down_pct** (current: 18): → 15, 16, 17, 20, 22
+**Alternate between #1 and #2 on consecutive proposals to explore the 2D surface.**
 
 ---
 
-## KNOWN-BAD — DO NOT REPRODUCE
+## KNOWN BAD — DO NOT USE
 
-- stop_loss_pct < 1.70 → always bad
-- rsi long (lt) > 45 → bad Sharpe
-- rsi long (lt) < 30 → bad Sharpe
+- stop_loss_pct < 1.70 → always fails
+- rsi long (lt) > 45 or < 30 → always fails
 - timeout_hours > 210 → reject
-- Any config producing < 800 trades → reject
-- These trade counts are known poisoned: ~84, ~143, ~190, ~185, ~174, ~224, ~178, ~158, ~239
+- Any config with < 1000 trades → reject
+- These exact values are poisoned attractors: take_profit_pct=4.65 + stop_loss_pct=1.92 together (that is the unchanged champion — you must change exactly one)
 
 ---
 
-## FINAL CHECKLIST
+## FINAL CHECK
 
-Before outputting, verify:
-- [ ] Copied YAML exactly — only ONE value changed
-- [ ] Changed value is NOT the current champion value (4.65 / 1.92 / 166 / 37.77 / 60 / 24 / 48)
+Before outputting, confirm:
+- [ ] Exactly ONE value changed from the champion YAML above
+- [ ] Changed value is different from current champion value
 - [ ] stop_loss_pct ≥ 1.70
 - [ ] rsi long (lt) between 30 and 45
 - [ ] timeout_hours ≤ 210
-- [ ] Expected trade count: 800–3000 (champion is 1265; stay close)
+- [ ] Change will NOT drop trades below 1000
 
-Output ONLY the YAML. No explanation needed.
+Output ONLY the YAML. No commentary.
 
 ---
 # ══════════════════════════════════════════════════════════════════
 # OPERATOR NOTES (not sent to LLM)
 # ══════════════════════════════════════════════════════════════════
-# [STATUS] Stalled since gen 3340. 3275+ gens no improvement.
-#          Dedup rate ~65%. Random single-param walk exhausted.
-# [Z8]  CRITICAL PATH: Run full 2D grid sweep take_profit_pct ×
-#       stop_loss_pct (~150 backtests). LLM sampling cannot find
-#       improvement without systematic coverage. Human action required.
+# [CRITICAL-Z8] Run full 2D grid: take_profit_pct × stop_loss_pct
+#   take_profit_pct: 4.50, 4.55, 4.60, 4.65, 4.70, 4.75, 4.80, 4.85,
+#                   4.90, 4.95, 5.00, 5.10, 5.20, 5.30, 5.40, 5.50
+#   stop_loss_pct:  1.70, 1.75, 1.80, 1.85, 1.90, 1.92, 1.95, 2.00,
+#                   2.05, 2.10, 2.15, 2.20, 2.25, 2.30
+#   ~224 backtests. LLM random walk CANNOT cover this. Human action needed.
+#   Z8 is the primary unlock. Live deployment blocked until Z8+Z4 complete.
+#
+# [CRITICAL-MIN_TRADES] MIN_TRADES[futures_swing] must be raised to 1000.
+#   Current value 400 allows 400-999 trade configs to waste backtest cycles.
+#   Champion regime is 1263-1272 trades. 400-trade configs = Sharpe < 1.0.
+#   BUG-5 (poison attractor bypassing gate) needs pre-backtest SHA-256 gate.
+#
+# [BUG-2] elite_0.yaml may lag in-memory champion. YAML shows 2.3513,
+#   improvement log last shows 2.3494. Difference = 0.0019. Write on every accept.
+# [BUG-4] Clone detection is post-backtest. Add pre-backtest SHA-256 gate.
+# [BUG-5] Poison attractor (~84-190t) bypassing MIN_TRADES gate sporadically.
+#   Apply gate PRE-backtest. Verify MIN_TRADES enforcement after raising to 1000.
 # [Z4]  Confirm APT/SUI/ARB/OP have ≥17,520 candles before live deploy.
-# [Z9]  Live deployment blocked until Z4+Z8 complete.
-#       Macro = CAUTION. Live sizing = 50% of normal only.
-#       Do NOT change size_pct in YAML (keep 25 for comparability).
+# [Z9]  Live deployment blocked until Z4+Z8 complete. Macro=CAUTION. 50% sizing.
 # [Z10] Gen gap 5031→5944 (913 gens missing). Investigate log writes.
-# [BUG-2] elite_0.yaml may lag in-memory champion. Fix: write on every accept.
-# [BUG-4] Clone detection is post-backtest. Fix: pre-backtest SHA-256 gate.
-# [BUG-5] Poison attractor (~84-190t) bypassing MIN_TRADES=400 gate
-#          sporadically (seen gen 6607: 84t, gen 6613: 143t).
-#          Gate must be applied PRE-backtest. Verify enforcement.
-# [NOTE] Champion regime: ~1265 trades, 40.1% win, 4.65/1.92 R:R=2.42.
-#        LLM proposals yielding 444-524 trades are structurally wrong.
-#        Adding trade-count awareness to prompt (800-trade floor guidance).
+# [NOTE] Dedup rate ~65% in recent gens = LLM cycling same attractor basin.
+#        Prompt has been shortened and restructured to YAML-first format.
+#        If dedup rate remains >50% after this revision, consider adding
+#        a "recently tried values" ban list injected per-generation.
 # ══════════════════════════════════════════════════════════════════
 ```
 
