@@ -1,20 +1,15 @@
 ```markdown
 # ODIN — FUTURES DAY v40.0
 
-## STEP 1 — MAKE EXACTLY THIS CHANGE
-
-**Change `entry.short.conditions[0].value` from `68.63` to `66.0`**
-
-Fallback chain (if value is BANNED):
-- Try `64.0` → if banned, try `62.0` → if banned, change `exit.stop_loss_pct` to `2.3`
-
-## STEP 2 — OUTPUT FORMAT (nothing else)
+## STEP 1 — OUTPUT FORMAT (do this, nothing else)
 
 CHANGE: [field] [old_value] → [new_value]
 USING: size_pct=8, rsi_long=29.33, rsi_short=[value], stop_loss=2.59, tp=4.6
-[YAML below with exactly ONE value changed]
+[YAML]
 
-## STEP 3 — CHAMPION YAML (copy exactly, change ONE value only)
+---
+
+## STEP 2 — CHAMPION YAML (copy exactly, change ONE value only)
 
 ```yaml
 name: crossover
@@ -65,39 +60,47 @@ risk:
   stop_if_down_pct: 18
 ```
 
-## BANNED VALUES — instant reject if used
+---
 
-| Field | Banned values |
-|-------|--------------|
+## STEP 3 — MAKE EXACTLY THIS CHANGE
+
+**Set `entry.short.conditions[0].value` = `66.0`**
+
+Fallback chain (use first value NOT in the BANNED column below):
+1. `66.0`
+2. `64.0`
+3. `62.0`
+4. If all banned → set `exit.stop_loss_pct` = `2.3`
+
+---
+
+## STEP 4 — BANNED VALUES (instant reject if used)
+
+| Field | BANNED — never use these |
+|-------|--------------------------|
 | entry.short.conditions[0].value | 68.63 |
 | entry.long.conditions[0].value | 29.33, 32.0, 35.97 |
 | position.size_pct | 8, 16.91 |
 | exit.stop_loss_pct | 2.59, 2.39 |
 | exit.take_profit_pct | 4.6, 5.0 |
-| timeout_minutes | 720 |
+| exit.timeout_minutes | 720 |
 | leverage | 2 |
 | fee_rate | 0.0005 |
 
-## TESTED AND FAILED — do not resubmit
+**Note:** `position.size_pct` MUST remain 8 (it is banned as a *change target*, not as a yaml value — keep it at 8).
+**Note:** `leverage`, `fee_rate`, `timeout_minutes` must remain at their champion values above.
 
-| Change | Result |
-|--------|--------|
-| rsi_short=68.63 | champion (banned) |
-| rsi_long=32.0 | Sharpe=0.296 |
-| rsi_long=35.97 | failed |
-| size_pct=16.91 | failed |
-| stop_loss_pct=2.39 | failed |
-| take_profit_pct=5.0 | Sharpe=0.021 |
+---
 
-## PREFLIGHT (check all before outputting)
+## STEP 5 — PREFLIGHT (check before outputting)
 
-- [ ] Exactly ONE value differs from champion YAML
-- [ ] Changed value NOT in BANNED list
-- [ ] Changed value NOT in TESTED AND FAILED list
+- [ ] Exactly ONE value changed from champion YAML
+- [ ] Changed value is NOT in BANNED list
 - [ ] All 16 pairs present, same order
-- [ ] fee_rate=0.0005, leverage=2 (never change these)
-- [ ] timeout_minutes=720 (never change)
+- [ ] leverage=2, fee_rate=0.0005, timeout_minutes=720 (unchanged)
 - [ ] YAML structure identical to champion
+
+---
 
 ## CONTEXT
 
@@ -105,7 +108,15 @@ Champion: Gen 3233 | Sharpe=0.4066 | 1756 trades | WR=50.1%
 Goal: Sharpe > 0.4066
 League: futures_day | MIN_TRADES=50
 
-Priority ladder (first untested wins — pick ONE):
+Previously tested (do not resubmit):
+- rsi_short=68.63 → champion (current)
+- rsi_long=32.0 → Sharpe=0.296 (worse)
+- rsi_long=35.97 → failed
+- size_pct=16.91 → failed
+- stop_loss_pct=2.39 → failed
+- take_profit_pct=5.0 → Sharpe=0.021 (failed)
+
+Priority ladder (first untested wins):
 1. rsi_short → 66.0
 2. rsi_short → 64.0
 3. rsi_short → 62.0
@@ -113,9 +124,6 @@ Priority ladder (first untested wins — pick ONE):
 5. size_pct → 10
 6. take_profit_pct → 4.2
 7. rsi_long → 27.0
-8. stop_loss_pct → 2.8
-9. rsi_short → 70.0
-10. take_profit_pct → 4.8
 ```
 
 ---
