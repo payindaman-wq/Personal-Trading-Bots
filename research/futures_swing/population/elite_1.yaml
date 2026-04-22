@@ -7,19 +7,6 @@ pairs:
 - BTC/USD
 - ETH/USD
 - SOL/USD
-- XRP/USD
-- DOGE/USD
-- AVAX/USD
-- LINK/USD
-- UNI/USD
-- AAVE/USD
-- NEAR/USD
-- APT/USD
-- SUI/USD
-- ARB/USD
-- OP/USD
-- ADA/USD
-- POL/USD
 position:
   size_pct: 25
   max_open: 3
@@ -46,12 +33,14 @@ entry:
       operator: gt
       value: 60
 exit:
-  take_profit_pct: 4.65
+  take_profit_pct: 5.2
   stop_loss_pct: 1.92
   timeout_hours: 166
 risk:
   pause_if_down_pct: 8
   pause_minutes: 120
   stop_if_down_pct: 18
-_sharpe: 2.3513
-_trades: 1265
+_sharpe: 0.9705
+_trades: 486
+_oos_sharpe: 2.1447
+_oos_trades: 125

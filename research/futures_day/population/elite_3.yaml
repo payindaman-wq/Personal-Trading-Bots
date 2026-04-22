@@ -31,5 +31,7 @@ risk:
   pause_if_down_pct: 8
   pause_minutes: 120
   stop_if_down_pct: 18
-_sharpe: 0.4066
-_trades: 1756
+_sharpe: -2.8382
+_trades: 629
+_oos_sharpe: 0.0005
+_oos_trades: 409
