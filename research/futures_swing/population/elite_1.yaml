@@ -33,14 +33,14 @@ entry:
       operator: gt
       value: 60
 exit:
-  take_profit_pct: 5.2
+  take_profit_pct: 4.65
   stop_loss_pct: 1.92
-  timeout_hours: 166
+  timeout_hours: 168
 risk:
   pause_if_down_pct: 8
   pause_minutes: 120
   stop_if_down_pct: 18
-_sharpe: 0.9705
-_trades: 486
-_oos_sharpe: 2.1447
-_oos_trades: 125
+_sharpe: 0.5883
+_trades: 504
+_oos_sharpe: 1.9128
+_oos_trades: 130

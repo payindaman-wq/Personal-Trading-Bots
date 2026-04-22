@@ -33,7 +33,7 @@ entry:
       operator: gt
       value: 60
 exit:
-  take_profit_pct: 4.65
+  take_profit_pct: 5.2
   stop_loss_pct: 1.92
   timeout_hours: 166
 risk:

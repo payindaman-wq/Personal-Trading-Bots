@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 import sys as _kl_sys
 _kl_sys.path.insert(0, "/root/.openclaw/workspace")
 import kraken_leverage
+import league_killswitch
 
 WORKSPACE        = os.environ.get('WORKSPACE', '/root/.openclaw/workspace')
 ACTIVE_DIR       = os.path.join(WORKSPACE, 'competition', 'futures_day', 'active')
@@ -173,6 +174,10 @@ def patch_start_time(comp_id):
 
 
 def start_new():
+    if league_killswitch.is_paused('futures_day'):
+        print(f'  [league_killswitch] futures_day is paused - skipping start_new.')
+        print(f'  Remove {league_killswitch.FLAG_DIR}/futures_day.flag to reactivate.')
+        return None
     now = datetime.now(timezone.utc)
     comp_id = now.strftime('fut-day-%Y%m%d-%H%M')
     comp_dir = os.path.join(ACTIVE_DIR, comp_id)

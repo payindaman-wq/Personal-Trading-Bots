@@ -11,6 +11,29 @@ import csv
 import sys as _sys
 _sys.path.insert(0, "/root/.openclaw/workspace")
 import kraken_leverage
+
+# F8: futures cost model. Slippage is a round-trip tax on leveraged notional
+# (entry + exit). 5 bp per side ~ realistic for BTC/ETH/SOL on Kraken perps.
+SLIPPAGE_PCT_PER_SIDE = 0.0005
+# Default funding rate if TYR state is unavailable: 0.01% per 8h.
+_DEFAULT_FUNDING_8H   = 0.0001
+
+def _current_funding_rate_8h():
+    """Return the ratio per-8h perpetual funding rate from TYR state.
+    TYR stores funding.avg_pct in percent (e.g. 0.00647 = 0.00647%/8h);
+    we return as a ratio for arithmetic."""
+    import os as _os
+    import json as _jsn
+    _path = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "tyr_state.json")
+    try:
+        with open(_path) as _f:
+            _t = _jsn.load(_f)
+        _pct = (_t.get("funding") or {}).get("avg_pct")
+        if _pct is None:
+            return _DEFAULT_FUNDING_8H
+        return float(_pct) / 100.0
+    except (OSError, _jsn.JSONDecodeError, ValueError, TypeError):
+        return _DEFAULT_FUNDING_8H
 import math
 import os
 from collections import deque
@@ -343,7 +366,7 @@ def run_backtest(strategy, league, pairs=None, time_slice=None):
         _cap = kraken_leverage.cap_for_strategy(strategy.get("pairs") or (pairs or []))
         if leverage > _cap:
             leverage = _cap
-    FUNDING_RATE_8H  = 0.0001  # 0.01% per 8h default
+    FUNDING_RATE_8H  = _current_funding_rate_8h()  # from TYR, falls back to 0.0001
     funding_ticks    = (8 * 60) // interval_minutes  # ticks per 8h funding period
     MAINTENANCE_MARGIN = 0.05
     liq_threshold    = (1.0 / leverage) * (1 - MAINTENANCE_MARGIN) if is_futures else 999.0
@@ -452,12 +475,16 @@ def run_backtest(strategy, league, pairs=None, time_slice=None):
                     if portfolio["closed_trades"]:
                         t = portfolio["closed_trades"][-1]
                         age_h = age_min / 60
-                        funding_cost = FUNDING_RATE_8H * leverage * t.get("cost_basis", 0) * int(age_h / 8)
+                        funding_cost  = FUNDING_RATE_8H * leverage * t.get("cost_basis", 0) * int(age_h / 8)
+                        slippage_cost = SLIPPAGE_PCT_PER_SIDE * 2 * leverage * t.get("cost_basis", 0)
+                        total_cost    = funding_cost + slippage_cost
                         lev_gain = t["pnl_usd"] * (leverage - 1)
-                        t["pnl_usd"] = round(t["pnl_usd"] * leverage - funding_cost, 4)
+                        t["pnl_usd"] = round(t["pnl_usd"] * leverage - total_cost, 4)
+                        t["funding_cost"]  = round(funding_cost, 4)
+                        t["slippage_cost"] = round(slippage_cost, 4)
                         t["won"] = t["pnl_usd"] > 0
                         # Correct portfolio cash
-                        portfolio["cash"] = round(portfolio["cash"] + lev_gain - funding_cost, 4)
+                        portfolio["cash"] = round(portfolio["cash"] + lev_gain - total_cost, 4)
 
         # Entries
         open_pairs = {pos["pair"] for pos in portfolio["positions"]}
