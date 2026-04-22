@@ -89,3 +89,10 @@ research/loki_log.jsonl
 # --- TYR / HEIMDALL runtime state (regenerated every 30 min) ----------------
 research/tyr_state.json
 research/heimdall_state.json
+
+# --- Log rotation backups (F13 meta_audit 2026-04-22) -----------------------
+*.gz
+*.gz-*
+*.log-2026*
+competition.log-*
+session_watchdog.log-*
