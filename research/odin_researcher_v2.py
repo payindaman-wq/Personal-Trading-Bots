@@ -67,6 +67,16 @@ SWING_MAX_TRADES    = 60   # swing hard upper bound (Item 3)
 SWING_ALLOWED_PAIRS = frozenset({"BTC/USD", "ETH/USD", "SOL/USD"})  # Item 7
 FUTURES_ALLOWED_PAIRS = frozenset({"BTC/USD", "ETH/USD", "SOL/USD"})  # Kraken Derivatives US universe
 
+# F4 (mode-collapse): force a random genome into the candidate pool every
+# FORCE_RANDOM_EVERY gens once gens_since_best >= FORCE_RANDOM_FLOOR. Breaks
+# hill-climbing stalls where every perturbation lands in the same basin.
+FORCE_RANDOM_FLOOR   = 500
+FORCE_RANDOM_EVERY   = 500
+# F4: tighter elite dedup — reject insertions whose Sharpe matches an
+# existing elite within this epsilon. Catches no-op perturbations that
+# reproduce the parent exactly.
+ELITE_SHARPE_EPS     = 0.001
+
 # Known-bad result fingerprints — sharpe values that always indicate a poison attractor.
 POISON_RESULT_FINGERPRINTS = {
     "futures_day":   {-2.7990, -3.3113, -4.8702},
@@ -331,6 +341,14 @@ class Population:
             except Exception:
                 gate = 0.0
         is_new_best = sharpe > (self.best_sharpe() + gate) if self.elites else True
+
+        # F4: reject clones — if a non-new-best candidate matches an existing
+        # elite Sharpe within ELITE_SHARPE_EPS, do not add it. Keeps the
+        # population from filling up with identical-Sharpe no-op perturbations.
+        if not is_new_best and self.elites:
+            for _, _e_strat, _ in self.elites:
+                if abs(sharpe - float(_e_strat.get("_sharpe", 0.0))) < ELITE_SHARPE_EPS:
+                    return False, False
 
         if len(self.elites) < POPULATION_SIZE:
             self.elites.append(entry)
@@ -824,6 +842,12 @@ def main():
             if r <= cum:
                 mutation_type = mt
                 break
+
+        # F4: periodic forced-random injection to escape hill-climb stalls.
+        if (gens_since_best >= FORCE_RANDOM_FLOOR
+                and (gens_since_best - FORCE_RANDOM_FLOOR) % FORCE_RANDOM_EVERY == 0):
+            mutation_type = "random"
+            description = "forced_random_diversity"
 
         print(f"[{ts}] Gen {gen} | best={best_s:.4f} | stall={gens_since_best} | {mutation_type}",
               end=" ", flush=True)
