@@ -48,6 +48,7 @@ WATCHED_SOURCES = {
     "syn_post_ship_review",
     "data_integrity",         # per-league write-path drift audit
     "mimir_audit",            # MIMIR citation fact-check
+    "runtime_state_freshness", # tracked runtime JSON drift (deploy-reset class)
 }
 
 # Patterns that indicate Chris himself must act (the officers cannot fix).
@@ -95,6 +96,10 @@ DROP_RULES = {
     ],
     "mimir_audit": [
         # Only fires when findings exist — nothing to drop by default.
+    ],
+    "runtime_state_freshness": [
+        r"RECOVERED",                          # freshness returned without auto-heal
+        r"self-healed",                        # auto-heal regenerated the file
     ],
 }
 
