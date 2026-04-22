@@ -78,7 +78,7 @@ def _llm_plateau():
         return False
     return (sum(_llm_history) / LLM_WINDOW) < LLM_PLATEAU_THRESHOLD
 
-MIN_TRADES = {"day": 280, "futures_day": 1700, "futures_swing": 50}
+MIN_TRADES = {"day": 280, "futures_day": 1700, "futures_swing": 400}
 SWING_MIN_TRADES    = 30   # IMMUTABLE - DO NOT MODIFY via LOKI (Item 4)
 MIMIR_MIN_GAP_HRS   = 6    # min wall-clock hours between Mimir calls per league
 # F12: stretched milestone cadence on stalled leagues. A league counts as
