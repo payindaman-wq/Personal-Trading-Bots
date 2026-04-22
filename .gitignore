@@ -102,3 +102,9 @@ session_watchdog.log-*
 # Tracking it caused deploy resets to wipe in-flight entries (see 2026-04-22
 # self_heal silent-escalate incident).
 syn_inbox.jsonl
+
+# --- Leaderboard JSONs (regenerated every 30 min, deploy-reset victims, 2026-04-22) ---
+competition/futures_day/futures_day_leaderboard.json
+competition/futures_swing/futures_swing_leaderboard.json
+competition/swing/swing_leaderboard.json
+competition/polymarket/polymarket_leaderboard.json
