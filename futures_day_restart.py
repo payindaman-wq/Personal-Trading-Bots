@@ -208,6 +208,17 @@ def start_new():
     with open(os.path.join(comp_dir, 'meta.json'), 'w') as f:
         json.dump(meta, f, indent=2)
 
+    # Snapshot the research backtest metadata at the moment this sprint starts
+    # so live-vs-backtest drift can be computed on archive. Silent if no meta
+    # sidecar exists yet (cold-start before odin_researcher writes one).
+    try:
+        import shutil as _shutil
+        meta_src = os.path.join(WORKSPACE, 'research', 'futures_day', 'best_strategy.meta.json')
+        if os.path.exists(meta_src):
+            _shutil.copy2(meta_src, os.path.join(comp_dir, 'deployed_strategy.meta.json'))
+    except Exception as _e:
+        print(f'  [drift] sidecar snapshot skipped: {_e}')
+
     cycle_state = load_cycle_state()
     sprints = cycle_state.get('sprints', [])
     if comp_id not in sprints:

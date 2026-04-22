@@ -982,6 +982,24 @@ def get_odin_research():
             result["last_activity"] = rows[-1]["ts"]
         # Sparkline: last 30 sharpe values
         result["sparkline"] = [r["sharpe"] for r in rows[-30:]]
+        # Attach live-vs-backtest drift state for futures leagues (keys absent
+        # on day/swing since only futures currently run the drift tracker).
+        drift_path = f"/root/.openclaw/workspace/research/{league_name}/backtest_drift.json"
+        if os.path.exists(drift_path):
+            try:
+                import json as _json
+                with open(drift_path) as _f:
+                    drift = _json.load(_f)
+                result["drift"] = {
+                    "sprints_seen":         drift.get("sprints_seen"),
+                    "live_sharpe_ann":      drift.get("live_sharpe_ann"),
+                    "mean_backtest_sharpe": drift.get("mean_backtest_sharpe"),
+                    "delta":                drift.get("delta"),
+                    "gate_bonus":           drift.get("gate_bonus"),
+                    "updated_at":           drift.get("updated_at"),
+                }
+            except Exception:
+                pass
         return result
 
     def parse_freya():
@@ -1158,6 +1176,16 @@ def build():
         }
 
     dashboard["pm_research"]        = get_pm_research()
+    # Refresh drift tracker before reading odin_research so the dashboard
+    # and the next ODIN loop see consistent drift state.
+    try:
+        import sys as _sys
+        _sys.path.insert(0, "/root/.openclaw/workspace/research")
+        import backtest_drift as _bd
+        for _L in ("futures_day", "futures_swing"):
+            _bd.update(_L)
+    except Exception:
+        pass
     dashboard["odin_research"]     = get_odin_research()
     dashboard["mimir_state"]       = get_mimir_state()
     dashboard["loki_state"]        = get_loki_state()

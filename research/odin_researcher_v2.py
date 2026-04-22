@@ -21,6 +21,7 @@ import os
 import random
 import sys as _sys
 _sys.path.insert(0, "/root/.openclaw/workspace")
+_sys.path.insert(0, "/root/.openclaw/workspace/research")
 import kraken_leverage
 import re
 import sys
@@ -29,6 +30,10 @@ import time
 import urllib.request
 from collections import deque
 from datetime import datetime, timezone
+try:
+    import backtest_drift
+except ImportError:
+    backtest_drift = None
 
 import yaml
 
@@ -315,7 +320,17 @@ class Population:
         strategy_dict["_trades"] = trades
         score = adj_score(sharpe, trades)
         entry = (score, strategy_dict, strategy_yaml)
-        is_new_best = sharpe > self.best_sharpe() if self.elites else True
+        # Drift-aware gate: if backtest Sharpe has been historically overstating
+        # live realised Sharpe for this league, a new champion must beat the
+        # current best by more than just +0 to count. gate_bonus defaults to 0
+        # when drift data is absent (cold-start or pre-first-sprint).
+        gate = 0.0
+        if backtest_drift is not None:
+            try:
+                gate = float(backtest_drift.get_gate_bonus(self.league))
+            except Exception:
+                gate = 0.0
+        is_new_best = sharpe > (self.best_sharpe() + gate) if self.elites else True
 
         if len(self.elites) < POPULATION_SIZE:
             self.elites.append(entry)
@@ -339,6 +354,11 @@ class Population:
 
     def _save_fleet(self, yaml_text):
         strat = yaml.safe_load(yaml_text)
+        meta = {
+            "sharpe":    float(strat.get("_sharpe", 0.0)),
+            "trades":    int(strat.get("_trades", 0)),
+            "saved_at":  datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        }
         strat.pop("_sharpe", None)
         strat.pop("_trades", None)
         clean = yaml.dump(strat, default_flow_style=False, sort_keys=False)
@@ -347,8 +367,14 @@ class Population:
             os.makedirs(os.path.dirname(fleet), exist_ok=True)
             with open(fleet, "w") as f:
                 f.write(clean)
-        with open(os.path.join(league_dir(self.league), "best_strategy.yaml"), "w") as f:
+        league_path = league_dir(self.league)
+        with open(os.path.join(league_path, "best_strategy.yaml"), "w") as f:
             f.write(clean)
+        # Sidecar for backtest-vs-live drift tracking — snapshotted into each
+        # sprint's deployed_strategy.meta.json at sprint-start.
+        with open(os.path.join(league_path, "best_strategy.meta.json"), "w") as f:
+            import json as _json
+            _json.dump(meta, f, indent=2)
 
     def pick_parent(self):
         if len(self.elites) <= 3:
