@@ -463,8 +463,13 @@ def run():
     # Persist snapshot alongside review for forensic reproducibility.
     ts_str = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     snap_path = os.path.join(META_AUDIT_DIR, "snapshot_" + ts_str + ".txt")
-    with open(snap_path, "w") as sf:
+    # F3: atomic write — guarantees vidar dispatch sees a complete file.
+    snap_tmp = snap_path + ".tmp"
+    with open(snap_tmp, "w") as sf:
         sf.write(snapshot)
+        sf.flush()
+        os.fsync(sf.fileno())
+    os.replace(snap_tmp, snap_path)
     print("[meta_audit] snapshot: " + snap_path + " (" + str(len(snapshot)) + " chars)")
 
     dispatch_vidar(snap_path)

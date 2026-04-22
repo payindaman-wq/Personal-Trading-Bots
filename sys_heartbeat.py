@@ -584,6 +584,7 @@ def main():
         "loki",                 # LOKI systemd/cycle failures (REVERT/restructure silenced below)
         "vidar",                # VIDAR API-call failure only (decision completions silent)
         "meta_audit",           # SYN weekly strategic audit — critical severity only (see override map)
+        "meta_audit_freshness", # F3: fires when weekly cron stops writing latest.json (error+ pages Chris)
         # NOTE (2026-04-19): the following sources are intentionally NOT allowlisted.
         # They route to syn_inbox only; VIDAR/LOKI consume and decide. Per
         # feedback_syn_telegram_chris_action_only.md: detection is not a Chris-action.

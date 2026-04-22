@@ -531,8 +531,15 @@ def run_mode(args, api_key):
             "decision":    decision,  # None on parse failure
             "parse_ok":    decision is not None,
         }
-        with open(os.path.join(META_AUDIT_REVIEW_DIR, "latest.json"), "w") as _f:
+        # F3: atomic write — tmp + fsync + rename so a killed process
+        # never leaves latest.json truncated (SYN dispatcher depends on it).
+        _sidecar_path = os.path.join(META_AUDIT_REVIEW_DIR, "latest.json")
+        _sidecar_tmp  = _sidecar_path + ".tmp"
+        with open(_sidecar_tmp, "w") as _f:
             json.dump(sidecar, _f, indent=2)
+            _f.flush()
+            os.fsync(_f.fileno())
+        os.replace(_sidecar_tmp, _sidecar_path)
         print(f"[vidar/meta_audit] review: {review_path} (parse_ok={decision is not None})")
 
     if decision:

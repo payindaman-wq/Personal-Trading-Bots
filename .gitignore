@@ -137,3 +137,9 @@ maintenance_log.jsonl
 research/loki_escalation_dedupe.json
 research/loki_revert_history.json
 research/loki_structural_monitor.json
+
+# --- meta_audit runtime state (F3 hardening 2026-04-22) ---------------------
+# Weekly audit writes snapshots + sidecar + freshness tracking here. All are
+# runtime state: regeneratable from the next cron run; must not be tracked or
+# the origin/master auto-reset will revert live state to stale snapshots.
+research/meta_audit/
