@@ -96,3 +96,9 @@ research/heimdall_state.json
 *.log-2026*
 competition.log-*
 session_watchdog.log-*
+
+# --- SYN inbox (append-only runtime state, 2026-04-22) ---------------------
+# Local writers append; sys_heartbeat + vidar_inbox_consumer read via offset.
+# Tracking it caused deploy resets to wipe in-flight entries (see 2026-04-22
+# self_heal silent-escalate incident).
+syn_inbox.jsonl
