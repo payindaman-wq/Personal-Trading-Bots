@@ -723,7 +723,7 @@ def main():
     league = args.league
 
     sys.path.insert(0, RESEARCH)
-    from odin_backtest import run_backtest
+    from odin_backtest import run_backtest, run_backtest_oos
 
     api_key = load_gemini_key(league)
 
@@ -998,6 +998,40 @@ def main():
             gen += 1
             time.sleep(args.sleep)
             continue
+        # OOS overfit gate: if candidate beats current best (raw, ignoring drift
+        # bonus), validate on held-out last 6mo. Reject if OOS sharpe goes
+        # negative or underperforms the champion's OOS. Keeps in-sample hill
+        # climbing from promoting overfit configs that don't generalise.
+        # Cost: ~1 extra backtest on ~5-15% of gens (only improvement candidates).
+        if pop.elites and sharpe > pop.best_sharpe():
+            oos_result = run_backtest_oos(candidate, league, get_pairs(league))
+            if "error" in oos_result:
+                print(f"| OOS_GATE_ERROR: {oos_result['error']}")
+                log_result(league, gen, result, "oos_error", oos_result["error"])
+                gen += 1
+                time.sleep(args.sleep)
+                continue
+            oos_sharpe    = float(oos_result.get("sharpe", -999.0))
+            oos_trades    = int(oos_result.get("total_trades", 0))
+            champion_oos  = float(pop.elites[0][1].get("_oos_sharpe", 0.0)) if pop.elites else 0.0
+            min_oos_trades = max(1, min_t // 4)
+            oos_ok = (
+                oos_sharpe >= max(0.0, champion_oos)
+                and oos_trades >= min_oos_trades
+            )
+            if not oos_ok:
+                print(f"| OOS_GATE_REJECT: oos_sharpe={oos_sharpe:.4f} "
+                      f"oos_trades={oos_trades} champion_oos={champion_oos:.4f}")
+                log_result(league, gen, result, "oos_reject",
+                           f"oos_sharpe={oos_sharpe:.4f} oos_trades={oos_trades} champion_oos={champion_oos:.4f}")
+                gen += 1
+                time.sleep(args.sleep)
+                continue
+            candidate["_oos_sharpe"] = round(oos_sharpe, 4)
+            candidate["_oos_trades"] = oos_trades
+            import yaml as _yaml3
+            candidate_yaml = _yaml3.dump(candidate, default_flow_style=False, sort_keys=False)
+
         # Population insertion
         inserted, is_new_best = pop.try_insert(candidate, candidate_yaml, sharpe, trades)
 

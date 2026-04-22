@@ -320,12 +320,17 @@ def compute_sharpe(snapshots):
 # Main backtest
 # ---------------------------------------------------------------------------
 
-def run_backtest(strategy, league, pairs=None):
+def run_backtest(strategy, league, pairs=None, time_slice=None):
     """
     Run strategy dict against 2yr local CSV data.
 
+    time_slice: optional (start_pct, end_pct) tuple to restrict to a sub-window
+      of the available timeline. Used by run_backtest_oos for out-of-sample
+      validation. Defaults to None = full window (backward-compatible).
+
     Returns dict with: sharpe, win_rate_pct, total_pnl_pct, total_trades,
-                       max_drawdown_pct, final_equity, suspicious, suspicious_reason
+                       max_drawdown_pct, final_equity, suspicious, suspicious_reason,
+                       time_slice (echoed back when provided).
     """
     is_futures       = league.startswith("futures_")
     base_league      = "day" if "day" in league else "swing"
@@ -364,6 +369,14 @@ def run_backtest(strategy, league, pairs=None):
         return {"error": "No data loaded"}
 
     all_ts  = sorted(set(c["ts_ms"] for rows in candle_data.values() for c in rows))
+    if time_slice is not None and all_ts:
+        _start_pct, _end_pct = time_slice
+        _n = len(all_ts)
+        _lo = max(0, int(_n * float(_start_pct)))
+        _hi = min(_n, int(_n * float(_end_pct)))
+        if _hi <= _lo:
+            return {"error": f"time_slice produced empty window: pct=({_start_pct},{_end_pct}) n={_n}"}
+        all_ts = all_ts[_lo:_hi]
     idx_map = {pair: {c["ts_ms"]: i for i, c in enumerate(rows)}
                for pair, rows in candle_data.items()}
     vwap_calcs = {pair: make_vwap_calc(vwap_window) for pair in test_pairs}
@@ -489,7 +502,7 @@ def run_backtest(strategy, league, pairs=None):
         suspicious        = True
         suspicious_reason = f"Win rate {win_rate}% > {SUSPICIOUS_WINRATE}% threshold"
 
-    return {
+    _result = {
         "sharpe":            sharpe,
         "win_rate_pct":      win_rate,
         "total_pnl_pct":     round(pnl_pct, 4),
@@ -502,3 +515,17 @@ def run_backtest(strategy, league, pairs=None):
         "suspicious_reason": suspicious_reason,
         "candles_processed": len(all_ts),
     }
+    if time_slice is not None:
+        _result["time_slice"] = [float(time_slice[0]), float(time_slice[1])]
+    return _result
+
+# Out-of-sample validation: last `oos_pct` of the 2yr window. With the
+# default 0.25, 24mo backtest => last 6mo OOS (anchored holdout). Used by
+# odin_researcher_v2 to guard new_best promotions against in-sample overfit.
+def run_backtest_oos(strategy, league, pairs=None, oos_pct=0.25):
+    return run_backtest(strategy, league, pairs=pairs, time_slice=(1.0 - oos_pct, 1.0))
+
+
+def run_backtest_is(strategy, league, pairs=None, oos_pct=0.25):
+    """In-sample companion: first (1-oos_pct) of the window."""
+    return run_backtest(strategy, league, pairs=pairs, time_slice=(0.0, 1.0 - oos_pct))
