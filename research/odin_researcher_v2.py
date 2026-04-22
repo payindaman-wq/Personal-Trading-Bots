@@ -961,6 +961,13 @@ def main():
             gen += 1
             time.sleep(args.sleep)
             continue
+        # MIMIR gen 11679: cap day trades to block structural failures (1000+ trade blowouts)
+        if league == "day" and trades > 450:
+            print(f"| [MAX_TRADES_REJECT trades={trades}]")
+            log_result(league, gen, {}, "max_trades_reject", f"trades={trades}>450")
+            gen += 1
+            time.sleep(args.sleep)
+            continue
         # Population insertion
         inserted, is_new_best = pop.try_insert(candidate, candidate_yaml, sharpe, trades)
 
