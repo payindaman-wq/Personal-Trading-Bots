@@ -344,6 +344,12 @@ def run_backtest(strategy, league, pairs=None):
     liq_threshold    = (1.0 / leverage) * (1 - MAINTENANCE_MARGIN) if is_futures else 999.0
 
     test_pairs = pairs or strategy.get("pairs", ["BTC/USD"])
+    if is_futures:
+        tradable = kraken_leverage.filter_tradable(test_pairs)
+        if not tradable:
+            return {"error": "no tradable pairs (Kraken Derivatives US universe: "
+                             + ",".join(kraken_leverage.tradable_pairs()) + ")"}
+        test_pairs = tradable
 
     # Load CSV data
     candle_data = {}

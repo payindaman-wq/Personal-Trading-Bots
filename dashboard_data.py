@@ -899,7 +899,7 @@ def get_odin_research():
     """Parse Odin research results for both leagues and return dashboard data."""
     import subprocess
 
-    def parse_league(tsv_path, service_name):
+    def parse_league(tsv_path, service_name, league_name=None):
         result = {
             "generations": 0,
             "improvements": 0,
@@ -954,7 +954,8 @@ def get_odin_research():
                     best_row = rows[-1]
 
         # Read true gen count from gen_state.json (results.tsv has gaps from restarts)
-        league_name = "day" if "day" in tsv_path else "swing"
+        if league_name is None:
+            league_name = "day" if "day" in tsv_path else "swing"
         gen_state_path = f"/root/.openclaw/workspace/research/{league_name}/gen_state.json"
         try:
             import json as _json
@@ -1047,10 +1048,10 @@ def get_odin_research():
         return result
 
     return {
-        "day":          parse_league(ODIN_DAY_RESULTS,           "odin_day.service"),
-        "swing":        parse_league(ODIN_SWING_RESULTS,         "odin_swing.service"),
-        "futures_day":  parse_league(ODIN_FUTURES_DAY_RESULTS,   "odin_futures_day.service"),
-        "futures_swing":parse_league(ODIN_FUTURES_SWING_RESULTS, "odin_futures_swing.service"),
+        "day":          parse_league(ODIN_DAY_RESULTS,           "odin_day.service",           "day"),
+        "swing":        parse_league(ODIN_SWING_RESULTS,         "odin_swing.service",         "swing"),
+        "futures_day":  parse_league(ODIN_FUTURES_DAY_RESULTS,   "odin_futures_day.service",   "futures_day"),
+        "futures_swing":parse_league(ODIN_FUTURES_SWING_RESULTS, "odin_futures_swing.service", "futures_swing"),
         "pm":           parse_freya(),
     }
 

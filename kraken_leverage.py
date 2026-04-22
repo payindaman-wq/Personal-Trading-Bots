@@ -126,10 +126,27 @@ def cap_for(symbol):
 
 def cap_for_strategy(pairs):
     """Strategy-level cap = MIN across pairs. Strategy leverage is flat,
-    so the tightest symbol governs. Empty/unknown pairs → 1.0."""
+    so the tightest symbol governs. Empty/unknown pairs → 1.0.
+
+    Unknown pairs are filtered BEFORE taking MIN so that strategies which
+    declare a broad universe (and get narrowed to the tradable subset at
+    backtest time) don't have their leverage silently collapsed to 1.0.
+    Empty intersection still returns 1.0."""
     caps = get_caps()
-    vals = [caps.get(p, 1.0) for p in (pairs or [])]
-    return min(vals) if vals else 1.0
+    known = [caps[p] for p in (pairs or []) if p in caps]
+    return min(known) if known else 1.0
+
+
+def tradable_pairs():
+    """Universe of pairs live-tradable on Kraken Derivatives US."""
+    return list(get_caps().keys())
+
+
+def filter_tradable(pairs):
+    """Intersect a candidate pair list with the live-tradable universe,
+    preserving input order. Untradable pairs are silently dropped."""
+    allowed = set(tradable_pairs())
+    return [p for p in (pairs or []) if p in allowed]
 
 
 if __name__ == "__main__":
