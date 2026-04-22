@@ -46,6 +46,8 @@ WATCHED_SOURCES = {
     "self_heal",              # self_heal_controller escalation after heal-failed
     "syn_weekly_audit",
     "syn_post_ship_review",
+    "data_integrity",         # per-league write-path drift audit
+    "mimir_audit",            # MIMIR citation fact-check
 }
 
 # Patterns that indicate Chris himself must act (the officers cannot fix).
@@ -87,6 +89,12 @@ DROP_RULES = {
     "syn_weekly_audit": [
         # syn_weekly_audit only emits when anomalies found — every entry is
         # real. Nothing to drop by default.
+    ],
+    "data_integrity": [
+        r"RECOVERED",                          # write-path cleared
+    ],
+    "mimir_audit": [
+        # Only fires when findings exist — nothing to drop by default.
     ],
 }
 
