@@ -55,6 +55,24 @@ LLM_PLATEAU_THRESHOLD   = 0.10   # <10% recent hits → cut llm weight to 0.20
 LLM_PLATEAU_WEIGHT      = 0.20
 _llm_history = deque(maxlen=LLM_WINDOW)
 
+# F5: Gemini prompt dedup. On stalled leagues the system_instruction +
+# user_message are near-identical gen-over-gen (same best_yaml, same
+# mode-collapsed population). After LLM_DEDUP_THRESHOLD identical prompts
+# in the last LLM_DEDUP_WINDOW recent calls, the next "llm" draw is flipped
+# to "perturb" — free local mutation instead of paid Gemini call. Layered
+# on top of LLM_PLATEAU_WEIGHT; cuts remaining LLM spend ~50% on stalls.
+import hashlib as _hashlib
+LLM_DEDUP_WINDOW    = 30
+LLM_DEDUP_THRESHOLD = 3
+_llm_prompt_hashes  = deque(maxlen=LLM_DEDUP_WINDOW)
+
+def _llm_prompt_fingerprint(system_instruction, user_message):
+    h = _hashlib.sha1()
+    h.update(system_instruction.encode("utf-8", errors="replace"))
+    h.update(b"|")
+    h.update(user_message.encode("utf-8", errors="replace"))
+    return h.hexdigest()
+
 def _llm_plateau():
     if len(_llm_history) < LLM_WINDOW:
         return False
@@ -855,6 +873,27 @@ def main():
         candidate = None
         candidate_yaml = None
         description = mutation_type
+
+        # F5: pre-Gemini prompt-hash dedup. If the prompt we are about to
+        # send matches LLM_DEDUP_THRESHOLD recent calls, skip Gemini and
+        # substitute a free perturb. The hash is computed from the exact
+        # (system_instruction, user_message) build_llm_prompt would produce.
+        if mutation_type == "llm":
+            _, _dd_best_strat, _ = pop.elites[0]
+            _dd_clean = copy.deepcopy(_dd_best_strat)
+            _dd_clean.pop("_sharpe", None)
+            _dd_clean.pop("_trades", None)
+            _dd_best_yaml = yaml.dump(_dd_clean, default_flow_style=False, sort_keys=False)
+            _dd_sys, _dd_user = build_llm_prompt(league, _dd_best_yaml, pop)
+            _dd_fp = _llm_prompt_fingerprint(_dd_sys, _dd_user)
+            _dd_count = _llm_prompt_hashes.count(_dd_fp)
+            if _dd_count >= LLM_DEDUP_THRESHOLD:
+                log_result(league, gen, {}, "llm_dedup_skip",
+                           f"fp={_dd_fp[:8]} seen={_dd_count}")
+                mutation_type = "perturb"
+                description = "llm_dedup_perturb"
+            else:
+                _llm_prompt_hashes.append(_dd_fp)
 
         if mutation_type == "llm":
             _, best_strat, _ = pop.elites[0]
