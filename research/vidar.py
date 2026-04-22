@@ -11,11 +11,13 @@ Modes:
   --mode restructure       Own program.md rewrite when structure is the bug
   --mode cycle_review      Low-confidence MIMIR fallback
   --mode deep_dive         Manual ad-hoc (requires --topic)
+  --mode meta_audit        SYN weekly strategic audit (requires --snapshot, no --league)
 
 Usage:
   python3 research/vidar.py --mode revert_review --league day --revert-ts 2026-04-19T03:45
   python3 research/vidar.py --mode oscillation_diag --league day
   python3 research/vidar.py --mode deep_dive --league day --topic "why is mean_sharpe flat?"
+  python3 research/vidar.py --mode meta_audit --snapshot /tmp/meta_audit_snapshot.txt
 """
 import argparse
 import json
@@ -37,9 +39,17 @@ ANTHROPIC_URL     = "https://api.anthropic.com/v1/messages"
 # split's savings negligible (~$6/month).
 VIDAR_MODEL       = "claude-opus-4-7"
 VIDAR_MAX_TOKENS  = 6000
+VIDAR_MAX_TOKENS_BY_MODE = {
+    # meta_audit emits ~10-15 findings with multi-sentence fields plus
+    # adaptive-thinking prose; 6k cuts it off mid-JSON. 16k fits without
+    # needing streaming (borderline per SDK guidance, but vidar uses
+    # urllib.request with a 10-min timeout, so large non-stream is fine).
+    "meta_audit": 16000,
+}
 
 VIDAR_LOG         = os.path.join(RESEARCH, "vidar_log.jsonl")
 VIDAR_DECISIONS   = os.path.join(RESEARCH, "vidar_decisions.jsonl")
+META_AUDIT_REVIEW_DIR = os.path.join(RESEARCH, "meta_audit")
 MAINTENANCE_LOG   = os.path.join(WORKSPACE, "maintenance_log.jsonl")
 MIMIR_LOG         = os.path.join(RESEARCH, "mimir_log.jsonl")
 LOKI_REVERT_HIST  = os.path.join(RESEARCH, "loki_revert_history.json")
@@ -76,10 +86,10 @@ def load_anthropic_key():
         return json.load(f)["anthropic_api_key"]
 
 
-def call_claude(prompt, api_key, model):
+def call_claude(prompt, api_key, model, max_tokens=None):
     payload = json.dumps({
         "model":      model,
-        "max_tokens": VIDAR_MAX_TOKENS,
+        "max_tokens": max_tokens or VIDAR_MAX_TOKENS,
         "messages":   [{"role": "user", "content": prompt}],
     }).encode()
     req = urllib.request.Request(
@@ -379,6 +389,75 @@ Topic: {topic}
 Give Chris your honest strategic read: root cause, second-order effects he may be missing, concrete recommendation. Be direct; no hedging."""
 
 
+def build_meta_audit_prompt(snapshot_path):
+    # Strategic meta-audit of the whole autoresearch system.
+    # Cross-league. Weekly via SYN cron. research/meta_audit.py builds the
+    # snapshot; VIDAR reads it verbatim for reproducibility.
+    with open(snapshot_path) as f:
+        snapshot = f.read()
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    parts = []
+    parts.append("You are VIDAR acting as the Strategic META-AUDITOR of the autoresearch system itself.\n\n")
+    parts.append("This is not a per-league review. Today you are one layer up: question whether the research SYSTEM is structurally sound.\n\n")
+    parts.append("Every specialist operates INSIDE the research frame. None of them can see:\n")
+    parts.append("  - Whether the objective function is aligned with the mission (5 BTC by 2027)\n")
+    parts.append("  - Whether backtest and live execution measure the same thing\n")
+    parts.append("  - Whether elite populations are diverse or mode-collapsed\n")
+    parts.append("  - Whether OOS / walk-forward validation is being bypassed\n")
+    parts.append("  - Whether fees, funding, slippage, leverage are modelled honestly\n")
+    parts.append("  - Whether a league is training on a universe it cannot trade\n")
+    parts.append("  - Whether an officer is doing something counterproductive\n")
+    parts.append("  - What question the system is NOT asking that it should\n\n")
+    parts.append("Be direct, specific, cite evidence from the snapshot. Do not congratulate. Find what is structurally wrong.\n\n")
+    parts.append("SEVERITY GUIDE\n")
+    parts.append("  critical: actively losing money OR deciding on a broken signal that will compound\n")
+    parts.append("  high:     material harm within 2-4 weeks if unaddressed\n")
+    parts.append("  medium:   meaningful structural weakness, fix next cycle\n")
+    parts.append("  low:      quality/efficiency gap, not urgent\n\n")
+    parts.append("REQUIRED CHECKS (add more findings as warranted):\n")
+    parts.append("  1. Objective function alignment\n")
+    parts.append("  2. Backtest-live parity (fees, funding, slippage, leverage, universe, fills)\n")
+    parts.append("  3. Elite diversity (check unique_sharpe)\n")
+    parts.append("  4. Validation regime (walk-forward / OOS)\n")
+    parts.append("  5. Officer coverage gaps\n")
+    parts.append("  6. Drift tracking connectedness\n")
+    parts.append("  7. Anthropic spend rationality\n")
+    parts.append("  8. What question is this system NOT asking that it should?\n\n")
+    parts.append("Write 3-6 paragraphs of reasoning first. Then output EXACTLY one JSON block:\n\n")
+    parts.append("```json\n")
+    parts.append("{\n")
+    parts.append('  "summary": "<2-3 sentences exec summary>",\n')
+    parts.append('  "severity_counts": {"critical": N, "high": N, "medium": N, "low": N},\n')
+    parts.append('  "findings": [\n')
+    parts.append('    {"id": "F1", "severity": "critical|high|medium|low", "title": "...",\n')
+    parts.append('     "evidence": "<verifiable from snapshot>", "why_it_matters": "...",\n')
+    parts.append('     "suggested_action": "<what to change, where>", "delegable_to_loki": true}\n')
+    parts.append('  ],\n')
+    parts.append('  "unanswered_questions": ["<question>", "..."]\n')
+    parts.append("}\n")
+    parts.append("```\n\n")
+    parts.append("delegable_to_loki: true ONLY for safe code changes LOKI can ship with auto-revert (threshold/parameter/flag tweaks). false for structural, policy, or mission-level changes that need a human decision.\n\n")
+    parts.append("Use the snapshot below as ground truth. Do not invent data.\n")
+    parts.append(f"Today: {today}\n\n<snapshot>\n")
+    parts.append(snapshot)
+    parts.append("\n</snapshot>\n")
+    return "".join(parts)
+
+
+def write_meta_audit_review(audit_ts, response_text, decision):
+    os.makedirs(META_AUDIT_REVIEW_DIR, exist_ok=True)
+    fname = "review_" + audit_ts.replace(":", "").replace("-", "") + ".md"
+    path = os.path.join(META_AUDIT_REVIEW_DIR, fname)
+    d = decision or {}
+    with open(path, "w") as f:
+        f.write("# SYN/meta_audit - " + audit_ts + "\n\n")
+        f.write("## Summary\n" + d.get("summary", "") + "\n\n")
+        f.write("## Severity counts\n")
+        f.write("```json\n" + json.dumps(d.get("severity_counts", {}), indent=2) + "\n```\n\n")
+        f.write("## Full reasoning\n\n" + response_text + "\n")
+    return path
+
+
 def run_mode(args, api_key):
     if args.mode == "revert_review":
         if not args.revert_ts:
@@ -404,6 +483,11 @@ def run_mode(args, api_key):
             print("--topic required for deep_dive")
             sys.exit(1)
         prompt = build_deep_dive_prompt(args.league, args.topic)
+    elif args.mode == "meta_audit":
+        if not args.snapshot or not os.path.exists(args.snapshot):
+            print("--snapshot <path> required for meta_audit")
+            sys.exit(1)
+        prompt = build_meta_audit_prompt(args.snapshot)
     else:
         print(f"unknown mode: {args.mode}")
         sys.exit(1)
@@ -411,7 +495,7 @@ def run_mode(args, api_key):
     model = VIDAR_MODEL
     print(f"[vidar] firing {model} ({args.mode}, {args.league}) — prompt {len(prompt)} chars")
     try:
-        response = call_claude(prompt, api_key, model)
+        response = call_claude(prompt, api_key, model, max_tokens=VIDAR_MAX_TOKENS_BY_MODE.get(args.mode))
     except Exception as e:
         tg_send(f"[SYN/VIDAR] API call failed ({args.mode}/{args.league}): {e}")
         raise
@@ -433,6 +517,23 @@ def run_mode(args, api_key):
             decision = json.loads(json_block)
         except Exception as e:
             print(f"[vidar] failed to parse decision JSON: {e}")
+
+    # meta_audit: persist review + sidecar unconditionally (even on parse
+    # failure) so the SYN dispatcher can still route an error row to the
+    # inbox rather than leaving a silent gap.
+    if args.mode == "meta_audit":
+        audit_ts = record["ts"]
+        review_path = write_meta_audit_review(audit_ts, response, decision)
+        os.makedirs(META_AUDIT_REVIEW_DIR, exist_ok=True)
+        sidecar = {
+            "audit_ts":    audit_ts,
+            "review_path": review_path,
+            "decision":    decision,  # None on parse failure
+            "parse_ok":    decision is not None,
+        }
+        with open(os.path.join(META_AUDIT_REVIEW_DIR, "latest.json"), "w") as _f:
+            json.dump(sidecar, _f, indent=2)
+        print(f"[vidar/meta_audit] review: {review_path} (parse_ok={decision is not None})")
 
     if decision:
         decision_record = {
@@ -517,12 +618,17 @@ def run_mode(args, api_key):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--mode", required=True,
-                   choices=["revert_review", "oscillation_diag", "restructure", "cycle_review", "deep_dive", "patch_repair"])
-    p.add_argument("--league", required=True)
+                   choices=["revert_review", "oscillation_diag", "restructure", "cycle_review", "deep_dive", "patch_repair", "meta_audit"])
+    p.add_argument("--league", default=None, help="required for all modes except meta_audit")
+    p.add_argument("--snapshot", default=None, help="path to snapshot file (meta_audit only)")
     p.add_argument("--revert-ts", default=None, help="for revert_review")
     p.add_argument("--mimir-ts", default=None, help="for patch_repair")
     p.add_argument("--topic", default=None, help="for deep_dive")
     args = p.parse_args()
+    if args.mode != "meta_audit" and not args.league:
+        p.error("--league is required for --mode " + args.mode)
+    if args.mode == "meta_audit" and not args.league:
+        args.league = "global"
     api_key = load_anthropic_key()
     run_mode(args, api_key)
 

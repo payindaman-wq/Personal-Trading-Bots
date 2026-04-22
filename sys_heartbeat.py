@@ -583,6 +583,7 @@ def main():
         "sys_heartbeat",        # Self-generated checks (service dead, etc.) — defensive
         "loki",                 # LOKI systemd/cycle failures (REVERT/restructure silenced below)
         "vidar",                # VIDAR API-call failure only (decision completions silent)
+        "meta_audit",           # SYN weekly strategic audit — critical severity only (see override map)
         # NOTE (2026-04-19): the following sources are intentionally NOT allowlisted.
         # They route to syn_inbox only; VIDAR/LOKI consume and decide. Per
         # feedback_syn_telegram_chris_action_only.md: detection is not a Chris-action.
@@ -595,6 +596,12 @@ def main():
     TG_SILENT_SUBSTRINGS = {
         "loki":  ("REVERT", "restructure:", "cycle advance OK"),
         "vidar": ("completed", "NEEDS YOU"),   # belt-and-suspenders against old code paths
+    }
+    # Per-source severity allowlist — tighter than the default (error|critical).
+    # meta_audit only pages Chris on severity=critical; non-critical findings
+    # flow through VIDAR arbitration per feedback_syn_telegram_chris_action_only.md.
+    TG_SEVERITY_OVERRIDES = {
+        "meta_audit": {"critical"},
     }
 
     inbox_path = f"{WORKSPACE}/syn_inbox.jsonl"
@@ -613,10 +620,13 @@ def main():
                 entry = json.loads(line)
                 severity = entry.get("severity", "info")
                 source_raw = entry.get("source", "unknown")
-                msg = entry.get("msg", "")[:400]
+                msg = (entry.get("msg") or entry.get("title") or entry.get("summary") or "")[:400]
                 if severity not in ("error", "critical"):
                     continue
                 if source_raw not in TG_ALLOWED_SOURCES:
+                    continue
+                _override = TG_SEVERITY_OVERRIDES.get(source_raw)
+                if _override is not None and severity not in _override:
                     continue
                 if any(tok in msg for tok in TG_SILENT_SUBSTRINGS.get(source_raw, ())):
                     continue
