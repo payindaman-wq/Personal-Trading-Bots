@@ -97,6 +97,17 @@ def load_researcher_constants():
     return constants
 
 
+def load_researcher_source():
+    """Return the full odin_researcher_v2.py source for verbatim quoting.
+    F6: MIMIR must have the real source in context so structural patches quote it
+    verbatim instead of hallucinating anchors from prior-version memory."""
+    researcher_path = os.path.join(RESEARCH, "odin_researcher_v2.py")
+    if not os.path.exists(researcher_path):
+        return ""
+    with open(researcher_path, encoding="utf-8") as f:
+        return f.read()
+
+
 def load_loki_changes(league, n=20):
     """Load recent LOKI code changes and escalations for this league."""
     loki_log = os.path.join(RESEARCH, "loki_log.jsonl")
@@ -332,7 +343,8 @@ def format_tyr_context(tyr):
 
 def build_prompt(league, program_md, best_strategy_yaml,
                  research_summary, sprint_summary, generation,
-                 self_audit="", tyr_context="", champion_ground_truth=None):
+                 self_audit="", tyr_context="", champion_ground_truth=None,
+                 researcher_source=""):
     if league == "day":              bot_name = "AutoBotDay";    timeframe = "5-minute (day trading)"
     elif league == "swing":          bot_name = "AutoBotSwing";  timeframe = "1-hour (swing trading)"
     elif league == "futures_day":    bot_name = "AutoBotDayFutures";   timeframe = "5-minute (futures day, 2x leverage)"
@@ -436,9 +448,21 @@ Output EXACTLY two sections, using these exact headers:
 If you identify a specific structural code change needed in odin_researcher_v2.py (a logic error, a missing guard, a counterproductive behavior — NOT a constant value), add an optional third section:
 
 ### STRUCTURAL_PATCH
-[{{"old": "exact unique string to replace", "new": "replacement string"}}]
+[{{"old": "exact unique string to replace", "new": "replacement string", "context": "3+ consecutive verbatim lines from the Source Code section, copied exactly (whitespace, indentation), showing where this change lands. The 'old' string MUST be inside this context."}}]
 
-Rules: each "old" string must appear exactly once in the file; max 3 pairs; no new imports; no signature changes; Python must remain valid. Omit this section entirely if no structural change is needed."""
+Rules:
+- Each patch MUST include a "context" field: 3+ consecutive lines copied verbatim from the Source Code section below, preserving exact whitespace and indentation. The "old" string must appear inside that context. Patches whose context is not present verbatim in the current file will be rejected as hallucinated.
+- Each "old" string must appear exactly once in the file.
+- Max 3 pairs; no new imports; no signature changes; Python must remain valid.
+- If you cannot find the change site by quoting the Source Code section below verbatim, DO NOT emit STRUCTURAL_PATCH. Propose the change in ANALYSIS instead.
+
+---
+## Source Code (odin_researcher_v2.py — canonical, quote verbatim for STRUCTURAL_PATCH)
+
+```python
+{researcher_source}
+```
+"""
 
 
 def load_pm_research_results(n=200):
@@ -798,12 +822,14 @@ def main():
         tyr     = load_tyr_context()
         tyr_ctx = format_tyr_context(tyr)
         champion_gt = load_champion_ground_truth(league)
+        researcher_source = load_researcher_source()
         prompt = build_prompt(
             league, program_md, best_strategy,
             research_summary, sprint_summary, generation,
             self_audit=self_audit,
             tyr_context=tyr_ctx,
             champion_ground_truth=champion_gt,
+            researcher_source=researcher_source,
         )
 
     print(f"  Calling Claude ({ANTHROPIC_MODEL})...")
