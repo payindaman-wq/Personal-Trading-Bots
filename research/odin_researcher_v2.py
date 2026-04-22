@@ -81,6 +81,11 @@ def _llm_plateau():
 MIN_TRADES = {"day": 280, "futures_day": 1700, "futures_swing": 50}
 SWING_MIN_TRADES    = 30   # IMMUTABLE - DO NOT MODIFY via LOKI (Item 4)
 MIMIR_MIN_GAP_HRS   = 6    # min wall-clock hours between Mimir calls per league
+# F12: stretched milestone cadence on stalled leagues. A league counts as
+# stalled once gens_since_best >= MIMIR_STALL_FLOOR; its baseline MIMIR
+# cadence drops from every 200 gens to every MIMIR_STALL_GAP_GENS.
+MIMIR_STALL_FLOOR    = 500
+MIMIR_STALL_GAP_GENS = 1000
 SWING_MAX_TRADES    = 60   # swing hard upper bound (Item 3)
 SWING_ALLOWED_PAIRS = frozenset({"BTC/USD", "ETH/USD", "SOL/USD"})  # Item 7
 FUTURES_ALLOWED_PAIRS = frozenset({"BTC/USD", "ETH/USD", "SOL/USD"})  # Kraken Derivatives US universe
@@ -1126,15 +1131,25 @@ def main():
         if len(results_history) > 300:
             results_history = results_history[-300:]
 
-        # Mimir milestone: deep analysis every 200 gens (baseline cadence)
-        # or immediately after a breakthrough (min 100 gens since last Mimir).
-        # Structural-failure storm: 3+ of last 10 had trades>450 — fire early
-        # (requires 50+ gens since last MIMIR to avoid spam on a single cluster).
-        # Wall-clock cooldown (MIMIR_MIN_GAP_HRS) caps per-league Claude spend.
+        # Mimir milestone: deep analysis every 200 gens on active leagues
+        # (baseline cadence) or immediately after a breakthrough (min 100
+        # gens since last Mimir). Structural-failure storm: 3+ of last 10
+        # had trades>450 — fire early (requires 50+ gens since last MIMIR
+        # to avoid spam on a single cluster). Wall-clock cooldown
+        # (MIMIR_MIN_GAP_HRS) caps per-league Claude spend.
+        #
+        # F12 (meta_audit): on stalled leagues (gens_since_best >=
+        # MIMIR_STALL_FLOOR) stretch the baseline cadence from 200 to
+        # MIMIR_STALL_GAP_GENS — Sonnet has nothing new to analyze on a
+        # frozen population, so most milestone fires are waste. Breakthrough
+        # and structural-storm branches still trigger immediately because
+        # those ARE new information.
         last_10_trades = [int(r.get('trades', '0')) for r in results_history[-10:] if str(r.get('trades', '0')).isdigit()]
         structural_storm = sum(1 for t in last_10_trades if t > 450) >= 3
+        _mimir_stalled  = gens_since_best >= MIMIR_STALL_FLOOR
+        _baseline_gap   = MIMIR_STALL_GAP_GENS if _mimir_stalled else 200
         trigger_mimir = (
-            (gen % 200 == 0)
+            ((gen - last_mimir_gen) >= _baseline_gap)
             or (is_new_best and (gen - last_mimir_gen) >= 100)
             or (structural_storm and (gen - last_mimir_gen) >= 50)
         )
@@ -1153,7 +1168,14 @@ def main():
             if gap_ok:
                 last_mimir_gen = gen
                 last_mimir_ts  = now_utc.strftime("%Y-%m-%dT%H:%M")
-                reason = "milestone" if gen % 200 == 0 else "breakthrough"
+                if is_new_best and (gen - last_mimir_gen) >= 100:
+                    reason = "breakthrough"
+                elif structural_storm:
+                    reason = "structural_storm"
+                elif _mimir_stalled:
+                    reason = "stalled_milestone"
+                else:
+                    reason = "milestone"
                 print(f"  [mimir] Gen {gen} {reason} — launching deep analysis...")
                 try:
                     subprocess.Popen(
