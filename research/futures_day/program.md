@@ -1,5 +1,10 @@
 ```markdown
-# ODIN — FUTURES DAY v43.0
+# ODIN — FUTURES DAY v44.0
+
+## UNIVERSE CONSTRAINT — DO NOT VIOLATE
+Kraken Derivatives US perpetuals: **BTC/USD, ETH/USD, SOL/USD only.**
+Any other pair is untradable live and will be silently dropped by the backtest
+engine. Never add pairs beyond these three.
 
 ## YAML TEMPLATE — copy verbatim, change EXACTLY ONE value
 
@@ -12,19 +17,6 @@ pairs:
 - BTC/USD
 - ETH/USD
 - SOL/USD
-- XRP/USD
-- DOGE/USD
-- AVAX/USD
-- LINK/USD
-- UNI/USD
-- AAVE/USD
-- NEAR/USD
-- APT/USD
-- SUI/USD
-- ARB/USD
-- OP/USD
-- ADA/USD
-- POL/USD
 position:
   size_pct: 8
   max_open: 1
@@ -79,8 +71,9 @@ Fallback chain (if 66.0 is banned or already tested):
 | exit.timeout_minutes | 720 (do not change) |
 | leverage | 2 (do not change) |
 | fee_rate | 0.0005 (do not change) |
+| pairs | must stay [BTC/USD, ETH/USD, SOL/USD] — do not add or remove |
 
-**ALSO BANNED — configurations that produced trades < 500 or Sharpe < -3.0 are invalid. If your change would tighten both RSI thresholds simultaneously or set rsi_long < 18 or rsi_short > 80, do not submit.**
+**ALSO BANNED — configurations that produced trades < 150 or Sharpe < -3.0 are invalid. If your change would tighten both RSI thresholds simultaneously or set rsi_long < 18 or rsi_short > 80, do not submit.**
 
 ---
 
@@ -100,7 +93,7 @@ Output the complete YAML with exactly one value changed from the template above.
 
 - [ ] Exactly ONE value differs from champion YAML above
 - [ ] Changed value is NOT in banned list
-- [ ] All 16 pairs present, same order
+- [ ] pairs is exactly [BTC/USD, ETH/USD, SOL/USD] — all three, no more, no fewer
 - [ ] leverage=2, fee_rate=0.0005, timeout_minutes=720 unchanged
 - [ ] YAML is complete — no lines removed or added
 
@@ -110,6 +103,9 @@ Output the complete YAML with exactly one value changed from the template above.
 
 Champion: Gen 3233 | Sharpe=0.4066 | 1756 trades | WR=50.1%
 Goal: Sharpe > 0.4066
+
+Expected trade volume on 3-pair universe: 200–400 trades / 2yr backtest.
+MIN_TRADES floor: 150 (configurations below this are auto-rejected).
 
 Previously tested — DO NOT RESUBMIT:
 | Field | Value | Result |
@@ -133,5 +129,3 @@ Next priority queue (in order):
 9. take_profit_pct → 4.2
 10. stop_loss_pct → 2.8
 ```
-
----

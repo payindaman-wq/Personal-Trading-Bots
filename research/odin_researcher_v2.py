@@ -60,7 +60,7 @@ def _llm_plateau():
         return False
     return (sum(_llm_history) / LLM_WINDOW) < LLM_PLATEAU_THRESHOLD
 
-MIN_TRADES = {"day": 280, "futures_day": 800, "futures_swing": 50}
+MIN_TRADES = {"day": 280, "futures_day": 150, "futures_swing": 50}
 SWING_MIN_TRADES    = 30   # IMMUTABLE - DO NOT MODIFY via LOKI (Item 4)
 MIMIR_MIN_GAP_HRS   = 6    # min wall-clock hours between Mimir calls per league
 SWING_MAX_TRADES    = 60   # swing hard upper bound (Item 3)
@@ -900,10 +900,14 @@ def main():
         if league in ("futures_day", "futures_swing"):
             _bad_pairs = set(candidate.get("pairs", [])) - FUTURES_ALLOWED_PAIRS
             if _bad_pairs:
+                print(f"  [universe] {league} gen {gen}: dropping untradable pairs {sorted(_bad_pairs)} (Kraken Derivatives US = BTC/ETH/SOL only)")
                 candidate["pairs"] = [p for p in candidate.get("pairs", []) if p in FUTURES_ALLOWED_PAIRS] or ["BTC/USD", "ETH/USD", "SOL/USD"]
             _cap = kraken_leverage.cap_for_strategy(candidate.get("pairs", []))
             if float(candidate.get("leverage", 1.0)) > _cap:
                 candidate["leverage"] = _cap
+            # Belt-and-suspenders assertion: candidate that reaches backtest must be a subset of tradable.
+            assert set(candidate.get("pairs", [])).issubset(FUTURES_ALLOWED_PAIRS), \
+                f"pairs whitelist post-filter produced non-tradable pair: {candidate.get('pairs')}"
             import yaml as _yaml2
             candidate_yaml = _yaml2.dump(candidate, default_flow_style=False, sort_keys=False)
 

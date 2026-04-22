@@ -357,6 +357,24 @@ def build_prompt(league, program_md, best_strategy_yaml,
 ODIN works by asking a small LLM (gemini-2.5-flash-lite) to propose ONE change to the current best strategy, then backtesting it on 2 years of {timeframe} BTC/USD, ETH/USD, SOL/USD data. If Sharpe improves, the change is kept.
 
 ---
+## UNIVERSE CONSTRAINT - HARD RULE FOR FUTURES LEAGUES
+
+For futures_day and futures_swing, the live tradable universe is exactly
+BTC/USD, ETH/USD, SOL/USD (Kraken Derivatives US perpetuals, per operator
+constraint). The backtest engine and researcher-side filters silently drop
+any other pair before running. Listing more pairs in program.md only tricks
+the small LLM into generating configs that collapse to 3 pairs anyway -
+inflating apparent trade counts and muddying telemetry.
+
+When you rewrite program.md for these leagues, the YAML template MUST list
+exactly these three pairs, and the program's rules/preflight MUST reject any
+pair outside this set. Do not cite a '16-pair' or historical champion - that
+era is over.
+
+For day/swing/pm leagues this constraint does not apply; follow the existing
+program guidance.
+
+---
 ## Actual Stored Champion (GROUND TRUTH — read directly from population/elite_0.yaml)
 
 {_champion_gt_str}

@@ -1,20 +1,19 @@
 ```markdown
 # ODIN Research Program — FUTURES SWING
-# Version: Post-Gen-7120 | Revised by MIMIR (Gen 7120 review)
-# TRUE Champion: Sharpe=2.3494 | Trades=1265 | Win=40.1%
-# STORED elite_0.yaml: Sharpe=1.1037 | Trades=494 — CORRUPTED, RESTORE REQUIRED
+# Version: Post-aaf247c-universe-fix (2026-04-22)
+# Champion: Sharpe=1.6006 | Trades=428 | elite_0.yaml is canonical ground truth.
 
-## ⚠️ OPERATOR ACTION REQUIRED BEFORE NEXT RUN
-## 1. Manually restore elite_0.yaml to the 16-pair, Sharpe=2.3494 champion below
-## 2. Verify MIN_TRADES[futures_swing]=800 in code (current value reads as 50)
-## 3. elite_0.yaml must be written on EVERY accept (BUG-2 fix)
+## UNIVERSE CONSTRAINT — DO NOT VIOLATE
+Kraken Derivatives US perpetuals: **BTC/USD, ETH/USD, SOL/USD only.**
+Any other pair is untradable live and will be silently dropped by the backtest
+engine. Never add pairs beyond these three.
 
 ---
 ## OUTPUT RULE
 Output ONLY the modified YAML. ONE value changed. Nothing else.
 
 ---
-## TEMPLATE — THIS IS THE TRUE CHAMPION. COPY EXACTLY, CHANGE ONE VALUE.
+## TEMPLATE — COPY EXACTLY, CHANGE ONE VALUE.
 
 ```yaml
 name: crossover
@@ -25,19 +24,6 @@ pairs:
 - BTC/USD
 - ETH/USD
 - SOL/USD
-- XRP/USD
-- DOGE/USD
-- AVAX/USD
-- LINK/USD
-- UNI/USD
-- AAVE/USD
-- NEAR/USD
-- APT/USD
-- SUI/USD
-- ARB/USD
-- OP/USD
-- ADA/USD
-- POL/USD
 position:
   size_pct: 25
   max_open: 3
@@ -82,9 +68,9 @@ risk:
 | rsi long (lt) | 33 – 44 ONLY |
 | rsi_period_hours | 18 – 30 ONLY |
 | timeout_hours | ≤ 210 |
-| Pairs | DO NOT CHANGE — must keep all 16 |
+| Pairs | must be exactly [BTC/USD, ETH/USD, SOL/USD] — do not add or remove |
 | fee_rate / size_pct / max_open / leverage | DO NOT CHANGE |
-| Minimum trades | Your change must produce ≥ 1000 trades |
+| Minimum trades | Your change must produce ≥ 200 trades |
 
 ---
 ## WHAT TO CHANGE — PICK EXACTLY ONE
@@ -121,10 +107,10 @@ stop_if_down_pct (current: 18): 15 | 16 | 17 | 20 | 22
 
 - stop_loss_pct < 1.70 → always fails
 - stop_loss_pct > 2.30 → too few trades
-- rsi long lt < 33 → poison attractor (~450–530 trades), always fails
+- rsi long lt < 33 → poison attractor, always fails
 - rsi long lt > 44 → too few trades
 - timeout_hours > 210 → rejected
-- Pairs list with fewer than 16 pairs → produces < 800 trades → reject
+- Pairs list differing from [BTC/USD, ETH/USD, SOL/USD] → reject (untradable universe)
 - These exact values are the current champion — do not reproduce:
   take_profit_pct=5.01, stop_loss_pct=1.92, timeout_hours=166,
   rsi_lt=37.77, rsi_gt=60, rsi_period=24, trend_period=48
@@ -132,14 +118,14 @@ stop_if_down_pct (current: 18): 15 | 16 | 17 | 20 | 22
 ---
 ## PRE-OUTPUT CHECKLIST
 
-- [ ] All 16 pairs present and unchanged
+- [ ] pairs is exactly [BTC/USD, ETH/USD, SOL/USD]
 - [ ] Exactly ONE value changed from template
 - [ ] Changed value is NOT the current champion value
 - [ ] stop_loss_pct is between 1.70 and 2.30
 - [ ] rsi long lt is between 33 and 44
 - [ ] timeout_hours ≤ 210
 - [ ] fee_rate, size_pct, max_open, leverage unchanged
-- [ ] Expected trade count ≥ 1000 (16 pairs = enough signal)
+- [ ] Expected trade count ≥ 200
 
 Output ONLY the YAML. No explanation. No comments.
 ```

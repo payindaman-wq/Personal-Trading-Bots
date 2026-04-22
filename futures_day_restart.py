@@ -144,7 +144,7 @@ def write_score_file(comp_id, sprint_dir, results_dir, league, duration_hours):
     score_path = os.path.join(results_dir, comp_id + '_score.json')
     with open(score_path, 'w') as fh:
         json.dump(score_data, fh, indent=2)
-    print(f'  Scored: {comp_id} -> winner={scores[0][chr(34)+"bot"+chr(34)]}')
+    print(f'  Scored: {comp_id} -> winner={scores[0]["bot"]}')
 
 
 def archive_current(comp_id):
