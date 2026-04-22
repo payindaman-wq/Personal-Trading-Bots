@@ -1,11 +1,7 @@
 ```markdown
-# ODIN Day League — v11300-escape
+# ODIN Day League — v11680
 
-## YOUR ONLY JOB: pick ONE row from the table, fill in the YAML, submit.
-
----
-
-## YAML TEMPLATE — fill in the 5 marked values from the table
+## TEMPLATE — COPY THIS EXACTLY, THEN CHANGE ONLY MARKED VALUES
 
 ```yaml
 name: crossover
@@ -35,7 +31,7 @@ entry:
     - indicator: price_change_pct
       period_minutes: 5
       operator: lt
-      value: LONG_VALUE     # ← fill from table (MUST be negative)
+      value: -1.21        # ← CHANGE THIS (MUST be negative)
     - indicator: macd_signal
       period_minutes: 30
       operator: eq
@@ -57,7 +53,7 @@ entry:
     - indicator: price_change_pct
       period_minutes: 30
       operator: gt
-      value: SHORT_VALUE    # ← fill from table (MUST be positive)
+      value: 1.16         # ← CHANGE THIS (MUST be positive)
     - indicator: macd_signal
       period_minutes: 30
       operator: eq
@@ -71,9 +67,9 @@ entry:
       operator: eq
       value: down
 exit:
-  take_profit_pct: TAKE_PROFIT   # ← fill from table
-  stop_loss_pct: STOP_LOSS       # ← fill from table
-  timeout_minutes: TIMEOUT       # ← fill from table
+  take_profit_pct: 3.51   # ← CHANGE THIS
+  stop_loss_pct: 0.37     # ← CHANGE THIS
+  timeout_minutes: 706    # ← CHANGE THIS
 risk:
   pause_if_down_pct: 4
   stop_if_down_pct: 10
@@ -82,49 +78,45 @@ risk:
 
 ---
 
-## ⚠️ PRE-SUBMIT CHECKS — ALL 5 MUST PASS OR DELETE AND RESTART
+## STEP 1 — VERIFY BEFORE SUBMITTING (all 4 must pass)
 
-1. long price_change_pct value is NEGATIVE (e.g. -1.21) ✓
-2. short price_change_pct value is POSITIVE (e.g. 1.16) ✓
+1. long price_change_pct value is NEGATIVE ✓
+2. short price_change_pct value is POSITIVE ✓
 3. long operator = lt, short operator = gt ✓
-4. pairs count = 10 (unchanged) ✓
-5. Row chosen is NOT marked "tested" or "CHAMPION" ✓
+4. All 5 values come from ONE row in the table below ✓
 
-**If any check fails → DELETE everything and restart from the template above.**
-
----
-
-## ⚠️ DEDUP WARNING — DO NOT PICK ROWS MARKED "tested" OR "CHAMPION"
-
-Picking a tested row = instant dedup_reject (trades=0, wasted generation).
-Only pick rows marked **PRIORITY** or **NEW**.
+**If any check fails → DELETE output and restart.**
 
 ---
 
-## PICK EXACTLY ONE ROW — PRIORITY FIRST, THEN NEW
+## STEP 2 — PICK EXACTLY ONE ROW
 
-**Champion to beat: Sharpe > 1.1731 AND trades ≥ 280**
+**Champion: Sharpe=1.1731, trades=310**
+**Goal: Sharpe > 1.1731 AND trades ≥ 280**
+
+**PICK FROM PRIORITY OR NEW ROWS ONLY. Do NOT repeat the champion row (A1) or any "tested" row.**
 
 | ID | long.value | short.value | take_profit | stop_loss | timeout | Status |
 |----|------------|-------------|-------------|-----------|---------|--------|
-| B5 | -1.21 | 1.16 | 3.51 | 0.31 | 706 | **PRIORITY** |
-| B6 | -1.21 | 1.16 | 4.00 | 0.37 | 706 | **PRIORITY** |
-| B7 | -1.21 | 1.16 | 3.51 | 0.43 | 706 | **PRIORITY** |
-| C3 | -1.18 | 1.13 | 3.75 | 0.37 | 706 | **PRIORITY** |
-| C4 | -1.24 | 1.19 | 3.25 | 0.40 | 706 | **PRIORITY** |
-| C5 | -1.21 | 1.16 | 3.51 | 0.37 | 800 | **PRIORITY** |
-| C6 | -1.21 | 1.16 | 3.51 | 0.37 | 600 | **PRIORITY** |
-| D2 | -1.24 | 1.16 | 3.25 | 0.37 | 706 | **PRIORITY** |
-| D3 | -1.21 | 1.13 | 3.51 | 0.34 | 706 | **PRIORITY** |
-| D4 | -1.21 | 1.19 | 3.51 | 0.40 | 706 | **PRIORITY** |
-| D6 | -1.24 | 1.16 | 3.51 | 0.40 | 660 | **PRIORITY** |
-| D7 | -1.21 | 1.13 | 3.75 | 0.37 | 750 | **PRIORITY** |
-| D8 | -1.21 | 1.19 | 3.25 | 0.37 | 660 | **PRIORITY** |
-| E1 | -1.21 | 1.16 | 3.51 | 0.28 | 706 | NEW |
+| A1 | -1.21 | 1.16 | 3.51 | 0.37 | 706 | CHAMPION — DO NOT PICK |
+| B5 | -1.21 | 1.16 | 3.51 | 0.31 | 706 | PRIORITY |
+| B6 | -1.21 | 1.16 | 4.00 | 0.37 | 706 | PRIORITY |
+| B7 | -1.21 | 1.16 | 3.51 | 0.43 | 706 | PRIORITY |
+| C3 | -1.18 | 1.13 | 3.75 | 0.37 | 706 | PRIORITY |
+| C4 | -1.24 | 1.19 | 3.25 | 0.40 | 706 | PRIORITY |
+| C5 | -1.21 | 1.16 | 3.51 | 0.37 | 800 | PRIORITY |
+| C6 | -1.21 | 1.16 | 3.51 | 0.37 | 600 | PRIORITY |
+| D2 | -1.24 | 1.16 | 3.25 | 0.37 | 706 | PRIORITY |
+| D3 | -1.21 | 1.13 | 3.51 | 0.34 | 706 | PRIORITY |
+| D4 | -1.21 | 1.19 | 3.51 | 0.40 | 706 | PRIORITY |
+| D6 | -1.24 | 1.16 | 3.51 | 0.40 | 660 | PRIORITY |
+| D7 | -1.21 | 1.13 | 3.75 | 0.37 | 750 | PRIORITY |
+| D8 | -1.21 | 1.19 | 3.25 | 0.37 | 660 | PRIORITY |
+| E1 | -1.21 | 1.16 | 3.51 | 0.28 | 706 | NEW ← EXPLORE FIRST |
 | E2 | -1.21 | 1.16 | 3.51 | 0.46 | 706 | NEW |
 | E3 | -1.21 | 1.16 | 3.51 | 0.37 | 850 | NEW |
 | E4 | -1.21 | 1.16 | 3.51 | 0.37 | 550 | NEW |
-| E5 | -1.21 | 1.16 | 4.25 | 0.37 | 706 | NEW |
+| E5 | -1.21 | 1.16 | 4.25 | 0.37 | 706 | NEW ← EXPLORE FIRST |
 | E6 | -1.21 | 1.16 | 3.00 | 0.34 | 706 | NEW |
 | E7 | -1.18 | 1.13 | 3.51 | 0.37 | 750 | NEW |
 | E8 | -1.24 | 1.19 | 3.51 | 0.37 | 660 | NEW |
@@ -135,24 +127,33 @@ Only pick rows marked **PRIORITY** or **NEW**.
 | F5 | -1.18 | 1.16 | 3.75 | 0.34 | 750 | NEW |
 | F6 | -1.24 | 1.16 | 3.25 | 0.40 | 660 | NEW |
 
-**Do NOT use rows not in this table. Do NOT invent values.**
+**RECENTLY SUBMITTED (DO NOT RESUBMIT THESE):**
+- A1: -1.21 / 1.16 / 3.51 / 0.37 / 706 (champion)
+- Any row already marked "tested" in the full history
+
+**If you are unsure which rows have been tried: pick E1, E5, F1, F2, F3, or F4 — these are confirmed untested.**
 
 ---
 
-## ACCEPTANCE RULES
+## STEP 3 — RESULT TAGS
 
-| Result | Tag | Action |
-|--------|-----|--------|
-| trades > 450 | [structural_failure] | DELETE — pick a different row |
-| trades = 0 | [dedup_reject] | DELETE — you picked a tested row, pick PRIORITY/NEW |
-| trades < 280 | [low_trades] | Discard, try next row |
-| 280 ≤ trades ≤ 450, Sharpe ≤ 1.1731 | [discarded] | Discard, try next row |
-| 280 ≤ trades ≤ 450, Sharpe > 1.1731 | [new_best] | Deploy immediately |
+| Result | Tag | Rep? |
+|--------|-----|------|
+| trades > 450 | [structural_failure] — DELETE, restart | NO |
+| trades < 280 | [low_trades] — discard | YES |
+| 280 ≤ trades ≤ 450, Sharpe ≤ 1.1731 | [discarded] | YES |
+| 280 ≤ trades ≤ 450, Sharpe > 1.1731 | [new_best] → deploy | YES |
 
-## LOCKED — NEVER CHANGE THESE
+**trades > 450 means you used an out-of-table value. Delete and use a table row.**
+
+---
+
+## LOCKED — NEVER CHANGE
 
 name · style · all 10 pairs · max_open=3 · size_pct=10 · fee_rate=0.001
-all operators (lt / gt / eq) · all indicator types · all period_minutes
-all eq values (true / bullish / bearish / above / below / up / down)
-condition count = 5 long + 5 short
+All operators (lt / gt / eq) · all indicator types · all period_minutes
+All eq values (true / bullish / bearish / above / below / up / down)
+Condition count: exactly 5 long + 5 short
 ```
+
+---
