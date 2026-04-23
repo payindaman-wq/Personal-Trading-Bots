@@ -34,6 +34,8 @@ WORKSPACE = "/root/.openclaw/workspace"
 STATE_FILE = f"{WORKSPACE}/competition/self_heal_state.json"
 LOG_FILE = f"{WORKSPACE}/competition/self_heal_log.jsonl"
 INBOX = f"{WORKSPACE}/syn_inbox.jsonl"
+EXCHANGE_PAUSE_FLAG = f"{WORKSPACE}/competition/exchange_paused"
+EXCHANGE_PAUSED_SERVICES = {"kalshi_copy", "polymarket_syn"}
 
 HEAL_AFTER_CONSECUTIVE = 2   # attempt self-heal at this many consecutive degraded runs
 ESCALATE_AFTER_HEAL    = 2   # escalate if still degraded this many runs AFTER heal attempt
@@ -174,6 +176,10 @@ def check_service(name):
     active, detail = systemctl_is_active(name)
     if active:
         return "healthy", detail
+    # Respect exchange_health pause: do not flag exchange-dependent services
+    # as degraded while the exchange is intentionally paused.
+    if name in EXCHANGE_PAUSED_SERVICES and os.path.exists(EXCHANGE_PAUSE_FLAG):
+        return "healthy", f"paused_by_exchange_health:{detail}"
     return "degraded", detail
 
 
