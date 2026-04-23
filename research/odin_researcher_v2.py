@@ -78,7 +78,7 @@ def _llm_plateau():
         return False
     return (sum(_llm_history) / LLM_WINDOW) < LLM_PLATEAU_THRESHOLD
 
-MIN_TRADES = {"day": 280, "futures_day": 1700, "futures_swing": 400}
+MIN_TRADES = {"day": 280, "futures_day": 600, "futures_swing": 400}  # futures_day lowered 1700->600 on 2026-04-23 for BTC/ETH/SOL-only universe
 SWING_MIN_TRADES    = 30   # IMMUTABLE - DO NOT MODIFY via LOKI (Item 4)
 MIMIR_MIN_GAP_HRS   = 6    # min wall-clock hours between Mimir calls per league
 # F12: stretched milestone cadence on stalled leagues. A league counts as
@@ -986,6 +986,7 @@ def main():
             print(f"| [DEDUP_REJECT]")
             log_result(league, gen, {}, "dedup_reject", "duplicate config")
             gen += 1
+            gens_since_best += 1  # 2026-04-23: count dedup rejects toward stall so FORCE_RANDOM/MIMIR machinery activates
             with open(state_path, "w") as f:
                 json.dump({"gen": gen, "gens_since_best": gens_since_best, "last_mimir_gen": last_mimir_gen, "last_mimir_ts": last_mimir_ts}, f)
             time.sleep(args.sleep)
@@ -1047,6 +1048,7 @@ def main():
             print(f"| sharpe={sharpe:.4f} trades={trades} [low_trades]")
             log_result(league, gen, result, "low_trades", f"trades={trades}")
             gen += 1
+            gens_since_best += 1  # 2026-04-23: count low_trades rejects toward stall so FORCE_RANDOM/MIMIR machinery activates
             with open(state_path, "w") as f:
                 json.dump({"gen": gen, "gens_since_best": gens_since_best, "last_mimir_gen": last_mimir_gen, "last_mimir_ts": last_mimir_ts}, f)
             time.sleep(args.sleep)
