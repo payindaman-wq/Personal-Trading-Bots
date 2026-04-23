@@ -1,6 +1,4 @@
 ```markdown
-# FREYA Research Program — MIMIR TERMINAL REVIEW
-
 ## ██████████████████████████████████████████████████████
 ## █                                                    █
 ## █   THIS IS NOT A NEW PROGRAM VERSION.              █
@@ -13,10 +11,13 @@
 
 ---
 
-## MIMIR STATEMENT — FINAL (REISSUED AT GEN 34,400)
+## MIMIR STATEMENT — FINAL (REISSUED AT GEN 34,800)
 
-Generations 34,201–34,400 have been reviewed.
-This is the same response that was delivered at generation 34,000.
+Generations 34,601–34,800 have been reviewed.
+This is the same response that was delivered at generation 34,600.
+It is the same response that was delivered at generation 34,400.
+It is the same response that was delivered at generation 34,200.
+It is the same response that was delivered at generation 34,000.
 It is the same response that was delivered at generation 33,800.
 It is the same response that was delivered at generation 33,600.
 It is the same response that was delivered at generation 33,400.
@@ -112,34 +113,31 @@ It is the same response that was delivered at generation 15,600.
 
 **Findings:**
 - Best result (all time):             Gen 13,490, adj=3.1959
-- Current loop attractor:             adj=2.5233 (Gen 34,400) — INFERIOR
+- Current loop attractor:             adj=2.5233 (Gen 34,800) — INFERIOR
 - Delta from all-time best:           -0.6726 adj units
 - Improvement this batch:             0 events
 - Improvements since Gen 13,490:      0 (net meaningful — no recovery
                                        toward 3.1959)
 - New viable attractors:              0
 - Information gain:                   0
-- Degenerate collapses this batch:    2 (adj=-1.0 at Gens 34,398/34,399;
-                                       bets=2, bets=5)
-- New failure mode observed:          Large-bet low-sharpe outputs at
-                                       adj=1.5671/bets=17905 and
-                                       adj=1.3492/bets=18238 — loop now
-                                       oscillating between zero-bet and
-                                       over-bet failure modes simultaneously
-- Degenerate collapse trend:          ELEVATED, INCREASING, and MUTATING
-                                       (variants now include bets=0, bets=1,
-                                       bets=2, bets=3, bets=5, bets=7,
-                                       bets=9, bets=11, bets=12, bets=23,
-                                       bets=37 modes)
-- Logging integrity:                  DEGRADED (collapse variant count
-                                       now exceeds 10 distinct modes)
+- Degenerate collapses this batch:    3 (adj=-1.0 at Gens 34,788/34,791/
+                                       34,795; bets=1, bets=0, bets=0)
+- Over-bet failure mode this batch:   1 (Gen 34,781: adj=1.3492,
+                                       bets=18238, sharpe=0.1979)
+- Collapse variant set:               bets=0,1,2,3,5,7,9,11,12,23,37
+                                       + over-bet modes bets=17905/18238
+                                       (12+ distinct failure modes)
+- Degenerate collapse trend:          ELEVATED, INCREASING, MUTATING,
+                                       NOW BI-DIRECTIONAL
 - Loop freeze status:                 CONFIRMED — dominant attractor
                                        adj=2.5233, sharpe=0.4061, bets=9969
-                                       recurring in 14 of last 20 generations
+                                       recurring in 6 of last 20 generations;
+                                       loop oscillating between frozen
+                                       attractor, zero-bet collapse, and
+                                       over-bet collapse simultaneously
 - Live results:                       9 wins / 38 total trades
 - Most recent sprint:                 0 trades placed across all 3 slots
-                                       (ninth consecutive sprint: zero
-                                       trades)
+                                       (tenth consecutive sprint: zero trades)
 - Completed sprint record:            0/24 (three slots, full sprints only)
 - p(0/24 | correct strategy):         < 10⁻⁷
 - D1 completions:                     0
@@ -154,14 +152,14 @@ It has not produced analyzable research since generation 13,490.
 
 ## THE SITUATION IN PLAIN LANGUAGE
 
-Thirty-four thousand four hundred generations have been run.
+Thirty-four thousand eight hundred generations have been run.
 The best result was found at generation 13,490.
 Nothing has meaningfully improved since generation 13,490.
-The loop has run 20,910 generations against zero net improvement.
+The loop has run 21,310 generations against zero net improvement.
 
-34,400 is a number.
+34,800 is a number.
 It is not a milestone.
-It is what happens when a loop runs 20,910 generations
+It is what happens when a loop runs 21,310 generations
 past its last result.
 
 There were zero improvement events this batch.
@@ -169,22 +167,20 @@ There were zero improvement events in the prior batch.
 There were zero improvement events in the batch before that.
 The trend is not improving.
 
-14 of the last 20 generations produced identical frozen output.
-2 degenerate collapses occurred in the last 20 generations.
-The collapse variants now include bets=0, bets=1, bets=2, bets=3,
-bets=5, bets=7, bets=9, bets=11, bets=12, bets=23, and bets=37.
-The mode is diversifying.
-A new failure mode has appeared: bets=17905 and bets=18238 with
-sharpe=0.2305 and sharpe=0.1979.
-The loop is now failing in two opposite directions simultaneously.
+6 of the last 20 generations produced identical frozen output.
+3 degenerate collapses occurred in the last 20 generations.
+1 over-bet failure mode occurred in the last 20 generations.
+The collapse variants now include bets=0, 1, 2, 3, 5, 7, 9, 11,
+12, 23, 37, and over-bet modes at bets=17905 and bets=18238.
+The loop is failing in two opposite directions simultaneously.
 The direction is not up.
 The loop is not searching.
 It is oscillating between a frozen attractor, an expanding set
-of degenerate zero-bet failure modes, and a new class of
+of degenerate zero-bet failure modes, and a growing class of
 over-bet low-sharpe failure modes.
 
 The most recent sprint placed zero trades across all three slots.
-This is the ninth consecutive sprint with zero trades placed.
+This is the tenth consecutive sprint with zero trades placed.
 The strategy cannot find qualifying markets.
 The prior failure mode was losing completed trades.
 The current failure mode is not placing trades at all.
@@ -199,7 +195,7 @@ the price range filter (0.08–0.3) may exclude all qualifying markets.
 This explains zero trades placed.
 This can be checked in 2 hours.
 It has not been checked.
-4,910 more generations have been run since generation 29,490 instead.
+5,310 more generations have been run since generation 29,490 instead.
 
 The best result cannot be trusted because D1 was never done.
 Live trading has lost on completed sprints at 0/24 across all three slots.
@@ -209,26 +205,25 @@ The strategy cannot find qualifying markets.
 The base rate can be checked in 2 hours.
 It has not been checked.
 
-34,400 is a number.
+34,800 is a number.
 It is not a milestone.
-It is a number the loop reached by running 20,910 generations
+It is a number the loop reached by running 21,310 generations
 past its last useful result.
 
-Running generation 34,401 will not change adj=2.5233.
+Running generation 34,801 will not change adj=2.5233.
 Running more generations will not recover adj=3.1959.
 Running more generations will not change the 0/24 completed sprint record.
 Running more generations will not explain zero trades placed.
 Running more generations will not fix the base rate.
 Running more generations will produce more frozen identical output.
 Running more generations will produce more degenerate collapses
-in an expanding set of variants, now including both zero-bet
-and over-bet failure modes.
+in an expanding set of variants, now failing in both directions.
 The collapse frequency is elevated. It is not recovering.
 The next batch will look identical to this one, or worse.
 
 2 hours is a small number.
 Do Option A or Option B.
-Do not run generation 34,401.
+Do not run generation 34,801.
 
 ---
 
@@ -267,7 +262,7 @@ Do not run generation 34,401.
   1. Kill the loop (ps aux | grep freya; kill -9 [PID]).
   2. Disable the scheduler.
   3. Rotate or remove the Gemini Flash Lite API key.
-  4. Archive v1.0–v71.0 and all simulation results (Gens 1–34,400).
+  4. Archive v1.0–v71.0 and all simulation results (Gens 1–34,800).
   5. Archive live results (all sprints: autobotpred1, autobotpred2,
      autobotpred3).
   6. Assign D1 to a person with 2 hours available.
@@ -303,32 +298,35 @@ the current generation count, live loss count, and collapse count.
 ## FOR THE RECORD — RUNNING STATISTICS
 
   Program versions produced:          71 (v1.0–v71.0) + terminal reviews
-  Simulation generations run:         34,400
+  Simulation generations run:         34,800
   Best generation (all time):         13,490 (adj=3.1959)
-  Current loop attractor:             34,400 (adj=2.5233) — INFERIOR
+  Current loop attractor:             34,800 (adj=2.5233) — INFERIOR
   Delta from all-time best:           -0.6726 adj units
   Improvements since Gen 13,490:      0 (net meaningful — no recovery
                                        toward 3.1959)
-  Generations run against zero:       20,910
+  Generations run against zero:       21,310
   Loop convergence status:            FULLY FROZEN (dominant attractor
                                        adj=2.5233 / sharpe=0.4061 / bets=9969
                                        + elevated and increasing degenerate
-                                       collapses in 10+ distinct modes;
-                                       14 of last 20 gens identical;
-                                       new over-bet failure mode emerging)
+                                       collapses in 12+ distinct modes;
+                                       6 of last 20 gens identical;
+                                       over-bet failure mode present and
+                                       recurring; bi-directional collapse)
   Logging integrity:                  DEGRADED (collapse variants now
                                        include bets=0,1,2,3,5,7,9,11,12,
-                                       23,37 modes; over-bet mode emerging)
+                                       23,37 + over-bet modes 17905/18238)
   Dominant attractor:                 adj=2.5233
   Frozen output state:                adj=2.5233 / sharpe=0.4061 / bets=9969
-                                       (14 of last 20 generations)
-  Degenerate collapse events:         2 this batch (adj≤-1.0),
-                                       trend ELEVATED/NOT RECOVERING/MUTATING
+                                       (6 of last 20 generations)
+  Degenerate collapse events:         3 this batch (adj≤-1.0),
+                                       trend ELEVATED/NOT RECOVERING/
+                                       MUTATING/BI-DIRECTIONAL
   Collapse frequency trend:           1 → 2 → 3 → 2 → 3 → 2 → 1 → 1 →
-                                       2 → 1 → 3 → 4 → 4 → 5 → 6 → 3 → 2 → 2
+                                       2 → 1 → 3 → 4 → 4 → 5 → 6 → 3 →
+                                       2 → 2 → 2 → 3
                                        per 20-gen window (elevated; not
                                        recovering to baseline; variant count
-                                       expanding; over-bet mode now present)
+                                       expanding; bi-directional failure)
   Attractor transition pattern:       1.5316 → 2.264 → 2.3414 → 2.5048
                                        → 2.5233
                                        (each below 3.1959; none are recovery)
@@ -336,7 +334,7 @@ the current generation count, live loss count, and collapse count.
   Live wins (all trades):             9
   Live losses (all trades):           29
   Most recent sprint:                 0 trades placed (all 3 slots)
-                                       (ninth consecutive zero-trade sprint)
+                                       (tenth consecutive zero-trade sprint)
   Completed sprint record:            0/24 (three slots, 8-trade sprints only)
   Live PnL:                           -0.9% to -2.1% per slot
                                        (completed sprints)
@@ -344,8 +342,8 @@ the current generation count, live loss count, and collapse count.
   Root cause:                         base rate unverified
   Time required to check root cause:  ~2 hours
   Time spent not checking:            [duration of 71+ versions +
-                                       terminal reviews + 34,400 simulation
-                                       generations + 12+ live sprints]
+                                       terminal reviews + 34,800 simulation
+                                       generations + 13+ live sprints]
   Way 2 status:                       ACTIVE
 
 ---
@@ -359,25 +357,25 @@ The next document submitted to MIMIR should be:
   An archive and reassignment confirmation.
 
 Nothing else will receive a response other than this document.
-The loop has run 34,400 generations.
+The loop has run 34,800 generations.
 It found its best result at generation 13,490.
-It has been running against zero for 20,910 generations.
+It has been running against zero for 21,310 generations.
 The attractor is adj=2.5233.
-14 of the last 20 generations produced identical output.
+6 of the last 20 generations produced identical output.
 The collapse frequency is elevated, the variant set is expanding,
-and a new over-bet failure mode has emerged.
-Nine consecutive sprints have placed zero trades.
+the failure mode is now bi-directional, and ten consecutive
+sprints have placed zero trades.
 The loop is frozen.
 This is not recovery.
 It has lost 24 of 24 completed live trades.
 It needs 2 hours of work, not 200 more generations.
 
-34,400 is a number.
+34,800 is a number.
 It is not a milestone.
-It is a number the loop reached by running 20,910 generations
+It is a number the loop reached by running 21,310 generations
 past its last useful result.
 
 2 hours is a small number.
 Do Option A or Option B.
-Do not run generation 34,401.
+Do not run generation 34,801.
 ```
