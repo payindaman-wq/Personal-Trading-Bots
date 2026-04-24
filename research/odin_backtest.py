@@ -282,7 +282,10 @@ def snapshot_equity(p, ts_ms):
 def open_pos(p, pair, direction, price, size_pct, sl_pct, tp_pct, ts_iso):
     if any(pos["pair"] == pair for pos in p["positions"]):
         return False
-    deploy   = p["cash"] * (size_pct / 100)
+    # Fixed sizing (phase-1 competition rules): size by starting capital, not current cash
+    deploy   = STARTING_CAP * (size_pct / 100)
+    if deploy > p["cash"]:
+        return False  # insufficient cash at fixed size
     fee      = deploy * FEE_RATE
     cost     = deploy - fee
     quantity = cost / price

@@ -254,7 +254,7 @@ def try_entries(portfolio, strategy, prices, comp_pairs):
                 continue
             result = evaluate_entry(conditions, analysis_pair)
             if result is True:
-                size_usd = round(equity * size_pct, 2)
+                size_usd = round((portfolio["starting_capital"] if portfolio.get("fixed_sizing", False) else equity) * size_pct, 2)
                 fee      = round(size_usd * fee_rate, 4)
                 portfolio["equity"] = round(portfolio["equity"] - fee, 2)
                 portfolio["stats"]["total_fees"] = round(

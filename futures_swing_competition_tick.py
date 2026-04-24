@@ -218,7 +218,8 @@ def check_entries(portfolio, strategy, prices, leverage):
             if evaluate_entry(conds, pair):
                 eq = portfolio['stats'].get('current_equity',
                                             portfolio.get('starting_capital', 1000.0))
-                margin = eq * size_pct / 100
+                sizing_base = portfolio.get('starting_capital', 1000.0) if portfolio.get('fixed_sizing', False) else eq
+                margin = sizing_base * size_pct / 100
                 qty = (margin * leverage) / current
                 portfolio.setdefault('positions', []).append({
                     'pair': pair, 'direction': direction, 'entry_price': current,

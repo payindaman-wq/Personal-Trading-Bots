@@ -367,7 +367,10 @@ def open_position(portfolio, pair, direction, price, size_pct, sl_pct, tp_pct, t
     if any(p["pair"] == pair for p in portfolio["positions"]):
         return None
     cash = portfolio["cash"]
-    deploy = cash * (size_pct / 100)
+    # Fixed sizing (phase-1 competition rules): size by starting capital, not current cash
+    deploy = STARTING_CAPITAL * (size_pct / 100)
+    if deploy > cash:
+        return None  # insufficient cash to open at fixed size
     entry_fee = deploy * FEE_RATE
     cost_basis = deploy - entry_fee
     quantity = cost_basis / price

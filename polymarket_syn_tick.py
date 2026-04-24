@@ -538,7 +538,7 @@ def gemini_assess(title, outcome, pm_price, kalshi_match, persona, api_key):
 def open_position(bot, market, outcome, price, reasoning, strategy):
     cid      = market["condition_id"]
     edge_cfg = strategy.get("edge", {})
-    size_usd = round(bot["cash"] * edge_cfg.get("max_position_pct", 0.10), 2)
+    size_usd = round((bot["starting_capital"] if bot.get("fixed_sizing", False) else bot["cash"]) * edge_cfg.get("max_position_pct", 0.10), 2)
     max_pos  = edge_cfg.get("max_positions", 5)
 
     if size_usd < 1.0:

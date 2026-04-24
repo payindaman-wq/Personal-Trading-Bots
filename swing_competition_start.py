@@ -85,6 +85,7 @@ def main():
             "pairs":           pairs,
             "starting_capital": STARTING_CAPITAL,
             "fee_rate":        FEE_RATE,
+            "fixed_sizing":    True,  # phase-1: no profit reinvestment
             "equity":          STARTING_CAPITAL,
             "peak_equity":     STARTING_CAPITAL,
             "positions":       [],
@@ -112,6 +113,7 @@ def main():
         "bots":           bots,
         "starting_capital": STARTING_CAPITAL,
         "fee_rate":       FEE_RATE,
+        "fixed_sizing":   True,  # phase-1: no profit reinvestment
         "status":         "active",
     }
     if args.cycle is not None:

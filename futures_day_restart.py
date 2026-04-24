@@ -192,6 +192,7 @@ def start_new():
             'duration_hours': 24, 'started_at': now.isoformat(),
             'pairs': ALL_PAIRS, 'starting_capital': STARTING_CAPITAL,
             'fee_rate': 0.0005, 'cash': STARTING_CAPITAL,
+            'fixed_sizing': True,  # phase-1: no profit reinvestment
             'positions': [], 'closed_trades': [],
             'stats': {
                 'total_trades': 0, 'wins': 0, 'losses': 0, 'win_rate': 0.0,
@@ -208,6 +209,7 @@ def start_new():
         'started_at': now.isoformat(), 'pairs': ALL_PAIRS,
         'bots': valid_bots, 'starting_capital': STARTING_CAPITAL,
         'fee_rate': 0.0005, 'status': 'active',
+        'fixed_sizing': True,  # phase-1: no profit reinvestment
         'league': 'futures_day', 'leverage_default': LEVERAGE_DEFAULT,
     }
     with open(os.path.join(comp_dir, 'meta.json'), 'w') as f:

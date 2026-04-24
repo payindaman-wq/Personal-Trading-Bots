@@ -35,6 +35,7 @@ next_sprint_num = cs["sprint_in_cycle"] + 1
 for bot in state["bots"]:
     bot["cash"]          = bot.get("starting_capital", 1000.0)
     bot["equity"]        = bot.get("starting_capital", 1000.0)
+    bot["fixed_sizing"]  = True  # phase-1: no profit reinvestment
     bot["pnl_usd"]       = 0.0
     bot["pnl_pct"]       = 0.0
     bot["total_trades"]  = 0
