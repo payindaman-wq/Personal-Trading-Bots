@@ -20,6 +20,15 @@ sys.path.insert(0, os.environ.get("WORKSPACE", "/root/.openclaw/workspace"))  # 
 from price_store import append_prices, get_current_price
 from indicators import evaluate_entry
 
+import fcntl
+LOCK_FILE = "/tmp/competition_tick.lock"
+lock_fh = open(LOCK_FILE, 'w')
+try:
+    fcntl.flock(lock_fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
+except BlockingIOError:
+    print("Another tick instance is running. Exiting.")
+    import sys as _sys; _sys.exit(0)
+
 WORKSPACE = os.environ.get("WORKSPACE", "/root/.openclaw/workspace")
 FLEET_DIR = os.path.join(WORKSPACE, "fleet")
 COMP_ACTIVE_DIR = os.path.join(WORKSPACE, "competition", "active")
@@ -369,4 +378,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    finally:
+        fcntl.flock(lock_fh, fcntl.LOCK_UN)
+        lock_fh.close()
