@@ -248,6 +248,92 @@ def check_league(cfg):
         except Exception:
             pass
 
+    # cycle_regressed: cycle_state.cycle lower than evidenced by archive directories.
+    # Scoped to day/swing only — futures uses score-file archives (no cycle dirs),
+    # and polymarket's cycle_1_archive contains retired-fleet legacy data that would
+    # false-positive. Catches the repeated swing/day cycle-counter reset pattern.
+    if name in ("day", "swing") and cfg["archive_root"] and cfg["archive_pattern"] and os.path.isdir(cfg["archive_root"]):
+        max_archived_cycle = 0
+        for sub in os.listdir(cfg["archive_root"]):
+            full = os.path.join(cfg["archive_root"], sub)
+            if not os.path.isdir(full):
+                continue
+            if sub.startswith("cycle-") or sub.startswith("cycle_"):
+                # Extract N from cycle-N, cycle-N-overflow, cycle_N_archive
+                token = sub.replace("cycle-", "").replace("cycle_", "").split("-")[0].split("_")[0]
+                try:
+                    n = int(token)
+                    max_archived_cycle = max(max_archived_cycle, n)
+                except ValueError:
+                    pass
+        # Active cycle must be > max_archived_cycle. If equal or less, the counter has regressed.
+        if max_archived_cycle >= cycle:
+            anomalies.append({
+                "league": name,
+                "kind": "cycle_regressed",
+                "detail": f"cycle_state.cycle={cycle} but archive/ has cycle-{max_archived_cycle} present — counter regressed",
+                "fix_hint": f"set cycle to {max_archived_cycle + 1} and reseed sprints[] from current-cycle entries in results/ + active/",
+            })
+
+    # duplicate_day_sprints: same YYYYMMDD date has multiple entries in sprints[] AND
+    # at least one of them is a zombie (lacks final_score.json AND is not the live sprint).
+    # Legitimate same-day entries (one archived + one currently live) are skipped.
+    date_groups = {}
+    for sid in sprints:
+        parts = sid.split("-")
+        for part in parts:
+            if len(part) == 8 and part.isdigit():
+                date_groups.setdefault(part, []).append(sid)
+                break
+    live_set = set()
+    if cfg.get("active_dir") and os.path.isdir(cfg["active_dir"]):
+        live_set = set(list_sprint_dirs(cfg["active_dir"]))
+    zombie_dates = []
+    zombie_sprints = []
+    for date, sids in date_groups.items():
+        if len(sids) <= 1:
+            continue
+        for sid in sids:
+            if sid in live_set:
+                continue  # live sprint, not a zombie
+            # Check for final_score.json in results dir or archive dirs
+            has_score = False
+            for candidate in [os.path.join(cfg["results_dir"], sid, "final_score.json"),
+                              os.path.join(cfg["results_dir"], sid + "_portfolios", "final_score.json")]:
+                if os.path.isfile(candidate):
+                    has_score = True
+                    break
+            if not has_score and cfg.get("archive_root") and os.path.isdir(cfg["archive_root"]):
+                for sub in os.listdir(cfg["archive_root"]):
+                    full = os.path.join(cfg["archive_root"], sub)
+                    if not os.path.isdir(full):
+                        continue
+                    for cand in [os.path.join(full, sid, "final_score.json"),
+                                 os.path.join(full, sid + "_portfolios", "final_score.json")]:
+                        if os.path.isfile(cand):
+                            has_score = True
+                            break
+                    if has_score:
+                        break
+            # Score-file archive model (futures/polymarket)
+            if not has_score and cfg.get("is_score_file_archive"):
+                for cand in [os.path.join(cfg["results_dir"], sid + "_score.json"),
+                             os.path.join(cfg["results_dir"], sid + "_auto.json")]:
+                    if os.path.isfile(cand):
+                        has_score = True
+                        break
+            if not has_score:
+                zombie_dates.append(date)
+                zombie_sprints.append(sid)
+    if zombie_sprints:
+        anomalies.append({
+            "league": name,
+            "kind": "duplicate_day_sprints",
+            "detail": f"sprints[] has zombie entries on date(s) {sorted(set(zombie_dates))}: {zombie_sprints} — no final_score/score_json, not live",
+            "zombie_sprints": zombie_sprints,
+            "fix_hint": "remove zombie sprint_ids from sprints[] and decrement sprint_in_cycle",
+        })
+
     return anomalies
 
 
@@ -298,7 +384,7 @@ def main():
         # Split: LOKI auto-fixable vs requires human review. Only human-review anomalies
         # go to SYN_INBOX with severity=error (Telegram alert). Auto-fixable kinds are
         # handled silently by LOKI; dashboard Maintenance tab still sees them via MAINTENANCE_LOG.
-        AUTO_FIXABLE_KINDS = {"counter_drift", "multiple_active", "missing_archive_cycle", "orphan_results"}
+        AUTO_FIXABLE_KINDS = {"counter_drift", "multiple_active", "missing_archive_cycle", "orphan_results", "cycle_regressed", "duplicate_day_sprints"}
         human_anoms = [a for a in new_anoms if a.get("kind") not in AUTO_FIXABLE_KINDS]
 
         if human_anoms:

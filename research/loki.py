@@ -826,6 +826,79 @@ def _apply_sprint_integrity_fix(anomalies):
                 _maintenance_log(league, kind, detail, "failed", result=str(e))
                 outcomes.append(f"{league}:orphan_results:fail:{e}")
 
+        elif kind == "duplicate_day_sprints":
+            # Safe: remove zombie sprint_ids (listed in anomaly.zombie_sprints) from
+            # cycle_state.sprints and re-derive sprint_in_cycle from length.
+            try:
+                cpath = _CS_PATHS[league]
+                st = json.load(open(cpath))
+                zombies = a.get("zombie_sprints") or []
+                before = list(st.get("sprints", []))
+                st["sprints"] = [s for s in before if s not in zombies]
+                st["sprint_in_cycle"] = len(st["sprints"])
+                json.dump(st, open(cpath, "w"), indent=2)
+                _maintenance_log(league, kind, detail, "fixed",
+                    result=f"removed zombies {zombies}, sprint_in_cycle={st['sprint_in_cycle']}")
+                outcomes.append(f"{league}:duplicate_day_sprints:fixed:{len(zombies)}")
+            except Exception as e:
+                _maintenance_log(league, kind, detail, "failed", result=str(e))
+                outcomes.append(f"{league}:duplicate_day_sprints:fail:{e}")
+
+        elif kind == "cycle_regressed":
+            # Safe: bump cycle to max_archived_cycle+1, rebuild sprints[] from current
+            # results/ + active/ only. Scoped to day/swing in the integrity check.
+            try:
+                import re as _re
+                cpath = _CS_PATHS[league]
+                st = json.load(open(cpath))
+                m = _re.search(r"cycle-(\d+) present", detail)
+                if not m:
+                    raise ValueError("could not parse max archived cycle from detail")
+                max_n = int(m.group(1))
+                new_cycle = max_n + 1
+                _bases = {"day": "/root/.openclaw/workspace/competition",
+                          "swing": "/root/.openclaw/workspace/competition/swing"}
+                base = _bases[league]
+                current_sprints = []
+                rdir = os.path.join(base, "results")
+                if os.path.isdir(rdir):
+                    for d in sorted(os.listdir(rdir)):
+                        full = os.path.join(rdir, d)
+                        if os.path.isdir(full) and not d.endswith("_portfolios"):
+                            current_sprints.append(d)
+                adir = os.path.join(base, "active")
+                if os.path.isdir(adir):
+                    for d in sorted(os.listdir(adir)):
+                        full = os.path.join(adir, d)
+                        if os.path.isdir(full):
+                            current_sprints.append(d)
+                cycle_start = None
+                for sid in current_sprints:
+                    for candidate in [os.path.join(rdir, sid, "meta.json"),
+                                      os.path.join(adir, sid, "meta.json")]:
+                        if os.path.isfile(candidate):
+                            try:
+                                mm = json.load(open(candidate))
+                                cycle_start = mm.get("started_at")
+                                break
+                            except Exception:
+                                pass
+                    if cycle_start:
+                        break
+                st["cycle"] = new_cycle
+                st["sprints"] = current_sprints
+                st["sprint_in_cycle"] = len(current_sprints)
+                if cycle_start:
+                    st["cycle_started_at"] = cycle_start
+                st["status"] = "active"
+                json.dump(st, open(cpath, "w"), indent=2)
+                _maintenance_log(league, kind, detail, "fixed",
+                    result=f"cycle={new_cycle}, sprints={current_sprints}")
+                outcomes.append(f"{league}:cycle_regressed:fixed:cycle->{new_cycle}")
+            except Exception as e:
+                _maintenance_log(league, kind, detail, "failed", result=str(e))
+                outcomes.append(f"{league}:cycle_regressed:fail:{e}")
+
         else:
             # Remaining risky fixes (phantom_sprint, cycle_state_missing, unknown) — escalate with dedupe.
             dedupe_key = f"{league}|{kind}|{detail}"
