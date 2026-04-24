@@ -264,10 +264,18 @@ def fetch_metaculus_markets():
     return markets
 
 
+# Nevada TRO (2026-04-24): Kalshi blocks Sports, Elections, Entertainment for
+# NV residents. Enforced server-side at order time, but filter here too so we
+# don't spend Gemini tokens evaluating markets we can't trade.
+NV_BLOCKED_KALSHI_CATEGORIES = frozenset({"Sports", "Elections", "Entertainment"})
+
+
 def fetch_kalshi_markets(kalshi_api_key=None):
-    """Fetch Kalshi events with nested markets. No auth needed for public data."""
+    """Fetch Kalshi events with nested markets. No auth needed for public data.
+    NV-blocked categories (sports/elections/entertainment) are filtered out."""
     markets = []
     cursor = None
+    nv_blocked = 0
     for _ in range(10):  # up to 2000 events
         try:
             url = ("https://api.elections.kalshi.com/trade-api/v2/events"
@@ -279,6 +287,9 @@ def fetch_kalshi_markets(kalshi_api_key=None):
             log.warning(f"Kalshi fetch error: {e}")
             break
         for event in page.get("events", []):
+            if event.get("category") in NV_BLOCKED_KALSHI_CATEGORIES:
+                nv_blocked += len(event.get("markets", []) or [])
+                continue
             for m in event.get("markets", []):
                 yes_bid = m.get("yes_bid_dollars")
                 yes_ask = m.get("yes_ask_dollars")
@@ -304,7 +315,7 @@ def fetch_kalshi_markets(kalshi_api_key=None):
         cursor = page.get("cursor")
         if not cursor or len(page.get("events", [])) < 200:
             break
-    log.info(f"SYN fetched {len(markets)} Kalshi markets")
+    log.info(f"SYN fetched {len(markets)} Kalshi markets (NV-blocked skipped: {nv_blocked})")
     return markets
 
 

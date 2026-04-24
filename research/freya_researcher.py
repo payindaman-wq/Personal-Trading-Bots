@@ -51,15 +51,20 @@ KALSHI_FEE_PROFIT_PCT   = 0.025
 KALSHI_MAX_FEE_CONTRACT = 0.07   # cap, not binding in practice at normal odds
 
 # ── PERMANENT KALSHI CONSTRAINTS (do not remove or relax) ────────────────────
-# These reflect hard limitations of Kalshi's public API and sprint structure.
-# See sanitize_candidate() — enforced on every Gemini mutation.
-#   - No sports: Kalshi public endpoint carries no sports markets
+# Hard limitations of Kalshi's public API, Nevada legal restrictions, and
+# sprint structure. Enforced in sanitize_candidate() on every Gemini mutation.
+#   - No sports: Kalshi public endpoint lacks sports AND NV TRO blocks them
+#   - No elections / no entertainment: NV TRO (2026-04-24 in-app notice)
+#     blocks Sports, Elections, Entertainment. "politics" removed from the
+#     FREYA pool because PM "politics" overlaps heavily with Kalshi Elections.
 #   - max_days_to_resolve <= 7: sprint window is 7 days; longer = locked capital
 #   - price_range [0.10, 0.90]: Kalshi fee (2.5% of profit/contract) is brutal
 #     at low probabilities — e.g. YES at 0.10 costs 22.5% of position in fees
 # ─────────────────────────────────────────────────────────────────────────────
-# Sports excluded: Kalshi public API does not serve sports markets
-CATEGORIES = ["politics", "crypto", "economics", "world_events"]
+CATEGORIES = ["crypto", "economics", "world_events"]
+# Kalshi event categories blocked by the Nevada TRO. Enforced deploy-side
+# in polymarket_syn_tick.fetch_kalshi_markets (hard filter on event.category).
+NV_BLOCKED_KALSHI_CATEGORIES = frozenset({"Sports", "Elections", "Entertainment"})
 
 
 def log(msg):
