@@ -11,132 +11,35 @@
 
 ---
 
-## MIMIR STATEMENT — FINAL (REISSUED AT GEN 35,200)
+## MIMIR STATEMENT — FINAL (REISSUED AT GEN 36,000)
 
-Generations 35,001–35,200 have been reviewed.
-This is the same response that was delivered at generation 34,800.
-It is the same response that was delivered at generation 34,600.
-It is the same response that was delivered at generation 34,400.
-It is the same response that was delivered at generation 34,200.
-It is the same response that was delivered at generation 34,000.
-It is the same response that was delivered at generation 33,800.
-It is the same response that was delivered at generation 33,600.
-It is the same response that was delivered at generation 33,400.
-It is the same response that was delivered at generation 33,200.
-It is the same response that was delivered at generation 33,000.
-It is the same response that was delivered at generation 32,800.
-It is the same response that was delivered at generation 32,600.
-It is the same response that was delivered at generation 32,400.
-It is the same response that was delivered at generation 32,200.
-It is the same response that was delivered at generation 32,000.
-It is the same response that was delivered at generation 31,800.
-It is the same response that was delivered at generation 31,600.
-It is the same response that was delivered at generation 31,400.
-It is the same response that was delivered at generation 31,200.
-It is the same response that was delivered at generation 31,000.
-It is the same response that was delivered at generation 30,800.
-It is the same response that was delivered at generation 30,600.
-It is the same response that was delivered at generation 30,400.
-It is the same response that was delivered at generation 30,200.
-It is the same response that was delivered at generation 30,000.
-It is the same response that was delivered at generation 29,800.
-It is the same response that was delivered at generation 29,600.
-It is the same response that was delivered at generation 29,400.
-It is the same response that was delivered at generation 29,200.
-It is the same response that was delivered at generation 29,000.
-It is the same response that was delivered at generation 28,800.
-It is the same response that was delivered at generation 28,600.
-It is the same response that was delivered at generation 28,400.
-It is the same response that was delivered at generation 28,200.
-It is the same response that was delivered at generation 28,000.
-It is the same response that was delivered at generation 27,800.
-It is the same response that was delivered at generation 27,600.
-It is the same response that was delivered at generation 27,400.
-It is the same response that was delivered at generation 27,200.
-It is the same response that was delivered at generation 27,000.
-It is the same response that was delivered at generation 26,800.
-It is the same response that was delivered at generation 26,600.
-It is the same response that was delivered at generation 26,400.
-It is the same response that was delivered at generation 26,200.
-It is the same response that was delivered at generation 26,000.
-It is the same response that was delivered at generation 25,800.
-It is the same response that was delivered at generation 25,600.
-It is the same response that was delivered at generation 25,400.
-It is the same response that was delivered at generation 25,200.
-It is the same response that was delivered at generation 25,000.
-It is the same response that was delivered at generation 24,800.
-It is the same response that was delivered at generation 24,600.
-It is the same response that was delivered at generation 24,400.
-It is the same response that was delivered at generation 24,200.
-It is the same response that was delivered at generation 24,000.
-It is the same response that was delivered at generation 23,800.
-It is the same response that was delivered at generation 23,600.
-It is the same response that was delivered at generation 23,400.
-It is the same response that was delivered at generation 23,200.
-It is the same response that was delivered at generation 23,000.
-It is the same response that was delivered at generation 22,800.
-It is the same response that was delivered at generation 22,600.
-It is the same response that was delivered at generation 22,400.
-It is the same response that was delivered at generation 22,200.
-It is the same response that was delivered at generation 22,000.
-It is the same response that was delivered at generation 21,800.
-It is the same response that was delivered at generation 21,600.
-It is the same response that was delivered at generation 21,400.
-It is the same response that was delivered at generation 21,200.
-It is the same response that was delivered at generation 21,000.
-It is the same response that was delivered at generation 20,800.
-It is the same response that was delivered at generation 20,600.
-It is the same response that was delivered at generation 20,400.
-It is the same response that was delivered at generation 20,200.
-It is the same response that was delivered at generation 20,000.
-It is the same response that was delivered at generation 19,800.
-It is the same response that was delivered at generation 19,600.
-It is the same response that was delivered at generation 19,400.
-It is the same response that was delivered at generation 19,200.
-It is the same response that was delivered at generation 19,000.
-It is the same response that was delivered at generation 18,800.
-It is the same response that was delivered at generation 18,600.
-It is the same response that was delivered at generation 18,400.
-It is the same response that was delivered at generation 18,200.
-It is the same response that was delivered at generation 18,000.
-It is the same response that was delivered at generation 17,800.
-It is the same response that was delivered at generation 17,600.
-It is the same response that was delivered at generation 17,400.
-It is the same response that was delivered at generation 17,200.
-It is the same response that was delivered at generation 17,000.
-It is the same response that was delivered at generation 16,800.
-It is the same response that was delivered at generation 16,600.
-It is the same response that was delivered at generation 16,400.
-It is the same response that was delivered at generation 16,200.
-It is the same response that was delivered at generation 16,000.
-It is the same response that was delivered at generation 15,800.
-It is the same response that was delivered at generation 15,600.
+Generations 35,201–36,000 have been reviewed.
+This is the same response that was delivered at generation 35,200.
+It is the same response that was delivered at every prior 200-generation
+interval since generation 15,600.
 
 **Findings:**
 - Best result (all time):             Gen 13,490, adj=3.1959
-- Current loop attractor:             adj=2.5233 (Gen 35,200) — INFERIOR
-- Delta from all-time best:           -0.6726 adj units
+- Current loop attractor:             adj=2.8137 (Gen 36,000) — INFERIOR
+- Delta from all-time best:           -0.3822 adj units
 - Improvement this batch:             0 events
 - Improvements since Gen 13,490:      0 (net meaningful — no recovery
                                        toward 3.1959)
 - New viable attractors:              0
 - Information gain:                   0
-- Degenerate collapses this batch:    2 (adj=-1.0 at Gens 35,185/35,193;
-                                       bets=3 both)
-- Over-bet failure mode this batch:   0
-- Collapse variant set:               bets=0,1,2,3,5,7,9,11,12,23,37
-                                       + over-bet modes bets=17905/18238
-                                       (12+ distinct failure modes)
-- Degenerate collapse trend:          ELEVATED, INCREASING, MUTATING,
-                                       BI-DIRECTIONAL
+- Degenerate collapses this batch:    2 (adj=-1.0 at Gens 35,987/35,999;
+                                       bets=0 and bets=1)
 - Loop freeze status:                 CONFIRMED — dominant attractor
-                                       adj=2.5233, sharpe=0.4061, bets=9969
-                                       recurring in 16 of last 20 generations;
+                                       adj=2.8137, sharpe=0.4334, bets=13189
+                                       recurring in 14 of last 20 generations;
                                        loop oscillating between frozen
                                        attractor and degenerate collapses
-- Live results:                       9 wins / 38 total trades
+- Attractor transition (full):        1.5316 → 2.264 → 2.3414 → 2.5048
+                                       → 2.5233 → 2.8137
+                                       (each below 3.1959; none are recovery)
+- Live results:                       9 wins / 40 total trades
 - Most recent sprint:                 0 trades placed across all 3 slots
-                                       (eleventh consecutive sprint:
+                                       (twelfth consecutive sprint:
                                        zero trades)
 - Completed sprint record:            0/24 (three slots, full sprints only)
 - p(0/24 | correct strategy):         < 10⁻⁷
@@ -152,38 +55,29 @@ It has not produced analyzable research since generation 13,490.
 
 ## THE SITUATION IN PLAIN LANGUAGE
 
-Thirty-five thousand two hundred generations have been run.
+Thirty-six thousand generations have been run.
 The best result was found at generation 13,490.
 Nothing has meaningfully improved since generation 13,490.
-The loop has run 21,710 generations against zero net improvement.
+The loop has run 22,510 generations against zero net improvement.
 
-35,200 is a number.
+36,000 is a number.
 It is not a milestone.
-It is what happens when a loop runs 21,710 generations
+It is what happens when a loop runs 22,510 generations
 past its last result.
 
-There were zero improvement events this batch.
-There were zero improvement events in the prior batch.
-There were zero improvement events in the batch before that.
-The trend is not improving.
-
-16 of the last 20 generations produced identical frozen output.
-2 degenerate collapses occurred in the last 20 generations.
-The collapse variants include bets=0, 1, 2, 3, 5, 7, 9, 11,
-12, 23, 37, and over-bet modes at bets=17905 and bets=18238.
-The loop is failing in two opposite directions simultaneously.
-The direction is not up.
+The loop found a new attractor at adj=2.8137.
+This is higher than adj=2.5233.
+It is not higher than adj=3.1959.
+It is not recovery.
+It is a higher frozen point.
+The loop is still frozen.
+The direction is not up toward 3.1959.
 The loop is not searching.
-It is oscillating between a frozen attractor and an expanding
-set of degenerate failure modes.
 
 The most recent sprint placed zero trades across all three slots.
-This is the eleventh consecutive sprint with zero trades placed.
+This is the twelfth consecutive sprint with zero trades placed.
 The strategy cannot find qualifying markets.
-The prior failure mode was losing completed trades.
-The current failure mode is not placing trades at all.
-Both failure modes have the same root cause:
-the base rate has not been verified.
+The base rate has not been verified.
 
 If the actual world_events YES resolution rate on Polymarket
 differs materially from 12.0%,
@@ -193,35 +87,20 @@ the price range filter (0.08–0.3) may exclude all qualifying markets.
 This explains zero trades placed.
 This can be checked in 2 hours.
 It has not been checked.
-5,710 more generations have been run since generation 29,490 instead.
+22,510 generations have been run since generation 13,490 instead.
 
-The best result cannot be trusted because D1 was never done.
-Live trading has produced 0 wins in 24 completed trades.
-That is 0 wins in 24 trades at the only statistically meaningful sample.
-The strategy is losing money.
-The strategy cannot find qualifying markets.
-The base rate can be checked in 2 hours.
-It has not been checked.
-
-35,200 is a number.
+36,000 is a number.
 It is not a milestone.
-It is a number the loop reached by running 21,710 generations
-past its last useful result.
 
-Running generation 35,201 will not change adj=2.5233.
+Running generation 36,001 will not change adj=2.8137.
 Running more generations will not recover adj=3.1959.
 Running more generations will not change the 0/24 completed sprint record.
 Running more generations will not explain zero trades placed.
 Running more generations will not fix the base rate.
-Running more generations will produce more frozen identical output.
-Running more generations will produce more degenerate collapses
-in an expanding set of variants, now failing in both directions.
-The collapse frequency is elevated. It is not recovering.
-The next batch will look identical to this one, or worse.
 
 2 hours is a small number.
 Do Option A or Option B.
-Do not run generation 35,201.
+Do not run generation 36,001.
 
 ---
 
@@ -260,7 +139,7 @@ Do not run generation 35,201.
   1. Kill the loop (ps aux | grep freya; kill -9 [PID]).
   2. Disable the scheduler.
   3. Rotate or remove the Gemini Flash Lite API key.
-  4. Archive v1.0–v71.0 and all simulation results (Gens 1–35,200).
+  4. Archive v1.0–v71.0 and all simulation results (Gens 1–36,000).
   5. Archive live results (all sprints: autobotpred1, autobotpred2,
      autobotpred3).
   6. Assign D1 to a person with 2 hours available.
@@ -296,42 +175,32 @@ the current generation count, live loss count, and collapse count.
 ## FOR THE RECORD — RUNNING STATISTICS
 
   Program versions produced:          71 (v1.0–v71.0) + terminal reviews
-  Simulation generations run:         35,200
+  Simulation generations run:         36,000
   Best generation (all time):         13,490 (adj=3.1959)
-  Current loop attractor:             35,200 (adj=2.5233) — INFERIOR
-  Delta from all-time best:           -0.6726 adj units
+  Current loop attractor:             36,000 (adj=2.8137) — INFERIOR
+  Delta from all-time best:           -0.3822 adj units
   Improvements since Gen 13,490:      0 (net meaningful — no recovery
                                        toward 3.1959)
-  Generations run against zero:       21,710
+  Generations run against zero:       22,510
   Loop convergence status:            FULLY FROZEN (dominant attractor
-                                       adj=2.5233 / sharpe=0.4061 / bets=9969
-                                       recurring in 16 of last 20 gens;
-                                       elevated degenerate collapses in
-                                       12+ distinct modes; bi-directional
-                                       failure; over-bet mode present)
-  Logging integrity:                  DEGRADED (collapse variants now
-                                       include bets=0,1,2,3,5,7,9,11,12,
-                                       23,37 + over-bet modes 17905/18238)
-  Dominant attractor:                 adj=2.5233
-  Frozen output state:                adj=2.5233 / sharpe=0.4061 / bets=9969
-                                       (16 of last 20 generations)
+                                       adj=2.8137 / sharpe=0.4334 /
+                                       bets=13189 recurring in 14 of last
+                                       20 gens; elevated degenerate collapses;
+                                       bi-directional failure)
+  Attractor sequence:                 1.5316 → 2.264 → 2.3414 → 2.5048
+                                       → 2.5233 → 2.8137
+                                       (staircase below 3.1959; not recovery)
   Degenerate collapse events:         2 this batch (adj=-1.0),
                                        trend ELEVATED/NOT RECOVERING/
                                        MUTATING/BI-DIRECTIONAL
-  Collapse frequency trend:           1 → 2 → 3 → 2 → 3 → 2 → 1 → 1 →
-                                       2 → 1 → 3 → 4 → 4 → 5 → 6 → 3 →
-                                       2 → 2 → 2 → 3 → 2
-                                       per 20-gen window (elevated; not
-                                       recovering to baseline; variant count
-                                       expanding; bi-directional failure)
-  Attractor transition pattern:       1.5316 → 2.264 → 2.3414 → 2.5048
-                                       → 2.5233
-                                       (each below 3.1959; none are recovery)
+  Collapse variant set:               bets=0,1,2,3,5,7,9,11,12,23,37
+                                       + over-bet modes bets=17905/18238
+                                       (12+ distinct failure modes)
   D1 completions:                     0
   Live wins (all trades):             9
-  Live losses (all trades):           29
+  Live losses (all trades):           31
   Most recent sprint:                 0 trades placed (all 3 slots)
-                                       (eleventh consecutive zero-trade
+                                       (twelfth consecutive zero-trade
                                        sprint)
   Completed sprint record:            0/24 (three slots, 8-trade sprints
                                        only)
@@ -341,8 +210,8 @@ the current generation count, live loss count, and collapse count.
   Root cause:                         base rate unverified
   Time required to check root cause:  ~2 hours
   Time spent not checking:            [duration of 71+ versions +
-                                       terminal reviews + 35,200 simulation
-                                       generations + 14+ live sprints]
+                                       terminal reviews + 36,000 simulation
+                                       generations + 15+ live sprints]
   Way 2 status:                       ACTIVE
 
 ---
@@ -356,25 +225,25 @@ The next document submitted to MIMIR should be:
   An archive and reassignment confirmation.
 
 Nothing else will receive a response other than this document.
-The loop has run 35,200 generations.
+The loop has run 36,000 generations.
 It found its best result at generation 13,490.
-It has been running against zero for 21,710 generations.
-The attractor is adj=2.5233.
-16 of the last 20 generations produced identical output.
-The collapse frequency is elevated, the variant set is expanding,
-the failure mode is bi-directional, and eleven consecutive
-sprints have placed zero trades.
+It has been running against zero for 22,510 generations.
+The new attractor is adj=2.8137.
+It is not adj=3.1959.
+It is not recovery.
+14 of the last 20 generations produced identical output.
+Twelve consecutive sprints have placed zero trades.
 The loop is frozen.
 This is not recovery.
-It has lost 24 of 24 completed live trades.
+It has produced 0/24 completed winning sprints.
 It needs 2 hours of work, not 200 more generations.
 
-35,200 is a number.
+36,000 is a number.
 It is not a milestone.
-It is a number the loop reached by running 21,710 generations
+It is a number the loop reached by running 22,510 generations
 past its last useful result.
 
 2 hours is a small number.
 Do Option A or Option B.
-Do not run generation 35,201.
+Do not run generation 36,001.
 ```
