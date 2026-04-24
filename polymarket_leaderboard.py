@@ -9,8 +9,66 @@ Usage:
   python3 polymarket_leaderboard.py         # print leaderboard to stdout
   python3 polymarket_leaderboard.py --json  # write polymarket_leaderboard.json
 """
-import os, sys, json, argparse
+import os, sys, json, argparse, re
 from datetime import datetime, timezone
+
+# Nevada TRO (2026-04-24): Kalshi blocks Sports, Elections, Entertainment for
+# NV residents. We tag each trade by NV legality here so cumulative_pnl_usd
+# (raw) and nv_legal_pnl_usd (NV-enforced) are both surfaced. Use nv_legal for
+# funding decisions. Heuristic keyword classifier — biases toward over-blocking
+# sports to avoid optimistic funding rankings. Mirrors nv_retro.py.
+SPORTS_RE = re.compile("|".join([
+    r"\bspread\b", r"\bmoneyline\b", r"\bover/under\b", r"\bo/u\b",
+    r"\b\-?\d+\.5\)", r"\bhandicap\b", r"\b1h\b", r"\b2h\b", r"\bhalftime\b",
+    r"\bfinal score\b", r"\bkick(-|\s)?off\b", r"\bpoints o/u\b",
+    r"\bprop\b", r"\bprop bet\b", r"\brebounds o/u", r"\bassists o/u",
+    r"\bstrikeouts?\b", r"\bwin by (ko|tko|submission|decision)\b",
+    r"\bgoals?\b", r"\btouchdown", r"\bhomerun", r"\bhome run",
+    r"\bwin on \d{4}-\d{2}-\d{2}\b", r"\bvs\.?\b", r"\bdefeat",
+    r"\bnfl\b", r"\bnba\b", r"\bmlb\b", r"\bnhl\b", r"\bufc\b", r"\bmma\b",
+    r"\bboxing\b", r"\bmls\b", r"\bepl\b", r"\bla liga\b", r"\bserie a\b",
+    r"\bbundesliga\b", r"\bchampions league\b", r"\bworld cup\b",
+    r"\beuro\s?20\d{2}\b", r"\bolympic", r"\bmasters\b",
+    r"\bopen\b.{0,10}tennis", r"\bgrand slam\b", r"\bpga\b", r"\batp\b",
+    r"\bwta\b", r"\bf1\b", r"\bformula 1\b", r"\bgrand prix\b",
+    r"\bvalorant\b", r"\bcsgo\b", r"\bcs:go\b", r"\bdota\b",
+    r"\bleague of legends\b", r"\bfc\b", r"\bunited\b.{0,10}fc",
+    r"\bcity fc\b", r"\bcurrent fc\b",
+    r"\blakers\b", r"\bceltics\b", r"\bwarriors\b", r"\bheat\b",
+    r"\brockets\b", r"\bknicks\b", r"\bnets\b", r"\bbucks\b",
+    r"\bthunder\b", r"\bnuggets\b", r"\byankees\b", r"\bdodgers\b",
+    r"\bred sox\b", r"\bpatriots\b", r"\bchiefs\b", r"\beagles\b",
+    r"\bcowboys\b", r"\b(red|blue) bulls\b",
+    r"\bshai gilgeous", r"\bluka doncic", r"\blebron\b",
+    r"\bkevin durant\b", r"\bstephen curry\b", r"\bgiannis\b",
+    r"\bjokic\b", r"\bmahomes\b", r"\blamar jackson\b", r"\bjosh allen\b",
+]), re.IGNORECASE)
+ELECTIONS_RE = re.compile("|".join([
+    r"\belection\b", r"\belectoral\b", r"\bpresidential\b", r"\bgovernor\b",
+    r"\bsenator\b", r"\bsenate\b", r"\bhouse race\b", r"\bvote\b",
+    r"\bcongress\b", r"\bmayor\b", r"\bnominee\b", r"\bprimary\b",
+    r"\bdemocratic\b", r"\brepublican\b", r"\bapproval rating\b",
+    r"\btrump\b", r"\bbiden\b", r"\bharris\b", r"\bvance\b",
+    r"\bwhite house\b", r"\bimpeach", r"\bvice president\b",
+    r"\bparliament\b", r"\bprime minister\b",
+]), re.IGNORECASE)
+ENTERTAINMENT_RE = re.compile("|".join([
+    r"\boscar", r"\bgrammy", r"\bemmy", r"\btony award", r"\bgolden globe",
+    r"\bbox office\b", r"\bopening weekend\b", r"\btaylor swift\b",
+    r"\bkanye\b", r"\bkardashian\b", r"\bbeyonce\b", r"\bdrake\b",
+    r"\bmovie\b", r"\bfilm\b", r"\balbum\b", r"\bbillboard\b",
+    r"\bnetflix\b.{0,20}(show|series|movie)", r"\bhbo\b",
+    r"\bsuperbowl halftime\b", r"\bmet gala\b",
+]), re.IGNORECASE)
+
+
+def is_nv_legal(title):
+    t = title or ""
+    if SPORTS_RE.search(t):       return False
+    if ELECTIONS_RE.search(t):    return False
+    if ENTERTAINMENT_RE.search(t): return False
+    return True
+
 
 WORKSPACE   = "/root/.openclaw/workspace"
 POLY_DIR    = os.path.join(WORKSPACE, "competition", "polymarket")
@@ -97,6 +155,20 @@ def get_live_bots():
             name  = b.get("name", "")
             bf_b  = backfill.get(name, {})
             pnl     = round(b.get("sprint_pnl_usd", 0.0) + bf_b.get("sprint_pnl_usd", 0.0), 4)
+            # NV-legal split: walk closed_trades + backfill trades and sum only
+            # the trades whose title passes is_nv_legal. Copy bots store titles
+            # on each trade record (same shape as autonomous bots).
+            closed_live   = b.get("closed_trades", []) or []
+            closed_bf     = bf_b.get("closed_trades", []) or []
+            nv_pnl = round(
+                sum(t.get("pnl_usd", 0.0) for t in closed_live if isinstance(t, dict) and is_nv_legal(t.get("title", "")))
+                + sum(t.get("pnl_usd", 0.0) for t in closed_bf if isinstance(t, dict) and is_nv_legal(t.get("title", ""))),
+                4,
+            )
+            nv_trades = (
+                sum(1 for t in closed_live if isinstance(t, dict) and is_nv_legal(t.get("title", "")))
+                + sum(1 for t in closed_bf if isinstance(t, dict) and is_nv_legal(t.get("title", "")))
+            )
             pnl_pct = round((pnl / STARTING_CAPITAL) * 100, 2)
             trades  = b.get("sprint_trades", 0) + bf_b.get("sprint_trades", 0)
             wins    = b.get("sprint_wins", 0)   + bf_b.get("sprint_wins", 0)
@@ -111,6 +183,8 @@ def get_live_bots():
                 "sprint_wins":     wins,
                 "win_rate":        round(wins / trades * 100, 1) if trades > 0 else 0.0,
                 "active_positions": len(b.get("positions", {})),
+                "sprint_nv_legal_pnl_usd": nv_pnl,
+                "sprint_nv_legal_trades":  nv_trades,
             })
     except Exception:
         pass
@@ -125,6 +199,9 @@ def get_live_bots():
             closed  = [t for t in b.get("closed_trades", [])
                        if not sprint_start or t.get("closed_at", "") >= sprint_start]
             pnl     = round(sum(t.get("pnl_usd", 0.0) for t in closed), 4)
+            nv_pnl  = round(sum(t.get("pnl_usd", 0.0) for t in closed
+                                if is_nv_legal(t.get("title", ""))), 4)
+            nv_trades = sum(1 for t in closed if is_nv_legal(t.get("title", "")))
             pnl_pct = round((pnl / STARTING_CAPITAL) * 100, 2)
             trades  = len(closed)
             wins    = sum(1 for t in closed if t.get("pnl_usd", 0.0) > 0)
@@ -139,10 +216,16 @@ def get_live_bots():
                 "sprint_wins":     wins,
                 "win_rate":        round(wins / trades * 100, 1) if trades > 0 else 0.0,
                 "active_positions": len(b.get("positions", {})),
+                "sprint_nv_legal_pnl_usd": nv_pnl,
+                "sprint_nv_legal_trades":  nv_trades,
             })
     except Exception:
         pass
 
+    # Copy-trader bots can also be classified — autonomous closed_trades have
+    # 'title', copy-trader bots don't store per-trade titles in the same shape,
+    # so nv_legal_pnl for copy fleet is tracked separately via the per-sprint
+    # _copy.json files below.
     return bots
 
 
@@ -172,9 +255,11 @@ def aggregate(completed_sprints, live_bots):
                 "sprint_wins":       0,
                 "podiums":           0,
                 "points":            0,
-                "cumulative_pnl_usd": 0.0,
+                "cumulative_pnl_usd":          0.0,
+                "cumulative_nv_legal_pnl_usd": 0.0,
                 "total_trades":      0,
                 "total_wins":        0,
+                "total_nv_legal_trades": 0,
             }
         # Update type/username if we have better info
         if type_ and type_ != "auto":
@@ -194,8 +279,11 @@ def aggregate(completed_sprints, live_bots):
             t["sprints_entered"]   += 1
             t["points"]            += b["points"]
             t["cumulative_pnl_usd"] = round(t["cumulative_pnl_usd"] + b.get("sprint_pnl_usd", 0.0), 2)
+            t["cumulative_nv_legal_pnl_usd"] = round(
+                t["cumulative_nv_legal_pnl_usd"] + b.get("sprint_nv_legal_pnl_usd", 0.0), 2)
             t["total_trades"]      += b.get("sprint_trades", 0)
             t["total_wins"]        += b.get("sprint_wins", 0)
+            t["total_nv_legal_trades"] += b.get("sprint_nv_legal_trades", 0)
             rank = b["rank"]
             if rank == 1:
                 t["sprint_wins"] += 1
@@ -206,8 +294,11 @@ def aggregate(completed_sprints, live_bots):
     for b in live_bots:
         t = ensure(b["bot"], b.get("type", "auto"), b.get("username", ""))
         t["cumulative_pnl_usd"] = round(t["cumulative_pnl_usd"] + b.get("sprint_pnl_usd", 0.0), 2)
+        t["cumulative_nv_legal_pnl_usd"] = round(
+            t["cumulative_nv_legal_pnl_usd"] + b.get("sprint_nv_legal_pnl_usd", 0.0), 2)
         t["total_trades"] += b.get("sprint_trades", 0)
         t["total_wins"]   += b.get("sprint_wins", 0)
+        t["total_nv_legal_trades"] += b.get("sprint_nv_legal_trades", 0)
 
     # Compute derived fields
     result = []

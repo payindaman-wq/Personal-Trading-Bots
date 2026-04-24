@@ -44,18 +44,26 @@ PM_ACTIVITY_URL   = "https://data-api.polymarket.com/activity"
 PM_MARKET_URL     = "https://gamma-api.polymarket.com/markets"
 
 # ── Bots: all 10 Polymarket copy-traders mirrored onto Kalshi ──────────────
+# 2026-04-24 — `disabled: True` set on all 10 pending an NV-legal trader audit.
+# Empirical data from sprint poly-auto-20260419-1000 + the kalshi-copy-20260412
+# sprint showed 100% of observed trade titles matched the NV-blocked sports
+# classifier (classifier biased toward over-block). We will not mirror these
+# wallets to Kalshi NV until each wallet's category mix is verified and at
+# least 50% of its recent trades fall in NV-legal Kalshi categories.
 BOT_CONFIG = [
-    {"name": "sol_k",     "pm_trader": "SecondWindCapital",   "pm_wallet": "0x8c80d213c0cbad777d06ee3f58f6ca4bc03102c3", "starting_capital": 1000.0},
-    {"name": "freyr_k",   "pm_trader": "beachboy4",           "pm_wallet": "0xc2e7800b5af46e6093872b177b7a5e7f0563be51", "starting_capital": 1000.0},
-    {"name": "haakon_k",  "pm_trader": "WoofMaster",          "pm_wallet": "0x916f7165c2c836aba22edb6453cdbb5f3ea253ba", "starting_capital": 1000.0},
-    {"name": "thor_k",    "pm_trader": "majorexploiter",      "pm_wallet": "0x019782cab5d844f02bafb71f512758be78579f3c", "starting_capital": 1000.0},
-    {"name": "torkel_k",  "pm_trader": "HorizonSplendidView", "pm_wallet": "0x02227b8f5a9636e895607edd3185ed6ee5598ff7", "starting_capital": 1000.0},
-    {"name": "bragi_k",   "pm_trader": "Blessed-Sunshine",    "pm_wallet": "0x59a0744db1f39ff3afccd175f80e6e8dfc239a09", "starting_capital": 1000.0},
-    {"name": "heimdall_k","pm_trader": "FTWUTB",              "pm_wallet": "0xdb2223cc5202a4718c3069f577ec971f71c96478", "starting_capital": 1000.0},
-    {"name": "baldur_k",  "pm_trader": "UAEVALORANTFAN",      "pm_wallet": "0xc65ca4755436f82d8eb461e65781584b8cadea39", "starting_capital": 1000.0},
-    {"name": "vidar_k",   "pm_trader": "ewelmealt",           "pm_wallet": "0x07921379f7b31ef93da634b688b2fe36897db778", "starting_capital": 1000.0},
-    {"name": "hallvard_k","pm_trader": "Countryside",         "pm_wallet": "0xbddf61af533ff524d27154e589d2d7a81510c684", "starting_capital": 1000.0},
+    {"name": "sol_k",     "pm_trader": "SecondWindCapital",   "pm_wallet": "0x8c80d213c0cbad777d06ee3f58f6ca4bc03102c3", "starting_capital": 1000.0, "disabled": True},
+    {"name": "freyr_k",   "pm_trader": "beachboy4",           "pm_wallet": "0xc2e7800b5af46e6093872b177b7a5e7f0563be51", "starting_capital": 1000.0, "disabled": True},
+    {"name": "haakon_k",  "pm_trader": "WoofMaster",          "pm_wallet": "0x916f7165c2c836aba22edb6453cdbb5f3ea253ba", "starting_capital": 1000.0, "disabled": True},
+    {"name": "thor_k",    "pm_trader": "majorexploiter",      "pm_wallet": "0x019782cab5d844f02bafb71f512758be78579f3c", "starting_capital": 1000.0, "disabled": True},
+    {"name": "torkel_k",  "pm_trader": "HorizonSplendidView", "pm_wallet": "0x02227b8f5a9636e895607edd3185ed6ee5598ff7", "starting_capital": 1000.0, "disabled": True},
+    {"name": "bragi_k",   "pm_trader": "Blessed-Sunshine",    "pm_wallet": "0x59a0744db1f39ff3afccd175f80e6e8dfc239a09", "starting_capital": 1000.0, "disabled": True},
+    {"name": "heimdall_k","pm_trader": "FTWUTB",              "pm_wallet": "0xdb2223cc5202a4718c3069f577ec971f71c96478", "starting_capital": 1000.0, "disabled": True},
+    {"name": "baldur_k",  "pm_trader": "UAEVALORANTFAN",      "pm_wallet": "0xc65ca4755436f82d8eb461e65781584b8cadea39", "starting_capital": 1000.0, "disabled": True},
+    {"name": "vidar_k",   "pm_trader": "ewelmealt",           "pm_wallet": "0x07921379f7b31ef93da634b688b2fe36897db778", "starting_capital": 1000.0, "disabled": True},
+    {"name": "hallvard_k","pm_trader": "Countryside",         "pm_wallet": "0xbddf61af533ff524d27154e589d2d7a81510c684", "starting_capital": 1000.0, "disabled": True},
 ]
+# Filter applied at tick entry so disabled bots never make Kalshi calls.
+ACTIVE_BOTS = [b for b in BOT_CONFIG if not b.get("disabled")]
 
 STOP_WORDS = {
     "will", "the", "a", "an", "of", "in", "on", "at", "to", "for",
@@ -680,7 +688,12 @@ def tick(state, api_key, kalshi_markets, kalshi_index):
     except Exception:
         _sprint_end_dt = None
 
+    # Disabled bots (per BOT_CONFIG) are held static: no wallet fetch, no order
+    # routing. Their state row persists so sprint leaderboards still render.
+    disabled_names = {cfg["name"] for cfg in BOT_CONFIG if cfg.get("disabled")}
     for bot in state["bots"]:
+        if bot.get("name") in disabled_names:
+            continue
         wallet   = bot["pm_wallet"]
         since_ts = bot.get("last_seen_ts", 0)
 
