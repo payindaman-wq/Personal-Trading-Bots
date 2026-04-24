@@ -174,11 +174,12 @@ def aggregate(sprints):
             b = ensure(name)
             b["sprints_entered"] += 1
             rank = r.get("rank", 99)
-            b["points"] += POINTS_MAP.get(rank, 1 if rank <= 8 else 0)
-            if rank == 1:
-                b["sprint_wins"] += 1
-            if rank <= 3:
-                b["podiums"] += 1
+            if not in_prog:
+                b["points"] += POINTS_MAP.get(rank, 1 if rank <= 8 else 0)
+                if rank == 1:
+                    b["sprint_wins"] += 1
+                if rank <= 3:
+                    b["podiums"] += 1
             pnl_usd = round(r.get("total_pnl_usd", 0.0) * usd_scale, 2)
             pnl_pct = r.get("total_pnl_pct", 0.0)
             b["cumulative_pnl_usd"] = round(b["cumulative_pnl_usd"] + pnl_usd, 2)

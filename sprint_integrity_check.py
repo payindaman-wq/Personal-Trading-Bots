@@ -189,6 +189,65 @@ def check_league(cfg):
                 "fix_hint": "move orphan sprint dirs into archive/cycle-N/ matching their cycle",
             })
 
+
+    # cycle_state_wiped: cycle>1 + empty sprints[] + no cycle_started_at, but an
+    # active sprint or recent score file exists. LOKI inline-advance or manual
+    # reset left the counter orphaned from reality.
+    if cycle > 1 and len(sprints) == 0 and state.get("cycle_started_at") in (None, ""):
+        live_active = []
+        if cfg.get("active_dir") and os.path.isdir(cfg["active_dir"]):
+            live_active = list_sprint_dirs(cfg["active_dir"])
+        has_recent_score = False
+        recent_score_id = None
+        if cfg["is_score_file_archive"] and os.path.isdir(cfg["results_dir"]):
+            score_files = sorted(
+                [f for f in os.listdir(cfg["results_dir"]) if f.endswith("_score.json") or f.endswith("_auto.json")],
+                key=lambda f: os.path.getmtime(os.path.join(cfg["results_dir"], f)),
+                reverse=True,
+            )
+            if score_files:
+                has_recent_score = True
+                recent_score_id = score_files[0].rsplit("_", 1)[0]
+        if live_active or has_recent_score:
+            detail_bits = []
+            if live_active:
+                detail_bits.append(f"active has {live_active}")
+            if recent_score_id:
+                detail_bits.append(f"latest score {recent_score_id}")
+            anomalies.append({
+                "league": name,
+                "kind": "cycle_state_wiped",
+                "detail": f"cycle={cycle} sprints=[] cycle_started_at=null but reality disagrees: " + "; ".join(detail_bits),
+                "fix_hint": "reseed sprints[] from live active + recent score files; set cycle_started_at from meta.json",
+            })
+
+    # futures score-file orphan check: count score files produced since cycle_started_at
+    # and compare to len(sprints). Missing entries => sprint started but never recorded.
+    if cfg["is_score_file_archive"] and name in ("futures_day", "futures_swing") and state.get("cycle_started_at"):
+        try:
+            from datetime import datetime as _dt
+            cs_ts = _dt.fromisoformat(state["cycle_started_at"].replace("Z", "+00:00"))
+            cs_epoch = cs_ts.timestamp()
+            if os.path.isdir(cfg["results_dir"]):
+                # 5-min buffer: score files archived right at the cycle boundary
+                # belong to the PREVIOUS cycle; strict > with buffer avoids false positives.
+                BOUNDARY_BUFFER_SEC = 300
+                recent_scores = [
+                    f for f in os.listdir(cfg["results_dir"])
+                    if (f.endswith("_score.json") or f.endswith("_auto.json"))
+                    and os.path.getmtime(os.path.join(cfg["results_dir"], f)) > cs_epoch + BOUNDARY_BUFFER_SEC
+                ]
+                expected = len(recent_scores) + (len(list_sprint_dirs(cfg["active_dir"])) if cfg.get("active_dir") else 0)
+                if expected > len(sprints) and expected - len(sprints) >= 1:
+                    anomalies.append({
+                        "league": name,
+                        "kind": "undercount_vs_results",
+                        "detail": f"sprints[] has {len(sprints)} but {len(recent_scores)} score files + active imply {expected} since cycle_started_at",
+                        "fix_hint": "rebuild sprints[] from score files dated >= cycle_started_at + active dirs",
+                    })
+        except Exception:
+            pass
+
     return anomalies
 
 

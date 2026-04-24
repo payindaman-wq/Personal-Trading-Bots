@@ -1494,19 +1494,38 @@ def run_cycle_advance_and_start(league, cfg, old_cycle):
                 tg_send(f"[LOKI] {league.upper()} cycle advance FAILED: {r.stderr[:100]}", severity="error")
                 return actions   # abort — don't start if advance failed
     else:
-        # Inline advance for leagues without a dedicated advance script
+        # Inline advance for leagues without a dedicated advance script.
+        # If a sprint is already live in active/, seed the fresh cycle with it so the
+        # counter doesn'''t orphan the running sprint (was the C3S0 Futures Day bug).
         try:
             with open(cfg["cycle_state"]) as f:
                 cs = json.load(f)
+            seed_sprints = []
+            seed_started = None
+            active_dir_tuple = _ACTIVE_PATHS.get(league)
+            if active_dir_tuple:
+                active_dir = active_dir_tuple[0]
+                if os.path.isdir(active_dir):
+                    live = [d for d in os.listdir(active_dir)
+                            if os.path.isdir(os.path.join(active_dir, d))]
+                    if live:
+                        seed_sprints = [sorted(live)[-1]]
+                        meta_path = os.path.join(active_dir, seed_sprints[0], "meta.json")
+                        try:
+                            with open(meta_path) as mf:
+                                seed_started = json.load(mf).get("started_at")
+                        except Exception:
+                            seed_started = None
             cs["cycle"]            = old_cycle + 1
-            cs["sprint_in_cycle"]  = 0
+            cs["sprint_in_cycle"]  = len(seed_sprints)
             cs["status"]           = "active"
-            cs["cycle_started_at"] = None
-            cs["sprints"]          = []
+            cs["cycle_started_at"] = seed_started
+            cs["sprints"]          = seed_sprints
             if not DRY_RUN:
                 with open(cfg["cycle_state"], "w") as f:
                     json.dump(cs, f, indent=2)
-            print(f"  [loki] {league}: cycle {old_cycle} -> {old_cycle + 1} (inline advance)")
+            seed_note = f" [seeded with live {seed_sprints[0]}]" if seed_sprints else ""
+            print(f"  [loki] {league}: cycle {old_cycle} -> {old_cycle + 1} (inline advance){seed_note}")
             actions.append(f"cycle_advanced_inline: {old_cycle}->{old_cycle + 1}")
         except Exception as e:
             print(f"  [loki] Inline advance failed [{league}]: {e}")
