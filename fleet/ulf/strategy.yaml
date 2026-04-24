@@ -42,8 +42,8 @@ entry:
         value: 45
       - indicator: volume_above_avg
         period_minutes: 30
-        operator: eq
-        value: true
+        operator: gt
+        value: 1.2
   short:
     conditions:
       - indicator: price_vs_vwap
@@ -63,8 +63,8 @@ entry:
         value: 55
       - indicator: volume_above_avg
         period_minutes: 30
-        operator: eq
-        value: true
+        operator: gt
+        value: 1.2
 exit:
   take_profit_pct: 0.7
   stop_loss_pct: 0.4

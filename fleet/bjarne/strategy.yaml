@@ -39,8 +39,8 @@ entry:
         value: 55
       - indicator: volume_above_avg
         period_minutes: 35
-        operator: eq
-        value: true
+        operator: gt
+        value: 1.2
   short:
     conditions:
       - indicator: trend
@@ -57,8 +57,8 @@ entry:
         value: 45
       - indicator: volume_above_avg
         period_minutes: 35
-        operator: eq
-        value: true
+        operator: gt
+        value: 1.2
 exit:
   take_profit_pct: 0.35
   stop_loss_pct: 0.2

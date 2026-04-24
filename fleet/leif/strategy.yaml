@@ -43,8 +43,8 @@ entry:
         value: 50
       - indicator: volume_above_avg
         period_minutes: 20
-        operator: eq
-        value: true
+        operator: gt
+        value: 1.2
   short:
     conditions:
       - indicator: bollinger_position
@@ -65,8 +65,8 @@ entry:
         value: 50
       - indicator: volume_above_avg
         period_minutes: 20
-        operator: eq
-        value: true
+        operator: gt
+        value: 1.2
 exit:
   take_profit_pct: 0.5
   stop_loss_pct: 0.3

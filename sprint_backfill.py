@@ -39,7 +39,7 @@ def fetch_ohlcv(pair, since_ts):
         raise RuntimeError("Kraken error for " + pair + ": " + str(data["error"]))
     result = data["result"]
     key = next(k for k in result if k != "last")
-    return [(int(c[0]), float(c[4]), float(c[5])) for c in result[key]]
+    return [(int(c[0]), float(c[4]), float(c[5]), float(c[6])) for c in result[key]]
 
 def _price_n_ago(h, minutes, sim_now):
     target = (sim_now - timedelta(minutes=minutes)).isoformat()
@@ -124,6 +124,23 @@ def compute_indicator(name, history, pair, period_minutes, sim_now):
             mv.append(_ema(w[slow_n - fast_n:], fast_n) - _ema(w, slow_n))
         h_val = mv[-1] - _ema(mv, sig_n)
         return "bullish" if h_val > 0 else ("bearish" if h_val < 0 else "neutral")
+    if name == "volume_above_avg":
+        # Backfill uses per-candle OHLC volume directly (not cumulative),
+        # so compare latest candle volume to average over the period.
+        ticks_with_vol = [t for t in h if "volume" in t]
+        if len(ticks_with_vol) < 2:
+            return None
+        cutoff = (sim_now - timedelta(minutes=period_minutes)).isoformat()
+        window = [t for t in ticks_with_vol if t["ts"] >= cutoff]
+        if len(window) < 2:
+            return None
+        vols = [t["volume"] for t in window if t["volume"] is not None and t["volume"] >= 0]
+        if len(vols) < 2:
+            return None
+        avg = sum(vols[:-1]) / len(vols[:-1])
+        if avg == 0:
+            return None
+        return round(vols[-1] / avg, 4)
     return None
 
 def evaluate_entry(conditions, history, pair, sim_now):
@@ -282,8 +299,8 @@ def _run(dry_run, sprint_start):
         except Exception as e:
             print("  " + pair.ljust(10) + ": FETCH ERROR -- " + str(e))
             ohlcv[pair] = []
-    all_ts = sorted(set(ts for clist in ohlcv.values() for ts, _, _ in clist))
-    by_ts  = {pair: {ts: (cl, vw) for ts, cl, vw in ohlcv[pair]} for pair in pairs}
+    all_ts = sorted(set(ts for clist in ohlcv.values() for ts, _, _, _ in clist))
+    by_ts  = {pair: {ts: (cl, vw, vol) for ts, cl, vw, vol in ohlcv[pair]} for pair in pairs}
     portfolios = {}
     for bot in bots:
         with open(os.path.join(comp_dir, "portfolio-" + bot + ".json")) as f:
@@ -314,14 +331,16 @@ def _run(dry_run, sprint_start):
         for pair in pairs:
             entry = by_ts[pair].get(unix_ts)
             if entry:
-                cl, vw = entry
+                cl, vw, vol = entry
                 tick = {"ts": sim_now.isoformat(), "last": cl}
                 if vw and vw != 0:
                     tick["vwap"] = vw
+                if vol is not None:
+                    tick["volume"] = vol
                 history[pair].append(tick)
                 if len(history[pair]) > HISTORY_WINDOW:
                     history[pair] = history[pair][-HISTORY_WINDOW:]
-                prices_tick[pair] = {"last": cl, "vwap": vw}
+                prices_tick[pair] = {"last": cl, "vwap": vw, "volume": vol}
         if sim_now < sprint_start:
             continue
         sprint_ticks += 1

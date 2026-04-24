@@ -49,6 +49,7 @@ WATCHED_SOURCES = {
     "data_integrity",         # per-league write-path drift audit
     "mimir_audit",            # MIMIR citation fact-check
     "runtime_state_freshness", # tracked runtime JSON drift (deploy-reset class)
+    "league_watchdog",       # dead execution / no MTM / stale tick — must reach LOKI work queue
 }
 
 # Patterns that indicate Chris himself must act (the officers cannot fix).
@@ -100,6 +101,9 @@ DROP_RULES = {
     "runtime_state_freshness": [
         r"RECOVERED",                          # freshness returned without auto-heal
         r"self-healed",                        # auto-heal regenerated the file
+    ],
+    "league_watchdog": [
+        r"RECOVERED",                          # future: watchdog recovery notice (none today)
     ],
 }
 
