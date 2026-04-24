@@ -100,6 +100,15 @@ FORCE_RANDOM_EVERY   = 500
 # reproduce the parent exactly.
 ELITE_SHARPE_EPS     = 0.001
 
+# F10 (meta_audit): horizon-matched secondary gate for day leagues. Primary
+# Sharpe is 2yr annualised; day sprints run 24h. A champion can have strong
+# 2yr Sharpe but mediocre typical-24h Sharpe (regime-blended), which is what
+# the sprint actually experiences. The gate requires candidate 24h-median
+# Sharpe to be at least 80% of the champion's, so promotions don't regress
+# the sprint-horizon metric. Swing leagues defer (need 7d window).
+DAY_24H_GATE_LEAGUES = {"day", "futures_day"}
+DAY_24H_GATE_FLOOR_FRAC = 0.8
+
 # Known-bad result fingerprints — sharpe values that always indicate a poison attractor.
 POISON_RESULT_FINGERPRINTS = {
     "futures_day":   {-2.7990, -3.3113, -4.8702},
@@ -866,7 +875,11 @@ def main():
                 mutation_type = mt
                 break
 
+        description = mutation_type
+
         # F4: periodic forced-random injection to escape hill-climb stalls.
+        # Set description before the unconditional assignment below was
+        # clobbering it — label preserved so meta_audit can grep fires.
         if (gens_since_best >= FORCE_RANDOM_FLOOR
                 and (gens_since_best - FORCE_RANDOM_FLOOR) % FORCE_RANDOM_EVERY == 0):
             mutation_type = "random"
@@ -877,7 +890,6 @@ def main():
 
         candidate = None
         candidate_yaml = None
-        description = mutation_type
 
         # F5: pre-Gemini prompt-hash dedup. If the prompt we are about to
         # send matches LLM_DEDUP_THRESHOLD recent calls, skip Gemini and
@@ -1099,6 +1111,27 @@ def main():
                 continue
             candidate["_oos_sharpe"] = round(oos_sharpe, 4)
             candidate["_oos_trades"] = oos_trades
+
+            # F10: horizon-matched 24h-median Sharpe gate (day leagues only).
+            # Fires alongside the OOS gate on improvement candidates: a new
+            # champion must hold >= 80% of the current champion's typical 24h
+            # Sharpe. Prevents promotions that beat 2yr but degrade the
+            # sprint-horizon metric. Swing leagues skip (24h window mismatch).
+            if league in DAY_24H_GATE_LEAGUES:
+                cand_24h  = float(result.get("sharpe_24h_median", 0.0))
+                champ_24h = float(pop.elites[0][1].get("_sharpe_24h_median", 0.0)) if pop.elites else 0.0
+                floor_24h = max(0.0, champ_24h * DAY_24H_GATE_FLOOR_FRAC)
+                if cand_24h < floor_24h:
+                    print(f"| H24_GATE_REJECT: sharpe_24h_median={cand_24h:.4f} "
+                          f"floor={floor_24h:.4f} champ={champ_24h:.4f}")
+                    log_result(league, gen, result, "h24_reject",
+                               f"cand_24h={cand_24h:.4f} champ_24h={champ_24h:.4f} floor={floor_24h:.4f}")
+                    gen += 1
+                    gens_since_best += 1  # count h24 rejects toward stall (FORCE_RANDOM/MIMIR activation)
+                    time.sleep(args.sleep)
+                    continue
+                candidate["_sharpe_24h_median"] = round(cand_24h, 4)
+
             import yaml as _yaml3
             candidate_yaml = _yaml3.dump(candidate, default_flow_style=False, sort_keys=False)
 

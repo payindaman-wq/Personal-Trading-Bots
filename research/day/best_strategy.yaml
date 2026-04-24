@@ -12,7 +12,7 @@ pairs:
 - AVAX/USD
 - LINK/USD
 position:
-  size_pct: 10
+  size_pct: 13.98
   max_open: 3
   fee_rate: 0.001
 entry:
@@ -62,9 +62,10 @@ entry:
       value: down
 exit:
   take_profit_pct: 3.51
-  stop_loss_pct: 0.37
+  stop_loss_pct: 0.28
   timeout_minutes: 706
 risk:
   pause_if_down_pct: 4
   stop_if_down_pct: 10
   pause_minutes: 60
+_sharpe_24h_median: -0.2132

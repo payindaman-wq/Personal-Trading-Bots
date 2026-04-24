@@ -342,6 +342,44 @@ def compute_sharpe(snapshots):
     return round(mean_r / std_r * math.sqrt(365), 4)
 
 
+# F10 (meta_audit): secondary horizon-matched metric for day leagues.
+# Primary Sharpe above is 2yr annualised — averages across regime shifts
+# that a 24h sprint will never see. This computes per-window Sharpe of
+# intra-window hourly returns across non-overlapping 24h buckets, then
+# returns the median. Used by odin_researcher_v2 as a new_best gate for
+# day/futures_day so promotions reflect typical 24h behaviour, not the
+# 2yr blend. Raw (not annualised) — the gate compares median-to-median.
+def compute_rolling_sharpe(snapshots, window_ms=86_400_000):
+    if len(snapshots) < 3:
+        return 0.0
+    snaps = sorted(snapshots, key=lambda x: x[0])
+    start_ts = snaps[0][0]
+    buckets = {}
+    for ts_ms, eq in snaps:
+        b = (ts_ms - start_ts) // window_ms
+        buckets.setdefault(b, []).append(eq)
+    sharpes = []
+    for eqs in buckets.values():
+        if len(eqs) < 3:
+            continue
+        rets = [(eqs[i] - eqs[i-1]) / eqs[i-1]
+                for i in range(1, len(eqs)) if eqs[i-1] > 0]
+        if len(rets) < 2:
+            continue
+        mean_r = sum(rets) / len(rets)
+        std_r  = math.sqrt(sum((r - mean_r)**2 for r in rets) / len(rets))
+        if std_r < 1e-9:
+            continue  # degenerate window (near-flat equity) — skip rather than divide
+        sharpes.append(mean_r / std_r)
+    if not sharpes:
+        return 0.0
+    sharpes.sort()
+    n = len(sharpes)
+    mid = n // 2
+    med = sharpes[mid] if n % 2 else (sharpes[mid-1] + sharpes[mid]) / 2
+    return round(med, 4)
+
+
 # ---------------------------------------------------------------------------
 # Main backtest
 # ---------------------------------------------------------------------------
@@ -521,6 +559,7 @@ def run_backtest(strategy, league, pairs=None, time_slice=None):
     wins     = sum(1 for t in trades if t["won"])
     pnl_pct  = (current_equity(portfolio) - STARTING_CAP) / STARTING_CAP * 100
     sharpe   = compute_sharpe(portfolio["equity_snapshots"])
+    sharpe_24h_median = compute_rolling_sharpe(portfolio["equity_snapshots"])
     win_rate = round(wins / total * 100, 1) if total > 0 else 0.0
 
     suspicious        = False
@@ -533,17 +572,18 @@ def run_backtest(strategy, league, pairs=None, time_slice=None):
         suspicious_reason = f"Win rate {win_rate}% > {SUSPICIOUS_WINRATE}% threshold"
 
     _result = {
-        "sharpe":            sharpe,
-        "win_rate_pct":      win_rate,
-        "total_pnl_pct":     round(pnl_pct, 4),
-        "total_trades":      total,
-        "wins":              wins,
-        "losses":            total - wins,
-        "max_drawdown_pct":  round(portfolio["max_drawdown"], 4),
-        "final_equity":      round(current_equity(portfolio), 2),
-        "suspicious":        suspicious,
-        "suspicious_reason": suspicious_reason,
-        "candles_processed": len(all_ts),
+        "sharpe":              sharpe,
+        "sharpe_24h_median":   sharpe_24h_median,
+        "win_rate_pct":        win_rate,
+        "total_pnl_pct":       round(pnl_pct, 4),
+        "total_trades":        total,
+        "wins":                wins,
+        "losses":              total - wins,
+        "max_drawdown_pct":    round(portfolio["max_drawdown"], 4),
+        "final_equity":        round(current_equity(portfolio), 2),
+        "suspicious":          suspicious,
+        "suspicious_reason":   suspicious_reason,
+        "candles_processed":   len(all_ts),
     }
     if time_slice is not None:
         _result["time_slice"] = [float(time_slice[0]), float(time_slice[1])]

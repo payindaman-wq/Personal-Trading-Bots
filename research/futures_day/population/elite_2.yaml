@@ -35,3 +35,4 @@ _sharpe: -4.3295
 _trades: 414
 _oos_sharpe: -1.266
 _oos_trades: 409
+_sharpe_24h_median: -0.0906
