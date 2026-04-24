@@ -272,7 +272,7 @@ def save_strategy(s, path):
 
 DEFAULT_STRATEGY = {
     "name":                "pm_research_best",
-    "category":            "politics",
+    "category":            "world_events",
     "include_keywords":    [],
     "exclude_keywords":    [],
     "price_range":         [0.10, 0.90],
