@@ -1,8 +1,8 @@
 ```markdown
 # ODIN Research Program — FUTURES SWING
-# GROUND TRUTH (elite_0.yaml): Sharpe=0.9057 | Trades=678 | OOS_Sharpe=2.3434
-# OOS gate ACTIVE: candidates must achieve OOS sharpe ≥ 2.3434 to be accepted.
-# Most discards fail OOS — optimize for OOS stability, not in-sample Sharpe.
+# GROUND TRUTH (elite_0.yaml): Sharpe=0.9038 | Trades=707
+# OOS gate ACTIVE: candidates must achieve OOS sharpe ≥ 2.3434 to be accepted as new_best.
+# new_elite insertions do NOT require OOS gate — focus on populating elites first.
 
 ## OUTPUT RULE
 Output ONLY the modified YAML. ONE value changed. Nothing else.
@@ -33,7 +33,7 @@ entry:
     - indicator: rsi
       period_hours: 24
       operator: lt
-      value: 42.0
+      value: 42.42
   short:
     conditions:
     - indicator: trend
@@ -45,9 +45,9 @@ entry:
       operator: gt
       value: 60
 exit:
-  take_profit_pct: 5.2
-  stop_loss_pct: 1.5
-  timeout_hours: 120
+  take_profit_pct: 3.96
+  stop_loss_pct: 1.64
+  timeout_hours: 113
 risk:
   pause_if_down_pct: 8
   pause_minutes: 120
@@ -73,31 +73,32 @@ risk:
 ---
 ## KEY FACTS
 
-- Champion: TP=5.20, SL=1.50, ratio=3.47. RSI long=42.0, RSI short=60.0, timeout=120h
-- OOS Sharpe=2.3434 >> in-sample=0.9057 — strategy already has strong OOS quality
-- Win rate ~33–34%. Trade count ~678. Both are healthy — do not try to change these.
-- OOS gate floor = 2.3434. Changes that improve in-sample but hurt OOS will be REJECTED.
-- OOS stability is helped by: higher TP/SL ratio, tighter RSI, longer timeout
-- Recent oos_rejects at sharpe~0.99 mean those changes degraded OOS — avoid repeating them
+- Champion: TP=3.96, SL=1.64, ratio=2.41. RSI long=42.42, RSI short=60, timeout=113h, rsi_period=24, trend_period=48
+- OOS Sharpe=2.3434 >> in-sample=0.9038 — OOS gate is very tight; most new_best attempts will fail it
+- Win rate ~34–37%. Trade count ~707. Both healthy — do not try to change these dramatically.
+- OOS gate floor = 2.3434. Changes that improve in-sample but hurt OOS will be REJECTED as new_best.
+- new_elite (population slot) does NOT require OOS gate — aim to improve population diversity first.
+- OOS stability is helped by: higher TP/SL ratio, cleaner RSI thresholds, appropriate timeout.
+- Recent dedup/oos_rejects mean the search space near current params is crowded — try slightly larger steps.
 
 ---
 ## WHAT TO CHANGE — PICK EXACTLY ONE
 
-**Current: TP=5.20, SL=1.50, ratio=3.47. RSI long=42.0, RSI short=60.0, timeout=120h, rsi_period=24, trend_period=48.**
+**Current: TP=3.96, SL=1.64, ratio=2.41. RSI long=42.42, RSI short=60, timeout=113h, rsi_period=24, trend_period=48, size_pct=25.**
 
-### PRIORITY 1 — take_profit_pct (current: 5.20) — improves TP/SL ratio → better OOS
-Try: **5.40 | 5.50 | 5.60 | 5.80 | 6.00 | 6.20 | 5.00 | 4.80**
+### PRIORITY 1 — take_profit_pct (current: 3.96) — raising TP improves ratio → better OOS
+Try: **4.20 | 4.40 | 4.60 | 4.80 | 5.00 | 5.20 | 5.40 | 3.70 | 3.50**
 
-### PRIORITY 2 — timeout_hours (current: 120) — longer timeout may improve OOS
-Try: **130 | 140 | 150 | 160 | 166 | 172 | 180 | 110 | 100**
+### PRIORITY 2 — stop_loss_pct (current: 1.64) — tightening SL improves ratio
+Try: **1.55 | 1.50 | 1.48 | 1.45 | 1.70 | 1.75 | 1.80**
 
-### PRIORITY 3 — RSI long lt (current: 42.0) — tighter = fewer but cleaner trades
-Try: **40.0 | 39.0 | 38.0 | 37.0 | 36.0 | 43.0 | 44.0 | 45.0**
+### PRIORITY 3 — timeout_hours (current: 113) — adjust to find better exit timing
+Try: **100 | 105 | 110 | 120 | 125 | 130 | 140 | 150 | 160**
 
-### PRIORITY 4 — stop_loss_pct (current: 1.50) — tighter improves ratio
-Try: **1.45 | 1.55 | 1.60 | 1.65 | 1.70 | 1.75 | 1.80**
+### PRIORITY 4 — RSI long lt (current: 42.42) — round to clean value or tighten
+Try: **42.0 | 41.0 | 40.0 | 39.0 | 38.0 | 43.0 | 44.0 | 45.0**
 
-### PRIORITY 5 — RSI short gt (current: 60.0) — higher = cleaner short signal
+### PRIORITY 5 — RSI short gt (current: 60) — higher = cleaner short signal
 Try: **61 | 62 | 63 | 64 | 65 | 58 | 57**
 
 ### PRIORITY 6 — rsi_period_hours (current: 24)
@@ -118,16 +119,17 @@ Try: **24 | 23 | 22 | 21 | 20 | 18**
 - timeout_hours > 210 or < 48 → rejected
 - Any pairs other than [BTC/USD, ETH/USD, SOL/USD] → rejected
 - DO NOT reproduce champion unchanged:
-  take_profit_pct=5.2, stop_loss_pct=1.5, timeout_hours=120,
-  rsi_lt=42.0, rsi_gt=60, rsi_period=24, trend_period=48, size_pct=25
+  take_profit_pct=3.96, stop_loss_pct=1.64, timeout_hours=113,
+  rsi_lt=42.42, rsi_gt=60, rsi_period=24, trend_period=48, size_pct=25
 
 ---
 ## PRE-OUTPUT CHECKLIST
 
 - [ ] pairs is exactly [BTC/USD, ETH/USD, SOL/USD]
-- [ ] Exactly ONE value changed from template
+- [ ] Exactly ONE value changed from template above
 - [ ] Changed value is NOT in KNOWN BAD list
 - [ ] stop_loss_pct between 1.45 and 2.50
+- [ ] take_profit_pct between 3.0 and 8.0
 - [ ] rsi long lt between 35 and 45
 - [ ] rsi short gt between 55 and 70
 - [ ] timeout_hours between 48 and 210
