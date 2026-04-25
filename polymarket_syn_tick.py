@@ -38,6 +38,49 @@ GEMINI_CACHE_DELTA   = 0.02   # skip cache if PM price moved more than 2 cents
 SPRINT_HOURS         = 168    # 7-day sprints
 PM_FEE_PCT           = 0.02   # Polymarket taker fee: 2% of notional per side
 
+# ── Category enforcement ──────────────────────────────────────────────────
+# Each bot has a declared category in its strategy.yaml. The market scanner
+# classifies every Polymarket candidate (tag-based first, Gemini fallback) and
+# only shows a bot markets matching its category. Cache lives in state and
+# survives restarts; categories are stable per market lifetime.
+CATEGORY_CACHE_TTL_DAYS = 7
+EVENT_TAGS_REFRESH_MIN  = 60    # refresh /events tag map at most once an hour
+KNOWN_BOT_CATEGORIES = [
+    "crypto", "politics", "sports", "science", "world_economics", "world_events",
+]
+CATEGORY_TAG_MAP = {
+    "crypto": [
+        "crypto", "bitcoin", "btc", "ethereum", "eth", "solana", "sol",
+        "xrp", "ripple", "dogecoin", "doge", "altcoin", "stablecoin",
+        "defi", "nft", "blockchain",
+    ],
+    "politics": [
+        "politics", "election", "trump", "biden", "harris", "republican",
+        "democrat", "senate", "congress", "house of representatives",
+        "president", "presidency", "supreme court", "scotus",
+        "legislation", "governor", "us politics", "world politics",
+    ],
+    "sports": [
+        "sports", "nba", "nfl", "mlb", "nhl", "soccer", "football",
+        "basketball", "baseball", "hockey", "tennis", "golf", "ufc",
+        "boxing", "f1", "formula 1", "olympics", "world cup",
+        "premier league", "champions league", "epl", "la liga", "esports",
+    ],
+    "science": [
+        "science", "ai", "artificial intelligence", "tech", "technology",
+        "space", "spacex", "nasa", "rocket", "satellite", "mars",
+        "moon", "climate", "weather", "health", "medicine", "research",
+        "vaccine", "covid", "openai", "google", "nvidia",
+    ],
+    "world_economics": [
+        "economy", "economics", "finance", "business", "markets",
+        "stocks", "stock market", "fed", "federal reserve",
+        "inflation", "gdp", "recession", "interest rates",
+        "treasury", "tariff", "trade war", "ipo", "earnings",
+        "commodities", "oil", "gold", "currencies", "forex",
+    ],
+}
+
 
 os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
 logging.basicConfig(
@@ -209,6 +252,14 @@ def fetch_polymarket_markets(strategies):
                 cid = m.get("conditionId", "")
                 if not cid:
                     continue
+                events_field = m.get("events") or []
+                event_ids = [str(e.get("id", "")) for e in events_field if e.get("id")]
+                inline_tags = []
+                for e in events_field:
+                    for t in (e.get("tags") or []):
+                        lbl = (t.get("label") or "").strip().lower()
+                        if lbl:
+                            inline_tags.append(lbl)
                 markets.append({
                     "condition_id": cid,
                     "title":        (m.get("question") or "").strip(),
@@ -216,6 +267,8 @@ def fetch_polymarket_markets(strategies):
                                      for i in range(min(len(outcomes), len(out_prices)))],
                     "liquidity":    float(m.get("liquidity") or 0),
                     "end_date":     m.get("endDate") or m.get("end_date_iso") or "",
+                    "event_ids":    event_ids,
+                    "tags":         list(set(inline_tags)),
                 })
             except Exception:
                 continue
@@ -227,6 +280,126 @@ def fetch_polymarket_markets(strategies):
     log.info(f"SYN fetched {len(markets)} Polymarket markets")
     return markets
 
+
+def fetch_polymarket_event_tags(max_events=2000):
+    """Fetch open Polymarket events and return {event_id: [tag_label_lower, ...]}.
+    The /markets feed often returns event.tags = None, so we hit /events directly.
+    Used by classify_market for category enforcement."""
+    tags_by_event = {}
+    offset, limit = 0, 100
+    while offset < max_events:
+        try:
+            url  = (f"https://gamma-api.polymarket.com/events"
+                    f"?closed=false&limit={limit}&offset={offset}")
+            page = api_get(url, timeout=20)
+        except Exception as e:
+            log.warning(f"Polymarket event-tag fetch error (offset={offset}): {e}")
+            break
+        if not page:
+            break
+        for ev in page:
+            ev_id = str(ev.get("id", ""))
+            if not ev_id:
+                continue
+            tag_objs = ev.get("tags") or []
+            tags_by_event[ev_id] = [
+                (t.get("label") or "").strip().lower()
+                for t in tag_objs if t.get("label")
+            ]
+        if len(page) < limit:
+            break
+        offset += limit
+    log.info(f"SYN fetched event tags for {len(tags_by_event)} Polymarket events")
+    return tags_by_event
+
+
+def merge_event_tags(markets, tags_by_event):
+    """Attach event tags to each market via its event_ids."""
+    for m in markets:
+        merged = set(m.get("tags") or [])
+        for eid in m.get("event_ids", []):
+            for t in tags_by_event.get(eid, []):
+                if t:
+                    merged.add(t)
+        m["tags"] = sorted(merged)
+
+
+def classify_market_by_tags(market):
+    """Tag-based classifier: returns a category from KNOWN_BOT_CATEGORIES or None.
+    A category wins if any of its keywords appears as a substring of any tag.
+    Ties broken by category order in CATEGORY_TAG_MAP (most specific first)."""
+    tags = market.get("tags") or []
+    if not tags:
+        return None
+    scores = {cat: 0 for cat in CATEGORY_TAG_MAP}
+    for cat, kws in CATEGORY_TAG_MAP.items():
+        for kw in kws:
+            if any(kw == t or kw in t for t in tags):
+                scores[cat] += 1
+    best_cat, best_score = max(scores.items(), key=lambda kv: kv[1])
+    if best_score == 0:
+        return None
+    return best_cat
+
+
+def gemini_classify_category(market, key):
+    """Single-shot Gemini call to classify a market into KNOWN_BOT_CATEGORIES.
+    Returns a category string, or 'world_events' as default. Cheap (~20 tokens)."""
+    title = market.get("title", "")[:200]
+    cats = ", ".join(KNOWN_BOT_CATEGORIES)
+    prompt = (
+        f"Classify this prediction market into ONE category from: {cats}.\n"
+        f"Market: {title}\n\n"
+        f"Reply with ONLY the category name (lowercase, snake_case). "
+        f"If none clearly fit, reply: world_events"
+    )
+    url = (f"https://generativelanguage.googleapis.com/v1beta/models/"
+           f"gemini-2.5-flash-lite:generateContent?key={key}")
+    payload = {
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {"temperature": 0.0, "maxOutputTokens": 20},
+    }
+    try:
+        resp = api_post(url, payload, timeout=12)
+        text = resp["candidates"][0]["content"]["parts"][0]["text"].strip().lower()
+        for c in KNOWN_BOT_CATEGORIES:
+            if c in text:
+                return c
+        return "world_events"
+    except Exception as e:
+        log.debug(f"Gemini classify error: {e}")
+        return None
+
+
+def classify_market(market, state, secrets, gemini_budget):
+    """Return the category for a market. Caches result in state['category_cache']
+    keyed by condition_id with CATEGORY_CACHE_TTL_DAYS TTL.
+    gemini_budget is a list [int] used as a mutable counter — caller can cap calls."""
+    cid = market["condition_id"]
+    cache = state.setdefault("category_cache", {})
+    now_ts = datetime.now(timezone.utc).timestamp()
+    rec = cache.get(cid)
+    if rec and (now_ts - rec.get("ts", 0)) < CATEGORY_CACHE_TTL_DAYS * 86400:
+        return rec["category"]
+
+    cat = classify_market_by_tags(market)
+    source = "tags"
+    if cat is None and gemini_budget[0] > 0:
+        keys = secrets.get("gemini_api_keys") or [secrets.get("gemini_api_key")]
+        for k in keys:
+            if not k:
+                continue
+            cat = gemini_classify_category(market, k)
+            if cat:
+                gemini_budget[0] -= 1
+                source = "gemini"
+                break
+    if cat is None:
+        cat = "world_events"
+        source = "default"
+
+    cache[cid] = {"category": cat, "ts": now_ts, "source": source}
+    return cat
 
 
 def fetch_metaculus_markets():
@@ -461,6 +634,15 @@ def filter_for_bot(markets, strategy, existing_cids):
         if not prices or prices[0] < pr[0] or prices[0] > pr[1]:
             continue
 
+        # Category enforcement — bot only sees markets in its declared category.
+        # Markets are pre-classified in run_tick into m['category'].
+        # Arb bots opt out (no declared category) and see everything.
+        bot_cat = strategy.get("category")
+        if bot_cat and bot_cat != "arb":
+            mkt_cat = m.get("category")
+            if mkt_cat and mkt_cat != bot_cat:
+                continue
+
         candidates.append(m)
 
     return candidates
@@ -578,6 +760,8 @@ def open_position(bot, market, outcome, price, reasoning, strategy):
         "opened_at":      datetime.now(timezone.utc).isoformat(),
         "market_end_date": market.get("end_date"),
         "reasoning":      reasoning[:200] if reasoning else "",
+        "bot_category":    strategy.get("category"),
+        "market_category": market.get("category"),
     }
     bot["total_trades"] += 1
     log.info(f"  [{bot['name']}] OPEN {outcome[:30]} @ {price:.3f} | ${size_usd:.0f} (fee ${open_fee:.2f}) | {market['title'][:45]}")
@@ -982,10 +1166,44 @@ def run_tick(state, strategies, secrets, tick_count):
         meta_index   = build_title_index(metaculus_markets)
         manif_index  = build_title_index(manifold_markets)
         kalshi_index = build_title_index(kalshi_markets)
+
+        # ── 1b. Fetch event tags (refresh hourly) and classify markets for category enforcement.
+        et_cache = state.setdefault("event_tags_cache", {})
+        last_ts  = et_cache.get("ts", 0)
+        now_ts   = datetime.now(timezone.utc).timestamp()
+        if (now_ts - last_ts) > EVENT_TAGS_REFRESH_MIN * 60 or not et_cache.get("data"):
+            et_cache["data"] = fetch_polymarket_event_tags()
+            et_cache["ts"]   = now_ts
+        merge_event_tags(pm_markets, et_cache.get("data", {}))
+
+        # Prune stale category cache entries.
+        cat_cache = state.setdefault("category_cache", {})
+        ttl_sec = CATEGORY_CACHE_TTL_DAYS * 86400
+        stale = [k for k, v in cat_cache.items() if now_ts - v.get("ts", 0) > ttl_sec]
+        for k in stale:
+            del cat_cache[k]
+
+        # Cap Gemini classifier calls per scan; tag-based is free and unbounded.
+        gemini_budget = [12]
+        cat_counts = {}
+        for m in pm_markets:
+            cat = classify_market(m, state, secrets, gemini_budget)
+            m["category"] = cat
+            cat_counts[cat] = cat_counts.get(cat, 0) + 1
+        log.info(f"Category enforcement: classified {len(pm_markets)} markets — "
+                 f"{', '.join(f'{c}={n}' for c,n in sorted(cat_counts.items(), key=lambda x:-x[1]))} "
+                 f"(gemini-fallback used: {12 - gemini_budget[0]})")
     else:
         metaculus_markets, manifold_markets, kalshi_markets = [], [], []
         meta_index = manif_index = kalshi_index = {}
         log.info("Skipping external data fetch this tick (price refresh only)")
+        # Even on price-refresh ticks, attach known categories so any opportunistic
+        # filter calls behave consistently.
+        cat_cache = state.get("category_cache", {})
+        for m in pm_markets:
+            rec = cat_cache.get(m["condition_id"])
+            if rec:
+                m["category"] = rec.get("category")
 
     # ── 2. Refresh all bot positions ──────────────────────────────────────
     for bot in state["bots"]:
