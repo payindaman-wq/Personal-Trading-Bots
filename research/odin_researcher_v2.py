@@ -1120,7 +1120,7 @@ def main():
             if league in DAY_24H_GATE_LEAGUES:
                 cand_24h  = float(result.get("sharpe_24h_median", 0.0))
                 champ_24h = float(pop.elites[0][1].get("_sharpe_24h_median", 0.0)) if pop.elites else 0.0
-                floor_24h = max(0.0, champ_24h * DAY_24H_GATE_FLOOR_FRAC)
+                floor_24h = champ_24h * DAY_24H_GATE_FLOOR_FRAC  # no max(0.0,...): for negative champ, floor is less-negative (allows improvement; max was blocking all -ve candidates)
                 if cand_24h < floor_24h:
                     print(f"| H24_GATE_REJECT: sharpe_24h_median={cand_24h:.4f} "
                           f"floor={floor_24h:.4f} champ={champ_24h:.4f}")
