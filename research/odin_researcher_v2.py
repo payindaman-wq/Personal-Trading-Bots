@@ -159,8 +159,8 @@ SWING_RANGES = {
     "max_open": (1, 3),
 }
 FUTURES_DAY_RANGES = {
-    "take_profit_pct": (0.8, 5.0),
-    "stop_loss_pct":   (0.5, 3.0),
+    "take_profit_pct": (0.8, 8.0),
+    "stop_loss_pct":   (0.5, 4.5),
     "timeout_minutes": (30, 480),
     "size_pct":        (8, 20),
     "max_open":        (1, 4),
