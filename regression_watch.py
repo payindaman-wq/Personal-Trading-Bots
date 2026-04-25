@@ -45,6 +45,7 @@ TRAILING_WINDOW = 7
 UNDER_PCT_THRESHOLD = 0.40
 Z_SCORE_THRESHOLD = -2.0
 COOLDOWN_HOURS = 6
+LEAGUE_COOLDOWN_HOURS = 1
 BASELINE_STALE_DAYS = 21
 BACKTEST_DAYS = 30
 
@@ -172,7 +173,7 @@ def baseline_is_stale(baseline):
     return datetime.now(timezone.utc) - dt > timedelta(days=BASELINE_STALE_DAYS)
 
 
-def should_alert(state, key):
+def should_alert(state, key, hours=COOLDOWN_HOURS):
     last = state.get("last_alerted", {}).get(key)
     if not last:
         return True
@@ -180,7 +181,7 @@ def should_alert(state, key):
         last_dt = datetime.fromisoformat(last)
     except Exception:
         return True
-    return datetime.now(timezone.utc) - last_dt > timedelta(hours=COOLDOWN_HOURS)
+    return datetime.now(timezone.utc) - last_dt > timedelta(hours=hours)
 
 
 def mark_alerted(state, key):
@@ -232,33 +233,42 @@ def run_default(dry_run=False):
     regressions = [r for r in findings if r["is_regression"]]
     log(f"checked {len(findings)} bot/baseline pairs; {len(regressions)} regressions; {len(stale_warnings)} stale baselines")
 
+    # Group regressions by league; one summary entry per league per LEAGUE_COOLDOWN_HOURS
+    by_league = {}
     for r in regressions:
-        key = f"regression:{r['league']}:{r['bot']}"
-        if not should_alert(state, key):
-            log(f"skip (cooldown): {key}")
+        by_league.setdefault(r["league"], []).append(r)
+
+    for league_key, league_regressions in sorted(by_league.items()):
+        summary_key = "regression_summary:" + league_key
+        if not should_alert(state, summary_key, hours=LEAGUE_COOLDOWN_HOURS):
+            log("skip (league cooldown): " + summary_key + " (" + str(len(league_regressions)) + " bot(s))")
             continue
-        msg = format_alert(r)
-        log(f"ALERT: {r['league']}/{r['bot']} under={r['under_pct']:.2f} z={r['z_score']:.2f} n={r['n']}")
+        parts = sorted(league_regressions, key=lambda x: x["under_pct"], reverse=True)
+        detail_str = ", ".join(r["bot"] + " -" + str(round(r["under_pct"] * 100)) + "%" for r in parts)
+        summary_msg = "[regression] " + str(len(parts)) + " bot(s) under-performing in " + league_key + ": " + detail_str
+        log("ALERT(" + league_key + "): " + summary_msg)
         if dry_run:
-            print("--- dry-run alert ---"); print(msg); print()
+            print("--- dry-run alert ---")
+            print(summary_msg)
+            print()
         else:
-            # Route to SYN inbox for downstream self-heal (LOKI/VIDAR), not
-            # directly to Telegram. Chris is not paged on routine regressions;
-            # the maintenance dashboard + officer pipeline handles the judgment.
             try:
                 inbox_rec = {
                     "ts":       datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
                     "source":   "regression_watch",
                     "severity": "warning",
-                    "msg":      f"[regression] {r['league']}/{r['bot']} under={r['under_pct']:.2f}% z={r['z_score']:.2f} n={r['n']}",
-                    "detail":   {"league": r["league"], "bot": r["bot"],
-                                 "under_pct": r["under_pct"], "z": r["z_score"], "n": r["n"]},
+                    "msg":      summary_msg,
+                    "detail":   {
+                        "league": league_key,
+                        "bots":   [{"bot": r["bot"], "under_pct": r["under_pct"],
+                                    "z": r["z_score"], "n": r["n"]} for r in parts],
+                    },
                 }
-                with open(f"{WORKSPACE}/syn_inbox.jsonl", "a") as f:
-                    f.write(json.dumps(inbox_rec) + "\n")
+                with open(WORKSPACE + "/syn_inbox.jsonl", "a") as f:
+                    f.write(json.dumps(inbox_rec) + chr(10))
             except Exception as e:
-                log(f"syn_inbox write failed: {e}")
-            mark_alerted(state, key)
+                log("syn_inbox write failed: " + str(e))
+            mark_alerted(state, summary_key)
 
     if stale_warnings and not dry_run:
         key = "stale_baselines"

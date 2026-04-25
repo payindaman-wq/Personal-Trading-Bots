@@ -25,7 +25,7 @@ import os
 import sys
 import urllib.request
 import fcntl
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 WORKSPACE         = "/root/.openclaw/workspace"
 RESEARCH          = os.path.join(WORKSPACE, "research")
@@ -57,6 +57,9 @@ LOKI_PAUSES_FILE  = os.path.join(RESEARCH, "loki_structural_pauses.json")
 ANTHROPIC_USAGE   = os.path.join(RESEARCH, "anthropic_usage.jsonl")
 LOKI_PENDING      = os.path.join(RESEARCH, "loki_pending_actions.jsonl")
 RESEARCHER_PY     = os.path.join(RESEARCH, "odin_researcher_v2.py")
+
+SUPPRESSION_MODES = {"revert_review", "oscillation_diag"}
+SUPPRESSION_WINDOW_HOURS = 48
 
 TG_BOT_TOKEN = "8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
 TG_CHAT_ID   = "8154505910"
@@ -204,6 +207,42 @@ def write_maintenance(league, mode, detail, result="", fix_hint="", phase="arbit
         _append_locked(MAINTENANCE_LOG, json.dumps(rec) + "\n")
     except Exception as e:
         print(f"  [vidar/maintenance] failed: {e}")
+
+
+def find_prior_decision(mode, league, revert_reason, within_hours=SUPPRESSION_WINDOW_HOURS):
+    """Scan vidar_log for most recent matching fire within window. Returns log entry or None."""
+    if not os.path.exists(VIDAR_LOG):
+        return None
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=within_hours)
+    best = None
+    with open(VIDAR_LOG) as f:
+        for line in f:
+            if not line.strip():
+                continue
+            try:
+                r = json.loads(line)
+                if r.get("suppressed"):
+                    continue
+                if r.get("mode") != mode or r.get("league") != league:
+                    continue
+                if revert_reason and r.get("revert_reason") != revert_reason:
+                    continue
+                ts_str = r.get("ts", "")
+                suffix = "+00:00" if ("+" not in ts_str and not ts_str.endswith("Z")) else ""
+                ts = datetime.fromisoformat(ts_str + suffix)
+                if ts >= cutoff:
+                    best = r
+            except Exception:
+                continue
+    return best
+
+
+def severity_step_up(new_revert, prior_log):
+    """True if new trigger is categorically worse failure than what VIDAR last reviewed."""
+    SEV = {"metric_degradation": 0, "structural": 1, "service_crash": 2}
+    prior_reason = prior_log.get("revert_reason", "metric_degradation") if prior_log else "metric_degradation"
+    new_reason = (new_revert or {}).get("reason", "metric_degradation")
+    return SEV.get(new_reason, 0) > SEV.get(prior_reason, 0)
 
 
 def build_revert_review_prompt(league, revert_ts):
@@ -459,6 +498,40 @@ def write_meta_audit_review(audit_ts, response_text, decision):
 
 
 def run_mode(args, api_key):
+    # F11: skip Opus call when same (mode, league, trigger) fired within 48h
+    revert_reason = None
+    new_revert = None
+    prior = None
+    if args.mode in SUPPRESSION_MODES:
+        if args.mode == "revert_review":
+            _reverts = load_recent_reverts(args.league, n=5)
+            if args.revert_ts:
+                new_revert = next((r for r in _reverts if r.get("ts", "").startswith(args.revert_ts[:16])), None)
+            if not new_revert:
+                new_revert = _reverts[-1] if _reverts else None
+            revert_reason = (new_revert or {}).get("reason", "metric_degradation")
+        else:
+            revert_reason = "oscillation"
+        prior = find_prior_decision(args.mode, args.league, revert_reason)
+        if prior and not severity_step_up(new_revert, prior):
+            short_rec = {
+                "ts":            datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
+                "mode":          args.mode,
+                "league":        args.league,
+                "revert_reason": revert_reason,
+                "suppressed":    True,
+                "prior_ts":      prior.get("ts"),
+                "msg":           "already_escalated, see prior decision " + prior.get("ts", "?"),
+            }
+            write_log(short_rec)
+            write_maintenance(args.league, args.mode,
+                detail="suppressed — prior " + prior.get("ts", "?"),
+                result="already_escalated",
+                fix_hint="same trigger (" + revert_reason + ") reviewed at " + prior.get("ts", "?"),
+            )
+            print("[vidar] suppressed: " + args.mode + "/" + args.league + "/" + revert_reason + " — prior " + prior.get("ts", "?"))
+            return
+
     if args.mode == "revert_review":
         if not args.revert_ts:
             print("--revert-ts required for revert_review")
@@ -492,6 +565,14 @@ def run_mode(args, api_key):
         print(f"unknown mode: {args.mode}")
         sys.exit(1)
 
+    # Inject prior context when VIDAR fires on a repeat trigger (helps convergence)
+    if prior and args.mode in SUPPRESSION_MODES:
+        prior_response = prior.get("response", "")
+        prior_summary = prior_response[:800] if prior_response else "(no prior response)"
+        prior_header = "[PRIOR VIDAR DECISION — " + prior.get("ts", "?") + " — same " + args.league + "/" + (revert_reason or "") + "]"
+        prior_footer = "[END PRIOR CONTEXT — use to converge, not re-derive]"
+        prompt = prior_header + chr(10) + prior_summary + chr(10) + prior_footer + chr(10) + chr(10) + prompt
+
     model = VIDAR_MODEL
     print(f"[vidar] firing {model} ({args.mode}, {args.league}) — prompt {len(prompt)} chars")
     try:
@@ -501,12 +582,13 @@ def run_mode(args, api_key):
         raise
 
     record = {
-        "ts":       datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
-        "mode":     args.mode,
-        "league":   args.league,
-        "topic":    args.topic,
-        "revert_ts": args.revert_ts,
-        "response": response,
+        "ts":            datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
+        "mode":          args.mode,
+        "league":        args.league,
+        "topic":         args.topic,
+        "revert_ts":     args.revert_ts,
+        "revert_reason": revert_reason,
+        "response":      response,
     }
     write_log(record)
 
