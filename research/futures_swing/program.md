@@ -1,8 +1,8 @@
 ```markdown
 # ODIN Research Program — FUTURES SWING
-# GROUND TRUTH (elite_0.yaml): Sharpe=0.7001 | Trades=486 | OOS_Sharpe=1.8971
-# OOS gate is ACTIVE: candidates must achieve OOS sharpe ≥ 1.8971 to be accepted.
-# This is the BINDING constraint — most discards fail OOS, not in-sample.
+# GROUND TRUTH (elite_0.yaml): Sharpe=0.9057 | Trades=678 | OOS_Sharpe=2.3434
+# OOS gate ACTIVE: candidates must achieve OOS sharpe ≥ 2.3434 to be accepted.
+# Most discards fail OOS — optimize for OOS stability, not in-sample Sharpe.
 
 ## OUTPUT RULE
 Output ONLY the modified YAML. ONE value changed. Nothing else.
@@ -33,7 +33,7 @@ entry:
     - indicator: rsi
       period_hours: 24
       operator: lt
-      value: 37.77
+      value: 42.0
   short:
     conditions:
     - indicator: trend
@@ -46,8 +46,8 @@ entry:
       value: 60
 exit:
   take_profit_pct: 5.2
-  stop_loss_pct: 1.92
-  timeout_hours: 166
+  stop_loss_pct: 1.5
+  timeout_hours: 120
 risk:
   pause_if_down_pct: 8
   pause_minutes: 120
@@ -71,48 +71,43 @@ risk:
 | Minimum trades | ≥ 400 |
 
 ---
-## KEY FACTS — READ BEFORE CHOOSING
+## KEY FACTS
 
-- Champion: TP=5.20, SL=1.92, ratio=2.71. RSI long=37.77, RSI short=60.0, timeout=166h
-- Win rate is structurally ~33–38% — do not try to change this
-- Trade count ~486 — stay above 400
-- OOS sharpe ≥ 1.8971 is REQUIRED for any improvement to be accepted
-- OOS stability favors: higher TP/SL ratio, tighter RSI thresholds, longer timeouts
-- Recent best: Gen 6436 sharpe=1.1223 with 435 trades — tighter RSI helps quality
+- Champion: TP=5.20, SL=1.50, ratio=3.47. RSI long=42.0, RSI short=60.0, timeout=120h
+- OOS Sharpe=2.3434 >> in-sample=0.9057 — strategy already has strong OOS quality
+- Win rate ~33–34%. Trade count ~678. Both are healthy — do not try to change these.
+- OOS gate floor = 2.3434. Changes that improve in-sample but hurt OOS will be REJECTED.
+- OOS stability is helped by: higher TP/SL ratio, tighter RSI, longer timeout
+- Recent oos_rejects at sharpe~0.99 mean those changes degraded OOS — avoid repeating them
 
 ---
 ## WHAT TO CHANGE — PICK EXACTLY ONE
 
-**Current: TP=5.20, SL=1.92, ratio=2.71. RSI long=37.77, RSI short=60.0, timeout=166h.**
+**Current: TP=5.20, SL=1.50, ratio=3.47. RSI long=42.0, RSI short=60.0, timeout=120h, rsi_period=24, trend_period=48.**
 
-### PRIORITY 1 — take_profit_pct (current: 5.20) — HIGHEST PRIORITY
-Higher TP improves ratio and OOS stability. Try:
-**5.40 | 5.50 | 5.60 | 5.70 | 5.80 | 6.00 | 5.00 | 4.90**
+### PRIORITY 1 — take_profit_pct (current: 5.20) — improves TP/SL ratio → better OOS
+Try: **5.40 | 5.50 | 5.60 | 5.80 | 6.00 | 6.20 | 5.00 | 4.80**
 
-### PRIORITY 2 — stop_loss_pct (current: 1.92)
-Tighter SL improves ratio. Minimum allowed 1.45.
-**1.45 | 1.50 | 1.55 | 1.60 | 1.65 | 1.70 | 1.75 | 1.80**
+### PRIORITY 2 — timeout_hours (current: 120) — longer timeout may improve OOS
+Try: **130 | 140 | 150 | 160 | 166 | 172 | 180 | 110 | 100**
 
-### PRIORITY 3 — RSI long lt (current: 37.77)
-Lower = fewer but cleaner trades (better OOS). Higher = more trades (watch 400 floor).
-**35.0 | 36.0 | 37.0 | 38.0 | 39.0 | 40.0 | 41.0 | 42.0**
+### PRIORITY 3 — RSI long lt (current: 42.0) — tighter = fewer but cleaner trades
+Try: **40.0 | 39.0 | 38.0 | 37.0 | 36.0 | 43.0 | 44.0 | 45.0**
 
-### PRIORITY 4 — RSI short gt (current: 60.0)
-Higher = cleaner short signal.
-**61 | 62 | 63 | 64 | 65 | 58 | 57 | 56**
+### PRIORITY 4 — stop_loss_pct (current: 1.50) — tighter improves ratio
+Try: **1.45 | 1.55 | 1.60 | 1.65 | 1.70 | 1.75 | 1.80**
 
-### PRIORITY 5 — timeout_hours (current: 166)
-Longer timeout may recover missed trades.
-**172 | 176 | 180 | 184 | 188 | 192 | 156 | 148**
+### PRIORITY 5 — RSI short gt (current: 60.0) — higher = cleaner short signal
+Try: **61 | 62 | 63 | 64 | 65 | 58 | 57**
 
 ### PRIORITY 6 — rsi_period_hours (current: 24)
-**20 | 21 | 22 | 23 | 25 | 26 | 27 | 28**
+Try: **20 | 21 | 22 | 23 | 25 | 26 | 27 | 28**
 
 ### PRIORITY 7 — trend period_hours (current: 48)
-**36 | 42 | 54 | 60 | 72**
+Try: **36 | 42 | 54 | 60 | 72**
 
 ### PRIORITY 8 — size_pct (current: 25)
-**24 | 23 | 22 | 21 | 20**
+Try: **24 | 23 | 22 | 21 | 20 | 18**
 
 ---
 ## KNOWN BAD — DO NOT USE
@@ -123,8 +118,8 @@ Longer timeout may recover missed trades.
 - timeout_hours > 210 or < 48 → rejected
 - Any pairs other than [BTC/USD, ETH/USD, SOL/USD] → rejected
 - DO NOT reproduce champion unchanged:
-  take_profit_pct=5.2, stop_loss_pct=1.92, timeout_hours=166,
-  rsi_lt=37.77, rsi_gt=60, rsi_period=24, trend_period=48, size_pct=25
+  take_profit_pct=5.2, stop_loss_pct=1.5, timeout_hours=120,
+  rsi_lt=42.0, rsi_gt=60, rsi_period=24, trend_period=48, size_pct=25
 
 ---
 ## PRE-OUTPUT CHECKLIST
