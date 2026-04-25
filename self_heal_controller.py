@@ -12,7 +12,7 @@ the individual watchdogs:
   - On transition back to healthy → log recovery, reset counter.
 
 Subsystem registry — all fields read from existing state; no new probes:
-  - Liveness: odin_* services, freya, kalshi_copy, polymarket_syn.
+  - Liveness: odin_* services, freya, polymarket_syn.
   - Freshness: tyr_state.json (45m), heimdall_state.json (45m),
                per-league researcher.log (30m for odin, 60m for freya).
 
@@ -35,7 +35,7 @@ STATE_FILE = f"{WORKSPACE}/competition/self_heal_state.json"
 LOG_FILE = f"{WORKSPACE}/competition/self_heal_log.jsonl"
 INBOX = f"{WORKSPACE}/syn_inbox.jsonl"
 EXCHANGE_PAUSE_FLAG = f"{WORKSPACE}/competition/exchange_paused"
-EXCHANGE_PAUSED_SERVICES = {"kalshi_copy", "polymarket_syn"}
+EXCHANGE_PAUSED_SERVICES = {"polymarket_syn"}
 
 HEAL_AFTER_CONSECUTIVE = 2   # attempt self-heal at this many consecutive degraded runs
 ESCALATE_AFTER_HEAL    = 2   # escalate if still degraded this many runs AFTER heal attempt
@@ -57,7 +57,6 @@ SERVICES = [
     "odin_futures_day",
     "odin_futures_swing",
     "freya",
-    "kalshi_copy",
     "polymarket_syn",
 ]
 

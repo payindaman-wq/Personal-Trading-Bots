@@ -229,7 +229,7 @@ def _layer_infrastructure():
     units = [
         "odin_day.service", "odin_swing.service",
         "odin_futures_day.service", "odin_futures_swing.service",
-        "freya.service", "polymarket_syn.service", "kalshi_copy.service",
+        "freya.service", "polymarket_syn.service",
     ]
     for u in units:
         out.append("  " + u + ": " + _systemctl_status(u))

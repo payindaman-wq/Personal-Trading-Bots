@@ -71,7 +71,6 @@ SERVICES = [
     {"name": "odin_futures_day",   "unit": "odin_futures_day.service"},
     {"name": "odin_futures_swing", "unit": "odin_futures_swing.service"},
     {"name": "freya",              "unit": "freya.service"},
-    {"name": "kalshi_copy",        "unit": "kalshi_copy.service"},
     {"name": "polymarket_syn",     "unit": "polymarket_syn.service"},
 ]
 

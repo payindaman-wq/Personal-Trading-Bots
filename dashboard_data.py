@@ -881,7 +881,7 @@ def get_pm_research():
     """Return prediction market data collection state for dashboard."""
     state = {
         "total": 0,
-        "by_source": {"polymarket": 0, "kalshi": 0, "manifold": 0},
+        "by_source": {"polymarket": 0, "manifold": 0},
         "last_run": None,
         "new_this_run": 0,
         "researcher_ready": False,

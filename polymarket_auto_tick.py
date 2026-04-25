@@ -3,7 +3,7 @@
 polymarket_auto_tick.py — Ullr autonomous sports betting bot for Polymarket.
 
 Every 15 min: refresh open position prices, auto-close resolved markets.
-Every 30 min: scan Polymarket for sports candidates, compare to Kalshi,
+Every 30 min: scan Polymarket for sports candidates,
               ask Gemini to assess edge, trade if confirmed.
 """
 import json, os, time, re, logging, urllib.request, urllib.error
@@ -231,62 +231,15 @@ def find_best_external_match(pm_title, markets, min_score=0.25, index=None):
             best, best_score = m, score
     return best
 
-def fetch_kalshi_markets():
-    """Fetch Kalshi markets with midpoint probability. No auth needed."""
-    markets = []
-    cursor = None
-    for _ in range(10):
-        try:
-            url = ("https://api.elections.kalshi.com/trade-api/v2/events"
-                   "?limit=200&with_nested_markets=true")
-            if cursor:
-                url += f"&cursor={cursor}"
-            page = api_get(url, timeout=20)
-        except Exception as e:
-            log.warning(f"Kalshi fetch error: {e}")
-            break
-        for event in page.get("events", []):
-            for m in event.get("markets", []):
-                yes_bid = m.get("yes_bid_dollars")
-                yes_ask = m.get("yes_ask_dollars")
-                if yes_bid is None or yes_ask is None:
-                    continue
-                try:
-                    bid, ask = float(yes_bid), float(yes_ask)
-                except (ValueError, TypeError):
-                    continue
-                if bid <= 0 or ask <= 0 or bid >= 1 or ask >= 1:
-                    continue
-                title = m.get("title", "") or event.get("title", "")
-                if not title:
-                    continue
-                markets.append({
-                    "id":    m.get("ticker", ""),
-                    "title": title,
-                    "prob":  round((bid + ask) / 2, 4),
-                    "close": m.get("close_time", ""),
-                })
-        cursor = page.get("cursor")
-        if not cursor or len(page.get("events", [])) < 200:
-            break
-    log.info(f"Fetched {len(markets)} Kalshi markets")
-    return markets
-
 
 
 # ── Gemini reasoning ──────────────────────────────────────────────────────────
 
-def gemini_assess(title, outcome, polymarket_price, kalshi_match, gemini_api_key):
+def gemini_assess(title, outcome, polymarket_price, gemini_api_key):
     """Ask Gemini to estimate true probability and assess edge."""
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
-    if kalshi_match:
-        ref_section = (
-            f"Kalshi market consensus:\n"
-            f"  '{kalshi_match['title']}': {kalshi_match['prob']:.1%}"
-        )
-    else:
-        ref_section = "No external reference available — use your own assessment only."
+    ref_section = "No external reference available — use your own assessment only."
 
     prompt = f"""You are a sharp sports betting analyst assessing a Polymarket prediction market.
 
@@ -300,7 +253,6 @@ Assess the TRUE probability of this outcome based on:
 - Your knowledge of the teams/players involved
 - Current season form, injuries, head-to-head record
 - Home/away advantage, venue, competition context
-- Whether Polymarket appears to be mispricing vs the Kalshi consensus or your estimate
 
 Respond ONLY with valid JSON (no markdown, no extra text):
 {{"estimated_prob": 0.00, "confidence": "low|medium|high", "value": "YES|NO|FAIR", "reasoning": "2-3 sentences max", "key_factors": ["factor1", "factor2"]}}
@@ -551,10 +503,6 @@ def tick(bot, strategy, secrets, tick_count):
     candidates = fetch_polymarket_sports_markets(strategy)
     bot["scan_count"] += len(candidates)
 
-    # Fetch Kalshi once per scan as the reference probability source
-    kalshi_markets = fetch_kalshi_markets()
-    kalshi_index   = build_title_index(kalshi_markets)
-
     MAX_GEMINI_PER_SCAN = 10
     gemini_this_scan = 0
 
@@ -575,21 +523,11 @@ def tick(bot, strategy, secrets, tick_count):
         if pm_price < 0.10 or pm_price > 0.90:
             continue
 
-        # Match against Kalshi for a reference probability (optional — used as context for Gemini)
-        kalshi_match = find_best_external_match(market["title"], kalshi_markets, min_score=0.30, index=kalshi_index)
-
-        # Pre-filter: if Kalshi match found and gap is tiny, skip (save Gemini calls)
-        if kalshi_match:
-            gap = abs(kalshi_match["prob"] - pm_price)
-            if gap < strategy["min_edge_pts"] / 2:
-                log.debug(f"  Skipping {market['title'][:40]} — Kalshi gap too small ({gap:.3f})")
-                continue
-
         # Rate limit: 6s between calls (~10/min, free tier is 15 RPM)
         time.sleep(6)
         try:
             assessment = gemini_assess(
-                market["title"], target["outcome"], pm_price, kalshi_match, secrets["gemini_api_key"]
+                market["title"], target["outcome"], pm_price, secrets["gemini_api_key"]
             )
         except RuntimeError:
             log.warning("  Scan aborted due to Gemini quota — waiting for next tick")

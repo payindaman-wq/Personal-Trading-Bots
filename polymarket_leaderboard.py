@@ -2,7 +2,7 @@
 """
 polymarket_leaderboard.py — Unified cumulative leaderboard for all 38 Polymarket bots.
 
-Merges copy-trader (state.json) and autonomous (auto_state.json) results across sprints.
+Merges autonomous (auto_state.json) results across sprints.
 Points: 1st=8, 2nd=5, 3rd=3, 4th+=1 (same as other leagues).
 
 Usage:
@@ -72,8 +72,6 @@ def is_nv_legal(title):
 
 WORKSPACE   = "/root/.openclaw/workspace"
 POLY_DIR    = os.path.join(WORKSPACE, "competition", "polymarket")
-STATE_FILE   = os.path.join(POLY_DIR, "kalshi_copy_state.json")
-BACKFILL_FILE = os.path.join(POLY_DIR, "kalshi_copy_pm_backfill.json")
 AUTO_STATE   = os.path.join(POLY_DIR, "auto_state.json")
 SPRINT_DIR  = os.path.join(POLY_DIR, "sprint_results")
 LB_PATH     = os.path.join(POLY_DIR, "polymarket_leaderboard.json")
@@ -138,56 +136,6 @@ def load_completed_sprints():
 def get_live_bots():
     """Read current sprint P&L directly from both state files."""
     bots = []
-
-    # Copy-trader bots (_k fleet) — merge live Kalshi state + historical PM backfill
-    # for current sprint. Mirrors polymarket_data.py merge logic.
-    try:
-        with open(STATE_FILE) as f:
-            state = json.load(f)
-        backfill = {}
-        try:
-            with open(BACKFILL_FILE) as bf:
-                backfill = json.load(bf).get("bots", {})
-        except Exception:
-            backfill = {}
-        sprint_id = state.get("sprint_id", "")
-        for b in state.get("bots", []):
-            name  = b.get("name", "")
-            bf_b  = backfill.get(name, {})
-            pnl     = round(b.get("sprint_pnl_usd", 0.0) + bf_b.get("sprint_pnl_usd", 0.0), 4)
-            # NV-legal split: walk closed_trades + backfill trades and sum only
-            # the trades whose title passes is_nv_legal. Copy bots store titles
-            # on each trade record (same shape as autonomous bots).
-            closed_live   = b.get("closed_trades", []) or []
-            closed_bf     = bf_b.get("closed_trades", []) or []
-            nv_pnl = round(
-                sum(t.get("pnl_usd", 0.0) for t in closed_live if isinstance(t, dict) and is_nv_legal(t.get("title", "")))
-                + sum(t.get("pnl_usd", 0.0) for t in closed_bf if isinstance(t, dict) and is_nv_legal(t.get("title", ""))),
-                4,
-            )
-            nv_trades = (
-                sum(1 for t in closed_live if isinstance(t, dict) and is_nv_legal(t.get("title", "")))
-                + sum(1 for t in closed_bf if isinstance(t, dict) and is_nv_legal(t.get("title", "")))
-            )
-            pnl_pct = round((pnl / STARTING_CAPITAL) * 100, 2)
-            trades  = b.get("sprint_trades", 0) + bf_b.get("sprint_trades", 0)
-            wins    = b.get("sprint_wins", 0)   + bf_b.get("sprint_wins", 0)
-            bots.append({
-                "bot":             name,
-                "type":            "copy",
-                "username":        b.get("pm_trader", b.get("trader", "")),
-                "sprint_id":       sprint_id,
-                "sprint_pnl_usd":  pnl,
-                "sprint_pnl_pct":  pnl_pct,
-                "sprint_trades":   trades,
-                "sprint_wins":     wins,
-                "win_rate":        round(wins / trades * 100, 1) if trades > 0 else 0.0,
-                "active_positions": len(b.get("positions", {})),
-                "sprint_nv_legal_pnl_usd": nv_pnl,
-                "sprint_nv_legal_trades":  nv_trades,
-            })
-    except Exception:
-        pass
 
     # Autonomous bots — closed P&L only (open positions excluded)
     try:

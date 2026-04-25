@@ -73,7 +73,6 @@ EXPECTED_CRON = [
 
 EXPECTED_SERVICES = [
     "freya.service",
-    "kalshi_copy.service",
     "polymarket_syn.service",
     "odin_day.service",
     "odin_swing.service",

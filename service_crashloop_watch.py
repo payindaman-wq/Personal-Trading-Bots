@@ -30,7 +30,6 @@ SERVICES = [
     "odin_futures_day",
     "odin_futures_swing",
     "freya",
-    "kalshi_copy",
     "polymarket_syn",
 ]
 

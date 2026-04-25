@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
 """
-exchange_health.py — Kraken + Kalshi API reachability monitor.
+exchange_health.py — Kraken API reachability monitor.
 
-Runs every 5 min via cron. Pings public status endpoints for both exchanges.
-After 3 consecutive failures on Kalshi, stops trading services
-(kalshi_copy, polymarket_syn) and writes a pause flag. On recovery,
-restarts them and fires a SYN alert. Kraken failure alerts but does not
-auto-pause (no live Kraken trading yet — Phase 1 funding pending).
+Runs every 5 min via cron. Pings Kraken public status endpoint.
+Kraken failure alerts but does not auto-pause (no live Kraken trading yet — Phase 1 funding pending).
 """
 import json, os, subprocess, urllib.request, urllib.error, ssl
 from datetime import datetime, timezone
@@ -21,7 +18,6 @@ CHAT_ID = "8154505910"
 
 FAIL_THRESHOLD = 3
 
-KALSHI_TRADING_SERVICES = ["kalshi_copy.service", "polymarket_syn.service"]
 
 EXCHANGES = {
     "kraken": {
@@ -29,12 +25,6 @@ EXCHANGES = {
         "timeout": 10,
         "check": lambda r: r.get("result", {}).get("status") == "online",
         "pause_services": [],
-    },
-    "kalshi": {
-        "url": "https://api.elections.kalshi.com/trade-api/v2/exchange/status",
-        "timeout": 10,
-        "check": lambda r: r.get("exchange_active") is True and r.get("trading_active") is True,
-        "pause_services": KALSHI_TRADING_SERVICES,
     },
 }
 

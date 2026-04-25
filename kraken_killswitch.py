@@ -49,7 +49,7 @@ RECOVERY_DRAWDOWN_MAX   = 0.05
 # Cooldowns to avoid spamming graduated warnings on every 5-min tick
 SOFT_ALERT_COOLDOWN_HOURS = 6
 
-LIVE_SERVICES      = ["kalshi_copy.service", "polymarket_syn.service"]
+LIVE_SERVICES      = ["polymarket_syn.service"]
 
 KRAKEN_API = "https://api.kraken.com"
 
