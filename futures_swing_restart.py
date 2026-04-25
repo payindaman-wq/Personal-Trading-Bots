@@ -164,7 +164,7 @@ def patch_start_time(comp_id):
 def start_new():
     if league_killswitch.is_paused('futures_swing'):
         print(f'  [league_killswitch] futures_swing is paused - skipping start_new.')
-        print(f'  Remove {league_killswitch.FLAG_DIR}/futures_swing.flag to reactivate.')
+        print("  Remove " + league_killswitch.league_pause_flag("futures_swing") + " to reactivate.")
         return None
     now = datetime.now(timezone.utc)
     comp_id = now.strftime('fut-swing-%Y%m%d-%H%M')

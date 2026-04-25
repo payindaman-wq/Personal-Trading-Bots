@@ -13,6 +13,7 @@ Logic:
 import os
 import json
 import subprocess
+import league_killswitch
 import sys
 from datetime import datetime, timezone
 import cycle_ledger
@@ -225,6 +226,11 @@ def check_cycle_boundary_early():
 def main():
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     print(f"[day_daily_restart] {now}")
+
+    if league_killswitch.is_paused("day"):
+        print("  [league_killswitch] day is paused -- skipping restart.")
+        print("  Remove " + league_killswitch.league_pause_flag("day") + " to reactivate.")
+        return
 
     if check_cycle_boundary_early():
         return

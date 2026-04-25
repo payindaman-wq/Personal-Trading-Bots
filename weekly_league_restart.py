@@ -1,3 +1,4 @@
+import league_killswitch
 #!/usr/bin/env python3
 """
 weekly_league_restart.py - Sunday 09:00 UTC restart for Swing, Arb, Spread leagues.
@@ -271,6 +272,10 @@ print("weekly_league_restart @ " + now.strftime("%Y-%m-%d %H:%M UTC"))
 print(f"  Target start timestamp: {target_ts}")
 
 for league, cfg in LEAGUES.items():
+    if league_killswitch.is_paused(league):
+        print("  [" + league + "] killswitch paused -- skipping weekly restart. "
+              "Remove " + league_killswitch.league_pause_flag(league) + " to reactivate.")
+        continue
     archived = expire_and_archive(league, cfg, now, args.dry_run)
     if archived:
         if league == "swing":
