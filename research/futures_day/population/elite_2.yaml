@@ -16,23 +16,23 @@ entry:
     - indicator: rsi
       period_minutes: 60
       operator: lt
-      value: 29.33
+      value: 27.74
   short:
     conditions:
     - indicator: rsi
       period_minutes: 60
       operator: gt
-      value: 68.63
+      value: 66.88
 exit:
-  take_profit_pct: 4.6
-  stop_loss_pct: 2.59
-  timeout_minutes: 720
+  take_profit_pct: 4.5
+  stop_loss_pct: 1.65
+  timeout_minutes: 960
 risk:
-  pause_if_down_pct: 8
-  pause_minutes: 120
-  stop_if_down_pct: 18
-_sharpe: -4.3295
-_trades: 414
-_oos_sharpe: -1.266
-_oos_trades: 409
-_sharpe_24h_median: -0.0906
+  pause_if_down_pct: 10.0
+  pause_minutes: 150
+  stop_if_down_pct: 11.0
+_oos_sharpe: -4.1526
+_oos_trades: 192
+_sharpe_24h_median: -0.1925
+_sharpe: -4.6682
+_trades: 180

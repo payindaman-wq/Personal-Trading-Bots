@@ -47,15 +47,14 @@ LEAGUES = [
         "stale_mul":  3,
         "error_lines": 30,
     },
-    # PAUSED 2026-04-25 meta_audit F2 — futures_day league frozen pending Chris F1/F2 decision
-    # {
-    #     "name":       "futures_day",
-    #     "tick_log":   f"{WORKSPACE}/competition/futures_day/tick.log",
-    #     "active_dir": f"{WORKSPACE}/competition/futures_day/active",
-    #     "interval":   5,
-    #     "stale_mul":  3,
-    #     "error_lines": 30,
-    # },
+    {
+        "name":       "futures_day",
+        "tick_log":   f"{WORKSPACE}/competition/futures_day/tick.log",
+        "active_dir": f"{WORKSPACE}/competition/futures_day/active",
+        "interval":   5,
+        "stale_mul":  3,
+        "error_lines": 30,
+    },
     {
         "name":       "futures_swing",
         "tick_log":   f"{WORKSPACE}/competition/futures_swing/tick.log",
@@ -69,7 +68,7 @@ LEAGUES = [
 SERVICES = [
     {"name": "odin_day",           "unit": "odin_day.service"},
     {"name": "odin_swing",         "unit": "odin_swing.service"},
-    # PAUSED 2026-04-25 meta_audit F2: {"name": "odin_futures_day",   "unit": "odin_futures_day.service"},
+    {"name": "odin_futures_day",   "unit": "odin_futures_day.service"},
     {"name": "odin_futures_swing", "unit": "odin_futures_swing.service"},
     {"name": "freya",              "unit": "freya.service"},
     {"name": "polymarket_syn",     "unit": "polymarket_syn.service"},
