@@ -15,6 +15,7 @@ import json
 import subprocess
 import sys
 from datetime import datetime, timezone
+import cycle_ledger
 
 WORKSPACE           = os.environ.get("WORKSPACE", "/root/.openclaw/workspace")
 ACTIVE_DIR          = os.path.join(WORKSPACE, "competition", "active")
@@ -132,6 +133,11 @@ def advance_cycle_if_needed(cycle_state):
     old_cycle = cycle_state.get("cycle", 1)
     cycle_state["status"] = "awaiting_review"
     save_cycle_state(cycle_state)
+    try:
+        cycle_ledger.emit("day", "cycle_completed",
+                          cycle=cycle_state.get("cycle"))
+    except Exception as _e:
+        print(f"  [ledger] emit failed (cycle_completed day advance): {_e}")
     print(f"  [cycle] Day Cycle {old_cycle} complete ({sprints_per_cycle} sprints) — awaiting LOKI review")
     # Write to SYN inbox so the alert reaches user if LOKI is delayed
     try:
@@ -194,6 +200,11 @@ def check_cycle_boundary_early():
         old_cycle = cs.get("cycle", 1)
         cs["status"] = "awaiting_review"
         save_cycle_state(cs)
+        try:
+            cycle_ledger.emit("day", "cycle_completed",
+                              cycle=cs.get("cycle"))
+        except Exception as _e:
+            print(f"  [ledger] emit failed (cycle_completed day boundary): {_e}")
         print(f"  [cycle] Day Cycle {old_cycle} boundary recovered from stale state "
               f"({sprint_in_cycle}/{sprints_per_cycle}) — awaiting LOKI review.")
         try:

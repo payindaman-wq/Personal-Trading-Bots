@@ -19,6 +19,7 @@ Invoked by league_watchdog.py every 10 min.
 import json
 import os
 from datetime import datetime, timezone
+import cycle_ledger
 
 WORKSPACE = os.environ.get("WORKSPACE", "/root/.openclaw/workspace")
 SYN_INBOX = os.path.join(WORKSPACE, "syn_inbox.jsonl")
@@ -332,6 +333,27 @@ def check_league(cfg):
             "detail": f"sprints[] has zombie entries on date(s) {sorted(set(zombie_dates))}: {zombie_sprints} — no final_score/score_json, not live",
             "zombie_sprints": zombie_sprints,
             "fix_hint": "remove zombie sprint_ids from sprints[] and decrement sprint_in_cycle",
+        })
+
+    # Phase-2 ledger drift check: shadow-mode reducer should match on-disk cycle_state.
+    # Drift means a writer either bypassed the ledger or the ledger has a stale baseline.
+    # NOT auto-fixable during shadow phase — needs human review to decide which side is right.
+    try:
+        ledger_drift = cycle_ledger.drift(name)
+    except Exception as _e:
+        ledger_drift = None
+        anomalies.append({
+            "league": name,
+            "kind": "ledger_drift_check_failed",
+            "detail": f"cycle_ledger.drift({name!r}) raised: {_e}",
+        })
+    if ledger_drift:
+        anomalies.append({
+            "league": name,
+            "kind": "ledger_vs_state_drift",
+            "detail": "; ".join(f"{f}: ledger={lv!r} disk={dv!r}" for f, (lv, dv) in ledger_drift.items()),
+            "fields":  list(ledger_drift.keys()),
+            "fix_hint": "shadow-mode: investigate whether a writer skipped emit() or the baseline is stale; do NOT auto-fix",
         })
 
     return anomalies

@@ -16,6 +16,7 @@ import sys
 import json
 import yaml
 from datetime import datetime, timezone, timedelta
+import cycle_ledger
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from swing_price_store import get_current_price, update_pair, update_spread_ratios
@@ -338,6 +339,11 @@ def update_swing_cycle_state(comp_id):
         state["status"] = "awaiting_review"
         with open(CYCLE_STATE, "w") as f:
             json.dump(state, f, indent=2)
+        try:
+            cycle_ledger.emit("swing", "cycle_completed",
+                              cycle=state.get("cycle"))
+        except Exception as _e:
+            print(f"  [ledger] emit failed (cycle_completed swing): {_e}")
         tg_send(
             f"*Swing Cycle {cycle} complete* — all {per} sprints finished.\n"
             f"Review standings and adjust non-profitable bot strategies, then run:\n"

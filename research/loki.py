@@ -20,6 +20,10 @@ import subprocess
 import sys
 import urllib.request
 from datetime import datetime, timezone, timedelta
+import sys as _sys_for_ledger
+if "/root/.openclaw/workspace" not in _sys_for_ledger.path:
+    _sys_for_ledger.path.insert(0, "/root/.openclaw/workspace")
+import cycle_ledger
 
 WORKSPACE        = "/root/.openclaw/workspace"
 RESEARCH         = os.path.join(WORKSPACE, "research")
@@ -1597,6 +1601,11 @@ def run_cycle_advance_and_start(league, cfg, old_cycle):
             if not DRY_RUN:
                 with open(cfg["cycle_state"], "w") as f:
                     json.dump(cs, f, indent=2)
+                try:
+                    cycle_ledger.emit(league, "cycle_advanced",
+                                      **{"from": old_cycle, "to": old_cycle + 1})
+                except Exception as _e:
+                    print(f"  [ledger] emit failed (cycle_advanced {league} inline): {_e}")
             seed_note = f" [seeded with live {seed_sprints[0]}]" if seed_sprints else ""
             print(f"  [loki] {league}: cycle {old_cycle} -> {old_cycle + 1} (inline advance){seed_note}")
             actions.append(f"cycle_advanced_inline: {old_cycle}->{old_cycle + 1}")

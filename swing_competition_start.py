@@ -5,6 +5,7 @@ import json
 import os
 import yaml
 from datetime import datetime, timezone
+import cycle_ledger
 
 WORKSPACE        = os.environ.get("WORKSPACE", "/root/.openclaw/workspace")
 STARTING_CAPITAL = 1000.00
@@ -122,6 +123,13 @@ def main():
         meta["sprint_in_cycle"] = args.sprint_in_cycle
     with open(os.path.join(comp_dir, "meta.json"), "w") as f:
         json.dump(meta, f, indent=2)
+    try:
+        cycle_ledger.emit("swing", "sprint_started",
+                          comp_id=comp_id,
+                          cycle=args.cycle,
+                          sprint_in_cycle=args.sprint_in_cycle)
+    except Exception as _e:
+        print(f"  [ledger] emit failed (sprint_started swing): {_e}")
 
     result = {
         "comp_id":        comp_id,

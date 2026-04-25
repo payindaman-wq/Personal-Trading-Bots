@@ -14,6 +14,7 @@ import os
 import shutil
 import subprocess
 from datetime import datetime, timezone
+import cycle_ledger
 
 WORKSPACE    = "/root/.openclaw/workspace"
 CYCLE_STATE  = os.path.join(WORKSPACE, "competition", "polymarket", "polymarket_cycle_state.json")
@@ -44,6 +45,11 @@ state["sprints"]          = []
 
 with open(CYCLE_STATE, "w") as f:
     json.dump(state, f, indent=2)
+try:
+    cycle_ledger.emit("polymarket", "cycle_advanced",
+                      **{"from": old_cycle, "to": new_cycle})
+except Exception as _e:
+    print(f"  [ledger] emit failed (cycle_advanced polymarket): {_e}")
 
 print(f"Polymarket cycle advanced: {old_cycle} -> {new_cycle}")
 

@@ -9,6 +9,7 @@ Usage: python3 polymarket_sprint_start.py
 import json
 import os
 from datetime import datetime, timezone, timedelta
+import cycle_ledger
 
 WORKSPACE    = "/root/.openclaw/workspace"
 AUTO_STATE   = os.path.join(WORKSPACE, "competition", "polymarket", "auto_state.json")
@@ -66,6 +67,13 @@ cs.setdefault("sprints", []).append(sprint_id)
 
 with open(CYCLE_STATE, "w") as f:
     json.dump(cs, f, indent=2)
+try:
+    cycle_ledger.emit("polymarket", "sprint_started",
+                      comp_id=sprint_id,
+                      cycle=cs.get("cycle"),
+                      sprint_in_cycle=cs.get("sprint_in_cycle"))
+except Exception as _e:
+    print(f"  [ledger] emit failed (sprint_started polymarket): {_e}")
 
 print(json.dumps({
     "sprint_id":       sprint_id,

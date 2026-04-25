@@ -11,6 +11,7 @@ import json
 import os
 import shutil
 from datetime import datetime, timezone
+import cycle_ledger
 
 WORKSPACE    = "/root/.openclaw/workspace"
 CYCLE_STATE  = os.path.join(WORKSPACE, "competition", "cycle_state.json")
@@ -40,6 +41,11 @@ state["sprints"]          = []
 
 with open(CYCLE_STATE, "w") as f:
     json.dump(state, f, indent=2)
+try:
+    cycle_ledger.emit("day", "cycle_advanced",
+                      **{"from": old_cycle, "to": new_cycle})
+except Exception as _e:
+    print(f"  [ledger] emit failed (cycle_advanced day): {_e}")
 
 print(f"Cycle advanced: {old_cycle} -> {new_cycle}")
 print(f"Next sprint starts at 2:00 AM PST (10:00 UTC)")

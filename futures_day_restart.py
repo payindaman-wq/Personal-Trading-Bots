@@ -10,6 +10,7 @@ import sys as _kl_sys
 _kl_sys.path.insert(0, "/root/.openclaw/workspace")
 import kraken_leverage
 import league_killswitch
+import cycle_ledger
 
 WORKSPACE        = os.environ.get('WORKSPACE', '/root/.openclaw/workspace')
 ACTIVE_DIR       = os.path.join(WORKSPACE, 'competition', 'futures_day', 'active')
@@ -236,6 +237,13 @@ def start_new():
     if not cycle_state.get('cycle_started_at'):
         cycle_state['cycle_started_at'] = now.isoformat()
     save_cycle_state(cycle_state)
+    try:
+        cycle_ledger.emit("futures_day", "sprint_started",
+                          comp_id=comp_id,
+                          cycle=cycle_state.get("cycle"),
+                          sprint_in_cycle=cycle_state.get("sprint_in_cycle"))
+    except Exception as _e:
+        print(f"  [ledger] emit failed (sprint_started futures_day): {_e}")
 
     print(f'  Started: {comp_id} (Cycle {cycle_state["cycle"]}, Sprint {cycle_state["sprint_in_cycle"]})')
     return comp_id
@@ -252,6 +260,11 @@ def main():
     if sprint_n >= spc and cs.get('status') != 'awaiting_review':
         cs['status'] = 'awaiting_review'
         save_cycle_state(cs)
+        try:
+            cycle_ledger.emit("futures_day", "cycle_completed",
+                              cycle=cs.get("cycle"))
+        except Exception as _e:
+            print(f"  [ledger] emit failed (cycle_completed futures_day): {_e}")
         old_cycle = cs.get('cycle', 1)
         print(f'  [cycle] Futures Day Cycle {old_cycle} complete ({spc} sprints) — awaiting LOKI review')
         try:
