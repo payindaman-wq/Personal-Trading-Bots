@@ -482,6 +482,35 @@ def run():
     n = route_to_inbox(sidecar)
     counts = (sidecar.get("decision") or {}).get("severity_counts", {})
     print("[meta_audit] routed " + str(n) + " rows to syn_inbox; counts=" + json.dumps(counts))
+
+    # F7 auto-execute: run vidar_executor on the same sidecar so each
+    # finding is classified into Tier 1/2/3 and (for Tier 1/2) planned into
+    # concrete actions queued to LOKI's pending pipeline. Tier 3 surfaces
+    # via syn_inbox source=meta_audit severity=critical (sys_heartbeat
+    # already pages Chris on that pair). Failures here are non-fatal — the
+    # sidecar is already written and findings are already in the inbox, so
+    # the executor is purely additive.
+    try:
+        import importlib.util
+        _spec = importlib.util.spec_from_file_location(
+            "vidar_executor", os.path.join(RESEARCH, "vidar_executor.py"),
+        )
+        _ve = importlib.util.module_from_spec(_spec)
+        _spec.loader.exec_module(_ve)
+        _ve.run_audit(LATEST_SIDECAR)
+    except Exception as _e:
+        print("[meta_audit] vidar_executor raised " + type(_e).__name__ + ": " + str(_e)[:300])
+        try:
+            with open(SYN_INBOX, "a") as ib:
+                ib.write(json.dumps({
+                    "ts":       datetime.now(timezone.utc).isoformat(),
+                    "source":   "meta_audit",
+                    "severity": "error",
+                    "summary":  "vidar_executor failed after meta_audit: " + type(_e).__name__ + ": " + str(_e)[:200],
+                }) + "\n")
+        except OSError:
+            pass
+
     return sidecar
 
 

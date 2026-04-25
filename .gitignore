@@ -143,3 +143,12 @@ research/loki_structural_monitor.json
 # runtime state: regeneratable from the next cron run; must not be tracked or
 # the origin/master auto-reset will revert live state to stale snapshots.
 research/meta_audit/
+
+# --- VIDAR auto-execute runtime state (F7 close, 2026-04-25) -----------------
+# Tier classifier cache (free re-classification across retries), executor
+# audit log (every queued/declined/tier3-paged action), and Tier-2 24h
+# review flag. All runtime — deploy reset would otherwise wipe in-flight
+# pending review entries.
+research/vidar_tier_cache.json
+research/vidar_executor_log.jsonl
+competition/vidar_pending_review.flag
