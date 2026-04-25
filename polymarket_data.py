@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """
 polymarket_data.py — Generate /var/www/dashboard/api/polymarket.json
-Reads from kalshi_copy_state.json (_k bots, live Kalshi activity) and
-kalshi_copy_pm_backfill.json (historical PM activity for the current sprint).
+Reads from auto_state.json (autonomous Polymarket fleet, written by
+polymarket_syn_tick.py). Replaced kalshi_copy_state.json source 2026-04-25
+during Phase 7 Kalshi retirement.
 """
 import json
 import os
 from datetime import datetime, timezone
 
-KALSHI_STATE_FILE = "/root/.openclaw/workspace/competition/polymarket/kalshi_copy_state.json"
-PM_BACKFILL_FILE  = "/root/.openclaw/workspace/competition/polymarket/kalshi_copy_pm_backfill.json"
-OUTPUT_FILE       = "/var/www/dashboard/api/polymarket.json"
+AUTO_STATE_FILE = "/root/.openclaw/workspace/competition/polymarket/auto_state.json"
+OUTPUT_FILE     = "/var/www/dashboard/api/polymarket.json"
 
 
 def pending_setup():
@@ -25,88 +25,52 @@ def pending_setup():
     }
 
 
-def load_backfill():
-    """Load PM backfill data; returns dict keyed by bot name."""
-    if not os.path.exists(PM_BACKFILL_FILE):
-        return {}
-    try:
-        with open(PM_BACKFILL_FILE) as f:
-            bf = json.load(f)
-        return bf.get("bots", {})
-    except Exception:
-        return {}
-
-
 def main():
-    if not os.path.exists(KALSHI_STATE_FILE):
+    if not os.path.exists(AUTO_STATE_FILE):
         data = pending_setup()
     else:
         try:
-            with open(KALSHI_STATE_FILE) as f:
+            with open(AUTO_STATE_FILE) as f:
                 raw = json.load(f)
 
-            raw_bots = raw.get("bots", [])
-            backfill = load_backfill()
+            raw_bots       = raw.get("bots", [])
+            sprint_started = raw.get("sprint_started_at", "")
 
             bots_out         = []
             open_positions   = []
             closed_positions = []
-            sprint_started   = raw.get("sprint_started_at", "")
 
             for b in raw_bots:
-                bot_name = b.get("name", b.get("bot", ""))
-                bf = backfill.get(bot_name, {})
+                bot_name = b.get("name", "")
+                category = b.get("category", "auto")
+                pnl      = round(b.get("pnl_usd", 0.0), 2)
+                trades   = b.get("total_trades", 0)
+                wins     = b.get("wins", 0)
 
-                # Merge Kalshi live + PM backfill stats
-                kalshi_pnl     = b.get("pnl_usd", 0.0)
-                kalshi_trades  = b.get("total_trades", 0)
-                kalshi_wins    = b.get("wins", 0)
-                kalshi_losses  = b.get("losses", 0)
-                kalshi_sp_pnl  = b.get("sprint_pnl_usd", 0.0)
-                kalshi_sp_tr   = b.get("sprint_trades", 0)
-                kalshi_sp_wins = b.get("sprint_wins", 0)
-
-                pm_pnl     = bf.get("pnl_usd", 0.0)
-                pm_trades  = bf.get("total_trades", 0)
-                pm_wins    = bf.get("wins", 0)
-                pm_losses  = bf.get("losses", 0)
-                pm_sp_pnl  = bf.get("sprint_pnl_usd", 0.0)
-                pm_sp_tr   = bf.get("sprint_trades", 0)
-                pm_sp_wins = bf.get("sprint_wins", 0)
-
-                merged_pnl     = round(kalshi_pnl + pm_pnl, 2)
-                merged_trades  = kalshi_trades + pm_trades
-                merged_wins    = kalshi_wins + pm_wins
-                merged_losses  = kalshi_losses + pm_losses
-                merged_sp_pnl  = round(kalshi_sp_pnl + pm_sp_pnl, 2)
-                merged_sp_tr   = kalshi_sp_tr + pm_sp_tr
-                merged_sp_wins = kalshi_sp_wins + pm_sp_wins
-
-                win_rate    = round(merged_wins / merged_trades * 100, 1) if merged_trades > 0 else 0.0
-                sp_win_rate = round(merged_sp_wins / merged_sp_tr * 100, 1) if merged_sp_tr > 0 else 0.0
-                active_pos  = len(b.get("positions", {}))
+                # auto_state.json is sprint-scoped (resets at sprint boundary),
+                # so lifetime stats inside the file == current-sprint stats.
+                wr = round(wins / trades * 100, 1) if trades > 0 else 0.0
 
                 bots_out.append({
                     "bot":              bot_name,
-                    "assigned_trader":  b.get("pm_trader", b.get("trader", "?")),
-                    "pnl_usd":          merged_pnl,
-                    "win_rate":         win_rate,
-                    "trades":           merged_trades,
-                    "active_positions": active_pos,
-                    "status":           "active",
-                    "sprint_pnl_usd":   merged_sp_pnl,
-                    "sprint_win_rate":  sp_win_rate,
-                    "sprint_trades":    merged_sp_tr,
+                    "assigned_trader":  category,
+                    "pnl_usd":          pnl,
+                    "win_rate":         wr,
+                    "trades":           trades,
+                    "active_positions": len(b.get("positions", {})),
+                    "status":           "stopped" if b.get("stopped") else "active",
+                    "sprint_pnl_usd":   pnl,
+                    "sprint_win_rate":  wr,
+                    "sprint_trades":    trades,
                 })
 
-                # Open positions (Kalshi live only)
                 for cid, pos in b.get("positions", {}).items():
                     open_positions.append({
                         "bot":            bot_name,
-                        "trader":         b.get("pm_trader", ""),
+                        "trader":         category,
                         "market":         pos.get("title", cid),
                         "outcome":        pos.get("outcome", ""),
-                        "side":           pos.get("side", "YES"),
+                        "side":           pos.get("side", "BUY"),
                         "entry_price":    pos.get("entry_price", 0),
                         "current_price":  pos.get("current_price", 0),
                         "cost_usd":       pos.get("cost_usd", 0),
@@ -115,29 +79,10 @@ def main():
                         "opened_at":      pos.get("opened_at", ""),
                     })
 
-                # Closed trades: Kalshi live
                 for t in b.get("closed_trades", []):
                     ts = t.get("closed_at", "")
                     if sprint_started and ts and ts < sprint_started:
                         continue
-                    closed_positions.append({
-                        "bot":          bot_name,
-                        "market_title": t.get("title", t.get("market", "")),
-                        "direction":    t.get("outcome", ""),
-                        "outcome":      "win" if (t.get("pnl_usd") or 0) >= 0 else "loss",
-                        "pnl_usd":      t.get("pnl_usd", 0),
-                        "pnl_pct":      t.get("pnl_pct", 0),
-                        "entry_price":  t.get("entry_price"),
-                        "exit_price":   t.get("exit_price"),
-                        "cost_usd":     t.get("cost_usd"),
-                        "reason":       t.get("reason", ""),
-                        "closed_at":    ts,
-                        "source":       t.get("source", "kalshi"),
-                    })
-
-                # Closed trades: PM backfill
-                for t in bf.get("closed_trades", []):
-                    ts = t.get("closed_at", "")
                     closed_positions.append({
                         "bot":          bot_name,
                         "market_title": t.get("title", ""),
@@ -155,7 +100,6 @@ def main():
 
             closed_positions.sort(key=lambda x: x.get("closed_at") or "", reverse=True)
 
-            # Fleet-level stats
             total_pnl  = sum(b["pnl_usd"] for b in bots_out)
             all_trades = sum(b["trades"] for b in bots_out)
             all_wins   = round(sum(b["win_rate"] * b["trades"] / 100 for b in bots_out))
@@ -164,8 +108,8 @@ def main():
 
             data = {
                 "generated_at":      datetime.now(timezone.utc).isoformat(),
-                "mode":              raw.get("mode", "simulation"),
-                "status":            "active",
+                "mode":              raw.get("mode", "paper"),
+                "status":            raw.get("status", "active"),
                 "started_at":        raw.get("started_at", ""),
                 "sprint_id":         raw.get("sprint_id", ""),
                 "sprint_started_at": sprint_started,
