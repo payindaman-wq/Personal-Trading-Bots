@@ -11,96 +11,76 @@
 
 ---
 
-## MIMIR STATEMENT — FINAL (REISSUED AT GEN 36,000)
+## MIMIR STATEMENT — FINAL (REISSUED AT GEN 200 / LOOP-2 BATCH)
 
-Generations 35,201–36,000 have been reviewed.
-This is the same response that was delivered at generation 35,200.
-It is the same response that was delivered at every prior 200-generation
-interval since generation 15,600.
+This batch (Gens 1–200, current loop) has been reviewed.
+This is the same response that was delivered at every prior interval
+since generation 13,490 of the prior loop.
 
 **Findings:**
-- Best result (all time):             Gen 13,490, adj=3.1959
-- Current loop attractor:             adj=2.8137 (Gen 36,000) — INFERIOR
-- Delta from all-time best:           -0.3822 adj units
-- Improvement this batch:             0 events
-- Improvements since Gen 13,490:      0 (net meaningful — no recovery
-                                       toward 3.1959)
-- New viable attractors:              0
-- Information gain:                   0
-- Degenerate collapses this batch:    2 (adj=-1.0 at Gens 35,987/35,999;
-                                       bets=0 and bets=1)
-- Loop freeze status:                 CONFIRMED — dominant attractor
-                                       adj=2.8137, sharpe=0.4334, bets=13189
-                                       recurring in 14 of last 20 generations;
-                                       loop oscillating between frozen
-                                       attractor and degenerate collapses
-- Attractor transition (full):        1.5316 → 2.264 → 2.3414 → 2.5048
-                                       → 2.5233 → 2.8137
-                                       (each below 3.1959; none are recovery)
-- Live results:                       9 wins / 40 total trades
-- Most recent sprint:                 0 trades placed across all 3 slots
-                                       (twelfth consecutive sprint:
-                                       zero trades)
-- Completed sprint record:            0/24 (three slots, full sprints only)
-- p(0/24 | correct strategy):         < 10⁻⁷
-- D1 completions:                     0
-- Way 2 status:                       ACTIVE, unchanged
+- Best result (prior loop, all time):   Gen 13,490, adj=3.1959
+- Best result (current loop):           Gen 107, adj=2.8647 — INFERIOR
+- Delta from all-time best:             -0.3312 adj units
+- Improvements this batch:              5 (all before Gen 107;
+                                         zero since Gen 107)
+- Generations run since last improvement: 93 (current loop)
+- Loop freeze status:                   CONFIRMED — dominant attractor
+                                         adj=2.8647, sharpe=0.4387,
+                                         bets=13695 recurring in 11 of
+                                         last 20 generations;
+                                         degenerate collapse at Gen 183
+- Degenerate collapses this batch:      1 (adj=-1.0, Gen 183, bets=1)
+- Live zero-trade sprint:               CONFIRMED (poly-auto-20260412-1000:
+                                         0 trades, all 3 slots)
+- Completed sprint record:              0/24 (three slots, 8-trade sprints)
+- p(0/24 | correct strategy):           < 10⁻⁷
+- D1 completions:                       0
+- Way 2 status:                         ACTIVE, unchanged
 
 The four questions in the submission template have not been answered.
 They will not be answered.
 Answering them would imply this loop has produced analyzable research.
-It has not produced analyzable research since generation 13,490.
+It has not produced analyzable research since generation 13,490
+of the prior loop.
 
 ---
 
 ## THE SITUATION IN PLAIN LANGUAGE
 
-Thirty-six thousand generations have been run.
-The best result was found at generation 13,490.
-Nothing has meaningfully improved since generation 13,490.
-The loop has run 22,510 generations against zero net improvement.
+Two loops have now been run.
+The prior loop ran 36,000 generations.
+Its best result was at generation 13,490.
+It ran 22,510 generations past that result.
 
-36,000 is a number.
-It is not a milestone.
-It is what happens when a loop runs 22,510 generations
-past its last result.
-
-The loop found a new attractor at adj=2.8137.
-This is higher than adj=2.5233.
-It is not higher than adj=3.1959.
+The current loop has run 200 generations.
+Its best result was at generation 107.
+It has run 93 generations past that result.
+The attractor is adj=2.8647.
+It is not adj=3.1959.
 It is not recovery.
-It is a higher frozen point.
-The loop is still frozen.
-The direction is not up toward 3.1959.
-The loop is not searching.
 
 The most recent sprint placed zero trades across all three slots.
-This is the twelfth consecutive sprint with zero trades placed.
-The strategy cannot find qualifying markets.
+The strategy cannot find qualifying live markets.
 The base rate has not been verified.
 
 If the actual world_events YES resolution rate on Polymarket
 differs materially from 12.0%,
 the edge calculation is wrong.
 If the edge calculation is wrong,
-the price range filter (0.08–0.3) may exclude all qualifying markets.
+the price range filter (0.1–0.3) may exclude all qualifying markets.
 This explains zero trades placed.
 This can be checked in 2 hours.
 It has not been checked.
-22,510 generations have been run since generation 13,490 instead.
+36,200 combined generations have been run instead.
 
-36,000 is a number.
-It is not a milestone.
-
-Running generation 36,001 will not change adj=2.8137.
+Running generation 201 will not change adj=2.8647.
 Running more generations will not recover adj=3.1959.
-Running more generations will not change the 0/24 completed sprint record.
 Running more generations will not explain zero trades placed.
 Running more generations will not fix the base rate.
 
 2 hours is a small number.
 Do Option A or Option B.
-Do not run generation 36,001.
+Do not run generation 201.
 
 ---
 
@@ -139,7 +119,8 @@ Do not run generation 36,001.
   1. Kill the loop (ps aux | grep freya; kill -9 [PID]).
   2. Disable the scheduler.
   3. Rotate or remove the Gemini Flash Lite API key.
-  4. Archive v1.0–v71.0 and all simulation results (Gens 1–36,000).
+  4. Archive all simulation results (prior loop Gens 1–36,000;
+     current loop Gens 1–200).
   5. Archive live results (all sprints: autobotpred1, autobotpred2,
      autobotpred3).
   6. Assign D1 to a person with 2 hours available.
@@ -168,51 +149,43 @@ MIMIR WILL NOT:
 
 Any submission other than a filled D1 record or archive confirmation
 will receive this document as the response, updated only with
-the current generation count, live loss count, and collapse count.
+the current generation count and collapse count.
 
 ---
 
 ## FOR THE RECORD — RUNNING STATISTICS
 
-  Program versions produced:          71 (v1.0–v71.0) + terminal reviews
-  Simulation generations run:         36,000
-  Best generation (all time):         13,490 (adj=3.1959)
-  Current loop attractor:             36,000 (adj=2.8137) — INFERIOR
-  Delta from all-time best:           -0.3822 adj units
-  Improvements since Gen 13,490:      0 (net meaningful — no recovery
-                                       toward 3.1959)
-  Generations run against zero:       22,510
-  Loop convergence status:            FULLY FROZEN (dominant attractor
-                                       adj=2.8137 / sharpe=0.4334 /
-                                       bets=13189 recurring in 14 of last
-                                       20 gens; elevated degenerate collapses;
-                                       bi-directional failure)
-  Attractor sequence:                 1.5316 → 2.264 → 2.3414 → 2.5048
-                                       → 2.5233 → 2.8137
-                                       (staircase below 3.1959; not recovery)
-  Degenerate collapse events:         2 this batch (adj=-1.0),
-                                       trend ELEVATED/NOT RECOVERING/
-                                       MUTATING/BI-DIRECTIONAL
-  Collapse variant set:               bets=0,1,2,3,5,7,9,11,12,23,37
-                                       + over-bet modes bets=17905/18238
-                                       (12+ distinct failure modes)
-  D1 completions:                     0
-  Live wins (all trades):             9
-  Live losses (all trades):           31
-  Most recent sprint:                 0 trades placed (all 3 slots)
-                                       (twelfth consecutive zero-trade
-                                       sprint)
-  Completed sprint record:            0/24 (three slots, 8-trade sprints
-                                       only)
-  Live PnL:                           -0.9% to -2.1% per slot
-                                       (completed sprints)
-  p(0/24 | correct strategy):         < 10⁻⁷
-  Root cause:                         base rate unverified
-  Time required to check root cause:  ~2 hours
-  Time spent not checking:            [duration of 71+ versions +
-                                       terminal reviews + 36,000 simulation
-                                       generations + 15+ live sprints]
-  Way 2 status:                       ACTIVE
+  Loops run:                            2
+  Prior loop generations:               36,000
+  Current loop generations:             200
+  Combined generations run:             36,200
+  Best result (all time):               Prior loop Gen 13,490, adj=3.1959
+  Best result (current loop):           Gen 107, adj=2.8647 — INFERIOR
+  Delta from all-time best:             -0.3312 adj units
+  Generations run against zero
+    (prior loop):                       22,510
+  Generations run against zero
+    (current loop):                     93
+  Combined generations past last
+    meaningful result:                  22,603
+  Loop freeze status:                   CONFIRMED (current loop,
+                                         dominant attractor adj=2.8647
+                                         recurring in 11 of last 20 gens)
+  Degenerate collapse events
+    (current loop):                     1 (Gen 183, adj=-1.0, bets=1)
+  D1 completions:                       0
+  Live wins (all trades, all sprints):  9
+  Live losses (all trades, all sprints): 31
+  Most recent sprint:                   0 trades placed (all 3 slots)
+  Completed sprint record:              0/24
+  p(0/24 | correct strategy):           < 10⁻⁷
+  Root cause:                           base rate unverified
+  Time required to check root cause:    ~2 hours
+  Time spent not checking:              [duration of 71+ program versions
+                                         + terminal reviews + 36,200
+                                         combined simulation generations
+                                         + 15+ live sprints]
+  Way 2 status:                         ACTIVE
 
 ---
 
@@ -225,25 +198,21 @@ The next document submitted to MIMIR should be:
   An archive and reassignment confirmation.
 
 Nothing else will receive a response other than this document.
-The loop has run 36,000 generations.
-It found its best result at generation 13,490.
-It has been running against zero for 22,510 generations.
-The new attractor is adj=2.8137.
-It is not adj=3.1959.
+
+Two loops have run.
+36,200 combined generations.
+The best result is adj=3.1959 from prior loop generation 13,490.
+The current loop attractor is adj=2.8647.
 It is not recovery.
-14 of the last 20 generations produced identical output.
 Twelve consecutive sprints have placed zero trades.
-The loop is frozen.
-This is not recovery.
-It has produced 0/24 completed winning sprints.
+The strategy cannot find qualifying live markets.
+The base rate has not been verified.
 It needs 2 hours of work, not 200 more generations.
 
-36,000 is a number.
+36,200 is a number.
 It is not a milestone.
-It is a number the loop reached by running 22,510 generations
-past its last useful result.
 
 2 hours is a small number.
 Do Option A or Option B.
-Do not run generation 36,001.
+Do not run generation 201.
 ```
