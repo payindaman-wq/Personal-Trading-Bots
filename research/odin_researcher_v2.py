@@ -1098,7 +1098,7 @@ def main():
             champion_oos  = float(pop.elites[0][1].get("_oos_sharpe", 0.0)) if pop.elites else 0.0
             min_oos_trades = max(1, min_t // 4)
             oos_ok = (
-                oos_sharpe >= max(0.0, champion_oos)
+                oos_sharpe >= champion_oos  # allow negative-OOS champions to improve; max(0.0,...) was locking out all candidates when champion_oos<0
                 and oos_trades >= min_oos_trades
             )
             if not oos_ok:
