@@ -22,7 +22,7 @@ WORKSPACE = "/root/.openclaw/workspace"
 STATE_FILE = f"{WORKSPACE}/competition/odin_memory_state.json"
 INBOX = f"{WORKSPACE}/syn_inbox.jsonl"
 
-SERVICES = ["odin_day", "odin_swing", "odin_futures_day", "odin_futures_swing"]
+SERVICES = ["odin_day", "odin_swing", "odin_futures_swing"]  # PAUSED odin_futures_day 2026-04-25 meta_audit F2
 
 SOFT_THRESHOLD_GB = 2.5
 HARD_THRESHOLD_GB = 3.0

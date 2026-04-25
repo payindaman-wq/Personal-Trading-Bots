@@ -47,14 +47,15 @@ LEAGUES = [
         "stale_mul":  3,
         "error_lines": 30,
     },
-    {
-        "name":       "futures_day",
-        "tick_log":   f"{WORKSPACE}/competition/futures_day/tick.log",
-        "active_dir": f"{WORKSPACE}/competition/futures_day/active",
-        "interval":   5,
-        "stale_mul":  3,
-        "error_lines": 30,
-    },
+    # PAUSED 2026-04-25 meta_audit F2 — futures_day league frozen pending Chris F1/F2 decision
+    # {
+    #     "name":       "futures_day",
+    #     "tick_log":   f"{WORKSPACE}/competition/futures_day/tick.log",
+    #     "active_dir": f"{WORKSPACE}/competition/futures_day/active",
+    #     "interval":   5,
+    #     "stale_mul":  3,
+    #     "error_lines": 30,
+    # },
     {
         "name":       "futures_swing",
         "tick_log":   f"{WORKSPACE}/competition/futures_swing/tick.log",
@@ -68,7 +69,7 @@ LEAGUES = [
 SERVICES = [
     {"name": "odin_day",           "unit": "odin_day.service"},
     {"name": "odin_swing",         "unit": "odin_swing.service"},
-    {"name": "odin_futures_day",   "unit": "odin_futures_day.service"},
+    # PAUSED 2026-04-25 meta_audit F2: {"name": "odin_futures_day",   "unit": "odin_futures_day.service"},
     {"name": "odin_futures_swing", "unit": "odin_futures_swing.service"},
     {"name": "freya",              "unit": "freya.service"},
     {"name": "polymarket_syn",     "unit": "polymarket_syn.service"},
@@ -491,7 +492,7 @@ def main():
             clear_alert(state, key)
 
     # ── Odin researcher health — alert if no successful generation in >6h ─────────
-    for vleague in ["day", "swing", "futures_day", "futures_swing"]:
+    for vleague in ["day", "swing", "futures_swing"]:  # PAUSED futures_day 2026-04-25 meta_audit F2
         key     = f"odin_{vleague}_health"
         problem = check_odin_health(vleague)
         if problem:
@@ -504,7 +505,7 @@ def main():
 
 
     # ── Odin backtest error storm — alert within 1-2 heartbeats of sustained failures ──
-    for vleague in ["day", "swing", "futures_day", "futures_swing"]:
+    for vleague in ["day", "swing", "futures_swing"]:  # PAUSED futures_day 2026-04-25 meta_audit F2
         key     = f"odin_{vleague}_backtest_errors"
         problem = check_odin_backtest_errors(vleague)
         if problem:
@@ -514,7 +515,7 @@ def main():
             clear_alert(state, key)
 
     # ── Program HALT directive — alert once per day if active ─────────────────
-    for vleague in ["day", "swing", "futures_day", "futures_swing"]:
+    for vleague in ["day", "swing", "futures_swing"]:  # PAUSED futures_day 2026-04-25 meta_audit F2
         key     = f"odin_{vleague}_program_halt"
         problem = check_program_halt(vleague)
         if problem:
@@ -524,7 +525,7 @@ def main():
             clear_alert(state, key)
 
     # ── Research paradigm stall — alert when a league has never achieved positive Sharpe ──
-    for vleague in ["day", "swing", "futures_day", "futures_swing"]:
+    for vleague in ["day", "swing", "futures_swing"]:  # PAUSED futures_day 2026-04-25 meta_audit F2
         key     = f"odin_{vleague}_research_stall"
         problem = check_research_stall(vleague)
         if problem:
@@ -653,7 +654,7 @@ def main():
     # SYN->Mimir escalation for research problems requiring analysis
     MIMIR_ESCALATE = ("backtest_errors", "program_halt", "research_stall")
     for key, msg in problems:
-        for lg in ["day", "swing", "futures_day", "futures_swing"]:
+        for lg in ["day", "swing", "futures_swing"]:  # PAUSED futures_day 2026-04-25 meta_audit F2
             for etype in MIMIR_ESCALATE:
                 if key == f"odin_{lg}_{etype}":
                     ctx = {}

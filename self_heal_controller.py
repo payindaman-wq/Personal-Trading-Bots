@@ -54,7 +54,7 @@ ESCALATE_AFTER_HEAL    = 2   # escalate if still degraded this many runs AFTER h
 SERVICES = [
     "odin_day",
     "odin_swing",
-    "odin_futures_day",
+    # PAUSED 2026-04-25 meta_audit F2: "odin_futures_day",
     "odin_futures_swing",
     "freya",
     "polymarket_syn",
@@ -85,12 +85,13 @@ FRESHNESS_TARGETS = [
         "max_age_min": 30,
         "heal_service": "odin_swing",
     },
-    {
-        "name": "researcher_log_futures_day",
-        "path": f"{WORKSPACE}/research/futures_day/researcher.log",
-        "max_age_min": 30,
-        "heal_service": "odin_futures_day",
-    },
+    # PAUSED 2026-04-25 meta_audit F2 — futures_day league frozen
+    # {
+    #     "name": "researcher_log_futures_day",
+    #     "path": f"{WORKSPACE}/research/futures_day/researcher.log",
+    #     "max_age_min": 30,
+    #     "heal_service": "odin_futures_day",
+    # },
     {
         "name": "researcher_log_futures_swing",
         "path": f"{WORKSPACE}/research/futures_swing/researcher.log",

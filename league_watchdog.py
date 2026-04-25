@@ -32,12 +32,13 @@ LEAGUES = [
         "active_dir":      os.path.join(WORKSPACE, "competition", "swing", "active"),
         "start_cmd":       ["python3", os.path.join(WORKSPACE, "swing_competition_start.py")],
     },
-    {
-        "name":            "futures_day",
-        "tick_interval_min": 5,
-        "active_dir":      os.path.join(WORKSPACE, "competition", "futures_day", "active"),
-        "start_cmd":       ["python3", os.path.join(WORKSPACE, "futures_day_restart.py")],
-    },
+    # PAUSED 2026-04-25 meta_audit F2 — league frozen pending Chris F1/F2 decision
+    # {
+    #     "name":            "futures_day",
+    #     "tick_interval_min": 5,
+    #     "active_dir":      os.path.join(WORKSPACE, "competition", "futures_day", "active"),
+    #     "start_cmd":       ["python3", os.path.join(WORKSPACE, "futures_day_restart.py")],
+    # },
     {
         "name":            "futures_swing",
         "tick_interval_min": 30,
