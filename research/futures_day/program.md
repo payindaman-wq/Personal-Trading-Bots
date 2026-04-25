@@ -74,7 +74,7 @@ Fallback chain (if 2.8 is banned or already tested):
 | fee_rate | 0.0005 (do not change) |
 | pairs | must stay [BTC/USD, ETH/USD, SOL/USD] — do not add or remove |
 
-**ALSO BANNED — any config with fewer than 800 trades is invalid. Do NOT tighten RSI thresholds below rsi_long=25 or above rsi_short=71. Do NOT submit rsi_short values of 62, 64, or 66 — these have been tested and produce Sharpe < -3.0.**
+**ALSO BANNED — any config with fewer than 200 trades is invalid (MIN_TRADES floor = 200, lowered 2026-04-25 after F8 cost model reduced achievable trades to 250–500 on BTC/ETH/SOL-only universe). Do NOT submit rsi_short values of 62, 64, or 66 — these have been tested and produce Sharpe < -3.0.**
 
 ---
 
@@ -103,14 +103,14 @@ Output the complete YAML with exactly one value changed from the template above.
 
 ## CONTEXT
 
-True Champion: Gen 3233 | Sharpe=0.4066 | 1756 trades | WR=50.1%
-Current elite_0: Sharpe=-3.2768 | 482 trades (regression — template above is the CORRECT anchor)
-Goal: Sharpe > 0.4066
+Note: Gen 3233 was champion (Sharpe=0.4066, 1756 trades) BEFORE F8 funding/slippage costs were applied (2026-04-22). Post-cost re-evaluation: same params now produce Sharpe=-4.3295, 414 trades. A new champion must be found.
+Current elite_0: Sharpe=-4.3295 | 414 trades (template above is current anchor)
+Goal: Sharpe > 0.0 (get back to positive; target > 0.4 once stable)
 
-Expected trade volume on 3-pair universe: 1500–2000 trades / 2yr backtest at rsi_long≈29, rsi_short≈69.
-MIN_TRADES floor: 800 (configurations below this are auto-rejected).
+Expected trade volume on 3-pair universe: 300–500 trades / 2yr backtest (observed range post-F8 with current BTC/ETH/SOL data).
+MIN_TRADES floor: 200 (configurations below this are auto-rejected).
 
-**CRITICAL: The winning RSI zone is rsi_long ≈ 29–30, rsi_short ≈ 68–70. Do NOT tighten these thresholds. Tighter RSI (e.g. rsi_short=62–66) has been exhaustively tested and produces deeply negative Sharpe (-3 to -5). Explore exit parameters and position sizing instead.**
+**RSI NOTE: Pre-cost testing showed rsi_long≈29–30 / rsi_short≈68–70 as winning zone, and tighter thresholds (rsi_short 62–66) failed. That data is still directionally valid but pre-dates F8 cost model. Tighter RSI = fewer trades = less cost drag, which may be an advantage now. Explore exit params AND RSI range freely — priority is finding any positive-Sharpe regime.**
 
 Previously tested — DO NOT RESUBMIT:
 | Field | Value | Result |
