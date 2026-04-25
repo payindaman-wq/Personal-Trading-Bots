@@ -14,7 +14,7 @@ pairs:
 position:
   size_pct: 13.98
   max_open: 3
-  fee_rate: 0.001
+  fee_rate: 0.0026
 entry:
   long:
     conditions:

@@ -239,7 +239,7 @@ def bt_evaluate_entry(conditions, history, pair, sim_now_iso):
 WORKSPACE = os.environ.get("WORKSPACE", "/root/.openclaw/workspace")
 FLEET_DIR = os.path.join(WORKSPACE, "fleet")
 STARTING_CAPITAL = 10_000.0
-FEE_RATE = 0.001
+FEE_RATE = 0.0026  # Kraken spot taker, $0-$50k tier (F4 2026-04-25)
 CANDLE_INTERVAL = "5m"
 MAX_HISTORY_MINUTES = 360  # 6 hours rolling window (covers MACD warmup + 240min trend lookback)
 

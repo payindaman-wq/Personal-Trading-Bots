@@ -39,9 +39,30 @@ import os
 from collections import deque
 from datetime import datetime, timezone, timedelta
 
+def _count_funding_ticks(open_dt, close_dt):
+    """Count Kraken perpetual funding ticks (UTC 00:00, 08:00, 16:00) in [open_dt, close_dt).
+    A position open at 07:59 UTC and closed at 08:01 UTC owes ONE funding payment.
+    A position open at 08:01 UTC and closed before 16:00 UTC owes ZERO."""
+    if close_dt <= open_dt:
+        return 0
+    cur = open_dt.replace(minute=0, second=0, microsecond=0)
+    if cur.hour % 8 != 0:
+        cur = cur + timedelta(hours=8 - (cur.hour % 8))
+    elif cur < open_dt:
+        cur = cur + timedelta(hours=8)
+    if cur < open_dt:
+        cur = cur + timedelta(hours=8)
+    n = 0
+    while cur < close_dt:
+        if cur >= open_dt:
+            n += 1
+        cur = cur + timedelta(hours=8)
+    return n
+
+
 DATA_DIR       = "/root/.openclaw/workspace/research/data"
 STARTING_CAP   = 10_000.0
-FEE_RATE       = 0.001
+FEE_RATE       = 0.0026  # Kraken spot taker, /usr/bin/bash-0k 30d volume tier (F4 2026-04-25)
 FLAT_THRESHOLD = 0.15
 SUSPICIOUS_SHARPE   = 3.5
 SUSPICIOUS_WINRATE  = 90.0
@@ -515,8 +536,10 @@ def run_backtest(strategy, league, pairs=None, time_slice=None):
                     # Apply leverage to the last closed trade P&L
                     if portfolio["closed_trades"]:
                         t = portfolio["closed_trades"][-1]
-                        age_h = age_min / 60
-                        funding_cost  = FUNDING_RATE_8H * leverage * t.get("cost_basis", 0) * int(age_h / 8)
+                        # F4: charge funding once per UTC funding tick (00/08/16) crossed,
+                        # not a coarse age/8 approximation. Matches Kraken's actual schedule.
+                        n_funding = _count_funding_ticks(opened_dt, datetime.fromisoformat(ts_iso))
+                        funding_cost  = FUNDING_RATE_8H * leverage * t.get("cost_basis", 0) * n_funding
                         slippage_cost = SLIPPAGE_PCT_PER_SIDE * 2 * leverage * t.get("cost_basis", 0)
                         total_cost    = funding_cost + slippage_cost
                         lev_gain = t["pnl_usd"] * (leverage - 1)
