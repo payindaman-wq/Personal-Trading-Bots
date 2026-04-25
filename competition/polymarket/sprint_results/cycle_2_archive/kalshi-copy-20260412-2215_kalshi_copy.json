@@ -1,0 +1,107 @@
+{
+  "sprint_id": "kalshi-copy-20260412-2215",
+  "started_at": "2026-04-12T22:15:57+00:00",
+  "ended_at": "2026-04-20T00:23:11.572168+00:00",
+  "bots": [
+    {
+      "bot": "sol_k",
+      "type": "kalshi_copy",
+      "pm_trader": "SecondWindCapital",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "freyr_k",
+      "type": "kalshi_copy",
+      "pm_trader": "beachboy4",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "haakon_k",
+      "type": "kalshi_copy",
+      "pm_trader": "WoofMaster",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "thor_k",
+      "type": "kalshi_copy",
+      "pm_trader": "majorexploiter",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "torkel_k",
+      "type": "kalshi_copy",
+      "pm_trader": "HorizonSplendidView",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "bragi_k",
+      "type": "kalshi_copy",
+      "pm_trader": "Blessed-Sunshine",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "heimdall_k",
+      "type": "kalshi_copy",
+      "pm_trader": "FTWUTB",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "baldur_k",
+      "type": "kalshi_copy",
+      "pm_trader": "UAEVALORANTFAN",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "vidar_k",
+      "type": "kalshi_copy",
+      "pm_trader": "ewelmealt",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "hallvard_k",
+      "type": "kalshi_copy",
+      "pm_trader": "Countryside",
+      "sprint_pnl_usd": 0.0,
+      "sprint_pnl_pct": 0.0,
+      "sprint_trades": 0,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    }
+  ]
+}

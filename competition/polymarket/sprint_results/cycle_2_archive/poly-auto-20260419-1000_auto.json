@@ -1,0 +1,129 @@
+{
+  "sprint_id": "poly-auto-20260419-1000",
+  "started_at": "2026-04-19T10:00:02.933871+00:00",
+  "ended_at": "2026-04-25T07:27:26.428221+00:00",
+  "ended_early": true,
+  "ended_reason": "Phase 7 Kalshi retirement: cut short to begin Cycle 3 with 6-bot Polymarket fleet",
+  "bots": [
+    {
+      "bot": "autobotpred2",
+      "type": "world_events",
+      "username": "",
+      "sprint_pnl_usd": -243.53,
+      "sprint_pnl_pct": -24.35,
+      "sprint_trades": 13,
+      "sprint_wins": 2,
+      "win_rate": 15.4
+    },
+    {
+      "bot": "gerd",
+      "type": "crypto",
+      "username": "",
+      "sprint_pnl_usd": -205.54,
+      "sprint_pnl_pct": -20.55,
+      "sprint_trades": 9,
+      "sprint_wins": 3,
+      "win_rate": 33.3
+    },
+    {
+      "bot": "autobotpred3",
+      "type": "world_events",
+      "username": "",
+      "sprint_pnl_usd": -175.92,
+      "sprint_pnl_pct": -17.59,
+      "sprint_trades": 20,
+      "sprint_wins": 2,
+      "win_rate": 10.0
+    },
+    {
+      "bot": "autobotpred1",
+      "type": "world_events",
+      "username": "",
+      "sprint_pnl_usd": -170.08,
+      "sprint_pnl_pct": -17.01,
+      "sprint_trades": 22,
+      "sprint_wins": 2,
+      "win_rate": 9.1
+    },
+    {
+      "bot": "hlin",
+      "type": "sports",
+      "username": "",
+      "sprint_pnl_usd": -41.01,
+      "sprint_pnl_pct": -4.1,
+      "sprint_trades": 9,
+      "sprint_wins": 0,
+      "win_rate": 0.0
+    },
+    {
+      "bot": "muninn",
+      "type": "arb",
+      "username": "",
+      "sprint_pnl_usd": 128.05,
+      "sprint_pnl_pct": 12.81,
+      "sprint_trades": 24,
+      "sprint_wins": 5,
+      "win_rate": 20.8
+    },
+    {
+      "bot": "eir",
+      "type": "science",
+      "username": "",
+      "sprint_pnl_usd": 252.66,
+      "sprint_pnl_pct": 25.27,
+      "sprint_trades": 25,
+      "sprint_wins": 6,
+      "win_rate": 24.0
+    },
+    {
+      "bot": "skadi",
+      "type": "crypto",
+      "username": "",
+      "sprint_pnl_usd": 545.78,
+      "sprint_pnl_pct": 54.58,
+      "sprint_trades": 23,
+      "sprint_wins": 6,
+      "win_rate": 26.1
+    },
+    {
+      "bot": "tora",
+      "type": "sports",
+      "username": "",
+      "sprint_pnl_usd": 643.24,
+      "sprint_pnl_pct": 64.32,
+      "sprint_trades": 25,
+      "sprint_wins": 7,
+      "win_rate": 28.0
+    },
+    {
+      "bot": "hermod",
+      "type": "world_economics",
+      "username": "",
+      "sprint_pnl_usd": 680.85,
+      "sprint_pnl_pct": 68.08,
+      "sprint_trades": 42,
+      "sprint_wins": 11,
+      "win_rate": 26.2
+    },
+    {
+      "bot": "njal",
+      "type": "crypto",
+      "username": "",
+      "sprint_pnl_usd": 936.52,
+      "sprint_pnl_pct": 93.65,
+      "sprint_trades": 28,
+      "sprint_wins": 7,
+      "win_rate": 25.0
+    },
+    {
+      "bot": "var",
+      "type": "politics",
+      "username": "",
+      "sprint_pnl_usd": 1090.25,
+      "sprint_pnl_pct": 109.03,
+      "sprint_trades": 23,
+      "sprint_wins": 7,
+      "win_rate": 30.4
+    }
+  ]
+}
