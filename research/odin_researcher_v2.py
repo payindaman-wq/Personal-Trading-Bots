@@ -95,6 +95,13 @@ FUTURES_ALLOWED_PAIRS = frozenset({"BTC/USD", "ETH/USD", "SOL/USD"})  # Kraken D
 # hill-climbing stalls where every perturbation lands in the same basin.
 FORCE_RANDOM_FLOOR   = 500
 FORCE_RANDOM_EVERY   = 500
+# F8 (meta_audit 2026-04-25): hard OOS floor — candidate OOS must clear this
+# regardless of champion_oos.
+OOS_HARD_FLOOR       = 0.0
+# F3 (meta_audit 2026-04-25): diversity injection thresholds.
+DIVERSITY_UNIQUE_FLOOR = 3
+DIVERSITY_STALL_FLOOR  = 500
+DIVERSITY_KEEP_TOP     = 5
 # F4: tighter elite dedup — reject insertions whose Sharpe matches an
 # existing elite within this epsilon. Catches no-op perturbations that
 # reproduce the parent exactly.
@@ -295,9 +302,16 @@ def get_ranges(league):
     return DAY_RANGES if league == "day" else SWING_RANGES
 
 
-def adj_score(sharpe, trades, target=50):
-    """Adjusted score: sharpe * sqrt(trades/target). Penalizes low trade counts."""
-    return sharpe * math.sqrt(max(trades, 1) / target)
+# F1 (meta_audit 2026-04-25): blend adj_score = 0.6 * backtest_sharpe + 0.4 * live_pnl_z.
+def adj_score(sharpe, trades, target=50, league=None):
+    base = sharpe
+    if league is None or backtest_drift is None:
+        return base
+    try:
+        z = float(backtest_drift.get_live_pnl_z(league))
+    except Exception:
+        z = 0.0
+    return 0.6 * base + 0.4 * z
 
 
 # ----------------------------------------------------------------
@@ -320,7 +334,7 @@ class Population:
                 strat = yaml.safe_load(text)
                 sharpe = strat.get("_sharpe", 0.0)
                 trades = strat.get("_trades", 30)  # default 30 for legacy files
-                score = adj_score(sharpe, trades)
+                score = adj_score(sharpe, trades, league=self.league)
                 self.elites.append((score, strat, text))
         self.elites.sort(key=lambda x: x[0], reverse=True)
 
@@ -343,7 +357,7 @@ class Population:
     def seed_from(self, strategy_dict, strategy_yaml, sharpe, trades=0):
         strategy_dict["_sharpe"] = sharpe
         strategy_dict["_trades"] = trades
-        score = adj_score(sharpe, trades)
+        score = adj_score(sharpe, trades, league=self.league)
         self.elites = [(score, strategy_dict, strategy_yaml)]
         self.save()
 
@@ -360,7 +374,7 @@ class Population:
         """Returns (inserted, is_new_best). is_new_best uses raw Sharpe (Item 8)."""
         strategy_dict["_sharpe"] = sharpe
         strategy_dict["_trades"] = trades
-        score = adj_score(sharpe, trades)
+        score = adj_score(sharpe, trades, league=self.league)
         entry = (score, strategy_dict, strategy_yaml)
         # Drift-aware gate: if backtest Sharpe has been historically overstating
         # live realised Sharpe for this league, a new champion must beat the
@@ -373,6 +387,16 @@ class Population:
             except Exception:
                 gate = 0.0
         is_new_best = sharpe > (self.best_sharpe() + gate) if self.elites else True
+
+        # F1 (meta_audit 2026-04-25): veto new_best when rolling 5-sprint live
+        # PnL median < 0 (>=5 sprints required, brand-new champions skip veto).
+        if is_new_best and backtest_drift is not None:
+            try:
+                if backtest_drift.get_veto_signal(self.league):
+                    print(f"| VETO_NEW_BEST: 5sprint_median<0 league={self.league}")
+                    is_new_best = False
+            except Exception:
+                pass
 
         # F4: reject clones — if a non-new-best candidate matches an existing
         # elite Sharpe within ELITE_SHARPE_EPS, do not add it. Keeps the
@@ -818,6 +842,7 @@ def main():
     gens_since_best = 0
     last_mimir_gen = 0
     last_mimir_ts  = None
+    diversity_injected_this_stall = False  # F3: one-shot per stall window
     if os.path.exists(state_path):
         try:
             with open(state_path) as f:
@@ -826,6 +851,7 @@ def main():
             gens_since_best = gs.get("gens_since_best", 0)
             last_mimir_gen = gs.get("last_mimir_gen", 0)
             last_mimir_ts  = gs.get("last_mimir_ts")
+            diversity_injected_this_stall = bool(gs.get("diversity_injected_this_stall", False))
         except Exception:
             pass
 
@@ -849,6 +875,24 @@ def main():
 
         ts = datetime.now(timezone.utc).strftime("%H:%M:%S")
         best_s = pop.best_sharpe()
+
+        # F3 (meta_audit 2026-04-25): diversity injection on mode collapse.
+        if pop.elites and not diversity_injected_this_stall:
+            _u_sharpe = len({float(s.get("_sharpe", 0.0)) for _, s, _ in pop.elites})
+            if _u_sharpe < DIVERSITY_UNIQUE_FLOOR or gens_since_best > DIVERSITY_STALL_FLOOR:
+                _keep = pop.elites[:DIVERSITY_KEEP_TOP]
+                _new_bottom = []
+                for _i in range(POPULATION_SIZE - DIVERSITY_KEEP_TOP):
+                    _rs, _ = random_strategy(league)
+                    _rs["_sharpe"] = 0.0
+                    _rs["_trades"] = 0
+                    _ry = yaml.dump(_rs, default_flow_style=False, sort_keys=False)
+                    _score = adj_score(0.0, 0, league=league)
+                    _new_bottom.append((_score, _rs, _ry))
+                pop.elites = _keep + _new_bottom
+                pop.save()
+                diversity_injected_this_stall = True
+                print(f"[{ts}] DIVERSITY_INJECT: unique_sharpe={_u_sharpe} stall={gens_since_best} replaced bottom {POPULATION_SIZE - DIVERSITY_KEEP_TOP}")
 
         # Adaptive weights
         if gens_since_best < 100:
@@ -1000,7 +1044,7 @@ def main():
             gen += 1
             gens_since_best += 1  # 2026-04-23: count dedup rejects toward stall so FORCE_RANDOM/MIMIR machinery activates
             with open(state_path, "w") as f:
-                json.dump({"gen": gen, "gens_since_best": gens_since_best, "last_mimir_gen": last_mimir_gen, "last_mimir_ts": last_mimir_ts}, f)
+                json.dump({"gen": gen, "gens_since_best": gens_since_best, "last_mimir_gen": last_mimir_gen, "last_mimir_ts": last_mimir_ts, "diversity_injected_this_stall": diversity_injected_this_stall}, f)
             time.sleep(args.sleep)
             continue
         seen_configs.add(_h)
@@ -1012,7 +1056,7 @@ def main():
             log_result(league, gen, {}, "poison_reject", _poison_reason[:80])
             gen += 1
             with open(state_path, "w") as f:
-                json.dump({"gen": gen, "gens_since_best": gens_since_best, "last_mimir_gen": last_mimir_gen, "last_mimir_ts": last_mimir_ts}, f)
+                json.dump({"gen": gen, "gens_since_best": gens_since_best, "last_mimir_gen": last_mimir_gen, "last_mimir_ts": last_mimir_ts, "diversity_injected_this_stall": diversity_injected_this_stall}, f)
             time.sleep(args.sleep)
             continue
 
@@ -1045,7 +1089,7 @@ def main():
             log_result(league, gen, result, "poison_reject", f"attractor sharpe={sharpe:.4f}")
             gen += 1
             with open(state_path, "w") as f:
-                json.dump({"gen": gen, "gens_since_best": gens_since_best, "last_mimir_gen": last_mimir_gen, "last_mimir_ts": last_mimir_ts}, f)
+                json.dump({"gen": gen, "gens_since_best": gens_since_best, "last_mimir_gen": last_mimir_gen, "last_mimir_ts": last_mimir_ts, "diversity_injected_this_stall": diversity_injected_this_stall}, f)
             time.sleep(args.sleep)
             continue
 
@@ -1062,7 +1106,7 @@ def main():
             gen += 1
             gens_since_best += 1  # 2026-04-23: count low_trades rejects toward stall so FORCE_RANDOM/MIMIR machinery activates
             with open(state_path, "w") as f:
-                json.dump({"gen": gen, "gens_since_best": gens_since_best, "last_mimir_gen": last_mimir_gen, "last_mimir_ts": last_mimir_ts}, f)
+                json.dump({"gen": gen, "gens_since_best": gens_since_best, "last_mimir_gen": last_mimir_gen, "last_mimir_ts": last_mimir_ts, "diversity_injected_this_stall": diversity_injected_this_stall}, f)
             time.sleep(args.sleep)
             continue
 
@@ -1097,15 +1141,24 @@ def main():
             oos_trades    = int(oos_result.get("total_trades", 0))
             champion_oos  = float(pop.elites[0][1].get("_oos_sharpe", 0.0)) if pop.elites else 0.0
             min_oos_trades = max(1, min_t // 4)
+            # F8 (meta_audit 2026-04-25): regime-shift reset — frozen population
+            # (gens_since_best > 1500 AND only 1 unique sharpe across elites)
+            # collapses champion_oos to 0.0 so the hard floor governs alone.
+            _unique_sharpe = len({float(s.get("_sharpe", 0.0)) for _, s, _ in pop.elites}) if pop.elites else 0
+            if gens_since_best > 1500 and _unique_sharpe == 1:
+                print(f"| OOS_ANCHOR_RESET: gens_since_best={gens_since_best} unique_sharpe=1 prev_champ_oos={champion_oos:.4f} -> 0.0")
+                champion_oos = 0.0
+            # F8: OOS hard floor (0.0) — candidates must clear max(floor, champion).
+            oos_bar = max(OOS_HARD_FLOOR, champion_oos)
             oos_ok = (
-                oos_sharpe >= champion_oos  # allow negative-OOS champions to improve; max(0.0,...) was locking out all candidates when champion_oos<0
+                oos_sharpe >= oos_bar
                 and oos_trades >= min_oos_trades
             )
             if not oos_ok:
                 print(f"| OOS_GATE_REJECT: oos_sharpe={oos_sharpe:.4f} "
-                      f"oos_trades={oos_trades} champion_oos={champion_oos:.4f}")
+                      f"oos_trades={oos_trades} champion_oos={champion_oos:.4f} bar={oos_bar:.4f}")
                 log_result(league, gen, result, "oos_reject",
-                           f"oos_sharpe={oos_sharpe:.4f} oos_trades={oos_trades} champion_oos={champion_oos:.4f}")
+                           f"oos_sharpe={oos_sharpe:.4f} oos_trades={oos_trades} champion_oos={champion_oos:.4f} bar={oos_bar:.4f}")
                 gen += 1
                 time.sleep(args.sleep)
                 continue
@@ -1141,7 +1194,8 @@ def main():
         if is_new_best:
             status = "new_best"
             gens_since_best = 0
-            score = adj_score(sharpe, trades)
+            diversity_injected_this_stall = False  # F3: clear flag for next stall window
+            score = adj_score(sharpe, trades, league=league)
             print(f"| *** NEW BEST: adj={score:.4f} sharpe={sharpe:.4f} win={win_rate}% "
                   f"pnl={pnl_pct:+.2f}% trades={trades} ***")
         elif inserted:
@@ -1224,7 +1278,7 @@ def main():
 
         gen += 1
         with open(state_path, "w") as f:
-            json.dump({"gen": gen, "gens_since_best": gens_since_best, "last_mimir_gen": last_mimir_gen, "last_mimir_ts": last_mimir_ts}, f)
+            json.dump({"gen": gen, "gens_since_best": gens_since_best, "last_mimir_gen": last_mimir_gen, "last_mimir_ts": last_mimir_ts, "diversity_injected_this_stall": diversity_injected_this_stall}, f)
         time.sleep(args.sleep)
 
 
