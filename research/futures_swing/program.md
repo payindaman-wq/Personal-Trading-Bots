@@ -1,8 +1,7 @@
 ```markdown
 # ODIN Research Program — FUTURES SWING
-# GROUND TRUTH (elite_0.yaml): Sharpe=0.9170 | Trades=748 | OOS_Sharpe=2.3434
-# WARNING: OOS gate compares candidate OOS vs champion_oos=2.3434 — this is the
-# primary rejection reason. Focus on changes that preserve OOS stability.
+# GROUND TRUTH (elite_0.yaml): Sharpe=0.7001 | Trades=486 | OOS_Sharpe=1.8971
+# WARNING: OOS gate compares candidate OOS vs champion_oos=1.8971
 # OOS gate is enforced automatically by code. Do NOT try to game it manually.
 
 ## OUTPUT RULE
@@ -34,7 +33,7 @@ entry:
     - indicator: rsi
       period_hours: 24
       operator: lt
-      value: 42.0
+      value: 37.77
   short:
     conditions:
     - indicator: trend
@@ -44,11 +43,11 @@ entry:
     - indicator: rsi
       period_hours: 24
       operator: gt
-      value: 58.32
+      value: 60.0
 exit:
-  take_profit_pct: 3.96
-  stop_loss_pct: 1.64
-  timeout_hours: 120
+  take_profit_pct: 5.2
+  stop_loss_pct: 1.92
+  timeout_hours: 166
 risk:
   pause_if_down_pct: 8
   pause_minutes: 120
@@ -74,32 +73,33 @@ risk:
 ---
 ## KEY FACTS
 
-- Champion: TP=3.96, SL=1.64, ratio=2.41. RSI long=42.0, RSI short=58.32, timeout=120h, rsi_period=24, trend_period=48, size_pct=25
-- Win rate ~34–38%. Trade count ~748. Sharpe=0.9170. OOS_Sharpe=2.3434.
-- OOS gate requires candidate OOS ≥ 2.3434 — this is strict. Changes that RAISE TP/SL ratio or TIGHTEN RSI thresholds improve OOS.
-- Recent oos_reject events at sharpe=1.03 and 0.97 confirm OOS is the bottleneck, not IS Sharpe.
-- High dedup pressure — do not repeat values already tried. Explore fresh values.
-- TP/SL ratio of 2.41 is LOW — raising TP or lowering SL improves OOS stability.
+- Champion: TP=5.2, SL=1.92, ratio=2.71. RSI long=37.77, RSI short=60.0, timeout=166h, rsi_period=24, trend_period=48, size_pct=25
+- Win rate ~34–38%. Trade count ~486. Sharpe=0.7001. OOS_Sharpe=1.8971.
+- OOS gate requires candidate OOS ≥ 1.8971 — this is the binding constraint.
+- TP/SL ratio of 2.71 is adequate. Raising TP further or tightening RSI thresholds may improve OOS.
+- High dedup pressure — do not repeat values already tried. Explore fresh values only.
+- RSI long is already tight at 37.77 — explore range 35.0–41.0 carefully.
+- RSI short is at 60.0 — raising to 62–66 may improve signal quality.
 
 ---
 ## WHAT TO CHANGE — PICK EXACTLY ONE
 
-**Current: TP=3.96, SL=1.64, ratio=2.41. RSI long=42.0, RSI short=58.32, timeout=120h, rsi_period=24, trend_period=48, size_pct=25.**
+**Current: TP=5.2, SL=1.92, ratio=2.71. RSI long=37.77, RSI short=60.0, timeout=166h, rsi_period=24, trend_period=48, size_pct=25.**
 
-### PRIORITY 1 — take_profit_pct (current: 3.96) — raising TP improves ratio → better OOS
-Try: **5.00 | 5.20 | 5.40 | 5.60 | 5.80 | 6.00 | 4.50 | 4.80 | 4.20**
+### PRIORITY 1 — RSI short gt (current: 60.0) — raising threshold → cleaner shorts, better OOS
+Try: **62.0 | 63.0 | 64.0 | 65.0 | 61.0 | 66.0 | 67.0 | 59.0 | 58.0 | 57.0 | 56.0**
 
-### PRIORITY 2 — RSI short gt (current: 58.32) — raising threshold → cleaner shorts, better OOS
-Try: **60.0 | 61.0 | 62.0 | 63.0 | 64.0 | 65.0 | 59.0 | 57.0 | 56.0**
+### PRIORITY 2 — take_profit_pct (current: 5.2) — raising TP improves ratio → better OOS
+Try: **5.5 | 5.8 | 6.0 | 6.2 | 6.5 | 7.0 | 4.8 | 4.5 | 5.0 | 5.3 | 5.6**
 
-### PRIORITY 3 — stop_loss_pct (current: 1.64) — lowering SL improves ratio → better OOS
-Try: **1.45 | 1.50 | 1.55 | 1.58 | 1.60 | 1.70 | 1.75 | 1.80**
+### PRIORITY 3 — RSI long lt (current: 37.77) — tighter = fewer but cleaner trades → better OOS
+Try: **36.0 | 35.5 | 37.0 | 38.0 | 39.0 | 40.0 | 41.0 | 35.0**
 
-### PRIORITY 4 — RSI long lt (current: 42.0) — tighter = fewer but cleaner trades → better OOS
-Try: **40.0 | 41.0 | 43.0 | 44.0 | 39.0 | 38.0 | 37.0 | 36.0**
+### PRIORITY 4 — stop_loss_pct (current: 1.92) — adjusting SL changes ratio
+Try: **1.80 | 1.75 | 1.70 | 1.65 | 1.60 | 1.55 | 1.50 | 2.00 | 2.10 | 2.20**
 
-### PRIORITY 5 — timeout_hours (current: 120) — longer timeout may improve OOS
-Try: **130 | 140 | 150 | 160 | 110 | 100 | 90 | 72 | 168**
+### PRIORITY 5 — timeout_hours (current: 166) — explore nearby values
+Try: **150 | 155 | 160 | 170 | 175 | 180 | 140 | 130 | 120 | 200 | 210**
 
 ### PRIORITY 6 — rsi_period_hours (current: 24)
 Try: **20 | 21 | 22 | 23 | 25 | 26 | 27 | 28 | 18 | 30**
@@ -108,7 +108,7 @@ Try: **20 | 21 | 22 | 23 | 25 | 26 | 27 | 28 | 18 | 30**
 Try: **36 | 42 | 54 | 60 | 72 | 24**
 
 ### PRIORITY 8 — size_pct (current: 25)
-Try: **24 | 23 | 22 | 21 | 20 | 18**
+Try: **24 | 23 | 22 | 21 | 20 | 19 | 18**
 
 ---
 ## KNOWN BAD — DO NOT USE
@@ -119,8 +119,8 @@ Try: **24 | 23 | 22 | 21 | 20 | 18**
 - timeout_hours > 210 or < 48 → rejected
 - Any pairs other than [BTC/USD, ETH/USD, SOL/USD] → rejected
 - DO NOT reproduce champion unchanged:
-  take_profit_pct=3.96, stop_loss_pct=1.64, timeout_hours=120,
-  rsi_lt=42.0, rsi_gt=58.32, rsi_period=24, trend_period=48, size_pct=25
+  take_profit_pct=5.2, stop_loss_pct=1.92, timeout_hours=166,
+  rsi_lt=37.77, rsi_gt=60.0, rsi_period=24, trend_period=48, size_pct=25
 
 ---
 ## PRE-OUTPUT CHECKLIST
@@ -137,5 +137,3 @@ Try: **24 | 23 | 22 | 21 | 20 | 18**
 
 Output ONLY the YAML. No explanation. No comments.
 ```
-
----

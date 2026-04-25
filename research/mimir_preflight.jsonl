@@ -1,0 +1,4 @@
+{"ts": "2026-04-25T22:54:40.540518+00:00", "league": "day", "gen": 12086, "citations_checked": 8, "citations_failed": 5, "decision": "reject"}
+{"ts": "2026-04-25T22:54:43.196807+00:00", "league": "swing", "gen": 22116, "citations_checked": 0, "citations_failed": 0, "decision": "accept"}
+{"ts": "2026-04-25T22:56:16.930146+00:00", "league": "futures_swing", "gen": 7440, "citations_checked": 2, "citations_failed": 0, "decision": "accept"}
+{"ts": "2026-04-25T22:56:26.682657+00:00", "league": "futures_day", "gen": 7252, "citations_checked": 2, "citations_failed": 2, "decision": "reject"}

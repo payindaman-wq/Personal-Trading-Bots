@@ -13,6 +13,7 @@ Usage:
 import argparse
 import json
 import os
+import re
 import shutil
 import urllib.request
 from datetime import datetime, timezone
@@ -25,6 +26,8 @@ ANTHROPIC_URL     = "https://api.anthropic.com/v1/messages"
 MIMIR_LOG            = os.path.join(RESEARCH, "mimir_log.jsonl")
 SYN_MIMIR_QUEUE      = os.path.join(RESEARCH, "syn_mimir_queue.jsonl")
 LOKI_PENDING_ACTIONS = os.path.join(RESEARCH, "loki_pending_actions.jsonl")
+SYN_INBOX            = os.path.join(WORKSPACE, "syn_inbox.jsonl")
+MIMIR_PREFLIGHT_LOG  = os.path.join(RESEARCH, "mimir_preflight.jsonl")
 
 DAY_RESULTS_DIR   = os.path.join(WORKSPACE, "competition", "results")
 SWING_RESULTS_DIR         = os.path.join(WORKSPACE, "competition", "swing", "results")
@@ -341,6 +344,86 @@ def format_tyr_context(tyr):
     return "\n".join(lines)
 
 
+
+def build_results_lookup(league):
+    """Build gen->sharpe dict from results.tsv for citation pre-flight."""
+    rows = load_research_results(league)
+    lookup = {}
+    for r in rows:
+        try:
+            lookup[int(r["gen"])] = float(r["sharpe"])
+        except (ValueError, KeyError):
+            pass
+    return lookup
+
+
+_CITE_PAT1 = re.compile(r"gen\s+(\d+).{0,120}?sharpe[=:\s]+([+-]?\d+\.\d+)", re.IGNORECASE)
+_CITE_PAT2 = re.compile(r"sharpe[=:\s]+([+-]?\d+\.\d+).{0,120}?gen\s+(\d+)", re.IGNORECASE)
+_CITE_PAT3 = re.compile(r"generation\s+(\d+).{0,120}?sharpe[=:\s]+([+-]?\d+\.\d+)", re.IGNORECASE)
+
+
+def extract_citations(text):
+    """Return list of (gen:int, sharpe:float) pairs cited in MIMIR output."""
+    seen = set()
+    results = []
+    for m in _CITE_PAT1.finditer(text):
+        k = (int(m.group(1)), round(float(m.group(2)), 6))
+        if k not in seen:
+            seen.add(k); results.append(k)
+    for m in _CITE_PAT2.finditer(text):
+        k = (int(m.group(2)), round(float(m.group(1)), 6))
+        if k not in seen:
+            seen.add(k); results.append(k)
+    for m in _CITE_PAT3.finditer(text):
+        k = (int(m.group(1)), round(float(m.group(2)), 6))
+        if k not in seen:
+            seen.add(k); results.append(k)
+    return results
+
+
+def verify_citations(citations, lookup, tolerance=0.01):
+    """Return list of (gen, cited_sharpe, actual_or_None) for each mismatch."""
+    failures = []
+    for gen, cited in citations:
+        actual = lookup.get(gen)
+        if actual is None:
+            failures.append((gen, cited, None))
+        elif abs(cited - actual) > tolerance:
+            failures.append((gen, cited, actual))
+    return failures
+
+
+def write_syn_preflight_reject(league, generation, failures):
+    parts = []
+    for gen, cited, actual in failures:
+        if actual is None:
+            parts.append(f"gen {gen}: cited={cited:.4f} actual=NOT_IN_TSV")
+        else:
+            parts.append(f"gen {gen}: cited={cited:.4f} actual={actual:.4f}")
+    entry = {
+        "ts":       datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
+        "source":   "mimir_preflight",
+        "severity": "warning",
+        "msg":      (f"[SYN/mimir_preflight] [{league}] gen={generation} REJECTED "
+                     f"\u2014 {len(failures)} unverified citation(s): {'; '.join(parts)}"),
+    }
+    with open(SYN_INBOX, "a") as f:
+        f.write(json.dumps(entry) + "\n")
+
+
+def log_preflight(league, generation, citations_checked, citations_failed, decision):
+    entry = {
+        "ts":                datetime.now(timezone.utc).isoformat(),
+        "league":            league,
+        "gen":               generation,
+        "citations_checked": citations_checked,
+        "citations_failed":  citations_failed,
+        "decision":          decision,
+    }
+    with open(MIMIR_PREFLIGHT_LOG, "a") as f:
+        f.write(json.dumps(entry) + "\n")
+
+
 def build_prompt(league, program_md, best_strategy_yaml,
                  research_summary, sprint_summary, generation,
                  self_audit="", tyr_context="", champion_ground_truth=None,
@@ -436,6 +519,9 @@ THEN analyze the research results and identify:
 5. What guidance would make the next 100 generations more productive
 
 Then produce an improved version of the research program.
+
+CITATION INTEGRITY - MANDATORY:
+Before writing your ANALYSIS, verify every Sharpe value you intend to cite against the Research Results section above. Do NOT fabricate or approximate Sharpe figures. If a generation's Sharpe is not explicitly listed in the data above, do not cite a specific number for it. A post-publication audit cross-checks every (gen, sharpe) pair you write against results.tsv; fabricated citations cause the entire cycle to be rejected.
 
 Output EXACTLY two sections, using these exact headers:
 
@@ -840,6 +926,25 @@ def main():
         return
 
     analysis, new_program, patch = parse_response(response)
+
+    # Citation pre-flight (crypto leagues only)
+    if league != "pm":
+        results_lookup = build_results_lookup(league)
+        citations = extract_citations(response)
+        failures  = verify_citations(citations, results_lookup)
+        pf_decision = "reject" if failures else "accept"
+        log_preflight(league, generation, len(citations), len(failures), pf_decision)
+        if failures:
+            write_syn_preflight_reject(league, generation, failures)
+            print(f"  [preflight] REJECTED -- {len(failures)}/{len(citations)} citation(s) failed")
+            for gen, cited, actual in failures:
+                if actual is None:
+                    print(f"    gen {gen}: cited={cited:.4f} not in results.tsv")
+                else:
+                    print(f"    gen {gen}: cited={cited:.4f} actual={actual:.4f} delta={abs(cited-actual):.4f}")
+            print(f"[mimir/{league}] Cycle rejected by preflight -- no files written.")
+            return
+        print(f"  [preflight] OK -- {len(citations)} citation(s) verified")
 
     program_updated = False
     if new_program and len(new_program) > 200:
