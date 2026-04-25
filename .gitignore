@@ -152,3 +152,6 @@ research/meta_audit/
 research/vidar_tier_cache.json
 research/vidar_executor_log.jsonl
 competition/vidar_pending_review.flag
+
+# Active tracking for FREYA validation gate (runtime, ephemeral)
+research/polymarket/active_tracking.jsonl

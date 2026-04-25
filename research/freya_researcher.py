@@ -6,6 +6,11 @@ Simulates strategy configurations against 300k+ historical resolved prediction
 market records, using Gemini Flash Lite to propose mutations. Triggers Mimir
 at every 100-generation milestone for deep analysis.
 
+Before promoting a new_best, runs a resolved-market validation gate against
+competition/polymarket/resolved_markets.jsonl (live Polymarket outcomes with
+real pre-resolution entry prices). Blocks promotion if realized expectancy <= 0
+on >= 50 resolved markets. Falls back to pending mode if < 50 available.
+
 Usage:
   python3 freya_researcher.py [--sleep 60]
 """
@@ -19,7 +24,7 @@ import re
 import subprocess
 import time
 import urllib.request
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 import yaml
 
@@ -27,6 +32,7 @@ WORKSPACE       = "/root/.openclaw/workspace"
 RESEARCH        = os.path.join(WORKSPACE, "research")
 PM_RESEARCH     = os.path.join(RESEARCH, "pm")
 PM_DATA         = os.path.join(RESEARCH, "polymarket", "resolved_markets.jsonl")
+COMP_PM_RESOLVED = os.path.join(WORKSPACE, "competition", "polymarket", "resolved_markets.jsonl")
 
 GEMINI_SECRET   = "/root/.openclaw/secrets/gemini.json"
 GEMINI_MODEL    = "gemini-2.5-flash-lite"
@@ -45,6 +51,8 @@ MIMIR_INTERVAL    = 200
 MIMIR_MIN_GAP_HRS = 6   # min wall-clock hours between Mimir calls
 SUSPICIOUS_SHARPE = 8.0
 MIN_BETS          = 20
+RESOLVED_GATE_MIN = 50  # min resolved markets needed to activate the gate
+RESOLVED_RELOAD_INTERVAL = 500  # reload comp resolved markets every N gens
 # Kalshi taker fee: 2.5% of potential profit per contract
 # (e.g. YES at 50c -> $0.0125/contract; low-prob contracts carry heavy fees)
 KALSHI_FEE_PROFIT_PCT   = 0.025
@@ -121,6 +129,121 @@ def load_resolved_markets():
                 skipped += 1
     log(f"Loaded {len(markets)} usable markets (skipped {skipped})")
     return markets
+
+
+def load_comp_resolved_markets(days=90):
+    """
+    Load competition-resolved Polymarket markets from last N days.
+    These have real pre-resolution entry prices captured by pm_collector's
+    active tracking — used for FREYA's realized PnL validation gate.
+    """
+    if not os.path.exists(COMP_PM_RESOLVED):
+        return []
+    cutoff  = datetime.now(timezone.utc) - timedelta(days=days)
+    markets = []
+    with open(COMP_PM_RESOLVED) as f:
+        for line in f:
+            try:
+                m = json.loads(line.strip())
+                if not m.get("entry_yes_price") or not m.get("resolution_outcome"):
+                    continue
+                if m.get("resolution_outcome") not in ("YES", "NO"):
+                    continue
+                ra = m.get("resolved_at", "")
+                try:
+                    dt = datetime.fromisoformat(
+                        ra.replace("Z", "+00:00")
+                    ).replace(tzinfo=timezone.utc)
+                    if dt < cutoff:
+                        continue
+                except Exception:
+                    pass  # include if date unparseable
+                markets.append(m)
+            except Exception:
+                pass
+    return markets
+
+
+def validate_resolved_gate(candidate, comp_markets, base_rates):
+    """
+    Replay candidate filter against competition-resolved Polymarket markets.
+
+    For each resolved market that passes the filter, simulate the strategy's
+    edge-based bet direction using the tracked entry_yes_price and actual
+    resolution outcome. Compute realized PnL per trade.
+
+    Returns dict:
+      n_resolved      - total resolved markets in window
+      n_bets          - markets matching candidate filter with sufficient edge
+      realized_pnl_pct - mean realized PnL per trade as % (None if insufficient)
+      pass_gate       - True=promote, False=block, None=pending (<50 resolved)
+    """
+    n_resolved = len(comp_markets)
+
+    if n_resolved < RESOLVED_GATE_MIN:
+        return {"n_resolved": n_resolved, "n_bets": 0,
+                "realized_pnl_pct": None, "pass_gate": None}
+
+    cat      = candidate.get("category", "")
+    inc_kw   = [k.lower() for k in candidate.get("include_keywords", [])]
+    exc_kw   = [k.lower() for k in candidate.get("exclude_keywords", [])]
+    pr       = candidate.get("price_range", [0.05, 0.95])
+    pr_lo    = float(pr[0])
+    pr_hi    = float(pr[1])
+    min_edge = float(candidate.get("min_edge_pts", 0.08))
+    base_rate = base_rates.get(cat, 0.50) if cat else 0.50
+
+    pnl = []
+    for m in comp_markets:
+        if cat and m.get("category") != cat:
+            continue
+        q = m.get("question", "").lower()
+        if inc_kw and not any(kw in q for kw in inc_kw):
+            continue
+        if exc_kw and any(kw in q for kw in exc_kw):
+            continue
+
+        yes_p = float(m.get("entry_yes_price", 0))
+        if not (pr_lo <= yes_p <= pr_hi):
+            continue
+
+        resolution = m.get("resolution_outcome", "").upper()
+        if resolution not in ("YES", "NO"):
+            continue
+
+        # Edge-based direction (mirrors simulate_strategy logic)
+        edge_no  = yes_p - base_rate
+        edge_yes = base_rate - yes_p
+
+        if edge_no >= min_edge:
+            # Bet NO: buy at cost (1 - yes_p)
+            cost = 1.0 - yes_p
+            won  = (resolution == "NO")
+        elif edge_yes >= min_edge:
+            # Bet YES: buy at cost yes_p
+            cost = yes_p
+            won  = (resolution == "YES")
+        else:
+            continue  # no edge on this market
+
+        if cost < 0.05:
+            continue  # near-zero cost contracts are degenerate
+
+        # PnL per unit bet: win returns (1/cost - 1) * cost = 1 - cost;
+        # lose returns -cost. Normalized to unit stake.
+        pnl.append((1.0 - cost) if won else -cost)
+
+    n_bets = len(pnl)
+    if n_bets == 0:
+        # Filter matched resolved markets but no edge trades — not enough signal
+        return {"n_resolved": n_resolved, "n_bets": 0,
+                "realized_pnl_pct": 0.0, "pass_gate": None}
+
+    realized_pnl_pct = round(sum(pnl) / n_bets * 100, 2)
+    pass_gate        = realized_pnl_pct > 0
+
+    return {"n_resolved": n_resolved, "n_bets": n_bets,
+            "realized_pnl_pct": realized_pnl_pct, "pass_gate": pass_gate}
 
 
 def compute_base_rates(markets):
@@ -507,12 +630,22 @@ def main():
     stall_alerted = gen_state.get("stall_alerted", False)
     last_mimir_ts = gen_state.get("last_mimir_ts")
 
+    # Load competition-resolved markets for validation gate
+    comp_markets = load_comp_resolved_markets()
+    log(f"Resolved gate: {len(comp_markets)} comp markets in last 90 days "
+        f"({'active' if len(comp_markets) >= RESOLVED_GATE_MIN else 'pending (<50)'})")
+
     log(f"Gen {gen}: best adj={best_score:.4f} sharpe={best_metrics['sharpe']:.4f} "
         f"n_bets={best_metrics['n_bets']}")
 
     while True:
         gen          += 1
         gens_no_best += 1
+
+        # Reload comp markets periodically so new resolutions are picked up
+        if gen % RESOLVED_RELOAD_INTERVAL == 0:
+            comp_markets = load_comp_resolved_markets()
+            log(f"  Resolved gate reload: {len(comp_markets)} comp markets")
 
         try:
             r     = random.random()
@@ -548,16 +681,40 @@ def main():
                 continue
 
             if score > best_score:
+                # Resolved-market validation gate (F9)
+                gate = validate_resolved_gate(candidate, comp_markets, base_rates)
+
+                if gate["pass_gate"] is False:
+                    gate_desc = (f"pnl={gate['realized_pnl_pct']:.1f}%"
+                                 f" n_bets={gate['n_bets']}"
+                                 f" n_resolved={gate['n_resolved']}")
+                    log(f"  Gen {gen}: RESOLVED_GATE REJECT adj={score:.4f} {gate_desc}")
+                    append_result(gen, metrics, "resolved_gate_reject",
+                                  desc + f"|{gate_desc}")
+                    continue
+
+                if gate["pass_gate"] is None:
+                    candidate["_resolved_validation"] = "pending"
+                    if gate["n_resolved"] > 0:
+                        log(f"  Gen {gen}: resolved gate pending "
+                            f"({gate['n_resolved']}<{RESOLVED_GATE_MIN} resolved markets)")
+                else:
+                    candidate.pop("_resolved_validation", None)
+                    candidate["_resolved_pnl_pct"] = gate["realized_pnl_pct"]
+                    candidate["_resolved_n_bets"]  = gate["n_bets"]
+
                 best          = copy.deepcopy(candidate)
                 best_score    = score
                 best_metrics  = metrics
                 gens_no_best  = 0
                 save_strategy(best, BEST_STRATEGY)
                 update_population(population, best, score)
+                gate_tag = (f" gate={'pending' if gate['pass_gate'] is None else 'passed'}"
+                            f"(n_resolved={gate['n_resolved']})")
                 append_result(gen, metrics, "new_best", desc)
                 log(f"  Gen {gen}: NEW BEST adj={score:.4f} sharpe={metrics['sharpe']:.4f} "
                     f"roi={metrics['roi_pct']:.1f}% win={metrics['win_rate']:.1f}% "
-                    f"n={metrics['n_bets']} [{mut_type}]")
+                    f"n={metrics['n_bets']} [{mut_type}]{gate_tag}")
             else:
                 update_population(population, candidate, score)
                 append_result(gen, metrics, "no_improvement", desc)
