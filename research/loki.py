@@ -1926,4 +1926,11 @@ def main():
 
 
 if __name__ == "__main__":
+    import sys as _sys; _sys.path.insert(0, '/root/.openclaw/workspace')
+    try:
+        from config_loader import config as _cfg
+        if getattr(_cfg, "mode", "full") != "full":
+            print("[loki] mode=lite -- exiting (AI research disabled)", flush=True); _sys.exit(0)
+    except Exception:
+        pass
     main()

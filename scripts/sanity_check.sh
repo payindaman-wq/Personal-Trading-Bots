@@ -152,6 +152,89 @@ else
     warn "vps_host not set -- skipping SSH test"
 fi
 
+# ---- Mode-aware checks ----
+MODE=$(python3 config_loader.py --get mode 2>/dev/null || echo "full")
+echo ""
+echo "Mode: $MODE"
+
+if [[ "$MODE" == "lite" ]]; then
+    echo "Checking lite-mode requirements..."
+
+    # Check upstream remote configured
+    if git remote get-url upstream &>/dev/null 2>&1; then
+        ok "upstream remote configured: $(git remote get-url upstream)"
+    else
+        fail "upstream remote not configured -- run: git remote add upstream https://github.com/coldstoneadmin/crypto-trading-toolkit"
+    fi
+
+    # Check strategy_sync cron installed
+    if crontab -l 2>/dev/null | grep -q "strategy_sync.py"; then
+        ok "strategy_sync cron installed"
+    else
+        warn "strategy_sync cron not installed -- run setup.sh --mode lite or add cron manually"
+    fi
+
+    # Check champion freshness for each enabled league
+    echo "Checking champion freshness..."
+    CHAMPIONS_OK=0
+    python3 - <<'PYEOF'
+import json, os, sys
+from datetime import datetime, timezone
+WORKSPACE = os.environ.get("WORKSPACE", "/root/.openclaw/workspace")
+try:
+    import yaml
+    config_raw = yaml.safe_load(open(f"{WORKSPACE}/config.yaml")) or {}
+except Exception:
+    config_raw = {}
+leagues = (config_raw.get("fleet") or {}).get("leagues_enabled") or []
+now = datetime.now(timezone.utc)
+stale = []
+for league in leagues:
+    meta_path = f"{WORKSPACE}/published/{league}/champion.meta.json"
+    if not os.path.exists(meta_path):
+        print(f"[YELLOW] {league}: published champion not found -- Mother may not have published yet")
+        stale.append(league)
+        continue
+    try:
+        meta = json.load(open(meta_path))
+        ts = datetime.fromisoformat(meta["ts"].replace("Z", "+00:00"))
+        age_h = (now - ts).total_seconds() / 3600
+        if age_h > 24:
+            print(f"[YELLOW] {league}: champion is {age_h:.1f}h old (>24h) -- Mother may be down")
+            stale.append(league)
+        else:
+            print(f"[GREEN]  {league}: champion age {age_h:.1f}h sharpe={meta.get('source_sharpe')}")
+    except Exception as e:
+        print(f"[YELLOW] {league}: could not read champion.meta.json: {e}")
+        stale.append(league)
+if stale:
+    sys.exit(1)
+sys.exit(0)
+PYEOF
+    if [[ $? -eq 0 ]]; then
+        PASS=$((PASS+1))
+    else
+        WARN=$((WARN+1))
+    fi
+
+elif [[ "$MODE" == "full" ]]; then
+    echo "Checking full-mode requirements..."
+
+    # Verify push access to origin (strategy_publisher will fail without it)
+    if git push --dry-run origin master &>/dev/null 2>&1; then
+        ok "push access to origin confirmed -- strategy_publisher can publish"
+    else
+        warn "push access to origin not confirmed -- strategy_publisher cron will fail; check repo permissions"
+    fi
+
+    # Check strategy_publisher cron installed
+    if crontab -l 2>/dev/null | grep -q "strategy_publisher.py"; then
+        ok "strategy_publisher cron installed"
+    else
+        warn "strategy_publisher cron not installed -- friends won't receive updated strategies"
+    fi
+fi
+
 echo ""
 echo "------------------------------------"
 echo "Results: ${PASS} GREEN  ${WARN} YELLOW  ${FAIL} RED"

@@ -4,6 +4,8 @@
 
 config_version: 1   # REQUIRED — must be the first key. Do not change this value.
 
+mode: "full"   # "full" (all AI officers) or "lite" (no AI, pull strategies from upstream)
+
 anthropic:
   api_key: ""               # Anthropic API key (or set ANTHROPIC_API_KEY env var)
   daily_budget_usd: 10      # Hard cap on daily Anthropic spend in USD
