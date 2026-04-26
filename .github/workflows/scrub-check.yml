@@ -1,0 +1,16 @@
+name: scrub-check
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  scrub-check:
+    name: Personal data leak guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run scrub check
+        run: bash scripts/scrub_check.sh

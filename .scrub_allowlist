@@ -1,0 +1,24 @@
+# .scrub_allowlist — regex suppression list for scripts/scrub_check.sh
+# One regex per line; lines starting with # are ignored.
+# A finding is suppressed if the full "file:line:content" string matches any entry here.
+#
+# TODO (migration day — see docs/migration_runbook.md):
+#   - Remove the migration_runbook.md entries once that file is updated to use
+#     YOUR_VPS_HOST and YOUR_USERNAME placeholders.
+#   - Remove the getting_started.md entry once that URL is updated post-migration.
+
+# docs/migration_runbook.md: Chris's VPS IP appears in SSH commands throughout.
+# These are migration-specific instructions; file becomes generic post-migration.
+docs/migration_runbook\.md:.*204\.168\.167\.19
+
+# docs/migration_runbook.md + docs/getting_started.md: payindaman-wq is the
+# migration target account and current template publisher URL.
+docs/migration_runbook\.md:.*payindaman
+docs/getting_started\.md:.*payindaman
+
+# research/, fleet/, published/ YAML files: machine-generated bot parameter files.
+# Officer names (FREYA, ODIN, etc.) appear as internal metadata written by the system,
+# not as user-facing config that would confuse fork operators.
+(research|fleet|published)/.*:.*\b(ODIN|MIMIR|FREYA|LOKI|TYR|VIDAR|HEIMDALL)\b
+# docs/troubleshooting.md: shows payindaman-wq upstream URL in sync troubleshooting steps
+docs/troubleshooting\.md:.*payindaman

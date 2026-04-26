@@ -74,3 +74,45 @@ git remote add upstream https://github.com/MOTHER_USERNAME/crypto-trading-toolki
 **PAT storage:** `config.yaml` is gitignored -- the PAT is never committed. Alternatively
 export `UPSTREAM_PAT` in your VPS environment. The publisher falls back to extracting
 the token from origin's URL if neither is set.
+
+
+## Personal Data Hygiene
+
+This repo includes a CI check (`scripts/scrub_check.sh`) that scans tracked files for strings
+that must not appear in a public template: VPS IPs, GitHub PATs, Telegram bot tokens, and
+personal account handles. It runs automatically on every push and pull request to master.
+
+Run it locally at any time:
+
+```bash
+bash scripts/scrub_check.sh
+```
+
+Exit 0 means clean. Exit 1 prints `FAIL [LABEL]: file:line:content` for each violation.
+
+### Adding an allowlist entry
+
+If a match is legitimate (for example, a doc that explains what a Telegram bot token looks
+like, or a migration runbook that intentionally references your VPS IP), add a regex to
+`.scrub_allowlist` at the repo root:
+
+```
+# Brief explanation of why this match is safe
+path/to/file\.md:.*your_pattern_here
+```
+
+Each line is matched against the full `file:line:content` string. Lines starting with `#`
+are comments.
+
+### Running your own fork
+
+When you fork this repo, extend the forbidden list with your own identifiers so accidental
+commits do not leak your infrastructure details:
+
+1. Open `scripts/scrub_check.sh` and add your VPS IP, personal GitHub handle, etc. to the
+   `check_pattern` calls in the **Global patterns** section.
+2. If you rename the upstream (for example, to your own GitHub username), add
+   `check_pattern "HANDLE" 'yourusername'` and add any legitimate existing uses to
+   `.scrub_allowlist`.
+3. The CI workflow (`.github/workflows/scrub-check.yml`) enforces these checks on every
+   push and pull request automatically.
