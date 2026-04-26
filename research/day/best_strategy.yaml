@@ -1,5 +1,5 @@
-name: crossover
-style: momentum_price_change_macd_ema_trend_filter
+name: null
+style: null
 pairs:
 - UNI/USD
 - AAVE/USD
@@ -12,60 +12,13 @@ pairs:
 - AVAX/USD
 - LINK/USD
 position:
-  size_pct: 13.98
-  max_open: 3
+  size_pct: 0
+  max_open: 0
   fee_rate: 0.0026
-entry:
-  long:
-    conditions:
-    - indicator: momentum_accelerating
-      period_minutes: 60
-      operator: eq
-      value: true
-    - indicator: price_change_pct
-      period_minutes: 5
-      operator: lt
-      value: -1.21
-    - indicator: macd_signal
-      period_minutes: 30
-      operator: eq
-      value: bullish
-    - indicator: price_vs_ema
-      period_minutes: 60
-      operator: eq
-      value: above
-    - indicator: trend
-      period_minutes: 240
-      operator: eq
-      value: up
-  short:
-    conditions:
-    - indicator: momentum_accelerating
-      period_minutes: 60
-      operator: eq
-      value: true
-    - indicator: price_change_pct
-      period_minutes: 30
-      operator: gt
-      value: 1.16
-    - indicator: macd_signal
-      period_minutes: 30
-      operator: eq
-      value: bearish
-    - indicator: price_vs_ema
-      period_minutes: 120
-      operator: eq
-      value: below
-    - indicator: trend
-      period_minutes: 240
-      operator: eq
-      value: down
-exit:
-  take_profit_pct: 3.51
-  stop_loss_pct: 0.28
-  timeout_minutes: 706
-risk:
-  pause_if_down_pct: 4
-  stop_if_down_pct: 10
-  pause_minutes: 60
-_sharpe_24h_median: -0.2132
+entry: {}
+exit: {}
+risk: {}
+_session9_stripped: true
+_session17_restripped: true
+_session17_restripped_reason: 'Session 9 placeholder reverted by deploy.yml git reset --hard origin/master on every push (yaml is git-tracked while meta.json is untracked). Plug: commit placeholder to HEAD so reset lands on placeholder content. Pending organic ODIN promotion under unified gate.'
+_sharpe_24h_median: null
