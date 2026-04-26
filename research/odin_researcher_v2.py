@@ -329,44 +329,225 @@ def adj_score(sharpe, trades, target=50, league=None):
 
 
 # ----------------------------------------------------------------
+# Archetype-bucketed elite pool (mode-collapse fix, meta_audit F3)
+# ----------------------------------------------------------------
+# Replaces the previous single global top-10 ranking with a per-archetype
+# pool. Each candidate is classified by primary signal family and competes
+# for slots WITHIN ITS BUCKET, not against the whole population. This makes
+# diversity injection (forced-randoms, signal-file resets) actually stick:
+# a random with a different archetype no longer has to outrank a winning
+# archetype on global Sharpe — it just has to beat the weakest of its own
+# bucket.
+#
+# Bucket layout: 4 archetypes x 3 slots = 12 elite slots max.
+# classify_archetype returns from a 6-name vocabulary; non-bucket archetypes
+# (volatility, hybrid) route to the closest bucket via BUCKET_OF.
+BUCKET_NAMES = ("trend_following", "mean_reversion", "breakout", "momentum")
+BUCKET_SLOTS = 3
+BUCKET_OF = {
+    "trend_following": "trend_following",
+    "mean_reversion":  "mean_reversion",
+    "breakout":        "breakout",
+    "momentum":        "momentum",
+    "volatility":      "breakout",        # range-expansion plays sit nearest breakout
+    "hybrid":          "trend_following", # fallback when no family dominates
+}
+
+_ARCHETYPE_FAMILIES = {
+    "trend":                 "trend_following",
+    "macd_signal":           "trend_following",
+    "price_vs_ema":          "trend_following",
+    "price_vs_vwap":         "trend_following",
+    "rsi":                   "mean_reversion",
+    "bollinger_position":    "mean_reversion",   # base; overridden per-condition below
+    "momentum_accelerating": "momentum",
+    "price_change_pct":      "momentum",
+}
+
+
+def classify_archetype(strategy):
+    """Heuristic on indicator families used by the strategy.
+
+    Returns one of: trend_following | mean_reversion | breakout | momentum |
+    volatility | hybrid. Each entry condition (long + short) votes for its
+    indicator's family. Bollinger above_upper-long / below_lower-short reads
+    as breakout. Top family wins; a tie at the top with both >=2 votes
+    collapses to hybrid. Empty/malformed strategies return hybrid.
+    """
+    if not isinstance(strategy, dict):
+        return "hybrid"
+    entry = strategy.get("entry", {}) or {}
+    votes = {}
+    for side in ("long", "short"):
+        side_block = entry.get(side, {}) or {}
+        for cond in side_block.get("conditions", []) or []:
+            ind = cond.get("indicator")
+            fam = _ARCHETYPE_FAMILIES.get(ind)
+            if fam is None:
+                continue
+            if ind == "bollinger_position":
+                v = cond.get("value")
+                if (side == "long" and v == "above_upper") or (side == "short" and v == "below_lower"):
+                    fam = "breakout"
+            votes[fam] = votes.get(fam, 0) + 1
+    if not votes:
+        return "hybrid"
+    ordered = sorted(votes.items(), key=lambda kv: kv[1], reverse=True)
+    top_fam, top_n = ordered[0]
+    if len(ordered) > 1 and ordered[1][1] == top_n and top_n >= 2:
+        return "hybrid"
+    return top_fam
+
+
+# ----------------------------------------------------------------
 # Population management
 # ----------------------------------------------------------------
 
 class Population:
     def __init__(self, league):
         self.league = league
-        self.elites = []  # list of (adj_score, strategy_dict, yaml_str)
+        self.elites = []  # flat sorted view across all buckets: (adj_score, strategy_dict, yaml_str)
+
+    def _bucket_view(self):
+        """Group current self.elites entries by archetype bucket. Sorted desc by score within each bucket."""
+        by_bucket = {name: [] for name in BUCKET_NAMES}
+        for entry in self.elites:
+            _, strat, _ = entry
+            archetype = classify_archetype(strat)
+            bn = BUCKET_OF.get(archetype, "trend_following")
+            by_bucket[bn].append(entry)
+        for bn in by_bucket:
+            by_bucket[bn].sort(key=lambda x: x[0], reverse=True)
+        return by_bucket
+
+    def archetype_distribution(self):
+        """Returns {bucket_name: count} for current elites — surfaced into champion meta."""
+        counts = {name: 0 for name in BUCKET_NAMES}
+        for _, strat, _ in self.elites:
+            archetype = classify_archetype(strat)
+            counts[BUCKET_OF.get(archetype, "trend_following")] += 1
+        return counts
+
+    def best_bucket(self):
+        """Archetype name of the bucket containing the top-scoring elite (or None if empty)."""
+        if not self.elites:
+            return None
+        return BUCKET_OF.get(classify_archetype(self.elites[0][1]), "trend_following")
+
+    def best_bucket_stalled(self, gens_since_best):
+        """Stall signal: best bucket has not produced an improvement in DIVERSITY_STALL_FLOOR gens.
+
+        gens_since_best (tracked by the main loop in gen_state.json) only resets when
+        is_new_best fires, which by definition is an improvement inside whichever bucket
+        currently holds the global top elite. So in the bucketed model this counter is
+        exactly 'gens since the best bucket last improved'.
+        """
+        return gens_since_best > DIVERSITY_STALL_FLOOR
 
     def load(self):
+        """Read elite files into self.elites. Migrates legacy elite_<i>.yaml on first load.
+
+        Two on-disk formats are tolerated: new (elite_<bucket>_<i>.yaml) and legacy
+        (elite_<i>.yaml, single global ranking). Whichever format is present is read,
+        each strategy is classified into its archetype bucket, and per-bucket overflow
+        is trimmed to the top BUCKET_SLOTS by adj_score. After load, self.save() is
+        called once if any legacy or stale files were detected so disk converges to
+        the new layout.
+        """
         d = pop_dir(self.league)
         self.elites = []
+        legacy_paths = []
+        new_format_present = False
+
+        # Legacy: elite_<i>.yaml.
         for i in range(POPULATION_SIZE):
             path = os.path.join(d, f"elite_{i}.yaml")
             if os.path.exists(path):
                 with open(path) as f:
                     text = f.read()
                 strat = yaml.safe_load(text)
-                sharpe = strat.get("_sharpe", 0.0)
-                trades = strat.get("_trades", 30)  # default 30 for legacy files
-                score = adj_score(sharpe, trades, league=self.league)
-                self.elites.append((score, strat, text))
-        self.elites.sort(key=lambda x: x[0], reverse=True)
+                if isinstance(strat, dict):
+                    sharpe = strat.get("_sharpe", 0.0)
+                    trades = strat.get("_trades", 30)  # default 30 for legacy files
+                    score = adj_score(sharpe, trades, league=self.league)
+                    self.elites.append((score, strat, text))
+                legacy_paths.append(path)
+
+        # New format: elite_<bucket>_<i>.yaml.
+        for bucket_name in BUCKET_NAMES:
+            for i in range(BUCKET_SLOTS):
+                path = os.path.join(d, f"elite_{bucket_name}_{i}.yaml")
+                if os.path.exists(path):
+                    with open(path) as f:
+                        text = f.read()
+                    strat = yaml.safe_load(text)
+                    if isinstance(strat, dict):
+                        sharpe = strat.get("_sharpe", 0.0)
+                        trades = strat.get("_trades", 30)
+                        score = adj_score(sharpe, trades, league=self.league)
+                        self.elites.append((score, strat, text))
+                    new_format_present = True
+
+        if not self.elites:
+            return
+
+        # Route every loaded strategy into its archetype bucket and trim overflow.
+        by_bucket = {name: [] for name in BUCKET_NAMES}
+        for entry in self.elites:
+            archetype = classify_archetype(entry[1])
+            bn = BUCKET_OF.get(archetype, "trend_following")
+            by_bucket[bn].append(entry)
+        flat = []
+        for bn in BUCKET_NAMES:
+            by_bucket[bn].sort(key=lambda x: x[0], reverse=True)
+            flat.extend(by_bucket[bn][:BUCKET_SLOTS])
+        flat.sort(key=lambda x: x[0], reverse=True)
+        self.elites = flat
+
+        # If we just migrated legacy files, or new-format files exist alongside legacy,
+        # converge disk to the bucketed layout (and prune trimmed overflow).
+        if legacy_paths or new_format_present:
+            self.save()
 
     def save(self):
+        """Write self.elites to per-bucket files. Trims per-bucket overflow and prunes stale files.
+
+        self.elites is the source of truth in memory; this method classifies each entry,
+        trims each bucket to BUCKET_SLOTS by adj_score, writes elite_<bucket>_<i>.yaml,
+        deletes any other elite_*.yaml in the population dir (legacy or stale), and
+        rebuilds self.elites to the post-trim flat sorted view.
+        """
         d = pop_dir(self.league)
-        for i, (score, strat, _) in enumerate(self.elites):
-            # _sharpe and _trades already stored in strat by try_insert/seed_from
-            path = os.path.join(d, f"elite_{i}.yaml")
-            text = yaml.dump(strat, default_flow_style=False, sort_keys=False)
-            with open(path, "w") as f:
-                f.write(text)
-            # Update tuple with fresh text
-            self.elites[i] = (score, strat, text)
-        # Remove any stale files beyond current population
-        for i in range(len(self.elites), POPULATION_SIZE):
-            path = os.path.join(d, f"elite_{i}.yaml")
-            if os.path.exists(path):
-                os.remove(path)
+        by_bucket = {name: [] for name in BUCKET_NAMES}
+        for entry in self.elites:
+            archetype = classify_archetype(entry[1])
+            bn = BUCKET_OF.get(archetype, "trend_following")
+            by_bucket[bn].append(entry)
+
+        written = set()
+        new_elites = []
+        for bucket_name in BUCKET_NAMES:
+            by_bucket[bucket_name].sort(key=lambda x: x[0], reverse=True)
+            bucket = by_bucket[bucket_name][:BUCKET_SLOTS]
+            for i, (score, strat, _) in enumerate(bucket):
+                path = os.path.join(d, f"elite_{bucket_name}_{i}.yaml")
+                text = yaml.dump(strat, default_flow_style=False, sort_keys=False)
+                with open(path, "w") as f:
+                    f.write(text)
+                written.add(path)
+                new_elites.append((score, strat, text))
+
+        new_elites.sort(key=lambda x: x[0], reverse=True)
+        self.elites = new_elites
+
+        # Cleanup: drop any elite_*.yaml file we did not just write (legacy or stale bucket slot).
+        import glob as _glob
+        for path in _glob.glob(os.path.join(d, "elite_*.yaml")):
+            if path not in written:
+                try:
+                    os.remove(path)
+                except OSError:
+                    pass
 
     def seed_from(self, strategy_dict, strategy_yaml, sharpe, trades=0):
         strategy_dict["_sharpe"] = sharpe
@@ -528,9 +709,18 @@ class Population:
                 if abs(sharpe - float(_e_strat.get("_sharpe", 0.0))) < ELITE_SHARPE_EPS:
                     return False, False
 
-        if len(self.elites) < POPULATION_SIZE:
+        # Archetype-bucketed routing (mode-collapse fix). The candidate competes
+        # only against members of its OWN bucket, not the global top-N. This is
+        # what makes diversity injection actually stick — a different-archetype
+        # random no longer has to outrank a winning archetype on global Sharpe.
+        archetype = classify_archetype(strategy_dict)
+        bucket_name = BUCKET_OF.get(archetype, "trend_following")
+        by_bucket = self._bucket_view()
+        bucket = by_bucket[bucket_name]
+
+        if len(bucket) < BUCKET_SLOTS:
+            # Bucket has room — append and let save() normalise (sort + per-bucket trim).
             self.elites.append(entry)
-            self.elites.sort(key=lambda x: x[0], reverse=True)
             self.save()
             # Sync best_strategy.yaml to current top elite after EVERY insertion,
             # not only on strict new_best. elites[0] can shift via adj_score
@@ -539,9 +729,12 @@ class Population:
             self._save_fleet(self.elites[0][2])
             return True, is_new_best
 
-        if score > self.worst_adj():
-            self.elites[-1] = entry
-            self.elites.sort(key=lambda x: x[0], reverse=True)
+        # Bucket full — displace ONLY the weakest of THIS bucket. Other buckets,
+        # even if they hold globally-lower-scoring strategies, are not touched.
+        if score > bucket[-1][0]:
+            weakest = bucket[-1]
+            self.elites = [e for e in self.elites if e is not weakest]
+            self.elites.append(entry)
             self.save()
             self._save_fleet(self.elites[0][2])
             return True, is_new_best
@@ -568,6 +761,8 @@ class Population:
             "sharpe":    raw,
             "trades":    int(strat.get("_trades", 0)),
             "saved_at":  datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "archetype":              classify_archetype(strat),
+            "archetype_distribution": self.archetype_distribution(),
         }
         strat.pop("_sharpe", None)
         strat.pop("_trades", None)
