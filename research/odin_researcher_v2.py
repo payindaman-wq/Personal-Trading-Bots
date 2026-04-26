@@ -99,6 +99,13 @@ FORCE_RANDOM_EVERY   = 500
 # F8 (meta_audit 2026-04-25): hard OOS floor — candidate OOS must clear this
 # regardless of champion_oos.
 OOS_HARD_FLOOR       = 0.0
+# audit-item-4 (Session 5, 2026-04-26): multi-metric promotion floors.
+# Sharpe alone let a -2.5267 candidate become champion on futures_day before
+# Sessions 1+2+3.5 closed the gap. Sortino floor demands positive
+# downside-risk-adjusted return; max-DD ceiling caps the worst peak-to-trough
+# loss any deployable candidate may exhibit. Conservative single-constant.
+SORTINO_FLOOR        = 0.5
+MAX_DD_CEIL_PCT      = 30.0
 # F3 (meta_audit 2026-04-25): diversity injection thresholds.
 DIVERSITY_UNIQUE_FLOOR = 3
 DIVERSITY_STALL_FLOOR  = 500
@@ -617,15 +624,22 @@ class Population:
             print(f"[odin/inbox] {e}")
         print(f"| VETO_NEW_BEST league={self.league} reason={reason} {detail}")
 
-    def _gate_new_best(self, raw_sharpe, cand_adj_score):
+    def _gate_new_best(self, raw_sharpe, cand_adj_score,
+                       sortino=None, max_dd_pct=None):
         """meta_audit F1 (2026-04-26) new_best promotion gate. Sequence:
-          (a) raw backtest_sharpe > 0           — HARD VETO, never overridable
-          (b) adj_score beats champion adj_score (+ drift gate_bonus)
-          (c) OOS gate                          — handled in main loop upstream
-          (d) 5-sprint live-PnL median veto     — preserved from prior F1 ship
+          (a)   raw backtest_sharpe > 0           — HARD VETO, never overridable
+          (a.1) sortino >= SORTINO_FLOOR          — audit-item-4 (Session 5)
+          (a.2) max_drawdown_pct <= MAX_DD_CEIL   — audit-item-4 (Session 5)
+          (b)   adj_score beats champion adj_score (+ drift gate_bonus)
+          (c)   OOS gate                          — handled in main loop upstream
+          (d)   5-sprint live-PnL median veto     — preserved from prior F1 ship
         Sparse-history fallback (<5 sprints OR no drift file): require
         raw>0 OR raw>=champion_raw, since adj_score collapses toward raw when
         z=0 and the adj comparison is fragile post-reseed.
+        sortino / max_dd_pct default to None for backward-compat with
+        existing 2-arg callers (smoke_f1_gate, smoke_deploy_gate); when
+        None the (a.1)/(a.2) checks no-op. Production callers in the main
+        loop pass both, so live promotions always exercise the full gate.
         Short-circuits on first failure; emits one syn_inbox entry per veto.
         Returns True only when the candidate passes every check.
         """
@@ -635,12 +649,39 @@ class Population:
                 self._emit_veto("raw_sharpe_negative",
                                 f"raw={raw_sharpe:.4f} cold_start")
                 return False
+            if sortino is not None and sortino < SORTINO_FLOOR:
+                self._emit_veto("sortino_below_floor",
+                                f"sortino={sortino:.4f} floor={SORTINO_FLOOR} "
+                                f"cold_start")
+                return False
+            if max_dd_pct is not None and max_dd_pct > MAX_DD_CEIL_PCT:
+                self._emit_veto("max_dd_above_ceil",
+                                f"max_dd={max_dd_pct:.4f} ceil={MAX_DD_CEIL_PCT} "
+                                f"cold_start")
+                return False
             return True
 
         # (a) HARD raw-Sharpe veto — never overridable by adj_score.
         if raw_sharpe < 0:
             self._emit_veto("raw_sharpe_negative",
                             f"raw={raw_sharpe:.4f} adj={cand_adj_score:.4f}")
+            return False
+
+        # (a.1) Sortino floor — fires after raw veto, before drift bonus + OOS.
+        # O(1) on values already in the candidate's backtest result; no second
+        # backtest run. Catches negative-downside-skew strategies that slip
+        # past Sharpe alone.
+        if sortino is not None and sortino < SORTINO_FLOOR:
+            self._emit_veto("sortino_below_floor",
+                            f"sortino={sortino:.4f} floor={SORTINO_FLOOR} "
+                            f"raw={raw_sharpe:.4f}")
+            return False
+
+        # (a.2) Max-drawdown ceiling — caps deployable worst peak-to-trough.
+        if max_dd_pct is not None and max_dd_pct > MAX_DD_CEIL_PCT:
+            self._emit_veto("max_dd_above_ceil",
+                            f"max_dd={max_dd_pct:.4f} ceil={MAX_DD_CEIL_PCT} "
+                            f"raw={raw_sharpe:.4f}")
             return False
 
         # Drift gate_bonus from the existing backtest_drift consumer interface
@@ -696,9 +737,12 @@ class Population:
 
         return True
 
-    def try_insert(self, strategy_dict, strategy_yaml, sharpe, trades):
+    def try_insert(self, strategy_dict, strategy_yaml, sharpe, trades,
+                   sortino=None, max_dd_pct=None):
         """Returns (inserted, is_new_best). is_new_best gated by F1 promotion
-        sequence in _gate_new_best (meta_audit 2026-04-26)."""
+        sequence in _gate_new_best (meta_audit 2026-04-26).
+        sortino / max_dd_pct forwarded to _gate_new_best for the
+        audit-item-4 (Session 5) Sortino floor + max-DD ceiling checks."""
         strategy_dict["_sharpe"] = sharpe
         strategy_dict["_trades"] = trades
         score = adj_score(sharpe, trades, league=self.league)
@@ -707,7 +751,7 @@ class Population:
         # Reset before the gate runs so a stale reason from a prior call
         # cannot leak into _save_fleet's deploy_skipped emission below.
         self._last_veto_reason = None
-        is_new_best = self._gate_new_best(sharpe, score)
+        is_new_best = self._gate_new_best(sharpe, score, sortino, max_dd_pct)
         veto_reason = self._last_veto_reason if not is_new_best else None
 
         # F4: reject clones — if a non-new-best candidate matches an existing
@@ -1561,8 +1605,16 @@ def main():
             import yaml as _yaml3
             candidate_yaml = _yaml3.dump(candidate, default_flow_style=False, sort_keys=False)
 
-        # Population insertion
-        inserted, is_new_best = pop.try_insert(candidate, candidate_yaml, sharpe, trades)
+        # Population insertion. audit-item-4 (Session 5): forward Sortino +
+        # max-DD from this gen's backtest result so _gate_new_best's (a.1)/(a.2)
+        # checks fire on every promotion attempt — values are already in
+        # `result`; no second backtest run.
+        cand_sortino = float(result.get("sortino", 0.0))
+        cand_max_dd  = float(result.get("max_drawdown_pct", 0.0))
+        inserted, is_new_best = pop.try_insert(
+            candidate, candidate_yaml, sharpe, trades,
+            sortino=cand_sortino, max_dd_pct=cand_max_dd,
+        )
 
         if is_new_best:
             status = "new_best"

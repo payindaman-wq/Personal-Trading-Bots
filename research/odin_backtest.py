@@ -363,6 +363,36 @@ def compute_sharpe(snapshots):
     return round(mean_r / std_r * math.sqrt(365), 4)
 
 
+# audit-item-4 (Session 5, 2026-04-26): Sortino mirror of compute_sharpe.
+# Annualised mean daily return / downside deviation (squared losses only,
+# divided by the same N as compute_sharpe so the two are comparable on
+# the SAME daily-equity series). Reuses the snapshots compute_sharpe
+# consumes — no second backtest run.
+def compute_sortino(snapshots):
+    if len(snapshots) < 2:
+        return 0.0
+    day_eq = {}
+    for ts_ms, eq in snapshots:
+        day = ts_ms // 86_400_000
+        day_eq[day] = eq
+    days = sorted(day_eq.keys())
+    if len(days) < 2:
+        return 0.0
+    rets = [(day_eq[days[i]] - day_eq[days[i-1]]) / day_eq[days[i-1]]
+            for i in range(1, len(days)) if day_eq[days[i-1]] > 0]
+    if len(rets) < 2:
+        return 0.0
+    mean_r = sum(rets) / len(rets)
+    neg = [r for r in rets if r < 0]
+    if not neg:
+        return 999.0  # no drawdown days; mirror sentinel of -999 in the favourable direction
+    downside_var = sum(r * r for r in neg) / len(rets)
+    downside_std = math.sqrt(downside_var)
+    if downside_std == 0:
+        return 999.0
+    return round(mean_r / downside_std * math.sqrt(365), 4)
+
+
 # F10 (meta_audit): secondary horizon-matched metric for day leagues.
 # Primary Sharpe above is 2yr annualised — averages across regime shifts
 # that a 24h sprint will never see. This computes per-window Sharpe of
@@ -413,7 +443,7 @@ def run_backtest(strategy, league, pairs=None, time_slice=None):
       of the available timeline. Used by run_backtest_oos for out-of-sample
       validation. Defaults to None = full window (backward-compatible).
 
-    Returns dict with: sharpe, win_rate_pct, total_pnl_pct, total_trades,
+    Returns dict with: sharpe, sortino, win_rate_pct, total_pnl_pct, total_trades,
                        max_drawdown_pct, final_equity, suspicious, suspicious_reason,
                        time_slice (echoed back when provided).
     """
@@ -582,6 +612,7 @@ def run_backtest(strategy, league, pairs=None, time_slice=None):
     wins     = sum(1 for t in trades if t["won"])
     pnl_pct  = (current_equity(portfolio) - STARTING_CAP) / STARTING_CAP * 100
     sharpe   = compute_sharpe(portfolio["equity_snapshots"])
+    sortino  = compute_sortino(portfolio["equity_snapshots"])
     sharpe_24h_median = compute_rolling_sharpe(portfolio["equity_snapshots"])
     win_rate = round(wins / total * 100, 1) if total > 0 else 0.0
 
@@ -596,6 +627,7 @@ def run_backtest(strategy, league, pairs=None, time_slice=None):
 
     _result = {
         "sharpe":              sharpe,
+        "sortino":             sortino,
         "sharpe_24h_median":   sharpe_24h_median,
         "win_rate_pct":        win_rate,
         "total_pnl_pct":       round(pnl_pct, 4),
