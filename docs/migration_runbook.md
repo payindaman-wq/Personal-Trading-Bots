@@ -42,6 +42,15 @@ Expected output: `config.yaml` followed by `OK: config.yaml is ignored`. If this
 command produces no output, stop — config.yaml is NOT ignored and you risk pushing
 secrets to a public repo.
 
+**Confirm config.yaml is not tracked in the source repo:**
+
+```bash
+ssh root@204.168.167.19 "cd /root/.openclaw/workspace && git ls-files | grep config.yaml"
+```
+
+Expected: no output. If `config.yaml` appears in the output, stop — it has been
+accidentally committed and will push to the public template in Step 2.
+
 **Confirm current origin:**
 
 ```bash
@@ -126,7 +135,8 @@ committed at some point in the source repo's history.)
 ## Step 3 — Set up the private personal Mother repo (~10 min)
 
 The personal repo is what the VPS deploys from. It holds the same code as the public
-template, plus your `config.yaml` tracked privately.
+template. `config.yaml` stays gitignored and lives only on the VPS filesystem — it is
+never committed to either repo.
 
 ### 3.1 — Re-point origin to the personal repo
 
@@ -138,41 +148,31 @@ git push -u origin master
 
 Wait for the push to complete. The personal repo now has the full codebase.
 
-### 3.2 — Track config.yaml in the personal repo only
+### 3.2 — Back up config.yaml outside git
 
-`config.yaml` is listed in `.gitignore`, which prevents it from being committed. The
-`.gitignore` itself is tracked and shared with the public template, so you must not
-modify `.gitignore` to allow `config.yaml` — that change would propagate upstream when
-you pull future improvements.
-
-Instead, use the per-clone exclude file. This is local to this clone only and is never
-committed or pushed:
+`config.yaml` is gitignored in both repos and must stay that way. It lives only on
+the VPS filesystem at `/root/.openclaw/workspace/config.yaml`. To protect against
+accidental loss (disk failure, re-clone, misconfiguration), encrypt and save a copy
+outside git using the provided backup script:
 
 ```bash
-# Tell this clone to treat !config.yaml as an override to .gitignore
-echo '!config.yaml' >> .git/info/exclude
-
-# Now git can see config.yaml — add and commit it
-git add config.yaml
-git commit -m "personal: track config.yaml in private Mother repo"
-git push origin master
+bash /root/.openclaw/workspace/scripts/backup_secrets.sh
 ```
 
-**Why .git/info/exclude instead of modifying .gitignore:**
-`.git/info/exclude` lives inside the hidden `.git/` directory and is never committed.
-It applies only to this specific clone on this VPS. If you ever re-clone the personal
-repo from scratch, repeat this `echo` line before running `git add config.yaml`. The
-Mother instance is the only deployment of the personal repo, so this is a one-time
-concern.
+The script prompts for a passphrase, encrypts `config.yaml` with AES-256 GPG, and
+saves the result to `/root/.config-backup/`. It keeps the last 7 daily backups and
+deletes older ones automatically. Store the passphrase in a password manager — it is
+not saved anywhere on the VPS.
 
-**Verify config.yaml is tracked:**
+**Confirm config.yaml is NOT tracked after re-pointing origin:**
 
 ```bash
-git ls-files config.yaml
+git ls-files config.yaml | wc -l
 ```
 
-Expected output: `config.yaml`. If blank, the add/commit above did not succeed — check
-for errors in the prior output.
+Expected output: `0`. If it returns `1`, config.yaml was accidentally committed at
+some point in the repo history — stop and investigate before pushing to the public
+template.
 
 ---
 
@@ -213,18 +213,13 @@ Copy the entire output including the `-----BEGIN OPENSSH PRIVATE KEY-----` and
 
 ## Step 5 — Update upstream config for strategy publishing (~2 min)
 
-Open `config.yaml` on the VPS and add the `upstream` block with the public
-template URL and your new PAT:
+Open  on the VPS (or via your laptop SSH session) and add the 
+block with the public template URL and your new PAT:
 
-```yaml
-upstream:
-  repo: "https://github.com/payindaman-wq/Personal-Trading-Bots"
-  branch: "master"
-  pat: "<NEW_PAT>"  # same PAT used above; public_repo scope is sufficient
-```
 
-`strategy_publisher.py` reads these values and pushes champion strategies to the
-public template repo regardless of where `origin` points. No crontab changes needed.
+
+ reads these values and pushes champion strategies to the public
+template repo regardless of where  points. No crontab changes are needed.
 
 ## Step 6 — First end-to-end deploy test (~5 min)
 
@@ -272,7 +267,70 @@ or others made before archiving remain accessible in read-only mode. No data is 
 
 ---
 
-## Step 8 — Bryan access cleanup (~3 min)
+## Step 8 — Branch protection on Personal-Trading-Bots (~3 min)
+
+This step applies to the **public template** only. Branch protection prevents direct
+pushes that bypass CI status checks, ensuring no scrub-check or smoke failures slip
+into the public repo.
+
+### Set the protection rule (GitHub browser UI)
+
+1. Go to https://github.com/payindaman-wq/Personal-Trading-Bots/settings/branches
+2. Click **Add branch protection rule**
+3. Branch name pattern: `master`
+4. Enable: **Require status checks to pass before merging**
+   - In the search box, add these checks (they appear in the dropdown after the first
+     push triggers each workflow):
+     - `scrub-check` (from `.github/workflows/scrub-check.yml`)
+     - `smoke` (from `.github/workflows/smoke.yml`)
+   - Enable: **Require branches to be up to date before merging**
+5. Enable: **Do not allow bypassing the above settings** (applies to admins — bypass
+   via the UI when genuinely needed; this is rare)
+6. Click **Save changes**
+
+**Note:** This rule applies only to merges via pull request. The `strategy_publisher`
+uses a PAT to push directly to master with admin override, which is unaffected. For
+fork users pulling updates from upstream, this gate ensures incoming template changes
+are scrub-clean before they land.
+
+### Step 8.1 — Configure publisher PAT to bypass branch protection
+
+If you want to be explicit about who can push directly:
+
+1. On https://github.com/payindaman-wq/Personal-Trading-Bots/settings/branches,
+   expand the new rule
+2. Under **Restrict who can push to matching branches**, add the `payindaman-wq`
+   account (or the bot account associated with the publisher PAT)
+3. If `payindaman-wq` is the only pusher and you are the repo owner, the admin bypass
+   already covers this — this sub-step is informational
+
+---
+
+## Step 9 — Cutover verification (~2 min)
+
+Run this one-liner from any terminal with VPS SSH access to confirm you are fully cut
+over to payindaman-wq:
+
+```bash
+ssh root@204.168.167.19 "cd /root/.openclaw/workspace && \
+  echo '== origin ==' && git remote -v | grep -E 'origin' && \
+  echo '== publisher upstream ==' && grep -A1 '^upstream:' config.yaml | grep 'repo:' && \
+  echo '== any coldstoneadmin refs left? ==' && grep -rn 'coldstoneadmin' --include='*.py' --include='*.yaml'
+--include='*.md' . 2>/dev/null | grep -v -E 'CHANGELOG|migration_runbook' || echo 'NONE (good)'"
+```
+
+You are fully on payindaman-wq when:
+- origin URL contains `payindaman-wq/Herbal-Nectars-Trading`
+- `repo:` line under `upstream:` contains `payindaman-wq/Personal-Trading-Bots`
+- The third check prints `NONE (good)` — CHANGELOG and migration_runbook are
+  exempt because they retain historical references
+
+If any check fails, do NOT archive `coldstoneadmin/crypto-trading-toolkit` yet — fix
+the pointer and re-run, otherwise you lose your rollback target.
+
+---
+
+## Step 10 — Bryan access cleanup (~3 min)
 
 The old repo is now archived and Bryan retains read-only access to it automatically.
 No action is needed on the old repo.
@@ -288,7 +346,7 @@ The `docs/getting_started.md` in that repo explains the full setup flow.
 
 ---
 
-## Step 9 — Update laptop clone (if applicable)
+## Step 11 — Update laptop clone (if applicable)
 
 If you have a clone of the old repo on your Windows laptop, update it to point at the
 personal repo. Open Git Bash or Windows Terminal in that directory and run:
@@ -318,8 +376,16 @@ Tick each item before calling the migration complete.
   banner at the top of the page
 - [ ] https://github.com/payindaman-wq/Personal-Trading-Bots is public, shows README
   and LICENSE, and does **not** contain `config.yaml`
-- [ ] https://github.com/payindaman-wq/Herbal-Nectars-Trading is private and contains
-  `config.yaml` (browse to the file directly to confirm it is tracked)
+- [ ] config.yaml is NOT tracked in Herbal-Nectars-Trading:
+
+  ```bash
+  ssh root@204.168.167.19 "cd /root/.openclaw/workspace && git ls-files config.yaml | wc -l"
+  ```
+
+  Expected: `0`
+- [ ] Branch protection rule active on Personal-Trading-Bots master, requiring
+  scrub-check and smoke status checks
+- [ ] Cutover verification one-liner from Step 9 prints all three GREEN markers
 - [ ] `strategy_sync.py` no longer references `coldstoneadmin` — confirmed by:
 
   ```bash

@@ -181,6 +181,23 @@ The script writes a file called `config.yaml` that is never uploaded to GitHub �
 
 - ✅ **4.2** `setup.sh` completed without errors.
 
+### Backing up your config.yaml
+
+The `config.yaml` file is the single source of secrets for your deployment. It is
+gitignored in both the public template and the private Mother repo. Never modify
+`.gitignore` to track it. If you need a backup, use `scripts/backup_secrets.sh` which
+encrypts it with GPG before saving.
+
+To create an encrypted backup immediately after setup:
+
+```bash
+bash /root/my-trading-toolkit/scripts/backup_secrets.sh
+```
+
+You will be prompted for a passphrase. Store it in a password manager — it is not
+saved anywhere on the server. The encrypted backup is written to `~/.config-backup/`.
+Run this script again whenever you update `config.yaml`.
+
 ### 4.3 — Run sanity check
 
 ```bash
