@@ -284,6 +284,23 @@ def evaluate_and_heal(entry, state):
         # Reset heal cycle so we don't escalate every run — back off and retry
         healed_at = None
         cycles_since_heal = 0
+        # Tier 2 retry budget exhausted -> hand off to Tier 3 immediately.
+        # Tier 3 enforces its own 30-min/component cooldown and 24h daily cap,
+        # so repeated handoffs from this code path are safe (cooldown-skipped).
+        try:
+            subprocess.Popen(
+                ["python3", f"{WORKSPACE}/self_heal_tier3.py",
+                 "--force", "cascade"],
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                start_new_session=True,
+            )
+        except Exception as _t3_err:
+            log_jsonl({
+                "ts": datetime.now(timezone.utc).isoformat(),
+                "subsystem": name,
+                "event": "tier3_handoff_failed",
+                "error": str(_t3_err)[:200],
+            })
 
     subs[name] = {
         "status": "degraded",
