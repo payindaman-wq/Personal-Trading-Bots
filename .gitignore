@@ -155,3 +155,6 @@ competition/vidar_pending_review.flag
 
 # Active tracking for FREYA validation gate (runtime, ephemeral)
 research/polymarket/active_tracking.jsonl
+
+# --- User config (never commit -- use config.example.yaml as schema reference) ---
+config.yaml
