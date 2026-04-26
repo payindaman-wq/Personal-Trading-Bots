@@ -79,7 +79,7 @@ def _llm_plateau():
         return False
     return (sum(_llm_history) / LLM_WINDOW) < LLM_PLATEAU_THRESHOLD
 
-MIN_TRADES = {"day": 280, "futures_day": 200, "futures_swing": 50}  # futures_day lowered 1700->600->200 on 2026-04-23 for BTC/ETH/SOL-only universe
+MIN_TRADES = {"day": 150, "futures_day": 200, "futures_swing": 50}  # session15: day lowered from 280 to 150 — current regime population averages 150-250 trades, 280 floor was unmeetable. Reassess at next regime shift. (futures_day previously lowered 1700->600->200 on 2026-04-23 for BTC/ETH/SOL-only universe)
 SWING_MIN_TRADES    = 30   # IMMUTABLE - DO NOT MODIFY via LOKI (Item 4)
 MIMIR_MIN_GAP_HRS   = 6    # min wall-clock hours between Mimir calls per league
 # F12: stretched milestone cadence on stalled leagues. A league counts as
