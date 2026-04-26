@@ -1,0 +1,22 @@
+name: Fork Smoke Test
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Python dependencies
+        run: |
+          if [[ -f requirements.txt ]]; then
+            pip install -r requirements.txt
+          fi
+
+      - name: Run fork smoke test
+        run: bash scripts/test_fork_smoke.sh

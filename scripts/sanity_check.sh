@@ -29,6 +29,9 @@ ok "config.yaml valid (config_version: $(python3 config_loader.py --get config_v
 
 get() { python3 config_loader.py --get "$1" 2>/dev/null; }
 
+# Detect mode early so AI API tests can be gated correctly.
+MODE=$(python3 config_loader.py --get mode 2>/dev/null || echo "full")
+
 ANTHROPIC_KEY=$(get anthropic_api_key)
 GEMINI_KEY=$(get gemini_api_key)
 KRAKEN_KEY=$(get kraken_api_key)
@@ -38,8 +41,11 @@ TG_CHAT=$(get telegram_chat_id)
 VPS_HOST=$(get vps_host)
 
 echo ""
-echo "Testing Anthropic..."
-ANTHROPIC_RESULT=$(python3 - <<PYEOF
+echo "Mode: $MODE"
+
+if [[ "$MODE" == "full" ]]; then
+    echo "Testing Anthropic (full mode)..."
+    ANTHROPIC_RESULT=$(python3 - <<PYEOF
 import anthropic
 try:
     client = anthropic.Anthropic(api_key="$ANTHROPIC_KEY")
@@ -53,14 +59,14 @@ except Exception as e:
     print(f"error: {e}")
 PYEOF
 )
-if [[ "$ANTHROPIC_RESULT" == "ok" ]]; then
-    ok "Anthropic API reachable"
-else
-    fail "Anthropic API: $ANTHROPIC_RESULT"
-fi
+    if [[ "$ANTHROPIC_RESULT" == "ok" ]]; then
+        ok "Anthropic API reachable"
+    else
+        fail "Anthropic API: $ANTHROPIC_RESULT"
+    fi
 
-echo "Testing Gemini..."
-GEMINI_RESULT=$(python3 - <<PYEOF
+    echo "Testing Gemini (full mode)..."
+    GEMINI_RESULT=$(python3 - <<PYEOF
 import urllib.request, urllib.error, json
 url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=$GEMINI_KEY"
 body = json.dumps({"contents": [{"parts": [{"text": "hi"}]}], "generationConfig": {"maxOutputTokens": 1}}).encode()
@@ -74,10 +80,14 @@ except Exception as e:
     print(f"error: {e}")
 PYEOF
 )
-if [[ "$GEMINI_RESULT" == "ok" ]]; then
-    ok "Gemini API reachable"
+    if [[ "$GEMINI_RESULT" == "ok" ]]; then
+        ok "Gemini API reachable"
+    else
+        fail "Gemini API: $GEMINI_RESULT"
+    fi
 else
-    fail "Gemini API: $GEMINI_RESULT"
+    warn "Lite mode: Anthropic API check skipped (AI officers not used in lite mode)"
+    warn "Lite mode: Gemini API check skipped (AI officers not used in lite mode)"
 fi
 
 if [[ -n "$KRAKEN_KEY" && -n "$KRAKEN_SECRET" ]]; then
@@ -153,9 +163,7 @@ else
 fi
 
 # ---- Mode-aware checks ----
-MODE=$(python3 config_loader.py --get mode 2>/dev/null || echo "full")
 echo ""
-echo "Mode: $MODE"
 
 if [[ "$MODE" == "lite" ]]; then
     echo "Checking lite-mode requirements..."
