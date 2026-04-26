@@ -59,7 +59,7 @@ ALERT_COOLDOWN_H  = 6
 INBOX = os.path.join(WORKSPACE, "syn_inbox.jsonl")
 
 
-def tg_send(msg, severity="error"):
+def tg_send(msg, severity="error", alert_id=None):
     """Write to SYN inbox. sys_heartbeat is the sole Telegram gateway."""
     try:
         rec = {
@@ -68,6 +68,8 @@ def tg_send(msg, severity="error"):
             "severity": severity,
             "msg":      (msg if isinstance(msg, str) else str(msg))[:2000],
         }
+        if alert_id:
+            rec["alert_id"] = alert_id
         with open(INBOX, "a") as f:
             f.write(json.dumps(rec) + "\n")
     except Exception as e:
@@ -166,7 +168,7 @@ def check_execution_health(league_name, meta, comp_dir, tick_interval_min):
             "Tick not persisting trades.",
             f"<code>{fix_prompt}</code>",
         ]
-        problems.append((f"{league_name}:dead_execution", "\n".join(lines)))
+        problems.append((f"{league_name}:dead_execution", "\n".join(lines), comp_id))
 
     if missing_mtm == found_files and missing_mtm > 0:
         lines = [
@@ -175,7 +177,7 @@ def check_execution_health(league_name, meta, comp_dir, tick_interval_min):
             "Tick not updating equity stats.",
             f"<code>{fix_prompt}</code>",
         ]
-        problems.append((f"{league_name}:no_mtm", "\n".join(lines)))
+        problems.append((f"{league_name}:no_mtm", "\n".join(lines), comp_id))
 
     if stale_files == found_files:
         lines = [
@@ -184,7 +186,7 @@ def check_execution_health(league_name, meta, comp_dir, tick_interval_min):
             "Cron or tick script may be down.",
             f"<code>{fix_prompt}</code>",
         ]
-        problems.append((f"{league_name}:stale_tick", "\n".join(lines)))
+        problems.append((f"{league_name}:stale_tick", "\n".join(lines), comp_id))
 
     return problems
 
@@ -277,10 +279,10 @@ def main():
             comp_dir = os.path.join(league["active_dir"], meta["comp_id"])
             tick_min = league.get("tick_interval_min", 30)
             problems = check_execution_health(league["name"], meta, comp_dir, tick_min)
-            for alert_key, alert_msg in problems:
+            for alert_key, alert_msg, comp_id in problems:
                 print(f"  [{league['name']}] HEALTH WARN: {alert_key}")
                 if should_alert(health_state, alert_key):
-                    tg_send(alert_msg)
+                    tg_send(alert_msg, alert_id=f"{alert_key}:{comp_id}")
                     mark_alerted(health_state, alert_key)
                     health_dirty = True
             for check_suffix in ("dead_execution", "no_mtm", "stale_tick"):
