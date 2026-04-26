@@ -32,3 +32,7 @@ Fixed two distinct ODIN failures Session 13 surfaced. (A) futures_day pair-filte
 Option A v2 Part A scope extended on 2026-04-26 (Session 10.6) — Session 15 surfaced that random_strategy produces 0 trades on tiny universes (3-pair Kraken Derivatives US); Part A now includes mutation-layer sparsity handling for universe_size < 5.
 
 Both scheduled routines (Option A v2 + 14-day verifier) scrubbed of status Telegrams on 2026-04-26 (Session 16). Telegrams now fire only on Chris-action conditions per feedback_syn_telegram_chris_action_only.md.
+
+## Session 19 — 2026-04-26 — day league fleet restore + gitignore prevention
+
+Restored 12 day-league bot strategies (floki, bjorn, lagertha, ragnar, leif, gunnar, harald, freydis, sigurd, astrid, ulf, bjarne) from commit f62ad49 after upstream template scrub commit 0694c9d + deploy.yml reset wiped them at 09:00 UTC. Added `fleet/*/strategy.yaml` to .gitignore on Mother VPS so future deploy resets dont repeat. Public template (Personal-Trading-Bots) keeps the .gitkeep posture — fork-friendly. Day league returns to 12 bots at next 09:00 UTC sprint launch. In-flight sprint comp-20260426-0900 untouched (still autobotday-only until end). deploy.yml uses git reset --hard origin/master only — no git clean — so untracked/ignored files survive. Commit: 850de95 (chore gitignore).
