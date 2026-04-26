@@ -168,3 +168,12 @@ competition/njord.log
 
 # Research runtime state — materialized from seed_strategy.yaml on first run; never commit live state
 research/*/best_strategy.yaml
+# --- Live fleet strategies (Mother VPS only, 2026-04-26) --------------------
+# Session 19: fleet/<bot>/strategy.yaml are live-tuned by LOKI on Mother VPS.
+# Public template (Personal-Trading-Bots) keeps the .gitkeep-only posture so
+# forks start clean; on Mother we keep strategies on disk but untracked so
+# deploy.yml's `git reset --hard origin/master` cannot delete them again
+# (root cause of 2026-04-26T09:00 UTC day-league wipe — see commit 0694c9d).
+fleet/*/strategy.yaml
+!fleet/.gitkeep
+!fleet/*/.gitkeep
