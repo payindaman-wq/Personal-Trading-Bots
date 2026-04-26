@@ -41,7 +41,6 @@ SYN_INBOX   = os.path.join(WORKSPACE, "syn_inbox.jsonl")
 
 FAILURE_ALERT_HOURS = 3
 UPSTREAM_REMOTE     = "upstream"
-UPSTREAM_BRANCH     = "main"
 MAX_CHAMPION_AGE_H  = 24    # WARN if champion is older than this
 
 
@@ -172,6 +171,7 @@ def main() -> None:
     from config_loader import config
 
     mode = getattr(config, "mode", "full")
+    upstream_branch = config.upstream.branch
     if mode != "lite":
         _log(f"mode={mode} -- exiting (only mode=lite syncs from upstream)")
         sys.exit(0)
@@ -194,8 +194,8 @@ def main() -> None:
     if args.dry_run:
         upstream_ok = _check_upstream_remote()
         if not upstream_ok:
-            _log(f"WARN: '{UPSTREAM_REMOTE}' remote not configured -- friend VPS needs: git remote add upstream https://github.com/coldstoneadmin/crypto-trading-toolkit")
-        _log(f"[dry-run] would: git fetch {UPSTREAM_REMOTE} {UPSTREAM_BRANCH} && git pull --rebase {UPSTREAM_REMOTE} {UPSTREAM_BRANCH}")
+            _log(f"WARN: '{UPSTREAM_REMOTE}' remote not configured -- friend VPS needs: git remote add upstream {config.upstream.repo}")
+        _log(f"[dry-run] would: git fetch {UPSTREAM_REMOTE} {upstream_branch} && git pull --rebase {UPSTREAM_REMOTE} {upstream_branch}")
         for league in leagues:
             champion = os.path.join(PUBLISHED, league, "champion.yaml")
             meta_path = os.path.join(PUBLISHED, league, "champion.meta.json")
@@ -215,18 +215,18 @@ def main() -> None:
 
     if not _check_upstream_remote():
         _log(f"ERROR: '{UPSTREAM_REMOTE}' remote not configured.")
-        _log("  Run: git remote add upstream https://github.com/coldstoneadmin/crypto-trading-toolkit")
+        _log(f"  Run: git remote add upstream {config.upstream.repo}")
         _record_failure(state, "no upstream remote")
         sys.exit(1)
 
-    fetch = _run(["git", "fetch", UPSTREAM_REMOTE, UPSTREAM_BRANCH], capture=True)
+    fetch = _run(["git", "fetch", UPSTREAM_REMOTE, upstream_branch], capture=True)
     if fetch.returncode != 0:
         _log(f"ERROR git fetch failed: {fetch.stderr.strip()}")
         _record_failure(state, f"git fetch: {fetch.stderr.strip()[:120]}")
         _maybe_alert(state, leagues)
         sys.exit(1)
 
-    pull = _run(["git", "pull", "--rebase", UPSTREAM_REMOTE, UPSTREAM_BRANCH], capture=True)
+    pull = _run(["git", "pull", "--rebase", UPSTREAM_REMOTE, upstream_branch], capture=True)
     if pull.returncode != 0:
         _log(f"ERROR git pull --rebase failed: {pull.stderr.strip()}")
         _record_failure(state, f"git pull: {pull.stderr.strip()[:120]}")

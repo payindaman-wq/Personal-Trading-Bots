@@ -46,3 +46,31 @@ The script checks `config_version` in your `config.yaml` and applies only the mi
 ## Keeping a Private Fork Clean
 
 If you have personal customizations (custom strategy names, private branding, private exchange credentials), keep them in files that are already gitignored (`config.yaml`, files under `tax/`, agent memory files). Avoid editing framework files directly -- patch the behavior via config or subclass the relevant officer -- so upstream pulls remain conflict-free.
+
+
+## Upstream Config Keys
+
+`strategy_publisher.py` (Mother) and `strategy_sync.py` (friend VPS) both read three
+keys from `config.yaml`:
+
+```yaml
+upstream:
+  repo: "https://github.com/MOTHER_USERNAME/crypto-trading-toolkit"  # public template
+  branch: "master"
+  pat: ""  # GitHub PAT with public_repo scope (or set UPSTREAM_PAT env var)
+```
+
+**Mother** (`mode: full`): set `upstream.repo` to the public template you forked from.
+The publisher creates a transient `upstream_pub` remote using this URL + PAT and pushes
+`published/<league>/champion.yaml` there every 4 hours.
+
+**Friend VPS** (`mode: lite`): set `upstream.repo` to the same public template. Add the
+remote once after cloning:
+
+```bash
+git remote add upstream https://github.com/MOTHER_USERNAME/crypto-trading-toolkit
+```
+
+**PAT storage:** `config.yaml` is gitignored -- the PAT is never committed. Alternatively
+export `UPSTREAM_PAT` in your VPS environment. The publisher falls back to extracting
+the token from origin's URL if neither is set.

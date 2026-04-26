@@ -25,6 +25,7 @@ import fcntl
 import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -145,6 +146,23 @@ def _publish_league(league: str, now_ts: str, dry_run: bool) -> tuple:
     return True, champion_meta
 
 
+def _build_push_url(cfg) -> str:
+    """Return authenticated URL for the upstream_pub transient remote."""
+    upstream = getattr(cfg, "upstream", None)
+    repo = (getattr(upstream, "repo", "https://github.com/coldstoneadmin/crypto-trading-toolkit")
+            if upstream else "https://github.com/coldstoneadmin/crypto-trading-toolkit")
+    pat = getattr(upstream, "pat", "") if upstream else ""
+    pat = pat or os.environ.get("UPSTREAM_PAT", "")
+    if not pat:
+        r = subprocess.run(["git", "remote", "get-url", "origin"],
+                           cwd=WORKSPACE, capture_output=True, text=True)
+        m = re.search(r"https://([^@\s]+)@", r.stdout)
+        if m:
+            pat = m.group(1)
+    if pat and "://" in repo and "@" not in repo:
+        repo = repo.replace("://", f"://{pat}@", 1)
+    return repo
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Publish champion strategies to upstream repo.")
     parser.add_argument("--dry-run", action="store_true",
@@ -229,12 +247,18 @@ def main() -> None:
 
     _log(f"committed: {commit_msg}")
 
-    push = _run(["git", "push", "origin", "master"], capture=True)
+    upstream_branch = getattr(config.upstream, "branch", "master")
+    repo_display = getattr(config.upstream, "repo", "upstream")
+    push_url = _build_push_url(config)
+    _run(["git", "remote", "remove", "upstream_pub"], capture=True)  # remove stale if any
+    _run(["git", "remote", "add", "upstream_pub", push_url])
+    push = _run(["git", "push", "upstream_pub", f"HEAD:{upstream_branch}"], capture=True)
+    _run(["git", "remote", "remove", "upstream_pub"], capture=True)  # cleanup
     if push.returncode != 0:
         _log(f"ERROR git push failed: {push.stderr.strip()}")
         sys.exit(1)
 
-    _log(f"pushed {len(touched)} league(s): {touched}")
+    _log(f"pushed {len(touched)} league(s) to {repo_display}: {touched}")
 
     state["last_published_ts"] = now_ts
     state["last_hashes"].update(new_hashes)

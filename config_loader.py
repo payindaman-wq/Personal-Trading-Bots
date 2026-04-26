@@ -94,6 +94,14 @@ def _load_config():
     if os.environ.get("KRAKEN_API_SECRET"):
         kr["api_secret"] = os.environ["KRAKEN_API_SECRET"]
 
+
+    up = raw.setdefault("upstream", {})
+    up.setdefault("repo", "https://github.com/coldstoneadmin/crypto-trading-toolkit")
+    up.setdefault("branch", "master")
+    up.setdefault("pat", "")
+    if os.environ.get("UPSTREAM_PAT"):
+        up["pat"] = os.environ["UPSTREAM_PAT"]
+
     return _to_namespace(raw)
 
 
