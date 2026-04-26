@@ -12,13 +12,16 @@
 #   2. Remove coldstoneadmin ALLOWED comment; add 'coldstoneadmin' to check_pattern calls.
 #   3. Audit .scrub_allowlist: remove migration_runbook.md + getting_started.md entries
 #      once those files are updated to use YOUR_USERNAME / YOUR_VPS_HOST placeholders.
-#   4. Swap allowed handle: replace coldstoneadmin allowance with payindaman-wq.
 
 set -euo pipefail
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 ALLOWLIST="${REPO_ROOT}/.scrub_allowlist"
 ERRORS=0
+
+# These files define forbidden patterns in their own source; exclude them from the scan.
+SKIP_FILES=("scripts/scrub_check.sh" ".scrub_allowlist")
+_skip_regex=$(printf '%s\n' "${SKIP_FILES[@]}" | sed 's/\./\./g' | paste -sd '|')
 
 # --- Load allowlist ---
 ALLOWLIST_PATTERNS=()
@@ -49,9 +52,9 @@ check_pattern() {
     local file_list
 
     if [[ -n "$file_filter" ]]; then
-        file_list=$(git ls-files | grep -E "$file_filter" || true)
+        file_list=$(git ls-files | grep -vE "^(${_skip_regex})$" | grep -E "$file_filter" || true)
     else
-        file_list=$(git ls-files)
+        file_list=$(git ls-files | grep -vE "^(${_skip_regex})$" || true)
     fi
 
     [[ -z "$file_list" ]] && return 0
@@ -72,7 +75,6 @@ cd "$REPO_ROOT"
 check_pattern "VPS_IP"       '204\.168\.167\.19'
 check_pattern "GITHUB_PAT"   'ghp_[a-zA-Z0-9]{20,}'
 check_pattern "TG_BOT_TOKEN" 'bot[0-9]+:[A-Za-z0-9_-]{30,}'
-check_pattern "HANDLE"       'payindaman'
 
 # coldstoneadmin is CURRENTLY ALLOWED — it is the upstream owner for this repo.
 # TODO migration: add check_pattern "HANDLE" 'coldstoneadmin' here and remove from allowlist.

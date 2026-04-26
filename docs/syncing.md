@@ -109,10 +109,8 @@ are comments.
 When you fork this repo, extend the forbidden list with your own identifiers so accidental
 commits do not leak your infrastructure details:
 
-1. Open `scripts/scrub_check.sh` and add your VPS IP, personal GitHub handle, etc. to the
-   `check_pattern` calls in the **Global patterns** section.
-2. If you rename the upstream (for example, to your own GitHub username), add
-   `check_pattern "HANDLE" 'yourusername'` and add any legitimate existing uses to
-   `.scrub_allowlist`.
-3. The CI workflow (`.github/workflows/scrub-check.yml`) enforces these checks on every
+1. Open `scripts/scrub_check.sh` and add your VPS IP and any other private identifiers to the
+   `check_pattern` calls in the **Global patterns** section. Add any legitimate existing
+   uses to `.scrub_allowlist`.
+2. The CI workflow (`.github/workflows/scrub-check.yml`) enforces these checks on every
    push and pull request automatically.
