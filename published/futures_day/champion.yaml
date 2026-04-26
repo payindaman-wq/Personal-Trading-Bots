@@ -1,0 +1,33 @@
+entry:
+  long:
+    conditions:
+    - indicator: rsi
+      operator: lt
+      period_minutes: 60
+      value: 25.72
+  short:
+    conditions:
+    - indicator: rsi
+      operator: gt
+      period_minutes: 60
+      value: 72.04
+exit:
+  stop_loss_pct: 4.01
+  take_profit_pct: 6.7
+  timeout_minutes: 1200
+league: futures_day
+leverage: 2
+name: crossover
+pairs:
+- BTC/USD
+- ETH/USD
+- SOL/USD
+position:
+  fee_rate: 0.0005
+  max_open: 1
+  size_pct: 5
+risk:
+  pause_if_down_pct: 9.0
+  pause_minutes: 150
+  stop_if_down_pct: 19.0
+style: mean_reversion_swing

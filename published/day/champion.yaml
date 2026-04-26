@@ -1,0 +1,70 @@
+entry:
+  long:
+    conditions:
+    - indicator: momentum_accelerating
+      operator: eq
+      period_minutes: 60
+      value: true
+    - indicator: price_change_pct
+      operator: lt
+      period_minutes: 5
+      value: -1.21
+    - indicator: macd_signal
+      operator: eq
+      period_minutes: 30
+      value: bullish
+    - indicator: price_vs_ema
+      operator: eq
+      period_minutes: 60
+      value: above
+    - indicator: trend
+      operator: eq
+      period_minutes: 240
+      value: up
+  short:
+    conditions:
+    - indicator: momentum_accelerating
+      operator: eq
+      period_minutes: 60
+      value: true
+    - indicator: price_change_pct
+      operator: gt
+      period_minutes: 30
+      value: 1.16
+    - indicator: macd_signal
+      operator: eq
+      period_minutes: 30
+      value: bearish
+    - indicator: price_vs_ema
+      operator: eq
+      period_minutes: 120
+      value: below
+    - indicator: trend
+      operator: eq
+      period_minutes: 240
+      value: down
+exit:
+  stop_loss_pct: 0.28
+  take_profit_pct: 3.51
+  timeout_minutes: 706
+name: crossover
+pairs:
+- UNI/USD
+- AAVE/USD
+- XRP/USD
+- SOL/USD
+- DOGE/USD
+- NEAR/USD
+- BTC/USD
+- ETH/USD
+- AVAX/USD
+- LINK/USD
+position:
+  fee_rate: 0.001
+  max_open: 3
+  size_pct: 13.98
+risk:
+  pause_if_down_pct: 4
+  pause_minutes: 60
+  stop_if_down_pct: 10
+style: momentum_price_change_macd_ema_trend_filter

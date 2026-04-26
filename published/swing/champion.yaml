@@ -1,0 +1,53 @@
+entry:
+  long:
+    conditions:
+    - indicator: momentum_accelerating
+      operator: eq
+      period_hours: 48
+      value: false
+    - indicator: bollinger_position
+      operator: eq
+      period_hours: 48
+      value: below_lower
+    - indicator: macd_signal
+      operator: eq
+      period_hours: 48
+      value: bullish
+    - indicator: price_change_pct
+      operator: lt
+      period_hours: 24
+      value: -0.5
+  short:
+    conditions:
+    - indicator: momentum_accelerating
+      operator: eq
+      period_hours: 48
+      value: false
+    - indicator: bollinger_position
+      operator: eq
+      period_hours: 168
+      value: above_upper
+    - indicator: macd_signal
+      operator: eq
+      period_hours: 24
+      value: bearish
+    - indicator: price_change_pct
+      operator: gt
+      period_hours: 24
+      value: 0.5
+exit:
+  stop_loss_pct: 1.5
+  take_profit_pct: 6.63
+  timeout_hours: 129
+name: crossover_tightened_momentum_short_v2
+pairs:
+- BTC/USD
+position:
+  fee_rate: 0.0026
+  max_open: 3
+  size_pct: 30
+risk:
+  pause_hours: 48
+  pause_if_down_pct: 8
+  stop_if_down_pct: 18
+style: randomly generated
