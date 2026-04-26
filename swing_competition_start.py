@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 import cycle_ledger
 
 WORKSPACE        = os.environ.get("WORKSPACE", "/root/.openclaw/workspace")
+ODIN_BEST_SWING  = os.path.join(WORKSPACE, "research", "swing", "best_strategy.yaml")
 STARTING_CAPITAL = 1000.00
 FEE_RATE         = 0.001
 DEFAULT_DURATION = 168  # 7 days in hours
@@ -46,6 +47,38 @@ def discover_bots():
     return bots
 
 
+
+def _write_sprint_backtest_meta(comp_dir):
+    """Snapshot backtest Sharpe into the new sprint dir for drift tracking.
+
+    Primary: _sharpe from best_strategy.yaml.
+    Fallback: best_strategy.meta.json.sharpe (present after first ODIN run).
+    """
+    sharpe = None
+    try:
+        if os.path.exists(ODIN_BEST_SWING):
+            with open(ODIN_BEST_SWING) as f:
+                d = yaml.safe_load(f)
+            sharpe = d.get("_sharpe")
+    except Exception:
+        pass
+    if sharpe is None:
+        meta_path = os.path.join(WORKSPACE, "research", "swing", "best_strategy.meta.json")
+        try:
+            if os.path.exists(meta_path):
+                with open(meta_path) as f:
+                    sharpe = json.load(f).get("sharpe")
+        except Exception:
+            pass
+    if sharpe is None:
+        return
+    try:
+        with open(os.path.join(comp_dir, "deployed_strategy.meta.json"), "w") as f:
+            json.dump({"sharpe": float(sharpe)}, f)
+        print(f"  [drift] deployed_strategy.meta.json sharpe={sharpe}", file=sys.stderr)
+    except Exception as e:
+        print(f"  [drift] meta write failed: {e}", file=sys.stderr)
+
 def main():
     import argparse
     parser = argparse.ArgumentParser(description="Start a swing trading competition")
@@ -75,6 +108,7 @@ def main():
         sys.exit(1)
 
     os.makedirs(comp_dir, exist_ok=True)
+    _write_sprint_backtest_meta(comp_dir)
 
     for bot in bots:
         portfolio = {

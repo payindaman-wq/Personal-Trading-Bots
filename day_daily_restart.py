@@ -93,6 +93,25 @@ def inject_odin_strategy():
         print(f"  [odin] Injection failed: {e} — AutoBotDay keeps current strategy.")
 
 
+
+def write_sprint_backtest_meta(comp_id):
+    """Snapshot best_strategy.yaml Sharpe into the new sprint dir for drift tracking."""
+    if not os.path.exists(ODIN_BEST_DAY):
+        return
+    try:
+        import yaml as _yaml
+        with open(ODIN_BEST_DAY) as f:
+            d = _yaml.safe_load(f)
+        sharpe = d.get("_sharpe_24h_median")
+        if sharpe is None:
+            return
+        meta_path = os.path.join(ACTIVE_DIR, comp_id, "deployed_strategy.meta.json")
+        with open(meta_path, "w") as f:
+            json.dump({"sharpe": float(sharpe)}, f)
+        print(f"  [drift] deployed_strategy.meta.json sharpe={sharpe}")
+    except Exception as e:
+        print(f"  [drift] meta write failed: {e}")
+
 def archive_current(comp_id):
     """Score and archive the current sprint directly (no watchdog wait)."""
     result = subprocess.run(
@@ -244,6 +263,7 @@ def main():
         new_comp_id = start_new()
         if new_comp_id:
             patch_start_time(new_comp_id)
+            write_sprint_backtest_meta(new_comp_id)
         return
 
     elapsed = hours_running(meta)
@@ -257,6 +277,7 @@ def main():
             new_comp_id = start_new()
             if new_comp_id:
                 patch_start_time(new_comp_id)
+                write_sprint_backtest_meta(new_comp_id)
     else:
         print(f"  Sprint < 20h old — keeping current sprint.")
 

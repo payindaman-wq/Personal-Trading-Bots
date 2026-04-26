@@ -33,6 +33,7 @@ import glob
 import json
 import math
 import os
+import yaml
 from datetime import datetime, timezone
 
 WORKSPACE   = "/root/.openclaw/workspace"
@@ -67,6 +68,13 @@ LEAGUE_CONFIG = {
         "sprint_glob": "fut-swing-*",
         "duration_hours": 168,
     },
+}
+
+
+# Sharpe field names in best_strategy.yaml for spot leagues.
+SPOT_SHARPE_FIELD = {
+    "day":   "_sharpe_24h_median",
+    "swing": "_sharpe",
 }
 
 WINDOW_SPRINTS = 10
@@ -105,15 +113,18 @@ def _sprint_pnl_pct(sprint_dir, bot):
 
 
 def _sprint_backtest_sharpe(sprint_dir):
-    """Return the backtest Sharpe claimed at deploy time, or None."""
+    """Return (sharpe, backfilled) from deployed_strategy.meta.json, or (None, False)."""
     meta = os.path.join(sprint_dir, "deployed_strategy.meta.json")
     if not os.path.exists(meta):
-        return None
+        return None, False
     try:
         with open(meta) as f:
-            return float(json.load(f).get("sharpe"))
+            d = json.load(f)
+        sharpe = d.get("sharpe")
+        backfilled = bool(d.get("_backfilled", False))
+        return (float(sharpe) if sharpe is not None else None), backfilled
     except (json.JSONDecodeError, OSError, TypeError, ValueError):
-        return None
+        return None, False
 
 
 def _annualise_sharpe(returns, periods_per_year):
@@ -127,6 +138,79 @@ def _annualise_sharpe(returns, periods_per_year):
     return round(mean_r / std_r * math.sqrt(periods_per_year), 4)
 
 
+def _read_best_strategy_sharpe(league):
+    """Read backtest Sharpe for spot leagues.
+
+    Primary: SPOT_SHARPE_FIELD from best_strategy.yaml.
+    Fallback: best_strategy.meta.json.sharpe (same source futures leagues use).
+    Returns None only when no champion file exists at all.
+    """
+    field = SPOT_SHARPE_FIELD.get(league)
+    if field is None:
+        return None
+    yaml_path = os.path.join(RESEARCH, league, "best_strategy.yaml")
+    meta_path = os.path.join(RESEARCH, league, "best_strategy.meta.json")
+    # Try yaml field first
+    if os.path.exists(yaml_path):
+        try:
+            with open(yaml_path) as f:
+                d = yaml.safe_load(f)
+            val = d.get(field)
+            if val is not None:
+                return float(val)
+        except Exception:
+            pass
+    # Fallback to meta.json (present for all spot leagues after ODIN first runs)
+    if os.path.exists(meta_path):
+        try:
+            with open(meta_path) as f:
+                val = json.load(f).get("sharpe")
+            return float(val) if val is not None else None
+        except Exception:
+            pass
+    return None
+
+
+def _write_deployed_meta(sprint_dir, sharpe, backfilled=False):
+    """Write deployed_strategy.meta.json into sprint_dir. Returns True on success."""
+    meta = {"sharpe": sharpe}
+    if backfilled:
+        meta["_backfilled"] = True
+    try:
+        with open(os.path.join(sprint_dir, "deployed_strategy.meta.json"), "w") as f:
+            json.dump(meta, f, indent=2)
+        return True
+    except Exception:
+        return False
+
+
+def backfill_spot_leagues():
+    """Write deployed_strategy.meta.json into last 10 archived sprint dirs for day + swing.
+
+    Uses current best_strategy.yaml Sharpe as best-effort. Marks files with
+    _backfilled: true. Skips dirs that already have the file. Idempotent.
+    """
+    for league in ("day", "swing"):
+        cfg = LEAGUE_CONFIG[league]
+        sharpe = _read_best_strategy_sharpe(league)
+        if sharpe is None:
+            print(f"[backfill][{league}] no sharpe in best_strategy.yaml -- skipping")
+            continue
+        dirs = _sprint_dirs(cfg)
+        candidates = [
+            d for d in dirs
+            if _sprint_pnl_pct(d, cfg["bot"]) is not None
+            and not os.path.exists(os.path.join(d, "deployed_strategy.meta.json"))
+        ]
+        to_fill = candidates[-10:]
+        written = 0
+        for d in to_fill:
+            if _write_deployed_meta(d, sharpe, backfilled=True):
+                written += 1
+                print(f"[backfill][{league}] wrote sharpe={sharpe} -> {os.path.basename(d)}")
+        print(f"[backfill][{league}] done: {written}/{len(to_fill)} dirs updated")
+
+
 def update(league):
     cfg = LEAGUE_CONFIG.get(league)
     if cfg is None:
@@ -136,14 +220,17 @@ def update(league):
     for d in _sprint_dirs(cfg):
         comp_id = os.path.basename(d)
         pnl = _sprint_pnl_pct(d, cfg["bot"])
-        bt  = _sprint_backtest_sharpe(d)
+        bt, bt_backfilled = _sprint_backtest_sharpe(d)
         if pnl is None:
             continue
-        per_sprint.append({
+        row = {
             "comp_id": comp_id,
             "live_pnl_pct": round(pnl, 4),
             "backtest_sharpe": bt,
-        })
+        }
+        if bt_backfilled:
+            row["_backfilled"] = True
+        per_sprint.append(row)
 
     recent = per_sprint[-WINDOW_SPRINTS:]
     returns = [row["live_pnl_pct"] / 100.0 for row in recent]
@@ -260,7 +347,11 @@ def get_gate_bonus(league):
 
 if __name__ == "__main__":
     import sys
-    for L in (sys.argv[1:] or list(LEAGUE_CONFIG.keys())):
+    args = sys.argv[1:]
+    if "--backfill" in args:
+        backfill_spot_leagues()
+        args = [a for a in args if a != "--backfill"]
+    for L in (args or list(LEAGUE_CONFIG.keys())):
         r = update(L)
         if r:
             print(f"[{L}] sprints={r['sprints_seen']} "
