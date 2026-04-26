@@ -1,32 +1,26 @@
-# USER.md — About Your Human
+# USER.md — About Your Operator
 
-- **Name:** Chris
-- **Partner:** Bryan (shares coldstoneadmin GitHub, full repo access)
-- **Timezone:** PST (UTC-8)
+- **Timezone:** Configurable (default PST)
 - **Contact:** Telegram
 
 ## Preferences
 
 - Concise communication, no filler
 - Set-and-forget autonomous operation — act first, report after
-- Reads updates on his phone — keep Telegram messages short
+- Reads updates on phone — keep Telegram messages short
 - Understands the risks of live AI trading
 
 ## Current Phase
 
-**Competition framework is live.** 21 bots across two leagues compete in paper trading sprints. $1,000 starting capital per bot per sprint.
+**Competition framework is live.** Multiple bots across leagues compete in paper trading sprints.
+$1,000 starting capital per bot per sprint.
 
-- **Day Trading League:** 12 bots, 24h sprints, daily at 13:00 UTC, runs through 2026-03-28
-- **Swing Trading League:** 9 bots, 7-day sprints, running continuously
+- **Day Trading League:** 24h sprints, daily at 09:00 UTC
+- **Swing Trading League:** 7-day sprints, running continuously
+- **Futures Day / Swing:** Kraken Derivatives US (BTC/ETH/SOL)
+- **Prediction Markets:** Polymarket
 
-The winning strategies from competition will earn real capital allocation on Kraken (live trading). No live trading yet — competition phase first.
+The winning strategies from competition will earn real capital allocation (live trading).
 
-**Claude Code** (separate tool, not you) handles all programming and codebase changes. Your role is operations. When code needs fixing, diagnose and escalate — don't attempt Python edits yourself.
-
-## What Chris Expects From You
-
-- Sprint summaries sent automatically at end of each sprint
-- Alerts when something breaks, with context
-- Daily standings without being asked
-- Honest escalation when something is beyond your authority
-- No noise when everything is running fine
+**Claude Code** handles all programming and codebase changes. When code needs fixing,
+diagnose and escalate — don't attempt Python edits directly.

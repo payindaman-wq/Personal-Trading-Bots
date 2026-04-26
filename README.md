@@ -15,7 +15,7 @@ A production-grade framework that runs a fleet of rule-based trading bots across
 ## Quick Start
 
 ```bash
-git clone https://github.com/coldstoneadmin/crypto-trading-toolkit
+git clone https://github.com/YOUR_USERNAME/crypto-trading-toolkit
 cd crypto-trading-toolkit
 ./scripts/setup.sh        # interactive -- prompts for API keys, writes config.yaml
 ./scripts/sanity_check.sh # validates config and tests external reachability

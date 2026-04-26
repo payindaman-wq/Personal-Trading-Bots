@@ -19,8 +19,9 @@ SESSIONS_JSON   = "/root/.openclaw/agents/main/sessions/sessions.json"
 ARCHIVE_DIR     = "/root/.openclaw/agents/main/sessions/archive"
 LOG_FILE        = "/root/.openclaw/workspace/session_watchdog.log"
 SIZE_THRESHOLD_KB = 100          # rotate sessions larger than this
-BOT_TOKEN       = "8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
-CHAT_ID         = "8154505910"
+from config_loader import config
+BOT_TOKEN = config.telegram.bot_token
+CHAT_ID   = config.telegram.chat_id
 
 
 def log(msg: str) -> None:

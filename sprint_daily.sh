@@ -7,8 +7,8 @@
 WORKSPACE="/root/.openclaw/workspace"
 CYCLE_STATE="$WORKSPACE/competition/cycle_state.json"
 ACTIVE_DIR="$WORKSPACE/competition/active"
-BOT_TOKEN="8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
-CHAT_ID="8154505910"
+BOT_TOKEN=$(python3 -c "import sys; sys.path.insert(0, '$WORKSPACE'); from config_loader import config; print(config.telegram.bot_token)")
+CHAT_ID=$(python3 -c "import sys; sys.path.insert(0, '$WORKSPACE'); from config_loader import config; print(config.telegram.chat_id)")
 LOG="$WORKSPACE/competition.log"
 COMP_START="/root/.openclaw/skills/competition-start/scripts/competition_start.py"
 

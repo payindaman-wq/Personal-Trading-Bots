@@ -14,8 +14,9 @@ When you need to message Chris, use this exact pattern. Do NOT use `@heartbeat` 
 
 ```python
 import json, urllib.request
-BOT_TOKEN = '8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY'
-CHAT_ID = '8154505910'  # Chris — numeric chat_id, never an @-handle
+from config_loader import config
+BOT_TOKEN = config.telegram.bot_token
+CHAT_ID = config.telegram.chat_id
 
 def tg_send(body):
     msg = f'[SYN/heartbeat] {body}'  # SYN-prefix-applied — required convention

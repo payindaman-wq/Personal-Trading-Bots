@@ -309,7 +309,7 @@ def inbox_escalate(body):
         "ts":       datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
         "source":   "syn_weekly_audit",
         "severity": "info",
-        "msg":      ("[SYN/weekly] audit anomalies: " + body)[:2000],
+        "msg":      ("[OPS/weekly] audit anomalies: " + body)[:2000],
     }
     with open(INBOX, "a") as f:
         f.write(json.dumps(rec) + "\n")

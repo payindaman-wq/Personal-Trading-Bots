@@ -36,8 +36,9 @@ MIN_TRADES = {"day": 50, "swing": 20}
 
 # Stall alert — Telegram ping every N consecutive gens without a new_best
 STALL_ALERT_GENS = 300
-TG_BOT_TOKEN     = "8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
-TG_CHAT_ID       = "8154505910"
+from config_loader import config
+TG_BOT_TOKEN = config.telegram.bot_token
+TG_CHAT_ID   = config.telegram.chat_id
 
 ALL_PAIRS = [
     "BTC/USD",  "ETH/USD",  "SOL/USD",  "XRP/USD",

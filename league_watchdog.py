@@ -50,8 +50,9 @@ POLY_STATE  = os.path.join(WORKSPACE, "competition", "polymarket", "auto_state.j
 POLY_CYCLE  = os.path.join(WORKSPACE, "competition", "polymarket", "polymarket_cycle_state.json")
 
 # Health check alerting
-BOT_TOKEN         = "8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
-CHAT_ID           = "8154505910"
+from config_loader import config
+BOT_TOKEN = config.telegram.bot_token
+CHAT_ID   = config.telegram.chat_id
 HEALTH_STATE_FILE = os.path.join(WORKSPACE, "competition", "watchdog_health_state.json")
 ALERT_COOLDOWN_H  = 6
 

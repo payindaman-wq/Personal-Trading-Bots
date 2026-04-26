@@ -104,7 +104,7 @@ def main():
             summary.append(f"{league}:DRIFT={drift}")
             if not prev.get("alerted"):
                 inbox_write(
-                    f"[SYN/data_integrity] write-path drift on {league}: "
+                    f"[OPS/data_integrity] write-path drift on {league}: "
                     f"gen_state.gen={r['state_gen']} vs max(results.tsv.gen)={r['tsv_gen']} "
                     f"(drift={drift} > threshold={DRIFT_THRESHOLD}). "
                     f"Same pattern as the 2026-04-19 futures write-gap incident.",
@@ -117,7 +117,7 @@ def main():
             summary.append(f"{league}:ok({drift})")
             if prev.get("alerted"):
                 inbox_write(
-                    f"[SYN/data_integrity] {league} write-path RECOVERED: drift={drift} <= {DRIFT_THRESHOLD}.",
+                    f"[OPS/data_integrity] {league} write-path RECOVERED: drift={drift} <= {DRIFT_THRESHOLD}.",
                     severity="info",
                 )
                 state[league] = {"alerted": False, "recovered": datetime.now(timezone.utc).isoformat(), "drift": drift}

@@ -19,8 +19,9 @@ SECRET_PATH = "/root/.openclaw/secrets/anthropic.json"
 USAGE_LOG = f"{WORKSPACE}/research/anthropic_usage.jsonl"
 STATE_FILE = f"{WORKSPACE}/competition/anthropic_health_state.json"
 
-BOT_TOKEN = "8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
-CHAT_ID = "8154505910"
+from config_loader import config
+BOT_TOKEN = config.telegram.bot_token
+CHAT_ID   = config.telegram.chat_id
 
 PROBE_MODEL = "claude-haiku-4-5-20251001"
 PROBE_URL = "https://api.anthropic.com/v1/messages"

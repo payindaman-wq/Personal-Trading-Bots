@@ -36,8 +36,9 @@ WORKSPACE    = os.environ.get("WORKSPACE", "/root/.openclaw/workspace")
 ACTIVE_DIR   = os.path.join(WORKSPACE, "competition", "swing", "active")
 RESULTS_DIR  = os.path.join(WORKSPACE, "competition", "swing", "results")
 CYCLE_STATE  = os.path.join(WORKSPACE, "competition", "swing", "swing_cycle_state.json")
-BOT_TOKEN    = "8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
-CHAT_ID      = "8154505910"
+from config_loader import config
+BOT_TOKEN = config.telegram.bot_token
+CHAT_ID   = config.telegram.chat_id
 FLEET_DIR    = os.path.join(WORKSPACE, "fleet", "swing")
 
 ALL_PAIRS = [

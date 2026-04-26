@@ -88,8 +88,9 @@ GEMINI_SECRET = "/root/.openclaw/secrets/gemini.json"
 GEMINI_MODEL  = "gemini-2.5-flash-lite"
 GEMINI_BASE   = "https://generativelanguage.googleapis.com/v1beta/models"
 
-TG_BOT_TOKEN     = "8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
-TG_CHAT_ID       = "8154505910"
+from config_loader import config
+TG_BOT_TOKEN = config.telegram.bot_token
+TG_CHAT_ID   = config.telegram.chat_id
 
 DRY_RUN = "--dry-run" in sys.argv
 
@@ -534,17 +535,17 @@ def apply_structural_change(league, description, patches):
         if not old_str:
             return False, f"patch {i}: empty old string"
         if not context:
-            tg_send(f"[SYN/mimir] patch {i} rejected: missing context field (F6 verbatim requirement)", severity="warning")
+            tg_send(f"[OPS/mimir] patch {i} rejected: missing context field (F6 verbatim requirement)", severity="warning")
             return False, f"patch {i}: missing context field (F6 requires verbatim source quote)"
         if context not in code:
-            tg_send(f"[SYN/mimir] patch {i} rejected: hallucinated context — MIMIR quoted source not present in current odin_researcher_v2.py (len={len(context)})", severity="warning")
+            tg_send(f"[OPS/mimir] patch {i} rejected: hallucinated context — MIMIR quoted source not present in current odin_researcher_v2.py (len={len(context)})", severity="warning")
             return False, f"patch {i}: context not found verbatim in current source (hallucinated anchor)"
         if old_str not in context:
             return False, f"patch {i}: old string not inside declared context"
         count = code.count(old_str)
         if count != 1:
             if count == 0:
-                tg_send(f"[SYN/mimir] patch {i} rejected: old string not in source (hallucinated anchor)", severity="warning")
+                tg_send(f"[OPS/mimir] patch {i} rejected: old string not in source (hallucinated anchor)", severity="warning")
             return False, f"patch {i}: old string found {count}x (need exactly 1)"
         new_code = new_code.replace(old_str, new_str, 1)
 

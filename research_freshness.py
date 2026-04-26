@@ -21,8 +21,9 @@ from datetime import datetime, timezone
 
 WORKSPACE  = "/root/.openclaw/workspace"
 STATE_FILE = f"{WORKSPACE}/competition/freshness_state.json"
-BOT_TOKEN  = "8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
-CHAT_ID    = "8154505910"
+from config_loader import config
+BOT_TOKEN = config.telegram.bot_token
+CHAT_ID   = config.telegram.chat_id
 
 COOLDOWN_MIN = 1440        # 24h
 MIMIR_ESCALATION_COOLDOWN_MIN = 2880  # 48h
@@ -406,7 +407,7 @@ def check_tyr_heimdall(state, alerts):
             if should_alert(state, key):
                 msg = f"{officer.upper()} log missing: {log} — officer not running?"
                 info(alerts, msg)
-                _inbox_error(f"[SYN/tyr_freshness] {msg}")
+                _inbox_error(f"[OPS/tyr_freshness] {msg}")
                 record_alert(state, key)
         elif age > LOG_STALE_MIN[officer]:
             key = f"{officer}_stale"
@@ -414,7 +415,7 @@ def check_tyr_heimdall(state, alerts):
                 msg = (f"{officer.upper()} log stale: {age:.0f} min "
                        f"(threshold {LOG_STALE_MIN[officer]}) — consumers degrading to fallback.")
                 info(alerts, msg)
-                _inbox_error(f"[SYN/tyr_freshness] {msg}")
+                _inbox_error(f"[OPS/tyr_freshness] {msg}")
                 record_alert(state, key, f"age_min={age:.0f}")
 
 

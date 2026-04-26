@@ -61,8 +61,9 @@ RESEARCHER_PY     = os.path.join(RESEARCH, "odin_researcher_v2.py")
 SUPPRESSION_MODES = {"revert_review", "oscillation_diag"}
 SUPPRESSION_WINDOW_HOURS = 48
 
-TG_BOT_TOKEN = "8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
-TG_CHAT_ID   = "8154505910"
+from config_loader import config
+TG_BOT_TOKEN = config.telegram.bot_token
+TG_CHAT_ID   = config.telegram.chat_id
 
 
 INBOX = os.path.join(WORKSPACE, "syn_inbox.jsonl")
@@ -578,7 +579,7 @@ def run_mode(args, api_key):
     try:
         response = call_claude(prompt, api_key, model, max_tokens=VIDAR_MAX_TOKENS_BY_MODE.get(args.mode))
     except Exception as e:
-        tg_send(f"[SYN/VIDAR] API call failed ({args.mode}/{args.league}): {e}")
+        tg_send(f"[OPS/VIDAR] API call failed ({args.mode}/{args.league}): {e}")
         raise
 
     record = {
@@ -662,13 +663,13 @@ def run_mode(args, api_key):
 
         # Autonomous fallback: project is fully automated, VIDAR must pick a
         # concrete action and own it. When the model hedges with
-        # "escalate_chris" or "reapply_change" (the two human-in-the-loop
+        # "escalate_human" or "reapply_change" (the two human-in-the-loop
         # options from the old playbook), coerce to the safest autonomous
         # equivalent per mode. Rationale stays on the Maintenance tab so Chris
         # can audit later.
         original_action = action
         coerced = False
-        if action in ("escalate_chris", "reapply_change"):
+        if action in ("escalate_human", "reapply_change"):
             fallback = {
                 "revert_review":    "accept_revert",         # LOKI already reverted — keep it
                 "oscillation_diag": "keep_pause",            # safest: stay paused

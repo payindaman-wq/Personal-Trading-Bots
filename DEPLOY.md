@@ -39,7 +39,7 @@ cd /root/workspace
 Or copy the framework into your private repo:
 
 ```bash
-git clone https://github.com/coldstoneadmin/crypto-trading-toolkit /tmp/framework
+git clone https://github.com/YOUR_USERNAME/crypto-trading-toolkit /tmp/framework
 cp -r /tmp/framework/* /root/workspace/
 cd /root/workspace
 git init && git remote add origin https://github.com/YOUR_USERNAME/my-trading-fleet
@@ -161,7 +161,7 @@ When the framework repo gets updates:
 
 ```bash
 # In your private repo
-git remote add framework https://github.com/coldstoneadmin/crypto-trading-toolkit
+git remote add framework https://github.com/YOUR_USERNAME/crypto-trading-toolkit
 git fetch framework
 git merge framework/master --allow-unrelated-histories
 # Resolve any conflicts, keeping your .env and personal config

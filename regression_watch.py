@@ -37,8 +37,9 @@ BACKTEST_RESULTS = f"{COMP_DIR}/backtest_results.json"
 BACKTEST_SCRIPT = f"{WORKSPACE}/backtest.py"
 LOG_FILE = f"{COMP_DIR}/regression_watch.log"
 
-BOT_TOKEN = "8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
-CHAT_ID = "8154505910"
+from config_loader import config
+BOT_TOKEN = config.telegram.bot_token
+CHAT_ID   = config.telegram.chat_id
 
 MIN_SPRINTS = 5
 TRAILING_WINDOW = 7

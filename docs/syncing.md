@@ -1,13 +1,13 @@
 # Staying in Sync with Upstream
 
-If you forked `coldstoneadmin/crypto-trading-toolkit`, use this guide to pull improvements while keeping your local customizations intact.
+If you forked `YOUR_USERNAME/crypto-trading-toolkit`, use this guide to pull improvements while keeping your local customizations intact.
 
 ## Add Upstream as a Remote
 
 Do this once after forking:
 
 ```bash
-git remote add upstream https://github.com/coldstoneadmin/crypto-trading-toolkit
+git remote add upstream https://github.com/YOUR_USERNAME/crypto-trading-toolkit
 git fetch upstream
 ```
 

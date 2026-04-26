@@ -17,8 +17,9 @@ PST = ZoneInfo("America/Los_Angeles")
 
 WORKSPACE  = "/root/.openclaw/workspace"
 STATE_FILE = f"{WORKSPACE}/competition/heartbeat_state.json"
-BOT_TOKEN  = "8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
-CHAT_ID    = "8154505910"
+from config_loader import config
+BOT_TOKEN = config.telegram.bot_token
+CHAT_ID   = config.telegram.chat_id
 
 COOLDOWN_MIN        = 1440    # min gap between repeated alerts for the same problem (24h)
 SERVICE_COOLDOWN_MIN = 1440
@@ -127,7 +128,7 @@ def clear_alert(state, key):
 # ── Telegram ────────────────────────────────────────────────────────────────
 
 def tg_send(msg):
-    msg = f"[SYN/heartbeat] {msg}"  # SYN-prefix-applied
+    msg = f"[OPS/heartbeat] {msg}"  # SYN-prefix-applied
     try:
         payload = json.dumps({
             "chat_id":    CHAT_ID,

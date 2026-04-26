@@ -198,7 +198,7 @@ def main():
         extra = len(findings_total) - MAX_FINDINGS_PER_RUN
         trail = f"\n(+{extra} more analyses with findings)" if extra > 0 else ""
         msg = (
-            f"[SYN/mimir_audit] {len(findings_total)} MIMIR analyses have "
+            f"[OPS/mimir_audit] {len(findings_total)} MIMIR analyses have "
             f"unverifiable (gen, Sharpe) citations (scanned={entries_scanned}):\n"
             + "\n".join(summary)
             + trail

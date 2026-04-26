@@ -41,54 +41,40 @@ FUTURES_SWING_CYCLE_PATH  = os.path.join(WORKSPACE, "competition", "futures_swin
 TYR_STATE_PATH      = os.path.join(WORKSPACE, "research", "tyr_state.json")
 HEIMDALL_STATE_PATH = os.path.join(WORKSPACE, "research", "heimdall_state.json")
 
-BOT_NAMES = [
-    "floki", "bjorn", "lagertha", "ragnar", "leif", "gunnar",
-    "harald", "freydis", "sigurd", "astrid", "ulf", "bjarne",
-    "egil", "solveig", "orm", "gudrid", "halfdan", "thyra",
-    "valdis", "runa", "ivar",
-]
+def _discover_fleet():
+    """Build fleet roster by reading strategy.yaml files from fleet/ directories."""
+    import glob as _glob
+    fleet = []
+    league_dirs = {
+        "day":          os.path.join(WORKSPACE, "fleet", "day"),
+        "swing":        os.path.join(WORKSPACE, "fleet", "swing"),
+        "futures_day":  os.path.join(WORKSPACE, "fleet", "futures_day"),
+        "futures_swing":os.path.join(WORKSPACE, "fleet", "futures_swing"),
+        "polymarket":   os.path.join(WORKSPACE, "fleet", "polymarket"),
+    }
+    for league, league_dir in league_dirs.items():
+        pattern = os.path.join(league_dir, "*", "strategy.yaml")
+        for strat_path in sorted(_glob.glob(pattern)):
+            bot_name = os.path.basename(os.path.dirname(strat_path))
+            if bot_name.startswith("_"):
+                continue
+            try:
+                import yaml as _yaml
+                with open(strat_path) as f:
+                    strat = _yaml.safe_load(f) or {}
+            except Exception:
+                strat = {}
+            fleet.append({
+                "bot":        bot_name,
+                "league":     league,
+                "style":      strat.get("style", "custom"),
+                "inspired_by": strat.get("inspiration") or strat.get("inspired_by"),
+            })
+    return fleet
 
-FLEET_ROSTER = [
-    # Day league
-    {"bot": "floki",    "league": "day",   "style": "Multi-TF confluence scalper",  "inspired_by": "Daan Crypto Trades"},
-    {"bot": "bjorn",    "league": "day",   "style": "EMA + MACD momentum",          "inspired_by": "Crypto Tony"},
-    {"bot": "lagertha", "league": "day",   "style": "VWAP trend directional",       "inspired_by": "TheWhiteWhaleHL"},
-    {"bot": "ragnar",   "league": "day",   "style": "VWAP reclaim",                 "inspired_by": "VWAP reclaim"},
-    {"bot": "leif",     "league": "day",   "style": "BB squeeze breakout",          "inspired_by": "Rekt Capital"},
-    {"bot": "gunnar",   "league": "day",   "style": "Aggressive momentum scalper",  "inspired_by": "Gainzy"},
-    {"bot": "harald",   "league": "day",   "style": "RSI + trend composite",        "inspired_by": "Scott Melker"},
-    {"bot": "freydis",  "league": "day",   "style": "Contrarian extreme reversal",  "inspired_by": "GCRClassic"},
-    {"bot": "sigurd",   "league": "day",   "style": "Altcoin momentum rotation",    "inspired_by": "van de Poppe"},
-    {"bot": "astrid",   "league": "day",   "style": "RSI mean reversion",           "inspired_by": "Crypto Jebb"},
-    {"bot": "ulf",      "league": "day",   "style": "Breakout retest precision",    "inspired_by": "The Trading Rush"},
-    {"bot": "bjarne",   "league": "day",   "style": "Trend pullback buyer",         "inspired_by": "Credible Crypto"},
-    # Swing league
-    {"bot": "egil",     "league": "swing", "style": "Weekly trend follower",        "inspired_by": "Benjamin Cowen"},
-    {"bot": "solveig",  "league": "swing", "style": "Multi-day mean reversion",     "inspired_by": "Crypto Jebb"},
-    {"bot": "orm",      "league": "swing", "style": "Macro pullback buyer",         "inspired_by": "InvestAnswers"},
-    {"bot": "gudrid",   "league": "swing", "style": "Macro sentiment",              "inspired_by": "Coin Bureau"},
-    {"bot": "halfdan",  "league": "swing", "style": "Technical structure",          "inspired_by": "CryptoCred"},
-    {"bot": "thyra",    "league": "swing", "style": "Altcoin cycles",               "inspired_by": "Altcoin Daily"},
-    {"bot": "valdis",   "league": "swing", "style": "Swing breakout",               "inspired_by": "Rekt Capital"},
-    {"bot": "runa",     "league": "swing", "style": "Bitcoin maximalist",           "inspired_by": "Tone Vays"},
-    {"bot": "ivar",     "league": "swing", "style": "Narrative momentum swing",     "inspired_by": "chris-crypto"},
-    # Spread fleet
-    {"bot": "skadi",    "league": "spread", "style": "ETH/BTC mean reversion",    "inspired_by": "Spread arb"},
-    {"bot": "sigrid",   "league": "spread", "style": "SOL/BTC mean reversion",    "inspired_by": "Spread arb"},
-    {"bot": "brynja",   "league": "spread", "style": "AAVE/LINK mean reversion",  "inspired_by": "Spread arb"},
-    {"bot": "herdis",   "league": "spread", "style": "AVAX/SOL mean reversion",   "inspired_by": "Spread arb"},
-    {"bot": "forseti",  "league": "spread", "style": "SOL/ETH momentum",          "inspired_by": "Spread arb"},
-    {"bot": "gunhild",  "league": "spread", "style": "AVAX/ETH momentum",         "inspired_by": "Spread arb"},
-    {"bot": "magni",    "league": "spread", "style": "LINK/ETH catch-up",         "inspired_by": "Spread arb"},
-    {"bot": "sunniva",  "league": "spread", "style": "AAVE/ETH catch-up",         "inspired_by": "Spread arb"},
-    {"bot": "ragnhild", "league": "spread", "style": "ETH/BTC breakout",          "inspired_by": "Spread arb"},
-    {"bot": "estrid",   "league": "spread", "style": "SOL/ETH breakout",          "inspired_by": "Spread arb"},
-    {"bot": "tofa",     "league": "spread", "style": "ETH/BTC dual confirmation", "inspired_by": "Spread arb"},
-    {"bot": "ingrid",   "league": "spread", "style": "LINK/ETH dual confirmation","inspired_by": "Spread arb"},
-    {"bot": "solrun",   "league": "spread", "style": "AAVE/LINK dual confirmation","inspired_by": "Spread arb"},
-    {"bot": "thordis",  "league": "spread", "style": "AVAX/SOL dual confirmation", "inspired_by": "Spread arb"},
 
-]
+FLEET_ROSTER = _discover_fleet()
+
 
 
 def load_json(path):

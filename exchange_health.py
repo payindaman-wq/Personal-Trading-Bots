@@ -13,8 +13,9 @@ PST = ZoneInfo("America/Los_Angeles")
 WORKSPACE = "/root/.openclaw/workspace"
 STATE_FILE = f"{WORKSPACE}/competition/exchange_health_state.json"
 PAUSE_FLAG = f"{WORKSPACE}/competition/exchange_paused"
-BOT_TOKEN = "8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
-CHAT_ID = "8154505910"
+from config_loader import config
+BOT_TOKEN = config.telegram.bot_token
+CHAT_ID   = config.telegram.chat_id
 
 FAIL_THRESHOLD = 3
 

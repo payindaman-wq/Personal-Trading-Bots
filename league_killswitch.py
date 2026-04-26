@@ -170,7 +170,7 @@ def apply(league, dry_run=False):
         _log(league + ": wrote " + flag_path)
     _inbox(
         "critical",
-        "[SYN/league_killswitch] " + league + " paused (" + criteria + "): " + reason
+        "[OPS/league_killswitch] " + league + " paused (" + criteria + "): " + reason
         + ". Resume: rm " + flag_path + " then systemctl enable+start odin_" + league + ".service",
         league, reason, dry_run=dry_run,
     )

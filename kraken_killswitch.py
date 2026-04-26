@@ -34,8 +34,9 @@ SECRETS_FILE  = "/root/.openclaw/secrets/kraken.json"
 STATE_FILE    = f"{WORKSPACE}/competition/killswitch_state.json"
 FLAG_FILE     = f"{WORKSPACE}/KILLSWITCH_TRIGGERED"
 LOG_FILE      = f"{WORKSPACE}/competition/killswitch.log"
-BOT_TOKEN     = "8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
-CHAT_ID       = "8154505910"
+from config_loader import config
+BOT_TOKEN = config.telegram.bot_token
+CHAT_ID   = config.telegram.chat_id
 
 DRAWDOWN_THRESHOLD = 0.15  # 15% = hard kill
 DRAWDOWN_WARNING   = 0.10  # 10% = Telegram warning

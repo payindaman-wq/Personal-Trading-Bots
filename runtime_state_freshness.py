@@ -132,7 +132,7 @@ def check_one(entry, state):
     if not stale:
         if prev.get("alerted"):
             inbox_write(
-                f"[SYN/runtime_state_freshness] {label} RECOVERED ({status}).",
+                f"[OPS/runtime_state_freshness] {label} RECOVERED ({status}).",
                 severity="info",
             )
         state[label] = {"consec_failures": 0, "alerted": False, "last_check": datetime.now(timezone.utc).isoformat()}
@@ -146,7 +146,7 @@ def check_one(entry, state):
         if new_age is not None and new_age <= max_age:
             if prev.get("alerted"):
                 inbox_write(
-                    f"[SYN/runtime_state_freshness] {label} self-healed (was {status}, now fresh:{new_age:.0f}min).",
+                    f"[OPS/runtime_state_freshness] {label} self-healed (was {status}, now fresh:{new_age:.0f}min).",
                     severity="info",
                 )
             state[label] = {"consec_failures": 0, "alerted": False, "last_check": datetime.now(timezone.utc).isoformat()}
@@ -167,7 +167,7 @@ def check_one(entry, state):
     }
     if fails >= ESCALATE_AFTER_FAILURES and not prev.get("escalated"):
         inbox_write(
-            f"[SYN/runtime_state_freshness] {label} stale and auto-heal failed {fails}x.\n"
+            f"[OPS/runtime_state_freshness] {label} stale and auto-heal failed {fails}x.\n"
             f"File: {path}\n"
             f"Status: {status}\n"
             f"Last regen result: {detail}\n"

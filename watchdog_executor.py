@@ -305,7 +305,7 @@ def _emit_critical(alert_id, reason, dry_run):
         "severity":   "critical",
         "alert_id":   alert_id,
         "msg":        (
-            f"[SYN/watchdog_executor] Cascading failure on {alert_id}: "
+            f"[OPS/watchdog_executor] Cascading failure on {alert_id}: "
             f"{reason}. Manual intervention required."
         ),
         "tg_allowed": True,

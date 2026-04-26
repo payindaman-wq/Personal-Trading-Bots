@@ -29,8 +29,9 @@ from zoneinfo import ZoneInfo
 PST = ZoneInfo("America/Los_Angeles")
 WORKSPACE = "/root/.openclaw/workspace"
 LOG_FILE  = f"{WORKSPACE}/competition/syn_audit.log"
-BOT_TOKEN = "8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
-CHAT_ID   = "8154505910"
+from config_loader import config
+BOT_TOKEN = config.telegram.bot_token
+CHAT_ID   = config.telegram.chat_id
 
 # Substrings that uniquely identify each expected cron entry (command portion).
 EXPECTED_CRON = [

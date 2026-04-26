@@ -404,7 +404,7 @@ def write_syn_preflight_reject(league, generation, failures):
         "ts":       datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
         "source":   "mimir_preflight",
         "severity": "warning",
-        "msg":      (f"[SYN/mimir_preflight] [{league}] gen={generation} REJECTED "
+        "msg":      (f"[OPS/mimir_preflight] [{league}] gen={generation} REJECTED "
                      f"\u2014 {len(failures)} unverified citation(s): {'; '.join(parts)}"),
     }
     with open(SYN_INBOX, "a") as f:

@@ -3,8 +3,8 @@
 # Starts next Swing and Polymarket sprints, sends ONE combined Telegram summary.
 
 WORKSPACE="/root/.openclaw/workspace"
-BOT_TOKEN="8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
-CHAT_ID="8154505910"
+BOT_TOKEN=$(python3 -c "import sys; sys.path.insert(0, '$WORKSPACE'); from config_loader import config; print(config.telegram.bot_token)")
+CHAT_ID=$(python3 -c "import sys; sys.path.insert(0, '$WORKSPACE'); from config_loader import config; print(config.telegram.chat_id)")
 LOG="$WORKSPACE/competition.log"
 
 log() {

@@ -180,7 +180,7 @@ def post_to_inbox(verdict, body_lines, severity):
         "ts":       datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
         "source":   "syn_post_ship_review",  # NOT allowlisted — inbox only by design
         "severity": "info",
-        "msg":      ("[SYN/post-ship] 24h bake review\n"
+        "msg":      ("[OPS/post-ship] 24h bake review\n"
                      f"Verdict: {verdict}\n" + "\n".join(body_lines))[:2000],
     }
     with open(INBOX, "a") as f:

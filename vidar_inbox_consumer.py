@@ -146,7 +146,7 @@ def classify(entry):
     # 1. Chris-action patterns take precedence.
     for pattern, reason in CHRIS_ACTION_RULES.get(src, []):
         if re.search(pattern, msg, re.IGNORECASE):
-            return "CHRIS_ACTION", reason
+            return "HUMAN_ACTION", reason
 
     # 2. Drop patterns — informational / already-resolved.
     for pattern in DROP_RULES.get(src, []):
@@ -209,7 +209,7 @@ def main():
         print(f"[{pst_now()}] no new inbox entries (offset={offset}, total={len(lines)})")
         return
 
-    counts = {"CHRIS_ACTION": 0, "LOKI_ESCALATE": 0, "DROP": 0, "IGNORED": 0}
+    counts = {"HUMAN_ACTION": 0, "LOKI_ESCALATE": 0, "DROP": 0, "IGNORED": 0}
 
     for line in new_lines:
         line = line.strip()
@@ -230,7 +230,7 @@ def main():
         verdict, reason = classify(entry)
         counts[verdict] += 1
 
-        if verdict == "CHRIS_ACTION":
+        if verdict == "HUMAN_ACTION":
             route_chris_action(entry, reason)
         elif verdict == "LOKI_ESCALATE":
             route_loki_escalate(entry, reason)
@@ -245,7 +245,7 @@ def main():
     state["last_offset"] = len(lines)
     save_state(state)
     print(f"[{pst_now()}] processed {len(new_lines)} lines | "
-          f"chris={counts['CHRIS_ACTION']} loki={counts['LOKI_ESCALATE']} "
+          f"human={counts['HUMAN_ACTION']} loki={counts['LOKI_ESCALATE']} "
           f"drop={counts['DROP']} ignored={counts['IGNORED']}")
 
 

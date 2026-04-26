@@ -1,0 +1,40 @@
+# crypto-trading-toolkit — configuration template
+# Copy this file to config.yaml and fill in your values.
+# config.yaml is gitignored — never commit it.
+
+config_version: 1   # REQUIRED — must be the first key. Do not change this value.
+
+anthropic:
+  api_key: ""               # Anthropic API key (or set ANTHROPIC_API_KEY env var)
+  daily_budget_usd: 10      # Hard cap on daily Anthropic spend in USD
+  throttle_at_pct: 80       # Alert when daily spend exceeds this % of budget
+
+gemini:
+  api_key: ""               # Google Gemini API key (or set GEMINI_API_KEY env var)
+
+kraken:
+  api_key: ""               # Kraken API key (or set KRAKEN_API_KEY env var)
+  api_secret: ""            # Kraken API secret (or set KRAKEN_API_SECRET env var)
+
+telegram:
+  bot_token: ""             # Telegram bot token from @BotFather (or set TELEGRAM_BOT_TOKEN env var)
+  chat_id: ""               # Your Telegram numeric user ID (or set TELEGRAM_CHAT_ID env var)
+
+vps:
+  host: ""                  # VPS IP or hostname (e.g. "1.2.3.4")
+  workspace: "/root/.openclaw/workspace"  # Absolute path to this repo on the VPS
+
+dashboard:
+  domain: ""                # Dashboard domain or IP (e.g. "dashboard.example.com")
+  branding: "Trading Toolkit"  # Title shown in the dashboard UI
+
+mission:
+  target: "Define your own profit target"
+
+fleet:
+  leagues_enabled:          # Which league types to activate
+    - day
+    - swing
+    - futures_day
+    - futures_swing
+    - polymarket

@@ -25,8 +25,9 @@ RESEARCH = "/root/.openclaw/workspace/research"
 REVERT_PATH = os.path.join(RESEARCH, "loki_revert_history.json")
 STATE_PATH = os.path.join(RESEARCH, "self_heal_readiness_state.json")
 
-BOT_TOKEN = "8491792848:AAEPeXKViSH6eBAtbjYxi77DIGfzwtdiYkY"
-CHAT_ID = "8154505910"
+from config_loader import config
+BOT_TOKEN = config.telegram.bot_token
+CHAT_ID   = config.telegram.chat_id
 
 
 INBOX = "/root/.openclaw/workspace/syn_inbox.jsonl"
