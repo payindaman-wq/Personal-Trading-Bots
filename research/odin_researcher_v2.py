@@ -39,6 +39,7 @@ import yaml
 
 WORKSPACE     = "/root/.openclaw/workspace"
 RESEARCH      = os.path.join(WORKSPACE, "research")
+SYN_INBOX_PATH = os.path.join(WORKSPACE, "syn_inbox.jsonl")
 GEMINI_SECRET = "/root/.openclaw/secrets/gemini.json"
 GEMINI_MODEL  = "gemini-2.5-flash-lite"
 GEMINI_BASE   = "https://generativelanguage.googleapis.com/v1beta/models"
@@ -375,41 +376,149 @@ class Population:
         self.save()
 
     def best_sharpe(self):
-        """Best RAW sharpe across all elites (Item 8 - not adj_score)."""
+        """Champion's gate-comparison metric (adj_score-based, with raw-Sharpe veto enforced upstream).
+
+        HARD RULE (meta_audit F1, 2026-04-26): a candidate with raw backtest_sharpe < 0
+        NEVER becomes champion regardless of adj_score. The raw veto runs first
+        in _gate_new_best before this metric is consulted, and _save_fleet
+        refuses to deploy a top elite whose raw Sharpe is negative.
+
+        Returns the top elite's stored adj_score (0.6 * backtest_sharpe + 0.4 *
+        live_pnl_z), not raw Sharpe. The OOS gate's `sharpe > pop.best_sharpe()`
+        trigger therefore sees adj_score boundaries — its internal logic is
+        unchanged, but the trigger threshold shifts by the live_pnl_z component.
+        """
         if not self.elites:
             return 0.0
-        return max(s.get("_sharpe", 0.0) for _, s, _ in self.elites)
+        return float(self.elites[0][0])
 
     def worst_adj(self):
         return self.elites[-1][0] if self.elites else -999.0
 
+    def _live_history_sparse(self):
+        """True when backtest_drift has <5 sprints (median field is null in the
+        JSON) OR when the drift module/file is absent. Sparse history means
+        adj_score collapses toward 0.6 * raw (z=0), so the adj comparison can't
+        be trusted post-reseed and the gate falls back to raw rules.
+        """
+        if backtest_drift is None:
+            return True
+        path = os.path.join(RESEARCH, self.league, "backtest_drift.json")
+        if not os.path.exists(path):
+            return True
+        try:
+            with open(path) as f:
+                return json.load(f).get("live_pnl_5sprint_median") is None
+        except (OSError, json.JSONDecodeError, ValueError):
+            return True
+
+    def _emit_veto(self, reason, detail):
+        """Append a new_best veto entry to syn_inbox.jsonl for SYN observability
+        (meta_audit F1, 2026-04-26). Also prints to stdout so the per-gen log
+        captures the veto inline.
+        """
+        rec = {
+            "ts":     datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
+            "source": "odin",
+            "kind":   "new_best_veto",
+            "league": self.league,
+            "reason": f"{reason}: {detail}",
+        }
+        try:
+            with open(SYN_INBOX_PATH, "a") as f:
+                f.write(json.dumps(rec) + "\n")
+        except Exception as e:
+            print(f"[odin/inbox] {e}")
+        print(f"| VETO_NEW_BEST league={self.league} reason={reason} {detail}")
+
+    def _gate_new_best(self, raw_sharpe, cand_adj_score):
+        """meta_audit F1 (2026-04-26) new_best promotion gate. Sequence:
+          (a) raw backtest_sharpe > 0           — HARD VETO, never overridable
+          (b) adj_score beats champion adj_score (+ drift gate_bonus)
+          (c) OOS gate                          — handled in main loop upstream
+          (d) 5-sprint live-PnL median veto     — preserved from prior F1 ship
+        Sparse-history fallback (<5 sprints OR no drift file): require
+        raw>0 OR raw>=champion_raw, since adj_score collapses toward raw when
+        z=0 and the adj comparison is fragile post-reseed.
+        Short-circuits on first failure; emits one syn_inbox entry per veto.
+        Returns True only when the candidate passes every check.
+        """
+        # Cold-start: first candidate becomes champion if it clears the raw veto.
+        if not self.elites:
+            if raw_sharpe < 0:
+                self._emit_veto("raw_sharpe_negative",
+                                f"raw={raw_sharpe:.4f} cold_start")
+                return False
+            return True
+
+        # (a) HARD raw-Sharpe veto — never overridable by adj_score.
+        if raw_sharpe < 0:
+            self._emit_veto("raw_sharpe_negative",
+                            f"raw={raw_sharpe:.4f} adj={cand_adj_score:.4f}")
+            return False
+
+        # Drift gate_bonus from the existing backtest_drift consumer interface
+        # (added on top of champion adj_score; same direction-of-travel as the
+        # prior raw-Sharpe gate, just measured on the adj_score axis).
+        gate_bonus = 0.0
+        if backtest_drift is not None:
+            try:
+                gate_bonus = float(backtest_drift.get_gate_bonus(self.league))
+            except Exception:
+                gate_bonus = 0.0
+
+        if self._live_history_sparse():
+            # adj_score ≈ 0.6 * raw when z=0 (sparse history). Fall back to raw.
+            # Champion raw is the max raw across elites — adj-sort and raw-sort
+            # diverge once z drifts per-elite-insertion, so we can't assume
+            # elites[0] holds the max raw.
+            champion_raw = max(
+                (float(s.get("_sharpe", 0.0)) for _, s, _ in self.elites),
+                default=0.0,
+            )
+            if not (raw_sharpe > 0 or raw_sharpe >= champion_raw):
+                self._emit_veto(
+                    "sparse_history_raw_floor",
+                    f"raw={raw_sharpe:.4f} champion_raw={champion_raw:.4f} "
+                    f"need raw>0 or raw>=champion_raw",
+                )
+                return False
+        else:
+            # (b) adj_score must beat champion adj_score plus drift gate_bonus.
+            champion_adj = float(self.elites[0][0])
+            if cand_adj_score <= (champion_adj + gate_bonus):
+                self._emit_veto(
+                    "adj_score_no_beat",
+                    f"cand_adj={cand_adj_score:.4f} "
+                    f"champion_adj={champion_adj:.4f} "
+                    f"gate_bonus={gate_bonus:.4f}",
+                )
+                return False
+
+        # (d) Reinforce existing 5-sprint live-PnL median veto. Brand-new
+        # champions (<5 sprints) hit the sparse-history branch above instead.
+        if backtest_drift is not None:
+            try:
+                if backtest_drift.get_veto_signal(self.league):
+                    self._emit_veto(
+                        "live_pnl_5sprint_median_negative",
+                        f"raw={raw_sharpe:.4f} adj={cand_adj_score:.4f}",
+                    )
+                    return False
+            except Exception:
+                pass
+
+        return True
+
     def try_insert(self, strategy_dict, strategy_yaml, sharpe, trades):
-        """Returns (inserted, is_new_best). is_new_best uses raw Sharpe (Item 8)."""
+        """Returns (inserted, is_new_best). is_new_best gated by F1 promotion
+        sequence in _gate_new_best (meta_audit 2026-04-26)."""
         strategy_dict["_sharpe"] = sharpe
         strategy_dict["_trades"] = trades
         score = adj_score(sharpe, trades, league=self.league)
         entry = (score, strategy_dict, strategy_yaml)
-        # Drift-aware gate: if backtest Sharpe has been historically overstating
-        # live realised Sharpe for this league, a new champion must beat the
-        # current best by more than just +0 to count. gate_bonus defaults to 0
-        # when drift data is absent (cold-start or pre-first-sprint).
-        gate = 0.0
-        if backtest_drift is not None:
-            try:
-                gate = float(backtest_drift.get_gate_bonus(self.league))
-            except Exception:
-                gate = 0.0
-        is_new_best = sharpe > (self.best_sharpe() + gate) if self.elites else True
 
-        # F1 (meta_audit 2026-04-25): veto new_best when rolling 5-sprint live
-        # PnL median < 0 (>=5 sprints required, brand-new champions skip veto).
-        if is_new_best and backtest_drift is not None:
-            try:
-                if backtest_drift.get_veto_signal(self.league):
-                    print(f"| VETO_NEW_BEST: 5sprint_median<0 league={self.league}")
-                    is_new_best = False
-            except Exception:
-                pass
+        is_new_best = self._gate_new_best(sharpe, score)
 
         # F4: reject clones — if a non-new-best candidate matches an existing
         # elite Sharpe within ELITE_SHARPE_EPS, do not add it. Keeps the
@@ -441,8 +550,22 @@ class Population:
 
     def _save_fleet(self, yaml_text):
         strat = yaml.safe_load(yaml_text)
+        raw = float(strat.get("_sharpe", 0.0))
+        # F1 (meta_audit 2026-04-26): HARD RULE — never deploy a top elite with
+        # raw backtest_sharpe < 0 as the active fleet champion. The new_best
+        # promotion gate already rejects raw<0 candidates from is_new_best,
+        # but bucket routing can still place a high-adj_score raw<0 candidate
+        # at elites[0]. Refuse the deployment here so best_strategy.yaml stays
+        # on the previous (gate-passing) champion until a positive-raw
+        # candidate is found. Emits a syn_inbox entry for SYN to flag.
+        if raw < 0:
+            self._emit_veto(
+                "fleet_sync_blocked_raw_negative",
+                f"top_raw={raw:.4f} top_trades={int(strat.get('_trades', 0))}",
+            )
+            return
         meta = {
-            "sharpe":    float(strat.get("_sharpe", 0.0)),
+            "sharpe":    raw,
             "trades":    int(strat.get("_trades", 0)),
             "saved_at":  datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         }
