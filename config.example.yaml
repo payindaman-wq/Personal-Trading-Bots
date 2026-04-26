@@ -38,3 +38,20 @@ fleet:
     - futures_day
     - futures_swing
     - polymarket
+
+# NJORD Capital Allocation Officer (cron-based, every 30 min when enabled).
+# Default disabled. Workflow: enabled+paper for >=1 week, review njord.log,
+# then switch to live. See docs/njord.md for the full activation flow.
+njord:
+  enabled: false              # set true to start the officer (paper or live)
+  mode: "paper"               # "paper" or "live". paper requires no Kraken keys.
+  total_capital_usd: 0        # required if mode=live; sets paper-balance cap if paper
+  per_bot_max_pct: 10         # cap on any single bot as % of total
+  drawdown_kill_pct: 15       # individual-bot drawdown kill trigger
+  league_weights:             # league weights (sum should be <= 1.0)
+    day: 0.35
+    swing: 0.25
+    futures_day: 0.20
+    futures_swing: 0.10
+    polymarket: 0.10
+  telegram_required_for_tier3: true   # page Chris on tier3 (wallet/keys/retire)

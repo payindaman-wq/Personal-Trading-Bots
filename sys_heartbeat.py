@@ -588,6 +588,7 @@ def main():
         "ledger_soak",          # one-shot Phase-2 cycle-ledger soak verdict (critical only — Chris-action)
         "league_killswitch",    # per-league kill (F2/mode-collapse) -- Chris must resume
         "self_heal_tier3",      # Tier 3 self-heal (critical only -- Chris ack required for irreversibles)
+        "njord",              # NJORD Capital Allocation Officer -- tier3 only (wallet/keys/retire); cron-based, off by default
         # NOTE (2026-04-19): the following sources are intentionally NOT allowlisted.
         # They route to syn_inbox only; VIDAR/LOKI consume and decide. Per
         # feedback_syn_telegram_chris_action_only.md: detection is not a Chris-action.
@@ -608,6 +609,7 @@ def main():
         "meta_audit": {"critical"},
         "ledger_soak":  {"critical"},
         "self_heal_tier3": {"critical"},  # only Chris-action tier3 pages; tier2/info dashboard-only
+        "njord":            {"critical"},  # only tier3 (Chris ack) pages; tier1/2 are dashboard/log only
     }
 
     inbox_path = f"{WORKSPACE}/syn_inbox.jsonl"

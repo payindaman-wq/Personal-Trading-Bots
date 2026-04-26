@@ -158,3 +158,10 @@ research/polymarket/active_tracking.jsonl
 
 # --- User config (never commit -- use config.example.yaml as schema reference) ---
 config.yaml
+
+# NJORD runtime state (per-bot allocation table, paper-mode portfolio,
+# pending-review queue, cycle log). All gitignored.
+competition/njord_allocation.json
+competition/njord_paper_state.json
+competition/njord_pending_review.flag
+competition/njord.log
