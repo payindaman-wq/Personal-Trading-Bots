@@ -120,26 +120,35 @@ def test_t3_raw_veto_overrides_high_adj():
 
 
 # ---------------------------------------------------------------------------
-# T4 (bonus): _save_fleet refuses to deploy a raw<0 top elite.
+# T4 (Session 3.5, 2026-04-26): unified deploy gate — _save_fleet honors
+# Session 2's gate decision. The legacy raw<0 elites[0] guard inside
+# _save_fleet was removed; raw<0 enforcement now lives upstream in the
+# gate, and _save_fleet skips the write + emits deploy_skipped on
+# is_new_best=False.
 # ---------------------------------------------------------------------------
-def test_t4_save_fleet_blocks_negative_top():
-    """End-to-end: even if bucket routing places a raw<0 elite at the top,
-    _save_fleet must refuse to write best_strategy.yaml.
-    """
+def test_t4_save_fleet_honors_gate():
     pop = Population("futures_day")
     inbox_before = reset_inbox_marker()
-    pop._save_fleet("name: bad\n_sharpe: -2.5267\n_trades: 30\n")
+    pop._save_fleet(
+        "name: bad\n_sharpe: -2.5267\n_trades: 30\n",
+        is_new_best=False,
+        veto_reason="raw_sharpe_negative",
+        candidate_id="bad",
+    )
     new = new_inbox_entries(inbox_before)
-    assert any("fleet_sync_blocked_raw_negative" in e["reason"] for e in new), \
-        f"T4: expected fleet_sync_blocked_raw_negative veto; got {new}"
-    print("T4 PASS: _save_fleet refused to deploy raw=-2.5267 top elite.")
+    assert any(e.get("kind") == "deploy_skipped"
+               and e.get("reason") == "raw_sharpe_negative"
+               and e.get("candidate_id") == "bad"
+               for e in new), \
+        f"T4: expected deploy_skipped(raw_sharpe_negative); got {new}"
+    print("T4 PASS: _save_fleet honored gate=False — emitted deploy_skipped.")
 
 
 def main():
     test_t1_negative_champion_vetoed()
     test_t2_adj_score_no_beat()
     test_t3_raw_veto_overrides_high_adj()
-    test_t4_save_fleet_blocks_negative_top()
+    test_t4_save_fleet_honors_gate()
     print("\nALL F1 GATE SMOKE TESTS PASSED.")
 
 

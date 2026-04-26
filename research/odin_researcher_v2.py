@@ -598,6 +598,11 @@ class Population:
         (meta_audit F1, 2026-04-26). Also prints to stdout so the per-gen log
         captures the veto inline.
         """
+        # Side-effect capture for the unified-deployment-gate consumer
+        # (_save_fleet via try_insert). The syn_inbox envelope below is
+        # unchanged; this attribute lets the deploy path read out the
+        # short reason code without re-deriving it from gate state.
+        self._last_veto_reason = reason
         rec = {
             "ts":     datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
             "source": "odin",
@@ -699,7 +704,11 @@ class Population:
         score = adj_score(sharpe, trades, league=self.league)
         entry = (score, strategy_dict, strategy_yaml)
 
+        # Reset before the gate runs so a stale reason from a prior call
+        # cannot leak into _save_fleet's deploy_skipped emission below.
+        self._last_veto_reason = None
         is_new_best = self._gate_new_best(sharpe, score)
+        veto_reason = self._last_veto_reason if not is_new_best else None
 
         # F4: reject clones — if a non-new-best candidate matches an existing
         # elite Sharpe within ELITE_SHARPE_EPS, do not add it. Keeps the
@@ -722,11 +731,14 @@ class Population:
             # Bucket has room — append and let save() normalise (sort + per-bucket trim).
             self.elites.append(entry)
             self.save()
-            # Sync best_strategy.yaml to current top elite after EVERY insertion,
-            # not only on strict new_best. elites[0] can shift via adj_score
-            # ranking without strict sharpe improvement; prior logic let the
-            # deployed YAML drift out of sync with the live champion.
-            self._save_fleet(self.elites[0][2])
+            # Population state (elite_*.yaml) and deployed champion
+            # (best_strategy.yaml) are decoupled: elite rotation always
+            # writes the population, but best_strategy.yaml only updates
+            # when Session 2's gate said is_new_best=True. _save_fleet
+            # consumes is_new_best/veto_reason and skips the deploy
+            # write (emitting deploy_skipped) on gate=False.
+            self._save_fleet(self.elites[0][2], is_new_best, veto_reason,
+                             candidate_id=strategy_dict.get("name"))
             return True, is_new_best
 
         # Bucket full — displace ONLY the weakest of THIS bucket. Other buckets,
@@ -736,27 +748,45 @@ class Population:
             self.elites = [e for e in self.elites if e is not weakest]
             self.elites.append(entry)
             self.save()
-            self._save_fleet(self.elites[0][2])
+            self._save_fleet(self.elites[0][2], is_new_best, veto_reason,
+                             candidate_id=strategy_dict.get("name"))
             return True, is_new_best
 
         return False, False
 
-    def _save_fleet(self, yaml_text):
+    def _save_fleet(self, yaml_text, is_new_best, veto_reason=None,
+                    candidate_id=None):
+        """Single source of truth for best_strategy.yaml deployment
+        (Session 3.5, 2026-04-26). Consumes Session 2's _gate_new_best
+        decision rather than re-deriving it. When the gate vetoed the
+        promotion (is_new_best=False), best_strategy.yaml is left
+        UNTOUCHED on disk — no rewrite, no mtime bump — and a
+        deploy_skipped entry is appended to syn_inbox reusing Session 2's
+        reason code. The legacy raw<0 elites[0] belt-and-suspenders guard
+        is removed; the unified gate is the only enforcement point.
+        Population state (elite_*.yaml) is updated by self.save() upstream
+        regardless — the deployed champion and the elite roster are now
+        decoupled by design.
+        """
+        if not is_new_best:
+            rec = {
+                "ts":           datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
+                "source":       "odin",
+                "kind":         "deploy_skipped",
+                "league":       self.league,
+                "reason":       veto_reason or "unknown",
+                "candidate_id": candidate_id,
+            }
+            try:
+                with open(SYN_INBOX_PATH, "a") as f:
+                    f.write(json.dumps(rec) + "\n")
+            except Exception as e:
+                print(f"[odin/inbox] {e}")
+            print(f"| DEPLOY_SKIPPED league={self.league} reason={veto_reason} "
+                  f"candidate={candidate_id}")
+            return
         strat = yaml.safe_load(yaml_text)
         raw = float(strat.get("_sharpe", 0.0))
-        # F1 (meta_audit 2026-04-26): HARD RULE — never deploy a top elite with
-        # raw backtest_sharpe < 0 as the active fleet champion. The new_best
-        # promotion gate already rejects raw<0 candidates from is_new_best,
-        # but bucket routing can still place a high-adj_score raw<0 candidate
-        # at elites[0]. Refuse the deployment here so best_strategy.yaml stays
-        # on the previous (gate-passing) champion until a positive-raw
-        # candidate is found. Emits a syn_inbox entry for SYN to flag.
-        if raw < 0:
-            self._emit_veto(
-                "fleet_sync_blocked_raw_negative",
-                f"top_raw={raw:.4f} top_trades={int(strat.get('_trades', 0))}",
-            )
-            return
         meta = {
             "sharpe":    raw,
             "trades":    int(strat.get("_trades", 0)),
