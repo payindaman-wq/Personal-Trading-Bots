@@ -151,6 +151,13 @@ ALL_PAIRS = [
 ]
 
 def get_pairs(league):
+    # session15: futures leagues are constrained to the Kraken Derivatives US universe
+    # (BTC/ETH/SOL). Without this, the random seeder/mutator drew strategies on untradable
+    # pairs which got filtered to empty at backtest entry — producing 0 trades and
+    # population-wide mode collapse on futures_day. Spot leagues keep the full ALL_PAIRS pool.
+    if league in ("futures_day", "futures_swing"):
+        allowed = set(kraken_leverage.tradable_pairs())
+        return [p for p in ALL_PAIRS if p in allowed]
     return ALL_PAIRS
 
 
@@ -994,8 +1001,10 @@ def random_strategy(league):
     long_conds = [random_condition(n, "long", league) for n in chosen]
     short_conds = [random_condition(n, "short", league) for n in chosen]
 
-    n_pairs = random.randint(3, 8)
-    pairs = random.sample(get_pairs(league), n_pairs)
+    # session15: clamp n_pairs to universe size for futures (BTC/ETH/SOL = 3 pairs).
+    universe = get_pairs(league)
+    n_pairs = random.randint(3, min(8, len(universe)))
+    pairs = random.sample(universe, n_pairs)
 
     tp = round(random.uniform(*r["take_profit_pct"]), 1)
     sl = round(random.uniform(*r["stop_loss_pct"]), 1)
@@ -1472,6 +1481,20 @@ def main():
             print(f"| POISON_YAML: {_poison_reason}")
             log_result(league, gen, {}, "poison_reject", _poison_reason[:80])
             gen += 1
+            with open(state_path, "w") as f:
+                json.dump({"gen": gen, "gens_since_best": gens_since_best, "last_mimir_gen": last_mimir_gen, "last_mimir_ts": last_mimir_ts, "diversity_injected_this_stall": diversity_injected_this_stall}, f)
+            time.sleep(args.sleep)
+            continue
+
+        # session15: reject candidates with pairs outside the league universe
+        # (catches LLM/external drift even though seeder/mutator are constrained).
+        _league_universe = set(get_pairs(league))
+        _untradable = [p for p in (candidate.get("pairs") or []) if p not in _league_universe]
+        if _untradable:
+            print(f"| UNTRADABLE_PAIRS: {_untradable}")
+            log_result(league, gen, {}, "untradable_pairs", f"{_untradable}"[:80])
+            gen += 1
+            gens_since_best += 1
             with open(state_path, "w") as f:
                 json.dump({"gen": gen, "gens_since_best": gens_since_best, "last_mimir_gen": last_mimir_gen, "last_mimir_ts": last_mimir_ts, "diversity_injected_this_stall": diversity_injected_this_stall}, f)
             time.sleep(args.sleep)
