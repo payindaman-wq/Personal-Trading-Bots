@@ -124,6 +124,23 @@ def sprint_has_results(league_cfg, sprint_id):
     return os.path.isdir(os.path.join(rdir, sprint_id + "_portfolios"))
 
 
+def _make_stable_anomaly_key(a):
+    """Stable :<league>:<kind>:<sub> key added to each anomaly for executor dedup."""
+    league = a.get("league", "")
+    kind   = a.get("kind", "")
+    if kind == "phantom_sprint":
+        sub = a.get("sprint_id", "")
+    elif kind == "duplicate_day_sprints":
+        sub = ",".join(sorted(a.get("zombie_sprints", [])))
+    elif kind == "ledger_vs_state_drift":
+        sub = ",".join(sorted(a.get("fields", [])))
+    elif kind == "missing_archive_cycle":
+        sub = str(a.get("missing_cycle", ""))
+    else:
+        sub = ""
+    return f"{league}:{kind}:{sub}"
+
+
 def check_league(cfg):
     anomalies = []
     state = load_json(cfg["cycle_state"])
@@ -356,6 +373,8 @@ def check_league(cfg):
             "fix_hint": "shadow-mode: investigate whether a writer skipped emit() or the baseline is stale; do NOT auto-fix",
         })
 
+    for a in anomalies:
+        a.setdefault("anomaly_key", _make_stable_anomaly_key(a))
     return anomalies
 
 
