@@ -107,6 +107,19 @@ DIVERSITY_KEEP_TOP     = 5
 # reproduce the parent exactly.
 ELITE_SHARPE_EPS     = 0.001
 
+_THROTTLE_FILE = os.path.join(RESEARCH, "anthropic_throttle.json")
+
+def _is_anthropic_throttled():
+    """Return True if daily budget throttle is active for today (UTC)."""
+    try:
+        import json as _j
+        from datetime import date as _d
+        with open(_THROTTLE_FILE) as _f:
+            _td = _j.load(_f)
+        return bool(_td.get("throttled")) and _td.get("date_utc") == _d.today().isoformat()
+    except Exception:
+        return False
+
 # F10 (meta_audit): horizon-matched secondary gate for day leagues. Primary
 # Sharpe is 2yr annualised; day sprints run 24h. A champion can have strong
 # 2yr Sharpe but mediocre typical-24h Sharpe (regime-blended), which is what
@@ -873,6 +886,18 @@ def main():
             time.sleep(60)
             continue
 
+        # External diversity injection signal from odin_health_executor.
+        # Written when gens_since_best exceeds the stall threshold.
+        _signal_path = os.path.join(league_dir(league), "diversity_inject_signal")
+        if os.path.exists(_signal_path):
+            try:
+                os.remove(_signal_path)
+                diversity_injected_this_stall = False
+                _sig_ts = datetime.now(timezone.utc).strftime("%H:%M:%S")
+                print(f"[{_sig_ts}] DIVERSITY_INJECT_SIGNAL: external trigger, re-arm F3", flush=True)
+            except OSError:
+                pass
+
         ts = datetime.now(timezone.utc).strftime("%H:%M:%S")
         best_s = pop.best_sharpe()
 
@@ -1235,8 +1260,9 @@ def main():
         # those ARE new information.
         last_10_trades = [int(r.get('trades', '0')) for r in results_history[-10:] if str(r.get('trades', '0')).isdigit()]
         structural_storm = sum(1 for t in last_10_trades if t > 450) >= 3
-        _mimir_stalled  = gens_since_best >= MIMIR_STALL_FLOOR
-        _baseline_gap   = MIMIR_STALL_GAP_GENS if _mimir_stalled else 200
+        _mimir_stalled   = gens_since_best >= MIMIR_STALL_FLOOR
+        _mimir_throttled = _is_anthropic_throttled()
+        _baseline_gap    = MIMIR_STALL_GAP_GENS if _mimir_stalled else (500 if _mimir_throttled else 200)
         trigger_mimir = (
             ((gen - last_mimir_gen) >= _baseline_gap)
             or (is_new_best and (gen - last_mimir_gen) >= 100)
@@ -1283,4 +1309,11 @@ def main():
 
 
 if __name__ == "__main__":
+    import sys as _sys; _sys.path.insert(0, '/root/.openclaw/workspace')
+    try:
+        from config_loader import config as _cfg
+        if getattr(_cfg, "mode", "full") != "full":
+            print("[odin-v2] mode=lite -- exiting (AI research disabled)", flush=True); _sys.exit(0)
+    except Exception:
+        pass
     main()

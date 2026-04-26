@@ -56,6 +56,19 @@ EXECUTOR_LOG             = os.path.join(RESEARCH, "vidar_executor_log.jsonl")
 PENDING_REVIEW_FLAG      = os.path.join(WORKSPACE, "competition", "vidar_pending_review.flag")
 
 PLANNER_MODEL            = "claude-opus-4-7"
+PLANNER_THROTTLE_MODEL   = "claude-sonnet-4-6"
+_THROTTLE_FILE           = "/root/.openclaw/workspace/research/anthropic_throttle.json"
+
+def _is_anthropic_throttled():
+    """Return True if daily budget throttle is active for today (UTC)."""
+    try:
+        import json as _j
+        from datetime import date as _d
+        with open(_THROTTLE_FILE) as _f:
+            _td = _j.load(_f)
+        return bool(_td.get("throttled")) and _td.get("date_utc") == _d.today().isoformat()
+    except Exception:
+        return False
 PLANNER_MAX_TOKENS       = 4000
 TIER2_REVIEW_DEADLINE_HR = 24
 
@@ -255,8 +268,11 @@ def plan_actions_for_finding(finding, tier, classify_rationale):
     api_key = _load_anthropic_key()
     client = anthropic.Anthropic(api_key=api_key)
 
+    _effective_planner_model = PLANNER_THROTTLE_MODEL if _is_anthropic_throttled() else PLANNER_MODEL
+    if _effective_planner_model != PLANNER_MODEL:
+        print(f"[vidar_executor] budget throttled: planner downgraded to {_effective_planner_model}")
     response = client.messages.create(
-        model=PLANNER_MODEL,
+        model=_effective_planner_model,
         max_tokens=PLANNER_MAX_TOKENS,
         system=_build_planner_system_blocks(),
         messages=[{
@@ -266,7 +282,7 @@ def plan_actions_for_finding(finding, tier, classify_rationale):
     )
 
     if hasattr(response, "usage"):
-        _log_usage(response.usage, PLANNER_MODEL, caller="vidar_executor_planner")
+        _log_usage(response.usage, _effective_planner_model, caller="vidar_executor_planner")
 
     text = response.content[0].text.strip()
     if "```" in text:
@@ -716,4 +732,11 @@ def main():
 
 
 if __name__ == "__main__":
+    import sys as _sys; _sys.path.insert(0, '/root/.openclaw/workspace')
+    try:
+        from config_loader import config as _cfg
+        if getattr(_cfg, "mode", "full") != "full":
+            print("[vidar-executor] mode=lite -- exiting (AI research disabled)", flush=True); _sys.exit(0)
+    except Exception:
+        pass
     main()

@@ -29,6 +29,7 @@ PROBE_URL = "https://api.anthropic.com/v1/messages"
 LOW_THRESHOLD_PCT = 10.0
 DAILY_BUDGET_USD = 10.0
 COOLDOWN_MIN = 360
+THROTTLE_FILE = os.path.join(os.path.dirname(USAGE_LOG), "anthropic_throttle.json")
 
 MODEL_PRICING = {
     "claude-sonnet-4-6":       {"in": 3.0,  "out": 15.0},
@@ -242,6 +243,34 @@ def main():
                 f"Tokens: {spend['input']:,} in / {spend['output']:,} out across {spend['calls']} calls{unk}"
             )
             mark_alerted(state, key)
+
+    # Budget throttle: write/clear research/anthropic_throttle.json
+    _throttle_at_pct = getattr(config.anthropic, "throttle_at_pct", 80) / 100.0
+    _daily_budget = getattr(config.anthropic, "daily_budget_usd", DAILY_BUDGET_USD)
+    _today_utc = datetime.now(timezone.utc).date().isoformat()
+    _existing = {}
+    if os.path.isfile(THROTTLE_FILE):
+        try:
+            with open(THROTTLE_FILE) as _f: _existing = json.load(_f)
+        except Exception: pass
+    if _existing.get("date_utc") != _today_utc:
+        try: os.remove(THROTTLE_FILE)
+        except OSError: pass
+        _existing = {}
+    if spend["cost_usd"] >= _throttle_at_pct * _daily_budget and not _existing.get("throttled"):
+        _throttle_data = {
+            "throttled": True,
+            "date_utc": _today_utc,
+            "spend_usd": round(spend["cost_usd"], 4),
+            "budget_usd": _daily_budget,
+            "throttle_pct": _throttle_at_pct * 100,
+            "set_at": datetime.now(timezone.utc).isoformat(),
+        }
+        try:
+            with open(THROTTLE_FILE, "w") as _f: json.dump(_throttle_data, _f)
+            print(f"[anthropic_health] throttle active: ${spend[cost_usd]:.2f} >= {_throttle_at_pct*100:.0f}% of ${_daily_budget}")
+        except Exception as _e:
+            print(f"[anthropic_health] throttle write failed: {_e}")
 
     save_state(state)
     print(

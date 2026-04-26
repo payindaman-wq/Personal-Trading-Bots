@@ -38,6 +38,19 @@ ANTHROPIC_URL     = "https://api.anthropic.com/v1/messages"
 # it's reviewing. Was mixed pre-2026-04-20 for cost; dedup ship made the
 # split's savings negligible (~$6/month).
 VIDAR_MODEL       = "claude-opus-4-7"
+VIDAR_THROTTLE_MODEL = "claude-sonnet-4-6"
+_THROTTLE_FILE    = "/root/.openclaw/workspace/research/anthropic_throttle.json"
+_NON_P0_MODES     = {"oscillation_diag", "restructure", "cycle_review", "deep_dive"}
+
+def _is_anthropic_throttled():
+    try:
+        import json as _j
+        from datetime import date as _d
+        with open(_THROTTLE_FILE) as _f:
+            _td = _j.load(_f)
+        return bool(_td.get("throttled")) and _td.get("date_utc") == _d.today().isoformat()
+    except Exception:
+        return False
 VIDAR_MAX_TOKENS  = 6000
 VIDAR_MAX_TOKENS_BY_MODE = {
     # meta_audit emits ~10-15 findings with multi-sentence fields plus
@@ -574,7 +587,26 @@ def run_mode(args, api_key):
         prior_footer = "[END PRIOR CONTEXT — use to converge, not re-derive]"
         prompt = prior_header + chr(10) + prior_summary + chr(10) + prior_footer + chr(10) + chr(10) + prompt
 
-    model = VIDAR_MODEL
+    if _is_anthropic_throttled():
+        if args.mode in _NON_P0_MODES:
+            print(f"[vidar] budget throttled -- deferring {args.mode}/{args.league} until UTC midnight")
+            try:
+                import json as _j
+                _defer_rec = {
+                    "ts":       datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
+                    "source":   "vidar",
+                    "severity": "info",
+                    "msg":      f"[VIDAR] {args.mode}/{args.league} deferred: daily budget throttle active. Will re-fire next UTC day.",
+                }
+                with open(INBOX, "a") as _f:
+                    _f.write(_j.dumps(_defer_rec) + chr(10))
+            except Exception:
+                pass
+            return
+        model = VIDAR_THROTTLE_MODEL
+        print(f"[vidar] budget throttled: downgrading {VIDAR_MODEL} -> {model} for {args.mode}")
+    else:
+        model = VIDAR_MODEL
     print(f"[vidar] firing {model} ({args.mode}, {args.league}) — prompt {len(prompt)} chars")
     try:
         response = call_claude(prompt, api_key, model, max_tokens=VIDAR_MAX_TOKENS_BY_MODE.get(args.mode))

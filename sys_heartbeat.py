@@ -492,7 +492,7 @@ def main():
             clear_alert(state, key)
 
     # ── Odin researcher health — alert if no successful generation in >6h ─────────
-    for vleague in ["day", "swing", "futures_swing"]:  # PAUSED futures_day 2026-04-25 meta_audit F2
+    for vleague in ["day", "swing", "futures_day", "futures_swing"]:
         key     = f"odin_{vleague}_health"
         problem = check_odin_health(vleague)
         if problem:
@@ -505,7 +505,7 @@ def main():
 
 
     # ── Odin backtest error storm — alert within 1-2 heartbeats of sustained failures ──
-    for vleague in ["day", "swing", "futures_swing"]:  # PAUSED futures_day 2026-04-25 meta_audit F2
+    for vleague in ["day", "swing", "futures_day", "futures_swing"]:
         key     = f"odin_{vleague}_backtest_errors"
         problem = check_odin_backtest_errors(vleague)
         if problem:
@@ -515,7 +515,7 @@ def main():
             clear_alert(state, key)
 
     # ── Program HALT directive — alert once per day if active ─────────────────
-    for vleague in ["day", "swing", "futures_swing"]:  # PAUSED futures_day 2026-04-25 meta_audit F2
+    for vleague in ["day", "swing", "futures_day", "futures_swing"]:
         key     = f"odin_{vleague}_program_halt"
         problem = check_program_halt(vleague)
         if problem:
@@ -525,7 +525,7 @@ def main():
             clear_alert(state, key)
 
     # ── Research paradigm stall — alert when a league has never achieved positive Sharpe ──
-    for vleague in ["day", "swing", "futures_swing"]:  # PAUSED futures_day 2026-04-25 meta_audit F2
+    for vleague in ["day", "swing", "futures_day", "futures_swing"]:
         key     = f"odin_{vleague}_research_stall"
         problem = check_research_stall(vleague)
         if problem:
@@ -659,7 +659,7 @@ def main():
     # SYN->Mimir escalation for research problems requiring analysis
     MIMIR_ESCALATE = ("backtest_errors", "program_halt", "research_stall")
     for key, msg in problems:
-        for lg in ["day", "swing", "futures_swing"]:  # PAUSED futures_day 2026-04-25 meta_audit F2
+        for lg in ["day", "swing", "futures_day", "futures_swing"]:
             for etype in MIMIR_ESCALATE:
                 if key == f"odin_{lg}_{etype}":
                     ctx = {}
