@@ -13,7 +13,7 @@ set -euo pipefail
 
 CONFIG="config.yaml"
 WORKSPACE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-UPSTREAM_URL="https://github.com/coldstoneadmin/crypto-trading-toolkit"
+UPSTREAM_URL="https://github.com/payindaman-wq/Personal-Trading-Bots"
 
 # TOOLKIT_MODE env var sets default; --mode flag takes explicit precedence.
 MODE="${TOOLKIT_MODE:-full}"
