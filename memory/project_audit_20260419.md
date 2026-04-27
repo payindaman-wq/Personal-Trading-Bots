@@ -51,3 +51,5 @@ Root cause: commit e5e4636 (2026-04-19T07:21) refactored direct tg_send() revert
 Fix: added direct syn_inbox write block at top of _record_revert() with full schema (source=loki, kind=revert, league, reason, detail, msg). Exception handler prints loudly and emits to research/loki_syn_inbox_failures.jsonl for traceability. Commit f3f4b9d.
 
 Backfill: 18 missing reverts (futures_day x2, futures_swing x11, day x3, swing x2) written to syn_inbox with _backfilled=true marker. Pre-backfill backup: syn_inbox.jsonl.bak.session22_pre_backfill.
+
+Tier 2 readiness re-audit scheduled (one-time, fires 2026-04-30 17:00 UTC, routine: tier2_readiness_reaudit; runs after Sessions 21/22/26/27 had 4 days to produce data).
