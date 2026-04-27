@@ -149,8 +149,8 @@ def _publish_league(league: str, now_ts: str, dry_run: bool) -> tuple:
 def _build_push_url(cfg) -> str:
     """Return authenticated URL for the upstream_pub transient remote."""
     upstream = getattr(cfg, "upstream", None)
-    repo = (getattr(upstream, "repo", "https://github.com/coldstoneadmin/crypto-trading-toolkit")
-            if upstream else "https://github.com/coldstoneadmin/crypto-trading-toolkit")
+    repo = (getattr(upstream, "repo", "https://github.com/payindaman-wq/Personal-Trading-Bots")
+            if upstream else "https://github.com/payindaman-wq/Personal-Trading-Bots")
     pat = getattr(upstream, "pat", "") if upstream else ""
     pat = pat or os.environ.get("UPSTREAM_PAT", "")
     if not pat:

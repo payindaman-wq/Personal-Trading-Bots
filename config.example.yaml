@@ -27,7 +27,7 @@ vps:
   workspace: "/root/.openclaw/workspace"  # Absolute path to this repo on the VPS
 
 upstream:
-  repo: "https://github.com/coldstoneadmin/crypto-trading-toolkit"  # public template — friends pull champion strategies from here
+  repo: "https://github.com/payindaman-wq/Personal-Trading-Bots"  # public template — friends pull champion strategies from here
   branch: "master"
   pat: ""  # GitHub PAT with public_repo scope for pushing to upstream.repo (or set UPSTREAM_PAT env var)
 

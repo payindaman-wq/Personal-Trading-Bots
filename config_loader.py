@@ -96,7 +96,7 @@ def _load_config():
 
 
     up = raw.setdefault("upstream", {})
-    up.setdefault("repo", "https://github.com/coldstoneadmin/crypto-trading-toolkit")
+    up.setdefault("repo", "https://github.com/payindaman-wq/Personal-Trading-Bots")
     up.setdefault("branch", "master")
     up.setdefault("pat", "")
     if os.environ.get("UPSTREAM_PAT"):
