@@ -182,16 +182,30 @@ def _read_results_tsv(league, last_n=50):
     return rows
 
 
+def _ghost_trader_threshold(league, window=200):
+    # session27: FIX B — per-league dynamic ghost-trader ceiling.
+    # p99 of non-zero trade counts in last <window> evals. FIX A at 1500
+    # still excluded futures_day champion class (1752-1793 trades); rolling
+    # percentile self-tunes per league. Session 23/27 2026-04-26.
+    rows = _read_results_tsv(league, window)
+    nonzero = sorted(r["trades"] for r in rows if r["trades"] > 0)
+    if len(nonzero) < 20:
+        return 3000  # fallback: insufficient data
+    p99_idx = min(int(len(nonzero) * 0.99), len(nonzero) - 1)
+    return nonzero[p99_idx]
+
+
 def compute_league_metrics(league, last_n=50):
     rows = _read_results_tsv(league, last_n)
     if not rows:
         return None
     total = len(rows)
-    structural = sum(1 for r in rows if r["trades"] > 450)
+    threshold = _ghost_trader_threshold(league)
+    structural = sum(1 for r in rows if r["trades"] > threshold)
     # League-agnostic 'valid' filter: exclude structural failures and errors.
-    # structural (trades>450) is captured in its own metric; backtest_error/zero-trade
+    # structural (trades>threshold) is captured in its own metric; backtest_error/zero-trade
     # rows skew the mean. Everything else counts.
-    valid = [r for r in rows if r["trades"] > 0 and r["trades"] <= 450 and r["status"] != 'backtest_error']
+    valid = [r for r in rows if r["trades"] > 0 and r["trades"] <= threshold and r["status"] != 'backtest_error']
     new_bests = sum(1 for r in rows if r["status"] == "new_best")
     return {
         "gens_in_window":          total,
