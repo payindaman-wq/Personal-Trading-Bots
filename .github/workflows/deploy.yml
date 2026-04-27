@@ -17,12 +17,22 @@ jobs:
           script: |
             set -e
 
-            # Sync to latest master — hard reset avoids local-change conflicts.
-            # Runtime data (competition/results, price_history, etc.) is gitignored
-            # so it is never touched by this reset.
             cd /root/.openclaw/workspace
             git fetch origin master
-            git reset --hard origin/master
+
+            # Abort if Mother has local commits not yet on origin.
+            AHEAD=$(git rev-list --count origin/master..HEAD 2>/dev/null || echo 0)
+            if [ "$AHEAD" -gt 0 ]; then
+              echo "::error::Mother has $AHEAD unpushed local commits — deploy aborting. Run: ssh root@204.168.167.19 'cd /root/.openclaw/workspace && git push origin master' then retry deploy."
+              git log origin/master..HEAD --oneline
+              exit 1
+            fi
+
+            # Pull --ff-only refuses to merge if Mother has local commits not on origin.
+            # This is intentional: deploy MUST fail loudly rather than silently destroy
+            # session work. If this step fails, SSH into Mother and `git push origin master`
+            # the missing commits, then re-run the deploy. See memory: feedback_push_after_each_commit.md.
+            git pull --ff-only origin master
 
             # Ensure /var/www/dashboard/index.html is a symlink to the workspace file
             # (cp would replace the symlink with a regular file on every deploy)
