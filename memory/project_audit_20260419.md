@@ -40,3 +40,14 @@ Restored 12 day-league bot strategies (floki, bjorn, lagertha, ragnar, leif, gun
 ## Session 17 — 2026-04-26 — Session 9 strip persistence fix
 
 Investigated why Session 9's 21:24 placeholder strip on research/day/best_strategy.yaml + research/futures_day/best_strategy.yaml didn't persist. Classification: B (second writer reverted, but writer is infra-level not code-level). Root cause: best_strategy.yaml is git-tracked; .github/workflows/deploy.yml runs git reset --hard origin/master via appleboy/ssh-action on every push to master, reverting unstaged yaml changes back to HEAD content (last committed pre-strip champion). meta.json files survived because they are untracked. Same root cause as Session 19's just-shipped fleet/*/strategy.yaml gitignore fix (commit 850de95) but for research/*/best_strategy.yaml — Session 19 didn't address research yamls. Unified gate (odin_researcher_v2.py:857 _save_fleet) remains the only active code-level writer; all 4 other writers checked are inactive (legacy v1 odin_researcher.py:98, volva_researcher.py:62, odin_grid_search.py:168 writes different file, smoke_deploy_gate.py is test-only). Plug: committed placeholder yaml to HEAD (commit 76fe811) so future deploy resets land on placeholder content rather than reverting it. Verified placeholder survived T+0, T+5min, and 6+ ODIN gen cycles (mtime unchanged at 23:24:56 — _save_fleet's is_new_best=True path not triggered for either league). Pre-existing post-promotion-revert issue (ODIN's organic champion writes get reverted on next push since file is git-tracked) is OUT OF SCOPE; needs separate session to gitignore research/*/best_strategy.yaml + add seed_strategy.yaml fork-bootstrap shim. Commits: 76fe811 (placeholder fix), this memory.
+
+
+## Session 22 (2026-04-26): loki syn_inbox swallow fix + 18 revert backfill
+
+Fixed silent-swallow bug in _record_revert() — 18 reverts since 2026-04-19 had been absent from syn_inbox. SYN/VIDAR monitoring surface restored.
+
+Root cause: commit e5e4636 (2026-04-19T07:21) refactored direct tg_send() revert calls into the new _record_revert() function but never included a syn_inbox write. The two Apr-19 entries in syn_inbox (05:15 + 07:08) were written by the pre-refactor code path; all 18 subsequent reverts used the new path with no syn_inbox write.
+
+Fix: added direct syn_inbox write block at top of _record_revert() with full schema (source=loki, kind=revert, league, reason, detail, msg). Exception handler prints loudly and emits to research/loki_syn_inbox_failures.jsonl for traceability. Commit f3f4b9d.
+
+Backfill: 18 missing reverts (futures_day x2, futures_swing x11, day x3, swing x2) written to syn_inbox with _backfilled=true marker. Pre-backfill backup: syn_inbox.jsonl.bak.session22_pre_backfill.
