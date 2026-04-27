@@ -18,3 +18,4 @@ All notable changes documented here. Semver-style versioning:
 - Tier 3 self-heal: cascading-failure and resource-exhaustion recovery.
 - Meta-audit cron: weekly strategic review with auto-execute action queueing.
 - `config_version: 1` -- initial schema (see `config.example.yaml`).
+# migrated 2026-04-26
