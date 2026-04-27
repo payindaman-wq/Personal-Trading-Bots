@@ -1,0 +1,44 @@
+name: session26_breakout_2
+style: swing_momentum
+inspiration: 'session26_reseed: archetype=breakout_archetype_random slot=2'
+league: futures_swing
+leverage: 2
+pairs:
+- BTC/USD
+- ETH/USD
+- SOL/USD
+position:
+  size_pct: 25
+  max_open: 3
+  fee_rate: 0.0005
+entry:
+  long:
+    conditions:
+    - indicator: bollinger_position
+      period_hours: 12
+      operator: eq
+      value: above_upper
+    - indicator: bollinger_position
+      period_hours: 48
+      operator: eq
+      value: above_upper
+  short:
+    conditions:
+    - indicator: bollinger_position
+      period_hours: 12
+      operator: eq
+      value: below_lower
+    - indicator: bollinger_position
+      period_hours: 48
+      operator: eq
+      value: below_lower
+exit:
+  take_profit_pct: 5.2
+  stop_loss_pct: 1.92
+  timeout_hours: 166
+risk:
+  pause_if_down_pct: 8
+  pause_minutes: 120
+  stop_if_down_pct: 18
+_sharpe: 0.0
+_trades: 0

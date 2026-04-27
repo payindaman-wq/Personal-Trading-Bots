@@ -1,6 +1,6 @@
-name: crossover
+name: session26_mean_reversion_2
 style: swing_momentum
-inspiration: "ODIN-injected champion \u2014 updated at each sprint reset"
+inspiration: 'session26_reseed: archetype=mean_reversion_archetype_random slot=2'
 league: futures_swing
 leverage: 2
 pairs:
@@ -14,24 +14,24 @@ position:
 entry:
   long:
     conditions:
-    - indicator: trend
+    - indicator: rsi
+      period_hours: 7
+      operator: lt
+      value: 39.7
+    - indicator: bollinger_position
       period_hours: 48
       operator: eq
-      value: up
-    - indicator: rsi
-      period_hours: 24
-      operator: lt
-      value: 37.77
+      value: inside
   short:
     conditions:
-    - indicator: trend
+    - indicator: rsi
+      period_hours: 14
+      operator: gt
+      value: 56.1
+    - indicator: bollinger_position
       period_hours: 48
       operator: eq
-      value: down
-    - indicator: rsi
-      period_hours: 24
-      operator: gt
-      value: 60
+      value: inside
 exit:
   take_profit_pct: 5.2
   stop_loss_pct: 1.92
@@ -40,7 +40,5 @@ risk:
   pause_if_down_pct: 8
   pause_minutes: 120
   stop_if_down_pct: 18
-_sharpe: 0.7001
-_trades: 486
-_oos_sharpe: 1.8971
-_oos_trades: 125
+_sharpe: 0.0
+_trades: 0

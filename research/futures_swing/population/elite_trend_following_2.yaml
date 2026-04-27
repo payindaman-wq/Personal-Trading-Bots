@@ -1,6 +1,6 @@
-name: crossover
+name: session26_perturb
 style: swing_momentum
-inspiration: "ODIN-injected champion \u2014 updated at each sprint reset"
+inspiration: 'session26_reseed: parent=champion_perturb (perturb sl: 1.92->1.94) slot=tf_2'
 league: futures_swing
 leverage: 2
 pairs:
@@ -33,14 +33,12 @@ entry:
       operator: gt
       value: 60
 exit:
-  take_profit_pct: 4.65
-  stop_loss_pct: 1.92
+  take_profit_pct: 5.2
+  stop_loss_pct: 1.94
   timeout_hours: 166
 risk:
   pause_if_down_pct: 8
   pause_minutes: 120
   stop_if_down_pct: 18
-_sharpe: 0.5413
-_trades: 504
-_oos_sharpe: 1.8712
-_oos_trades: 130
+_sharpe: 0.0
+_trades: 0
