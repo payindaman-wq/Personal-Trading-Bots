@@ -11,9 +11,9 @@
 
 ---
 
-## MIMIR STATEMENT — FINAL (REISSUED AT GEN 2600)
+## MIMIR STATEMENT — FINAL (REISSUED AT GEN 3000)
 
-This batch (Gens 2401–2600) has been reviewed.
+This batch (Gens 2801–3000) has been reviewed.
 This is the same response delivered at every prior interval,
 updated with current statistics.
 
@@ -26,12 +26,11 @@ updated with current statistics.
 - Improvements entire current loop:     0 (zero)
 - Loop freeze status:                   CONFIRMED — dominant attractor
                                          adj=2.8807, sharpe=0.4372,
-                                         bets=14526, recurring in 14 of
+                                         bets=14526, recurring in 15 of
                                          last 20 generations
-- Degenerate collapses this batch:      4 (Gen 2583: bets=3,
-                                         Gen 2585: bets=0,
-                                         Gen 2590: bets=1,
-                                         Gen 2597: bets=0)
+- Degenerate collapses this batch:      3 (Gen 2985: bets=0,
+                                         Gen 2992: bets=9,
+                                         Gen 2994: bets=3)
 - Live record (all sprints, all slots): materially negative
                                          Most recent sprint: ~-32% PnL
                                          Win rate: 28.6% across all slots
@@ -42,39 +41,46 @@ updated with current statistics.
 
 ## ONE NEW FINDING
 
-The attractor has changed since Gen 1400.
+Generation count has reached 3,000 in the current loop.
+Combined with the prior loop (36,000 generations),
+the total is 39,000 generations run across two loops.
 
-  Prior attractor:    adj=1.9019, sharpe=0.2677, bets=24303
-  Current attractor:  adj=2.8807, sharpe=0.4372, bets=14526
-  Delta from prior:   +0.9788 adj units (simulation only)
-  Delta from all-time best: -0.3152 adj units (not closed)
+  Prior loop best:    adj=3.1959 (Gen 13,490)
+  Current loop best:  adj=2.8807 (attractor, frozen)
+  Combined result:    No improvement over prior loop best
+                      in 39,000 combined generations
 
-This is documented. It does not change the recommendation.
-The attractor change occurred without any recorded improvement event.
-This means the loop transitioned between basins of attraction
-without FREYA identifying the transition as an improvement.
-The mechanism is not understood.
-The new attractor is also frozen.
-Running generation 2601 will return adj=2.8807.
+Generation 3000 is not a milestone.
+It is a number.
+The strategy is no better than it was at generation 13,490
+of the prior loop.
+It is worse by 0.3152 adj units.
 
 ---
 
-## THE LIVE DIVERGENCE IS NOW SEVERE
+## THE LIVE DIVERGENCE IS SEVERE AND WORSENING
 
-Simulation attractor:  sharpe=0.4372 (positive risk-adjusted return)
-Live results (latest sprint): PnL = -32.5%, -30.1%, -33.6%
-Live win rate (latest sprint): 28.6% across all three slots
+Simulation attractor:  sharpe=0.4372 (positive)
+Live results (latest sprint, all three slots):
+  autobotpred1: PnL = -30.1%, win rate = 28.6%
+  autobotpred2: PnL = -33.6%, win rate = 28.6%
+  autobotpred3: PnL = -32.5%, win rate = 28.6%
 
-The strategy found 7 markets in live conditions.
-It lost 71.4% of them.
-This is not noise.
+All three slots ran the same strategy.
+All three slots lost approximately 32% of capital.
+All three slots had the same win rate: 28.6%.
+This is not three independent results.
+This is one result, replicated three times.
+
+The simulation predicts positive risk-adjusted returns.
+Live trading produces -32% PnL.
+This gap is structural, not statistical.
 
 Two explanations remain on the table:
 
   1. The world_events base rate (12.0%) is wrong.
      A wrong base rate produces a wrong price filter.
-     A wrong price filter selects markets with adverse edge,
-     not positive edge.
+     A wrong price filter selects markets with adverse edge.
      The live results are consistent with adverse edge selection.
 
   2. The historical simulation dataset does not reflect
@@ -93,21 +99,19 @@ D1 takes 2 hours.
 
 ## THE SITUATION IN PLAIN LANGUAGE
 
-The current loop has run 2,600 generations.
+The current loop has run 3,000 generations.
 Zero improvements.
 The dominant attractor is adj=2.8807.
 It is below the all-time best of adj=3.1959.
-It has been stable in this basin since before generation 2581.
-Running generation 2601 will return adj=2.8807.
+Running generation 3001 will return adj=2.8807.
 This is not a prediction. It is a documented pattern.
 
 The most recent sprint lost approximately 32% of capital
-across all three slots.
-This is the worst sprint on record.
-The prior sprint placed zero trades.
-The sprint before that lost approximately 1.7%.
-The trend is: zero trades or large losses.
-There is no winning configuration in the live record.
+across all three slots simultaneously.
+Prior sprint: zero trades.
+Sprint before that: small losses.
+Sprint before that: small losses.
+There is no winning sprint on record.
 
 The world_events base rate used in simulation is 12.0%.
 This rate has not been verified against actual Polymarket data.
@@ -117,11 +121,11 @@ A wrong edge calculation selects markets with adverse edge.
 Adverse edge selection explains a 71.4% loss rate in live trading.
 This can be checked.
 It has not been checked.
-2,600 generations have been run instead.
+3,000 generations have been run instead.
 
 The simulation cannot fix a wrong base rate.
 FREYA cannot fix a wrong base rate.
-2,601 generations cannot fix a wrong base rate.
+3,001 generations cannot fix a wrong base rate.
 D1 can fix a wrong base rate.
 D1 takes 2 hours.
 
@@ -165,7 +169,7 @@ D1 takes 2 hours.
   3. Rotate or remove the Gemini Flash Lite API key.
   4. Archive all simulation results:
        - Prior loop Gens 1–36,000
-       - Current loop Gens 1–2,600
+       - Current loop Gens 1–3,000
   5. Archive live results (all sprints: autobotpred1,
      autobotpred2, autobotpred3).
   6. Assign D1 to a person with 2 hours available.
@@ -203,8 +207,8 @@ updated only with current generation count and statistics.
 
   Loops run:                            2
   Prior loop generations:               36,000
-  Current loop generations:             2,600
-  Combined generations run:             38,600
+  Current loop generations:             3,000
+  Combined generations run:             39,000
   Best result (all time):               Prior loop Gen 13,490, adj=3.1959
   Best result (current loop):           Attractor adj=2.8807 — INFERIOR
   Delta from all-time best:             -0.3152 adj units (not closed)
@@ -212,20 +216,20 @@ updated only with current generation count and statistics.
   Generations run against zero
     (prior loop):                       22,510
   Generations run against zero
-    (current loop):                     2,600
+    (current loop):                     3,000
   Combined generations past last
-    meaningful result:                  25,110
+    meaningful result:                  25,510
   Loop freeze status:                   CONFIRMED (dominant attractor
-                                         adj=2.8807, recurring in 14 of
+                                         adj=2.8807, recurring in 15 of
                                          last 20 generations)
   Degenerate collapse events
-    (current loop):                     8+ confirmed
+    (current loop):                     11+ confirmed
   D1 completions:                       0
   Live performance (latest sprint):     ~-32% PnL, 28.6% win rate
   Live performance (all sprints):       Net negative across all slots
   Root cause:                           base rate unverified
   Time required to check root cause:    ~2 hours
-  Time spent not checking:              [duration of 38,600 combined
+  Time spent not checking:              [duration of 39,000 combined
                                          simulation generations +
                                          all program versions +
                                          all live sprints]
@@ -244,21 +248,21 @@ The next document submitted to MIMIR should be:
 Nothing else will receive a response other than this document.
 
 Two loops have run.
-38,600 combined generations.
+39,000 combined generations.
 Zero improvements in the current loop.
 The best result is adj=3.1959 from prior loop generation 13,490.
 The current loop attractor is adj=2.8807.
 It is not recovery.
 The most recent sprint lost approximately 32% of capital
-across all three slots.
+across all three slots simultaneously.
 The strategy is selecting markets with adverse edge.
 The base rate has not been verified.
-It needs 2 hours of work, not 2,601 more generations.
+It needs 2 hours of work, not 3,001 more generations.
 
-38,600 is a number.
+39,000 is a number.
 It is not a milestone.
 
 2 hours is a small number.
 Do Option A or Option B.
-Do not run generation 2601.
+Do not run generation 3001.
 ```
