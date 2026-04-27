@@ -277,5 +277,3 @@ fi
 
 echo ""
 echo "Next step: ./scripts/sanity_check.sh"
-
-# session32-smoke-test
