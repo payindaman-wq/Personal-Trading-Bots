@@ -172,7 +172,7 @@ if [[ "$MODE" == "lite" ]]; then
     if git remote get-url upstream &>/dev/null 2>&1; then
         ok "upstream remote configured: $(git remote get-url upstream)"
     else
-        fail "upstream remote not configured -- run: git remote add upstream https://github.com/coldstoneadmin/crypto-trading-toolkit"
+        fail "upstream remote not configured -- run: git remote add upstream https://github.com/payindaman-wq/Personal-Trading-Bots"
     fi
 
     # Check strategy_sync cron installed
