@@ -85,3 +85,7 @@ Reseed sequence: backups created (elites_pre_session26_reseed.tar.gz + .bak.sess
 Verified post-restart: 10 elites on disk in bucketed format, all md5-unique, all in BTC/ETH/SOL universe, archetype distribution {trend_following: 3, mean_reversion: 3, breakout: 3, momentum: 1}, all produce >0 trades on first backtest (counts: trend_following 141/224/224, mean_reversion 14/17/14, breakout 32/67/67, momentum 80). best_strategy.yaml mtime+md5 unchanged. Mirrors 8c6585a futures_day treatment (also a 10-elite random reseed with stall reset). Tier 2 readiness re-audit (Session 28) scheduled to fire 2026-04-30.
 
 Commits: 8e07a4b (research: per-league MIMIR pause flag check), ed19d8d (futures_swing: full reseed of population), plus this memory commit.
+
+## Session 32 (2026-04-26): deploy.yml uses pull --ff-only
+
+Replaced deploy.yml's `git reset --hard origin/master` with `git pull --ff-only origin master`. Added an unpushed-commits guard step that emits a GitHub Actions ::error:: and exits 1 if Mother has local commits not on origin. Architectural backstop for the race that lost Session 19's 850de95 and dangled Sessions 21/24's work today. Discipline (push after each commit, memory: feedback_push_after_each_commit.md) is still the primary defense; this is the safety net. Commit 647597d.
