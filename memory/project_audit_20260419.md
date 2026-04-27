@@ -97,3 +97,4 @@ Recovered Sessions 19/21/24 commits that were reverted off master by deploy.yml 
 ## Session 34 — 2026-04-26 — scrub-check unblocked
 
 Session 34 (2026-04-26): fixed scrub-check violation in deploy.yml line 26. Hardcoded VPS IP was introduced by Session 32 (commit 647597d) and persisted on every subsequent push including Session 30's recovery 4eeccb2. Replaced with ${{ secrets.VPS_HOST }}, matching the pattern deploy.yml:14 already uses. scrub-check now passes. Migration to public template no longer blocked.
+Overnight structural-fix verifier scheduled (one-time, fires 2026-04-28 13:00 UTC, routine: overnight_structural_fix_verifier_20260428; covers 11 changes shipped 2026-04-26 across Sessions 17/19/21/22/24/25/26/27/30/32/34).
