@@ -66,3 +66,18 @@ Results vs old 450 threshold:
 - day/swing: no regression
 
 Threshold values as of 2026-04-26: day=334, futures_day=980, swing=60, futures_swing=533. Self-adjusts as leagues evolve. Reassess at Tier 2 build (Session 28).
+
+
+## Session 26 (2026-04-27): full reseed of futures_swing
+
+Population structurally broken — 8/10 elites byte-identical (md5 2ad2db5...), 956 gens since improvement, MIMIR trapped in dedup maze (Session 23 diagnosis confirmed by gen_state.json showing gens_since_best=956). Reseeded with 5 champion-perturb children + 5 cross-archetype seeds in bucketed format: 3 trend_following (champion-perturb via odin.perturb()), 3 mean_reversion (rsi+bollinger_position 'inside' — votes 4 mean_reversion), 3 breakout (2x bollinger_position above_upper-long/below_lower-short — votes 4 breakout), 1 momentum (price_change_pct + momentum_accelerating — votes 4 momentum). All 10 fit Session 1's bucket layout (4 archetypes x 3 slots = 12 max). Stall counter reset (gens_since_best 956 -> 0), F1 raw_sharpe_negative gate re-armed (visible firing in researcher.log post-restart with VETO_NEW_BEST entries). F2 killswitch armed for next sprints (no sprint history yet on reseeded pool).
+
+MIMIR paused 24h via new per-league flag mechanism: research/futures_swing/mimir_paused.flag contains an ISO timestamp expiry. Code patched in research/odin_researcher_v2.py at the trigger_mimir gate to honor the flag and self-clear on expiry. Pause expires 2026-04-28T00:42:39 UTC.
+
+Live champion (best_strategy.yaml) preserved byte-for-byte (md5 72d1f01...). Note: meta.json says sharpe=0.9342/trades=705 but yaml itself has _sharpe=0.7001/_trades=486 — divergence pre-existed this session, caused by pre-Session-3.5 odin code running on the futures_swing service (started 2026-04-26 02:00 UTC, before the 22:18 Session 3.5 deploy). The OLD code's "sync best_strategy.yaml to current top elite after EVERY insertion" behavior (now removed in Session 3.5) overwrote the gate-deployed champion 1m15s after meta was saved. Restart picked up the new code with unified-gate-only writes; replacement champion will come via _save_fleet() organic promotion.
+
+Reseed sequence: backups created (elites_pre_session26_reseed.tar.gz + .bak.session26_pre_reseed siblings on researcher.log/best_strategy.yaml/best_strategy.meta.json/gen_state.json/program.md/results.tsv), 10 elites written, gen_state reset (gens_since_best=0, diversity_injected_this_stall=true to suppress F3 auto-inject of random-replacements over reseed). First restart attempt at 00:30 saw F3 fire (unique_sharpe=1, all _sharpe=0) and replaced 5 of my elites with random_strategy() output before I caught it; second restart with diversity flag set worked. Mean_reversion blend initially used invalid bollinger values (inside_lower/inside_upper/above_middle — backtest only emits above_upper/below_lower/inside) — fixed in second pass.
+
+Verified post-restart: 10 elites on disk in bucketed format, all md5-unique, all in BTC/ETH/SOL universe, archetype distribution {trend_following: 3, mean_reversion: 3, breakout: 3, momentum: 1}, all produce >0 trades on first backtest (counts: trend_following 141/224/224, mean_reversion 14/17/14, breakout 32/67/67, momentum 80). best_strategy.yaml mtime+md5 unchanged. Mirrors 8c6585a futures_day treatment (also a 10-elite random reseed with stall reset). Tier 2 readiness re-audit (Session 28) scheduled to fire 2026-04-30.
+
+Commits: 8e07a4b (research: per-league MIMIR pause flag check), ed19d8d (futures_swing: full reseed of population), plus this memory commit.
