@@ -206,6 +206,9 @@ sed -i \
 echo ""
 echo "config.yaml written."
 
+# Materialize best_strategy.yaml for each league from the shipped seed (idempotent)
+bash "${WORKSPACE}/scripts/bootstrap_research_yamls.sh"
+
 # ----- Mode-specific post-setup -----
 
 if [[ "$MODE" == "lite" ]]; then

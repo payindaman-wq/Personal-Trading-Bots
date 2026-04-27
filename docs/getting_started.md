@@ -181,6 +181,8 @@ The script writes a file called `config.yaml` that is never uploaded to GitHub �
 
 - ✅ **4.2** `setup.sh` completed without errors.
 
+> **What setup does with strategy files:** Each research league ships with a `seed_strategy.yaml` in the repository. `setup.sh` copies it to `best_strategy.yaml` in the same directory — this is the live file the bots actually read. `best_strategy.yaml` is gitignored, so pulling upstream updates (or future git resets) will never overwrite your running strategy. If you are in lite mode, the strategy will be replaced by the next champion sync from upstream anyway. If you are in full mode, ODIN will evolve it over time.
+
 ### Backing up your config.yaml
 
 The `config.yaml` file is the single source of secrets for your deployment. It is

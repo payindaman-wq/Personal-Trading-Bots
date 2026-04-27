@@ -86,11 +86,16 @@ scripts/             setup and sanity-check utilities
 docs/                architecture overview and operator guides
 fleet/               per-bot strategy YAML files
 research/            officer scripts and research output
+  <league>/
+    seed_strategy.yaml   stable seed shipped with the repo (fork-safe)
+    best_strategy.yaml   live runtime state materialized from seed at setup (gitignored)
 competition/         runtime league state (gitignored on your deployment)
 published/           champion strategies published by Mother (lite mode source)
 config.yaml          your local config (gitignored -- never committed)
 config.example.yaml  schema reference and defaults
 ```
+
+`best_strategy.yaml` is never committed — it is runtime state materialized from `seed_strategy.yaml` when you run `scripts/setup.sh`. Pulling upstream updates does not overwrite your live strategy files.
 
 ## Staying in Sync with Upstream
 

@@ -165,3 +165,6 @@ competition/njord_allocation.json
 competition/njord_paper_state.json
 competition/njord_pending_review.flag
 competition/njord.log
+
+# Research runtime state — materialized from seed_strategy.yaml on first run; never commit live state
+research/*/best_strategy.yaml
