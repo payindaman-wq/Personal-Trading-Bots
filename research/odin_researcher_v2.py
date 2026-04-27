@@ -1691,6 +1691,24 @@ def main():
             or (is_new_best and (gen - last_mimir_gen) >= 100)
             or (structural_storm and (gen - last_mimir_gen) >= 50)
         )
+        # Session 26: per-league MIMIR pause flag. When research/<league>/mimir_paused.flag
+        # exists and contains an ISO timestamp in the future, suppress trigger_mimir.
+        # Flag self-clears once the timestamp passes.
+        if trigger_mimir:
+            _mimir_pause_path = os.path.join(league_dir(league), "mimir_paused.flag")
+            if os.path.exists(_mimir_pause_path):
+                try:
+                    with open(_mimir_pause_path) as _pf:
+                        _until_iso = _pf.read().strip()
+                    _until_dt = datetime.fromisoformat(_until_iso).replace(tzinfo=timezone.utc)
+                    if datetime.now(timezone.utc) < _until_dt:
+                        trigger_mimir = False
+                        print(f"  [mimir] Gen {gen} skipped: paused until {_until_iso}")
+                    else:
+                        os.remove(_mimir_pause_path)
+                        print(f"  [mimir] pause expired, removed flag {_mimir_pause_path}")
+                except Exception as _e:
+                    print(f"  [mimir/pause] {_e}")
         if trigger_mimir:
             now_utc = datetime.now(timezone.utc)
             gap_ok  = True
