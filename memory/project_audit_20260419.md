@@ -53,3 +53,16 @@ Fix: added direct syn_inbox write block at top of _record_revert() with full sch
 Backfill: 18 missing reverts (futures_day x2, futures_swing x11, day x3, swing x2) written to syn_inbox with _backfilled=true marker. Pre-backfill backup: syn_inbox.jsonl.bak.session22_pre_backfill.
 
 Tier 2 readiness re-audit scheduled (one-time, fires 2026-04-30 17:00 UTC, routine: tier2_readiness_reaudit; runs after Sessions 21/22/26/27 had 4 days to produce data).
+
+## Session 27 (2026-04-26): LOKI structural_failure trades ceiling FIX B
+
+Replaced LOKI's hardcoded 450-trade structural_failure threshold with a per-league dynamic ceiling via _ghost_trader_threshold() (p99 of non-zero trade counts in last 200 evals). Commit da713cd.
+
+FIX A at 1500 was evaluated and rejected: futures_day champion class trades 1752-1793 which exceeds 1500. FIX B self-tunes per league.
+
+Results vs old 450 threshold:
+- futures_day: sfr 18%->0%, mean_sharpe_valid -4.46->-3.35 (12 strategies un-excluded)
+- futures_swing: sfr 10%->0%, mean_sharpe_valid -1.16->-0.92 (5 strategies un-excluded)
+- day/swing: no regression
+
+Threshold values as of 2026-04-26: day=334, futures_day=980, swing=60, futures_swing=533. Self-adjusts as leagues evolve. Reassess at Tier 2 build (Session 28).
