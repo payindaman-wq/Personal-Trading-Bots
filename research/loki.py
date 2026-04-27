@@ -260,7 +260,7 @@ def is_structural_paused(league):
     return False, None
 
 
-def _record_revert(league, reason, detail=""):
+def _record_revert(league, reason, detail="", _recurse=False):
     history = load_revert_history()
     revert_ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
     history.setdefault(league, []).append({
@@ -304,6 +304,32 @@ def _record_revert(league, reason, detail=""):
             pass
 
 
+    # Write revert event to syn_inbox so SYN/VIDAR observe every revert.
+    try:
+        _inbox = os.path.join(WORKSPACE, "syn_inbox.jsonl")
+        _srec = {
+            "ts":       revert_ts,
+            "source":   "loki",
+            "severity": "error",
+            "kind":     "revert",
+            "league":   league,
+            "reason":   reason,
+            "detail":   detail[:200],
+            "msg":      f"[SYN/LOKI] REVERT ({league}/{reason}): {detail[:200]}. Restored pre-change backup.",
+        }
+        with open(_inbox, "a") as _sf:
+            _sf.write(json.dumps(_srec) + 
+")
+    except Exception as _se:
+        print(f"  [loki/revert/syn_inbox] WRITE FAILED — revert not visible to SYN/VIDAR: {_se}")
+        try:
+            _fail_log = os.path.join(RESEARCH, "loki_syn_inbox_failures.jsonl")
+            with open(_fail_log, "a") as _ff:
+                _ff.write(json.dumps({"ts": revert_ts, "error": str(_se), "league": league, "reason": reason}) + 
+")
+        except Exception:
+            pass
+
     # Maintenance tab surface — every revert shows up here with source=LOKI.
     try:
         mrec = {
@@ -339,40 +365,56 @@ def _record_revert(league, reason, detail=""):
     else:
         print(f"  [loki/revert/vidar] skipped — revert_review for {league} within cooldown")
 
-    # Oscillation guard
-    now_ts = datetime.now(timezone.utc).timestamp()
-    recent = [r for r in kept
-              if (now_ts - datetime.fromisoformat(r["ts"]).replace(tzinfo=timezone.utc).timestamp()) < 86400]
-    if len(recent) >= AUDIT_REVERT_OSCILLATION_LIMIT:
-        pauses = load_structural_pauses()
-        # Detect whether we're already in an active pause window — if so,
-        # extend but skip the VIDAR re-fire (it already diagnosed this cycle).
-        already_paused = False
-        prev_until = pauses.get(league)
-        if prev_until:
+    # Oscillation guard — skip when called recursively to record the oscillation event itself
+    if not _recurse:
+        now_ts = datetime.now(timezone.utc).timestamp()
+        recent = [r for r in kept
+                  if (now_ts - datetime.fromisoformat(r["ts"]).replace(tzinfo=timezone.utc).timestamp()) < 86400]
+        if len(recent) >= AUDIT_REVERT_OSCILLATION_LIMIT:
+            _champ_id = None
             try:
-                prev_dt = datetime.fromisoformat(prev_until).replace(tzinfo=timezone.utc)
-                if prev_dt > datetime.now(timezone.utc):
-                    already_paused = True
+                _cp = os.path.join(RESEARCH, league, "best_strategy.yaml")
+                if os.path.exists(_cp):
+                    _c = yaml.safe_load(open(_cp))
+                    _champ_id = _c.get("name") or _c.get("bot_name") or _c.get("id")
             except Exception:
                 pass
-        until = datetime.now(timezone.utc) + timedelta(hours=AUDIT_PAUSE_HOURS)
-        pauses[league] = until.strftime("%Y-%m-%dT%H:%M")
-        save_structural_pauses(pauses)
-        if already_paused:
-            print(f"  [loki-oscillation] {league} pause extended (already paused until {prev_until}); skipping VIDAR re-fire")
-        else:
-            print(f"  [loki-oscillation] {league} paused {AUDIT_PAUSE_HOURS}h after {len(recent)} reverts in 24h -- VIDAR oscillation_diag will review")
-            try:
-                subprocess.Popen(
-                    ["python3", VIDAR_SCRIPT,
-                     "--mode", "oscillation_diag",
-                     "--league", league],
-                    stdout=open(os.path.join(RESEARCH, "vidar.log"), "a"),
-                    stderr=subprocess.STDOUT,
-                )
-            except Exception as _e:
-                print(f"  [loki/oscillation/vidar] launch failed: {_e}")
+            _prior_id = recent[-2].get("reason") if len(recent) >= 2 else reason
+            _record_revert(league, "oscillation", json.dumps({
+                "oscillation_count": len(recent),
+                "prior_champion_id": _prior_id,
+                "current_champion_id": _champ_id,
+                "time_window": "24h",
+            }), _recurse=True)
+            pauses = load_structural_pauses()
+            # Detect whether we're already in an active pause window — if so,
+            # extend but skip the VIDAR re-fire (it already diagnosed this cycle).
+            already_paused = False
+            prev_until = pauses.get(league)
+            if prev_until:
+                try:
+                    prev_dt = datetime.fromisoformat(prev_until).replace(tzinfo=timezone.utc)
+                    if prev_dt > datetime.now(timezone.utc):
+                        already_paused = True
+                except Exception:
+                    pass
+            until = datetime.now(timezone.utc) + timedelta(hours=AUDIT_PAUSE_HOURS)
+            pauses[league] = until.strftime("%Y-%m-%dT%H:%M")
+            save_structural_pauses(pauses)
+            if already_paused:
+                print(f"  [loki-oscillation] {league} pause extended (already paused until {prev_until}); skipping VIDAR re-fire")
+            else:
+                print(f"  [loki-oscillation] {league} paused {AUDIT_PAUSE_HOURS}h after {len(recent)} reverts in 24h -- VIDAR oscillation_diag will review")
+                try:
+                    subprocess.Popen(
+                        ["python3", VIDAR_SCRIPT,
+                         "--mode", "oscillation_diag",
+                         "--league", league],
+                        stdout=open(os.path.join(RESEARCH, "vidar.log"), "a"),
+                        stderr=subprocess.STDOUT,
+                    )
+                except Exception as _e:
+                    print(f"  [loki/oscillation/vidar] launch failed: {_e}")
 
 
 def _audit_verdict(baseline, current):
