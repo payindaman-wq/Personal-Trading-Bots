@@ -6,7 +6,7 @@ to two new repos under your `payindaman-wq` GitHub account — a public template
 fork, and a private personal repo the VPS deploys from.
 **Prerequisites:**
 - Logged into github.com as `payindaman-wq`
-- SSH access to `204.168.167.19` working from your laptop
+- SSH access to `YOUR_VPS_IP` working from your laptop
 - Approximately 30-45 minutes of uninterrupted focus
 - A new GitHub Personal Access Token (PAT) from your `payindaman-wq` account with `repo`
   scope — create one at https://github.com/settings/tokens before you start
@@ -25,7 +25,7 @@ what this runbook expects.
 **Check working tree and recent commits:**
 
 ```bash
-ssh root@204.168.167.19 "cd /root/.openclaw/workspace && git status && echo '---' && git log --oneline -5"
+ssh root@YOUR_VPS_IP "cd /root/.openclaw/workspace && git status && echo '---' && git log --oneline -5"
 ```
 
 Expected: `Your branch is up to date with 'origin/master'.` and `nothing to commit`
@@ -35,7 +35,7 @@ Expected: `Your branch is up to date with 'origin/master'.` and `nothing to comm
 **Confirm config.yaml is gitignored:**
 
 ```bash
-ssh root@204.168.167.19 "cd /root/.openclaw/workspace && git check-ignore config.yaml && echo 'OK: config.yaml is ignored'"
+ssh root@YOUR_VPS_IP "cd /root/.openclaw/workspace && git check-ignore config.yaml && echo 'OK: config.yaml is ignored'"
 ```
 
 Expected output: `config.yaml` followed by `OK: config.yaml is ignored`. If this
@@ -45,7 +45,7 @@ secrets to a public repo.
 **Confirm config.yaml is not tracked in the source repo:**
 
 ```bash
-ssh root@204.168.167.19 "cd /root/.openclaw/workspace && git ls-files | grep config.yaml"
+ssh root@YOUR_VPS_IP "cd /root/.openclaw/workspace && git ls-files | grep config.yaml"
 ```
 
 Expected: no output. If `config.yaml` appears in the output, stop — it has been
@@ -54,7 +54,7 @@ accidentally committed and will push to the public template in Step 2.
 **Confirm current origin:**
 
 ```bash
-ssh root@204.168.167.19 "cd /root/.openclaw/workspace && git remote -v"
+ssh root@YOUR_VPS_IP "cd /root/.openclaw/workspace && git remote -v"
 ```
 
 Expected: `origin https://ghp_...@github.com/coldstoneadmin/crypto-trading-toolkit.git`
@@ -105,7 +105,7 @@ This pushes the current master branch from the VPS to the new public repo. Origi
 not changed here — you are adding a temporary remote for the one-shot push only.
 
 ```bash
-ssh root@204.168.167.19
+ssh root@YOUR_VPS_IP
 ```
 
 Once connected:
@@ -190,20 +190,20 @@ Add the following two secrets (click "New repository secret" for each):
 
 | Secret name | Value |
 |---|---|
-| `VPS_HOST` | `204.168.167.19` |
+| `VPS_HOST` | `YOUR_VPS_IP` |
 | `VPS_SSH_KEY` | Contents of the deploy private key on the VPS (see below) |
 
 **To find the deploy SSH key:**
 
 ```bash
-ssh root@204.168.167.19 "ls ~/.ssh/"
+ssh root@YOUR_VPS_IP "ls ~/.ssh/"
 ```
 
 Look for a key whose public half is in `~/.ssh/authorized_keys`. To print the private
 key contents for pasting:
 
 ```bash
-ssh root@204.168.167.19 "cat ~/.ssh/id_ed25519"
+ssh root@YOUR_VPS_IP "cat ~/.ssh/id_ed25519"
 ```
 
 Copy the entire output including the `-----BEGIN OPENSSH PRIVATE KEY-----` and
@@ -227,7 +227,7 @@ Verify the new deploy chain works. Make a trivial commit and push, then watch th
 Actions tab.
 
 ```bash
-ssh root@204.168.167.19
+ssh root@YOUR_VPS_IP
 cd /root/.openclaw/workspace
 
 echo "# migrated $(date -u +%Y-%m-%d)" >> CHANGELOG.md
@@ -312,7 +312,7 @@ Run this one-liner from any terminal with VPS SSH access to confirm you are full
 over to payindaman-wq:
 
 ```bash
-ssh root@204.168.167.19 "cd /root/.openclaw/workspace && \
+ssh root@YOUR_VPS_IP "cd /root/.openclaw/workspace && \
   echo '== origin ==' && git remote -v | grep -E 'origin' && \
   echo '== publisher upstream ==' && grep -A1 '^upstream:' config.yaml | grep 'repo:' && \
   echo '== any coldstoneadmin refs left? ==' && grep -rn 'coldstoneadmin' --include='*.py' --include='*.yaml'
@@ -369,7 +369,7 @@ git remote add public https://<NEW_PAT>@github.com/payindaman-wq/Personal-Tradin
 
 Tick each item before calling the migration complete.
 
-- [ ] `ssh root@204.168.167.19 "cd /root/.openclaw/workspace && git remote -v"` shows
+- [ ] `ssh root@YOUR_VPS_IP "cd /root/.openclaw/workspace && git remote -v"` shows
   `origin` pointing at `payindaman-wq/Herbal-Nectars-Trading`
 - [ ] Deploy test from Step 6 ran green in GitHub Actions
 - [ ] https://github.com/coldstoneadmin/crypto-trading-toolkit shows an "Archived"
@@ -379,7 +379,7 @@ Tick each item before calling the migration complete.
 - [ ] config.yaml is NOT tracked in Herbal-Nectars-Trading:
 
   ```bash
-  ssh root@204.168.167.19 "cd /root/.openclaw/workspace && git ls-files config.yaml | wc -l"
+  ssh root@YOUR_VPS_IP "cd /root/.openclaw/workspace && git ls-files config.yaml | wc -l"
   ```
 
   Expected: `0`
@@ -389,7 +389,7 @@ Tick each item before calling the migration complete.
 - [ ] `strategy_sync.py` no longer references `coldstoneadmin` — confirmed by:
 
   ```bash
-  ssh root@204.168.167.19 "grep coldstoneadmin /root/.openclaw/workspace/strategy_sync.py"
+  ssh root@YOUR_VPS_IP "grep coldstoneadmin /root/.openclaw/workspace/strategy_sync.py"
   ```
 
   Expected: no output.
@@ -397,7 +397,7 @@ Tick each item before calling the migration complete.
 - [ ] Sanity check passes:
 
   ```bash
-  ssh root@204.168.167.19 "cd /root/.openclaw/workspace && bash scripts/sanity_check.sh"
+  ssh root@YOUR_VPS_IP "cd /root/.openclaw/workspace && bash scripts/sanity_check.sh"
   ```
 
 ---
@@ -408,7 +408,7 @@ Tick each item before calling the migration complete.
 you are fully reverted:
 
 ```bash
-ssh root@204.168.167.19 "cd /root/.openclaw/workspace && git remote set-url origin https://<OLD_PAT>@github.com/coldstoneadmin/crypto-trading-toolkit.git"
+ssh root@YOUR_VPS_IP "cd /root/.openclaw/workspace && git remote set-url origin https://<OLD_PAT>@github.com/coldstoneadmin/crypto-trading-toolkit.git"
 ```
 
 Use the old URL you saved during the pre-flight checks.
