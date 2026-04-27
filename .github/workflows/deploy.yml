@@ -1,45 +1,19 @@
 name: Deploy to VPS
 
+# Public template — auto-deploy is disabled.
+# To enable: add VPS_HOST and VPS_SSH_KEY secrets to your fork,
+# then change "on:" to "on:\n  push:\n    branches: [master]"
+# See docs/vps_setup.md for full setup instructions.
+
 on:
-  push:
-    branches: [master]
+  workflow_dispatch:
 
 jobs:
-  deploy:
+  setup-reminder:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to VPS
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: root
-          key: ${{ secrets.VPS_SSH_KEY }}
-          script: |
-            set -e
-
-            cd /root/.openclaw/workspace
-            git fetch origin master
-
-            # Abort if Mother has local commits not yet on origin.
-            AHEAD=$(git rev-list --count origin/master..HEAD 2>/dev/null || echo 0)
-            if [ "$AHEAD" -gt 0 ]; then
-              echo "::error::Mother has $AHEAD unpushed local commits — deploy aborting. Run: ssh root@${{ secrets.VPS_HOST }} 'cd /root/.openclaw/workspace && git push origin master' then retry deploy."
-              git log origin/master..HEAD --oneline
-              exit 1
-            fi
-
-            # Pull --ff-only refuses to merge if Mother has local commits not on origin.
-            # This is intentional: deploy MUST fail loudly rather than silently destroy
-            # session work. If this step fails, SSH into Mother and `git push origin master`
-            # the missing commits, then re-run the deploy. See memory: feedback_push_after_each_commit.md.
-            git pull --ff-only origin master
-
-            # Ensure /var/www/dashboard/index.html is a symlink to the workspace file
-            # (cp would replace the symlink with a regular file on every deploy)
-            cp /root/.openclaw/workspace/dashboard/index.html /var/www/dashboard/index.html
-            chmod 644 /var/www/dashboard/index.html
-
-            # Refresh dashboard data
-            python3 /root/.openclaw/workspace/dashboard_data.py
-
-            echo "Deploy complete"
+      - name: Configure VPS secrets
+        run: |
+          echo "Auto-deploy is disabled in the public template."
+          echo "Add VPS_HOST and VPS_SSH_KEY secrets to enable it."
+          echo "See docs/vps_setup.md for instructions."
