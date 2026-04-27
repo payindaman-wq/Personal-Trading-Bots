@@ -265,6 +265,30 @@ def _record_revert(league, reason, detail=""):
             continue
     history[league] = kept
     save_revert_history(history)
+    # Write revert event to syn_inbox so SYN/VIDAR observe every revert.
+    try:
+        _inbox = os.path.join(WORKSPACE, "syn_inbox.jsonl")
+        _srec = {
+            "ts":       revert_ts,
+            "source":   "loki",
+            "severity": "error",
+            "kind":     "revert",
+            "league":   league,
+            "reason":   reason,
+            "detail":   detail[:200],
+            "msg":      f"[SYN/LOKI] REVERT ({league}/{reason}): {detail[:200]}. Restored pre-change backup.",
+        }
+        with open(_inbox, "a") as _sf:
+            _sf.write(json.dumps(_srec) + "\n")
+    except Exception as _se:
+        print(f"  [loki/revert/syn_inbox] WRITE FAILED — revert not visible to SYN/VIDAR: {_se}")
+        try:
+            _fail_log = os.path.join(RESEARCH, "loki_syn_inbox_failures.jsonl")
+            with open(_fail_log, "a") as _ff:
+                _ff.write(json.dumps({"ts": revert_ts, "error": str(_se), "league": league, "reason": reason}) + "\n")
+        except Exception:
+            pass
+
 
     # Maintenance tab surface — every revert shows up here with source=LOKI.
     try:
