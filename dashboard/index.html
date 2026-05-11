@@ -2230,11 +2230,11 @@ function render_polymarket(pm, cycle_state, cum_rankings, total_sprints) {
     type:             b.category || 'auto',
     username:         '',
     pnl_usd:          b.pnl_usd || 0,
-    sprint_pnl_usd:   (typeof b.closed_pnl_usd === 'number' ? b.closed_pnl_usd : b.pnl_usd) || 0,
+    sprint_pnl_usd:   b.pnl_usd || 0,
     win_rate:         b.win_rate || 0,
-    sprint_win_rate:  b.win_rate || 0,
+    sprint_win_rate:  (typeof b.sprint_win_rate === 'number' ? b.sprint_win_rate : b.win_rate) || 0,
     trades:           b.trades || 0,
-    sprint_trades:    b.trades || 0,
+    sprint_trades:    (typeof b.sprint_trades === 'number' ? b.sprint_trades : b.trades) || 0,
     active_positions: b.active_positions || 0,
   }));
   const all_bots = [...copy_bots, ...auto_bots];

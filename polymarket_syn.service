@@ -1,0 +1,14 @@
+[Unit]
+Description=Polymarket SYN autonomous prediction market tick (15 autonomous bots)
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/.openclaw/workspace
+ExecStart=/usr/bin/python3 /root/.openclaw/workspace/polymarket_syn_tick.py
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

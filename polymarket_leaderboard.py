@@ -172,29 +172,20 @@ def get_live_bots():
         pass
 
     # Copy-trader bots — read live from state.json (polymarket.service).
-    # Each row carries the trader's PM username so Live Action / leaderboard
-    # show who the bot is mirroring. nv_legal_pnl is tracked at sprint-end via
-    # the _copy.json files; live we just surface sprint counters.
     try:
         with open(COPY_STATE) as f:
             cs = json.load(f)
         sprint_id    = cs.get("sprint_id", "")
         sprint_start = cs.get("sprint_started_at", "")
         for b in cs.get("bots", []):
-            sp_pnl    = round(b.get("sprint_pnl_usd", 0.0), 4)
-            sp_trades = b.get("sprint_trades", 0)
-            sp_wins   = b.get("sprint_wins", 0)
-            closed_titles = [t.get("title", "") for t in b.get("closed_trades", [])
-                             if not sprint_start or t.get("closed_at", "") >= sprint_start]
-            nv_pnl = 0.0  # copy bots' closed_trades carry pnl_usd; nv-legal applies via title
-            nv_trades = 0
-            for t in b.get("closed_trades", []):
-                ts = t.get("closed_at", "")
-                if sprint_start and ts and ts < sprint_start:
-                    continue
-                if is_nv_legal(t.get("title", "")):
-                    nv_pnl += t.get("pnl_usd", 0.0)
-                    nv_trades += 1
+            closed    = [t for t in b.get("closed_trades", [])
+                         if not sprint_start or t.get("closed_at", "") >= sprint_start]
+            sp_pnl    = round(sum(t.get("pnl_usd", 0.0) for t in closed), 4)
+            sp_trades = len(closed)
+            sp_wins   = sum(1 for t in closed if t.get("pnl_usd", 0.0) > 0)
+            nv_pnl    = round(sum(t.get("pnl_usd", 0.0) for t in closed
+                                  if is_nv_legal(t.get("title", ""))), 4)
+            nv_trades = sum(1 for t in closed if is_nv_legal(t.get("title", "")))
             bots.append({
                 "bot":             b.get("name", ""),
                 "type":            "copy",
@@ -206,7 +197,7 @@ def get_live_bots():
                 "sprint_wins":     sp_wins,
                 "win_rate":        round(sp_wins / sp_trades * 100, 1) if sp_trades > 0 else 0.0,
                 "active_positions": len(b.get("positions", {})),
-                "sprint_nv_legal_pnl_usd": round(nv_pnl, 4),
+                "sprint_nv_legal_pnl_usd": nv_pnl,
                 "sprint_nv_legal_trades":  nv_trades,
             })
     except Exception:

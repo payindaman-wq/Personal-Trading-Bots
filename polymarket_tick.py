@@ -364,11 +364,20 @@ def advance_sprint(state):
     os.makedirs(SPRINT_RESULTS, exist_ok=True)
 
     # Archive copy-trader results in unified sprint_results dir
+    try:
+        from polymarket_leaderboard import is_nv_legal as _nv_ok
+    except ImportError:
+        def _nv_ok(title): return True
+    sprint_start = state.get("sprint_started_at", "")
     bots_data = []
     for b in state["bots"]:
         sp_trades = b.get("sprint_trades", 0)
         sp_wins   = b.get("sprint_wins", 0)
         sp_pnl    = round(b.get("sprint_pnl_usd", 0), 2)
+        closed    = [t for t in b.get("closed_trades", [])
+                     if not sprint_start or t.get("closed_at", "") >= sprint_start]
+        nv_pnl    = round(sum(t.get("pnl_usd", 0.0) for t in closed if _nv_ok(t.get("title", ""))), 2)
+        nv_trades = sum(1 for t in closed if _nv_ok(t.get("title", "")))
         bots_data.append({
             "bot":            b["name"],
             "type":           "copy",
@@ -378,6 +387,8 @@ def advance_sprint(state):
             "sprint_trades":  sp_trades,
             "sprint_wins":    sp_wins,
             "win_rate":       round(sp_wins / sp_trades * 100, 1) if sp_trades > 0 else 0.0,
+            "sprint_nv_legal_pnl_usd": nv_pnl,
+            "sprint_nv_legal_trades":  nv_trades,
         })
     results = {
         "sprint_id":  sprint_id,
@@ -405,15 +416,6 @@ def advance_sprint(state):
     except Exception as _e:
         log.warning(f"Could not advance cycle state: {_e}")
 
-    # Regenerate unified leaderboard
-    try:
-        import subprocess as _sp
-        lb_script = os.path.join(os.path.dirname(SPRINT_RESULTS), "..", "..", "polymarket_leaderboard.py")
-        lb_script = os.path.normpath(lb_script)
-        _sp.Popen(["python3", lb_script, "--json"])
-    except Exception as _e:
-        log.warning(f"Could not run leaderboard: {_e}")
-
     new_id   = f"poly-{now.strftime('%Y%m%d-%H%M')}"
     ends_at  = now + timedelta(hours=SPRINT_HOURS)
     state["sprint_id"]         = new_id
@@ -425,6 +427,18 @@ def advance_sprint(state):
         bot["sprint_trades"]       = 0
         bot["sprint_start_equity"] = bot["equity"]
     log.info(f"Sprint advanced: {sprint_id} → {new_id} (ends {ends_at.isoformat()})")
+    return True
+
+
+def _regen_leaderboard():
+    try:
+        import subprocess as _sp
+        lb_script = os.path.join(os.path.dirname(SPRINT_RESULTS), "..", "..", "polymarket_leaderboard.py")
+        lb_script = os.path.normpath(lb_script)
+        _sp.Popen(["python3", lb_script, "--json"])
+        log.info("Leaderboard regeneration triggered.")
+    except Exception as _e:
+        log.warning(f"Could not regenerate leaderboard: {_e}")
 
 
 def tick():
@@ -432,10 +446,12 @@ def tick():
 
     # Advance sprint if window has elapsed
     sprint_ends = state.get("sprint_ends_at")
+    sprint_advanced = False
     if sprint_ends:
         ends_dt = datetime.fromisoformat(sprint_ends)
         if datetime.now(timezone.utc) >= ends_dt:
             advance_sprint(state)
+            sprint_advanced = True
 
     new_events = []
 
@@ -475,6 +491,8 @@ def tick():
 
     recompute_stats(state)
     save_state(state)
+    if sprint_advanced:
+        _regen_leaderboard()
     write_dashboard(state)
 
     n_pos = state["stats"]["active_positions"]

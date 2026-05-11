@@ -100,7 +100,30 @@ ln -s $WORKSPACE/skills/competition-start $SKILLS_DIR/competition-start
 python3 $SKILLS_DIR/accounting/scripts/accounting.py init
 ```
 
-## Step 6: Set Up Cron Jobs
+## Step 6: Deploy Systemd Services
+
+Copy and enable the prediction market tick service (runs every 15 min, 15 autonomous bots):
+
+```bash
+cp /root/.openclaw/workspace/polymarket_syn.service /etc/systemd/system/
+systemctl daemon-reload
+systemctl enable polymarket_syn.service
+systemctl start polymarket_syn.service
+# Verify it's running:
+systemctl status polymarket_syn.service
+```
+
+The tick auto-initializes its state on first run if `auto_state.json` is missing.
+
+Also copy the copy-trading daemon if using the copy-trader pipeline:
+```bash
+cp /root/.openclaw/workspace/polymarket.service /etc/systemd/system/
+systemctl daemon-reload
+systemctl enable polymarket.service
+systemctl start polymarket.service
+```
+
+## Step 7: Set Up Cron Jobs
 
 Paper trading competition ticks (every 5 min for day league):
 
@@ -120,7 +143,7 @@ Add:
 0 * * * * WORKSPACE=/root/.openclaw/workspace python3 /root/.openclaw/workspace/swing_price_store.py >> /root/.openclaw/workspace/competition/cron.log 2>&1
 ```
 
-## Step 7: Start a Competition
+## Step 8: Start a Competition
 
 Via Telegram (ask SYN):
 ```
@@ -132,7 +155,7 @@ Or directly:
 python3 $SKILLS_DIR/competition-start/scripts/competition_start.py 4
 ```
 
-## Step 8: Go Live (When Ready)
+## Step 9: Go Live (When Ready)
 
 Before going live with real capital:
 

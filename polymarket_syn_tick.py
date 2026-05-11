@@ -930,15 +930,21 @@ def score_and_archive_sprint(state):
     unified_dir = os.path.join(os.path.dirname(RESULTS_DIR), "sprint_results")
     os.makedirs(unified_dir, exist_ok=True)
 
+    try:
+        from polymarket_leaderboard import is_nv_legal as _nv_ok
+    except ImportError:
+        def _nv_ok(title): return True
     bots_data = []
     sprint_start = state.get("sprint_started_at", "")
     for bot in bots:
-        closed  = [t for t in bot.get("closed_trades", [])
-                   if not sprint_start or t.get("closed_at", "") >= sprint_start]
-        pnl     = round(sum(t.get("pnl_usd", 0.0) for t in closed), 2)
-        pnl_pct = round((pnl / 1000.0) * 100, 2)
-        trades  = len(closed)
-        wins    = sum(1 for t in closed if t.get("pnl_usd", 0.0) > 0)
+        closed   = [t for t in bot.get("closed_trades", [])
+                    if not sprint_start or t.get("closed_at", "") >= sprint_start]
+        pnl      = round(sum(t.get("pnl_usd", 0.0) for t in closed), 2)
+        pnl_pct  = round((pnl / 1000.0) * 100, 2)
+        trades   = len(closed)
+        wins     = sum(1 for t in closed if t.get("pnl_usd", 0.0) > 0)
+        nv_pnl   = round(sum(t.get("pnl_usd", 0.0) for t in closed if _nv_ok(t.get("title", ""))), 2)
+        nv_trades = sum(1 for t in closed if _nv_ok(t.get("title", "")))
         bots_data.append({
             "bot":            bot["name"],
             "type":           bot.get("category", "auto"),
@@ -948,6 +954,8 @@ def score_and_archive_sprint(state):
             "sprint_trades":  trades,
             "sprint_wins":    wins,
             "win_rate":       round(wins / trades * 100, 1) if trades > 0 else 0.0,
+            "sprint_nv_legal_pnl_usd": nv_pnl,
+            "sprint_nv_legal_trades":  nv_trades,
         })
     result_file = os.path.join(unified_dir, f"{sprint_id}_auto.json")
     with open(result_file, "w") as f:
@@ -966,14 +974,6 @@ def score_and_archive_sprint(state):
         json.dump({"sprint_id": sprint_id, "scored_at": datetime.now(timezone.utc).isoformat(),
                    "bots": bots_data}, f, indent=2)
 
-    # Regenerate unified leaderboard
-    try:
-        import subprocess as _sp
-        lb_script = os.path.join(os.path.dirname(RESULTS_DIR), "..", "polymarket_leaderboard.py")
-        lb_script = os.path.normpath(lb_script)
-        _sp.Popen(["python3", lb_script, "--json"])
-    except Exception as _e:
-        log.warning(f"Could not run leaderboard: {_e}")
 
 
 def start_new_sprint(state):
@@ -1037,10 +1037,13 @@ def write_dashboard(state):
     for b in bots:
         t = b.get("total_trades", 0)
         w = b.get("wins", 0)
-        bot_closed_pnl = round(sum(
-            tr.get("pnl_usd", 0) for tr in b.get("closed_trades", [])
+        sprint_closed  = [
+            tr for tr in b.get("closed_trades", [])
             if not sprint_start or tr.get("closed_at", "") >= sprint_start
-        ), 2)
+        ]
+        bot_closed_pnl = round(sum(tr.get("pnl_usd", 0) for tr in sprint_closed), 2)
+        sp_trades      = len(sprint_closed)
+        sp_wins        = sum(1 for tr in sprint_closed if tr.get("pnl_usd", 0) > 0)
         norm_bots.append({
             "bot":              b["name"],
             "category":         b.get("category", ""),
@@ -1049,6 +1052,9 @@ def write_dashboard(state):
             "closed_pnl_usd":   bot_closed_pnl,
             "win_rate":         round(w / t * 100, 1) if t > 0 else 0.0,
             "trades":           t,
+            "sprint_trades":    sp_trades,
+            "sprint_wins":      sp_wins,
+            "sprint_win_rate":  round(sp_wins / sp_trades * 100, 1) if sp_trades > 0 else 0.0,
             "active_positions": len(b.get("positions", {})),
             "total_fees":       round(b.get("total_fees", 0), 2),
             "status":           state.get("status", "active"),
@@ -1132,12 +1138,14 @@ def run_tick(state, strategies, secrets, tick_count):
     cs = load_cycle_state()
     if cs.get("status") == "awaiting_review":
         log.info(f"Polymarket Cycle {cs['cycle']} awaiting review — tick skipped.")
-        return
+        return False
 
+    sprint_archived = False
     # Sprint check — archive and immediately restart (Polymarket runs 24/7)
     if sprint_is_expired(state):
         completed_sprint_id = state.get("sprint_id", "unknown")
         score_and_archive_sprint(state)
+        sprint_archived = True
         cycle_done = update_cycle_after_sprint(completed_sprint_id)
         if cycle_done:
             log.info("Cycle complete — awaiting strategy review.")
@@ -1223,7 +1231,7 @@ def run_tick(state, strategies, secrets, tick_count):
         update_equity(bot)
 
     if not do_scan:
-        return
+        return sprint_archived
 
     # ── 3. Build candidate pools for each bot ─────────────────────────────
     # opinion_pool: {cid → {market, bots[], vegas}}
@@ -1532,6 +1540,17 @@ def run_tick(state, strategies, secrets, tick_count):
         f"{b['name']}=${b['equity']:.0f}" for b in sorted(state["bots"], key=lambda x: x["equity"], reverse=True)[:5]
     )
     log.info(f"Top 5: {bot_summary}")
+    return sprint_archived
+
+
+def _regen_leaderboard():
+    try:
+        import subprocess as _sp
+        lb_script = os.path.join(WORKSPACE, "polymarket_leaderboard.py")
+        _sp.Popen(["python3", lb_script, "--json"])
+        log.info("Leaderboard regeneration triggered.")
+    except Exception as _e:
+        log.warning(f"Could not regenerate leaderboard: {_e}")
 
 
 def main():
@@ -1551,8 +1570,10 @@ def main():
     while True:
         try:
             state = load_state()
-            run_tick(state, strategies, secrets, tick_count)
+            sprint_archived = run_tick(state, strategies, secrets, tick_count)
             save_state(state)
+            if sprint_archived:
+                _regen_leaderboard()
             write_dashboard(state)
         except Exception as e:
             log.error(f"Tick error: {e}", exc_info=True)
